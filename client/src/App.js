@@ -1,31 +1,23 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react';
+import './App.css';
+import Navbar from './components/Navbar';
+import Hero from './components/Hero';
+import Projects from './components/Projects';
+import Team from './components/Team';
+import Testimonials from './components/Testimonials';
+import Footer from './components/Footer';
 
 function App() {
-  const [data, setData] = useState([{}])
-
-  useEffect(() => {
-    fetch('/members').then(
-      res => res.json()
-    ).then(
-      data => {
-        setData(data)
-        console.log(data)
-      }
-    )
-  }, [])
-
   return (
-    <div>
-      {(typeof data.members === 'undefined') ? (
-        <p>Loading...</p>
-      ) : (
-        data.members.map((member, i) => (
-          <p key={i}>{member}</p>
-        ))
-      )}
-
+    <div className="App">
+      <Navbar />
+      <Hero />
+      <Projects />
+      <Team />
+      <Testimonials />
+      <Footer />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
