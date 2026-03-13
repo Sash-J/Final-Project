@@ -1,0 +1,153 @@
+/* ── Root ───────────────────────────────────────────────────────────────────── */
+.um-root {
+    padding: 0 0 60px;
+    font-family: 'Inter', sans-serif;
+    background-color: #0d0d0d;
+    color: #eee;
+    min-height: 100vh;
+    border-radius: .8em;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────────── */
+.um-header {
+    text-align: center;
+    padding: 48px 24px 28px;
+}
+
+.um-header h2 {
+    font-size: 2rem;
+    color: #fff;
+    margin-bottom: 6px;
+    font-weight: 700;
+}
+
+.um-header p {
+    color: #888;
+    font-size: 0.95rem;
+}
+
+/* ── Content Layout ─────────────────────────────────────────────────────────── */
+.um-content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    margin: 0 32px;
+}
+
+.grid-window {
+    background: #161616;
+    border: 1px solid #242424;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+.grid-window h3 {
+    color: #fff;
+    border-bottom: 2px solid #2a2a2a;
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+    padding-bottom: 10px;
+}
+
+/* ── Table Styles ───────────────────────────────────────────────────────────── */
+.um-table-container {
+    overflow-x: auto;
+}
+
+.um-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    color: #eee;
+}
+
+.um-table thead th {
+    background: #242424;
+    color: #aaa;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 16px;
+    text-align: center;
+    border-bottom: 1px solid #333;
+}
+
+.um-table tbody td {
+    padding: 16px;
+    border-bottom: 1px solid #1c1c1c;
+}
+
+.um-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* ── Status Indicators & Pills ──────────────────────────────────────────────── */
+.status-indicator {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.status-indicator.approved {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+}
+
+.status-indicator.pending {
+    background: rgba(234, 179, 8, 0.1);
+    color: #eab308;
+}
+
+.role-pill {
+    font-weight: 600;
+}
+
+.role-pill.admin { color: #f87171; }
+.role-pill.manager { color: #a78bfa; }
+.role-pill.client { color: #60a5fa; }
+
+/* ── Buttons ────────────────────────────────────────────────────────────────── */
+.approve-btn {
+    background: #22c55e;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: opacity 0.2s;
+}
+
+.approve-btn:hover {
+    opacity: 0.85;
+}
+
+/* ── Status Messages ────────────────────────────────────────────────────────── */
+.status-msg {
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+}
+
+.status-msg.success { background: rgba(52, 211, 153, 0.1); color: #34d399; }
+.status-msg.error { background: rgba(248, 113, 113, 0.1); color: #f87171; }
+
+.no-pending {
+    color: #666;
+    font-style: italic;
+    font-size: 0.95rem;
+}
+
+.um-loading {
+    color: #666;
+    text-align: center;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────────── */
+@media (max-width: 700px) {
+    .um-content { margin: 0 12px; }
+}

@@ -56,6 +56,44 @@ h2 {
   color: var(--accent-color);
 }
 
+.user-welcome {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+}
+
+.logout-btn {
+  background: transparent;
+  border: 1px solid var(--accent-color);
+  color: var(--accent-color);
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.logout-btn:hover {
+  background: var(--accent-color);
+  color: var(--bg-color);
+}
+
+.login-link {
+  background: var(--accent-color);
+  color: var(--bg-color) !important;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+/* Main Content Wrapper */
+.main-content {
+  padding-top: 80px; /* Space for fixed navbar */
+  min-height: calc(100vh - 80px);
+}
+
 /* Hero */
 .hero {
   height: 100vh;
