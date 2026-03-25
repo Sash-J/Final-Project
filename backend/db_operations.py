@@ -20,22 +20,84 @@ def get_tables():
 def get_projects():
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM projects ORDER BY id DESC")
+    # Get projects with concatenated lists of clients and crew members and version count
+    query = """
+        SELECT p.*, 
+               GROUP_CONCAT(DISTINCT u_client.username SEPARATOR ', ') as client_usernames,
+               GROUP_CONCAT(DISTINCT u_client.id SEPARATOR ',') as client_ids,
+               GROUP_CONCAT(DISTINCT u_crew.username SEPARATOR ', ') as crew_usernames,
+               GROUP_CONCAT(DISTINCT u_crew.id SEPARATOR ',') as crew_ids,
+               (SELECT COUNT(*) FROM budget_versions bv WHERE bv.project_id = p.id) as version_count
+        FROM projects p
+        LEFT JOIN client_projects cp ON p.id = cp.project_id
+        LEFT JOIN users u_client ON cp.user_id = u_client.id
+        LEFT JOIN crew_projects crp ON p.id = crp.project_id
+        LEFT JOIN users u_crew ON crp.user_id = u_crew.id
+        GROUP BY p.id
+        ORDER BY p.id DESC
+    """
+    cursor.execute(query)
     result = cursor.fetchall()
     cursor.close()
     conn.close()
     return result
 
 
-def insert_project(project_name):
+def insert_project(project_name, code_name=None, start_date=None, end_date=None, location=None):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO projects (project_name) VALUES (%s)", (project_name,))
+    cursor.execute(
+        """INSERT INTO projects (project_name, code_name, start_date, end_date, location) 
+           VALUES (%s, %s, %s, %s, %s)""",
+        (project_name, code_name, start_date, end_date, location),
+    )
     conn.commit()
     new_id = cursor.lastrowid
     cursor.close()
     conn.close()
     return new_id
+
+
+def update_project(project_id, project_name, code_name=None, start_date=None, end_date=None, location=None):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """UPDATE projects 
+           SET project_name = %s, code_name = %s, start_date = %s, end_date = %s, location = %s 
+           WHERE id = %s""",
+        (project_name, code_name, start_date, end_date, location, project_id),
+    )
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return True
+
+
+
+def delete_project(project_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        # Delete related records to handle foreign keys
+        cursor.execute("DELETE FROM client_projects WHERE project_id = %s", (project_id,))
+        cursor.execute(
+            "DELETE FROM project_budget_values WHERE project_id = %s", (project_id,)
+        )
+        cursor.execute("DELETE FROM payments WHERE project_id = %s", (project_id,))
+        # Delete budget versions associated with the project
+        cursor.execute("DELETE FROM budget_versions WHERE project_id = %s", (project_id,))
+
+        # Delete the project itself
+        cursor.execute("DELETE FROM projects WHERE id = %s", (project_id,))
+
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        cursor.close()
+        conn.close()
+    return True
 
 
 # ── Departments ───────────────────────────────────────────────────────────────
@@ -87,9 +149,13 @@ def get_categories():
 def insert_category(category_name, department_id):
     conn = get_connection()
     cursor = conn.cursor()
+    # Get max sort_order for this department
+    cursor.execute("SELECT COALESCE(MAX(sort_order), 0) FROM categories WHERE department_id = %s", (department_id,))
+    max_order = cursor.fetchone()[0]
+    
     cursor.execute(
-        "INSERT INTO categories (category_name, department_id) VALUES (%s, %s)",
-        (category_name, department_id),
+        "INSERT INTO categories (category_name, department_id, sort_order) VALUES (%s, %s, %s)",
+        (category_name, department_id, max_order + 1),
     )
     conn.commit()
     new_id = cursor.lastrowid
@@ -132,6 +198,51 @@ def insert_budget_item(item_name, category_id):
     return new_id
 
 
+def update_budget_items_order(ordered_ids):
+    """
+    Updates the sort_order for a list of budget item IDs.
+    Expects a list of IDs in the new order.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        for index, item_id in enumerate(ordered_ids):
+            cursor.execute(
+                "UPDATE budget_items SET sort_order = %s WHERE id = %s",
+                (index, item_id),
+            )
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        cursor.close()
+        conn.close()
+    return True
+
+
+def update_categories_order(ordered_ids):
+    """
+    Updates the sort_order for a list of category IDs.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        for index, cat_id in enumerate(ordered_ids):
+            cursor.execute(
+                "UPDATE categories SET sort_order = %s WHERE id = %s",
+                (index, cat_id),
+            )
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        cursor.close()
+        conn.close()
+    return True
+
+
 # ── Project Budget Values ─────────────────────────────────────────────────────
 
 
@@ -153,14 +264,20 @@ def get_budget_values():
     return result
 
 
-def insert_budget_value(project_id, budget_item_id, quantity, rate, total):
+def insert_budget_value(project_id, budget_item_id, quantity, rate, total, rate_type="day", rate_multiplier=1.0):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
         """INSERT INTO project_budget_values
-           (project_id, budget_item_id, quantity, rate, total)
-           VALUES (%s, %s, %s, %s, %s)""",
-        (project_id, budget_item_id, quantity, rate, total),
+           (project_id, budget_item_id, quantity, rate, rate_type, rate_multiplier, total)
+           VALUES (%s, %s, %s, %s, %s, %s, %s)
+           ON DUPLICATE KEY UPDATE
+           quantity = VALUES(quantity),
+           rate = VALUES(rate),
+           rate_type = VALUES(rate_type),
+           rate_multiplier = VALUES(rate_multiplier),
+           total = VALUES(total)""",
+        (project_id, budget_item_id, quantity, rate, rate_type, rate_multiplier, total),
     )
     conn.commit()
     new_id = cursor.lastrowid
@@ -182,13 +299,13 @@ def get_hierarchy():
 
     for dept in departments:
         cursor.execute(
-            "SELECT * FROM categories WHERE department_id = %s ORDER BY id",
+            "SELECT * FROM categories WHERE department_id = %s ORDER BY sort_order, id",
             (dept["id"],),
         )
         categories = cursor.fetchall()
         for cat in categories:
             cursor.execute(
-                "SELECT * FROM budget_items WHERE category_id = %s ORDER BY id",
+                "SELECT * FROM budget_items WHERE category_id = %s ORDER BY sort_order, id",
                 (cat["id"],),
             )
             cat["items"] = cursor.fetchall()
@@ -202,95 +319,428 @@ def get_hierarchy():
 # ── Budget values for a specific project (for pre-fill) ───────────────────────
 
 
-def get_budget_values_for_project(project_id):
+def get_budget_values_for_project(project_id, version_id=None):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    if version_id:
+        query = """
+            SELECT budget_item_id, quantity, rate, rate_type, rate_multiplier, additional1, additional2, comment1, comment2, total
+            FROM project_budget_values
+            WHERE version_id = %s
+        """
+        params = (version_id,)
+    else:
+        query = """
+            SELECT budget_item_id, quantity, rate, rate_type, rate_multiplier, additional1, additional2, comment1, comment2, total
+            FROM project_budget_values
+            WHERE version_id = (
+                SELECT id FROM budget_versions 
+                WHERE project_id = %s 
+                ORDER BY version_number DESC LIMIT 1
+            )
+        """
+        params = (project_id,)
+        
+    cursor.execute(query, params)
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return {str(row["budget_item_id"]): row for row in rows}
+
+
+def get_budget_versions(project_id):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute(
-        """
-        SELECT budget_item_id, quantity, rate, additional1, additional2, comment1, comment2, total
-        FROM project_budget_values
-        WHERE project_id = %s
-        """,
+        "SELECT id, version_number, created_at FROM budget_versions WHERE project_id = %s ORDER BY version_number ASC",
         (project_id,),
     )
     rows = cursor.fetchall()
     cursor.close()
     conn.close()
-    # Return as a dict keyed by budget_item_id for fast lookup in React
-    return {str(row["budget_item_id"]): row for row in rows}
+    return rows
+
+
+def create_budget_version(project_id, source_version_id=None):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        # Get next version number
+        cursor.execute(
+            "SELECT COALESCE(MAX(version_number), 0) + 1 FROM budget_versions WHERE project_id = %s",
+            (project_id,),
+        )
+        next_version = cursor.fetchone()[0]
+
+        # Insert new version
+        cursor.execute(
+            "INSERT INTO budget_versions (project_id, version_number) VALUES (%s, %s)",
+            (project_id, next_version),
+        )
+        new_version_id = cursor.lastrowid
+
+        # If source version is provided, clone values
+        if source_version_id:
+            cursor.execute(
+                """
+                INSERT INTO project_budget_values (
+                    project_id, budget_item_id, version_id, quantity, rate, rate_type, 
+                    rate_multiplier, additional1, additional2, comment1, comment2, total
+                )
+                SELECT 
+                    project_id, budget_item_id, %s, quantity, rate, rate_type, 
+                    rate_multiplier, additional1, additional2, comment1, comment2, total
+                FROM project_budget_values
+                WHERE version_id = %s
+                """,
+                (new_version_id, source_version_id),
+            )
+
+        conn.commit()
+        return new_version_id
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def delete_budget_version(version_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        # Get project_id before deleting
+        cursor.execute("SELECT project_id FROM budget_versions WHERE id = %s", (version_id,))
+        row = cursor.fetchone()
+        if not row:
+            return False
+        project_id = row[0]
+
+        # Delete values first (manual cascade)
+        cursor.execute("DELETE FROM project_budget_values WHERE version_id = %s", (version_id,))
+        
+        # Delete the version entry
+        cursor.execute("DELETE FROM budget_versions WHERE id = %s", (version_id,))
+
+        # Resequence remaining versions for this project
+        cursor.execute(
+            "SELECT id FROM budget_versions WHERE project_id = %s ORDER BY version_number ASC, created_at ASC",
+            (project_id,)
+        )
+        remaining = cursor.fetchall()
+        for idx, (v_id,) in enumerate(remaining):
+            cursor.execute(
+                "UPDATE budget_versions SET version_number = %s WHERE id = %s",
+                (idx + 1, v_id)
+            )
+
+        conn.commit()
+        return True
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        cursor.close()
+        conn.close()
 
 
 # ── Batch insert / upsert budget values ───────────────────────────────────────
 
 
-def insert_budget_values_batch(project_id, values):
+def insert_budget_values_batch(project_id, version_id, values, client_ids=None):
     """
     values: list of { budget_item_id, quantity, rate, total }
+    client_ids: optional list of user_ids (role='client') to associate with the project
     Uses INSERT ... ON DUPLICATE KEY UPDATE so re-submitting a project
     updates existing rows rather than duplicating them.
-    Requires a UNIQUE KEY on (project_id, budget_item_id) — add it once:
-        ALTER TABLE project_budget_values
-        ADD UNIQUE KEY uq_project_item (project_id, budget_item_id);
     """
     if not values:
         return 0
 
     conn = get_connection()
     cursor = conn.cursor()
-    sql = """
-        INSERT INTO project_budget_values
-            (project_id, budget_item_id, quantity, rate, additional1, additional2, comment1, comment2, total)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-        ON DUPLICATE KEY UPDATE
-            quantity    = VALUES(quantity),
-            rate        = VALUES(rate),
-            additional1 = VALUES(additional1),
-            additional2 = VALUES(additional2),
-            comment1    = VALUES(comment1),
-            comment2    = VALUES(comment2),
-            total       = VALUES(total)
-    """
-    rows = [
-        (
-            project_id,
-            v["budget_item_id"],
-            v["quantity"],
-            v["rate"],
-            v.get("additional1", 0),
-            v.get("additional2", 0),
-            v.get("comment1", ""),
-            v.get("comment2", ""),
-            v["total"],
-        )
-        for v in values
-    ]
-    cursor.executemany(sql, rows)
-    conn.commit()
-    affected = cursor.rowcount
-    cursor.close()
-    conn.close()
+    
+    try:
+        sql = """
+            INSERT INTO project_budget_values
+                (project_id, version_id, budget_item_id, quantity, rate, rate_type, rate_multiplier, additional1, additional2, comment1, comment2, total)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+                quantity    = VALUES(quantity),
+                rate        = VALUES(rate),
+                rate_type   = VALUES(rate_type),
+                rate_multiplier = VALUES(rate_multiplier),
+                additional1 = VALUES(additional1),
+                additional2 = VALUES(additional2),
+                comment1    = VALUES(comment1),
+                comment2    = VALUES(comment2),
+                total       = VALUES(total)
+        """
+        rows = [
+            (
+                project_id,
+                version_id,
+                v["budget_item_id"],
+                v["quantity"],
+                v["rate"],
+                v.get("rate_type", "day"),
+                v.get("rate_multiplier", 1.0),
+                v.get("additional1", 0),
+                v.get("additional2", 0),
+                v.get("comment1", ""),
+                v.get("comment2", ""),
+                v["total"],
+            )
+            for v in values
+        ]
+        cursor.executemany(sql, rows)
+        affected = cursor.rowcount
+        
+        # If client_ids are provided, update the client_projects table
+        if client_ids is not None:
+            # Clear existing clients for this project
+            cursor.execute("DELETE FROM client_projects WHERE project_id = %s", (project_id,))
+            
+            # Insert the new clients
+            if client_ids:
+                client_sql = "INSERT INTO client_projects (user_id, project_id) VALUES (%s, %s)"
+                client_rows = [(c_id, project_id) for c_id in client_ids]
+                cursor.executemany(client_sql, client_rows)
+        
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        cursor.close()
+        conn.close()
+        
     return affected
 
 
-# ── Users ─────────────────────────────────────────────────────────────────────
+# ── User management functions moved to auth_operations.py ────
 
 
-def get_user_by_username(username):
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
-    user = cursor.fetchone()
-    cursor.close()
-    conn.close()
-    return user
+# Dashboard and assignment functions moved to auth_operations.py
 
+# Functions moved to auth_operations.py
 
-def create_user(username, password_hash, role, is_approved=0):
+def insert_payment(project_id, amount, payment_date, notes=""):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO users (username, password_hash, role, is_approved) VALUES (%s, %s, %s, %s)",
-        (username, password_hash, role, is_approved),
+        "INSERT INTO payments (project_id, amount, payment_date, notes) VALUES (%s, %s, %s, %s)",
+        (project_id, amount, payment_date, notes),
+    )
+    conn.commit()
+    new_id = cursor.lastrowid
+    cursor.close()
+    conn.close()
+    return new_id
+
+def get_payments_for_project(project_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute(
+        "SELECT id, amount, payment_date, status, notes FROM payments WHERE project_id = %s ORDER BY payment_date DESC",
+        (project_id,)
+    )
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return result
+
+# ── Milestones ────────────────────────────────────────────────────────────────
+
+def get_project_milestones(project_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM project_milestones WHERE project_id = %s ORDER BY target_date ASC, id ASC", (project_id,))
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return result
+
+def insert_milestone(project_id, title, description, target_date, status='pending', client_note='', is_visiondivision=0):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """INSERT INTO project_milestones (project_id, title, description, target_date, status, client_note, is_visiondivision)
+           VALUES (%s, %s, %s, %s, %s, %s, %s)""",
+        (project_id, title, description, target_date, status, client_note, is_visiondivision)
+    )
+    conn.commit()
+    new_id = cursor.lastrowid
+    cursor.close()
+    conn.close()
+    return new_id
+
+def update_milestone(milestone_id, status=None, client_note=None, title=None, description=None, target_date=None, is_visiondivision=None):
+    conn = get_connection()
+    cursor = conn.cursor()
+    updates = []
+    params = []
+    if status is not None:
+        updates.append("status = %s")
+        params.append(status)
+    if client_note is not None:
+        updates.append("client_note = %s")
+        params.append(client_note)
+    if title is not None:
+        updates.append("title = %s")
+        params.append(title)
+    if description is not None:
+        updates.append("description = %s")
+        params.append(description)
+    if target_date is not None:
+        updates.append("target_date = %s")
+        params.append(target_date)
+    if is_visiondivision is not None:
+        updates.append("is_visiondivision = %s")
+        params.append(is_visiondivision)
+        
+    if not updates:
+        return True
+
+    params.append(milestone_id)
+    query = f"UPDATE project_milestones SET {', '.join(updates)} WHERE id = %s"
+    
+    cursor.execute(query, tuple(params))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return True
+
+def update_project_status(project_id, status):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE projects SET status = %s WHERE id = %s", (status, project_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return True
+
+def delete_milestone(milestone_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM project_milestones WHERE id = %s", (milestone_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return True
+
+def get_milestone_by_id(milestone_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM project_milestones WHERE id = %s", (milestone_id,))
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return result
+
+
+def run_budget_migration():
+    print("Migration: Starting...")
+    conn = get_connection()
+    print("Migration: Connected.")
+    cursor = conn.cursor()
+    try:
+        # Create budget_versions table
+        print("Migration: Creating budget_versions table...")
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS budget_versions (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                project_id INT NOT NULL,
+                version_number INT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+            )
+        """)
+        
+        # Check if version_id already exists in project_budget_values
+        print("Migration: Checking for version_id column...")
+        cursor.execute("SHOW COLUMNS FROM project_budget_values LIKE 'version_id'")
+        if not cursor.fetchone():
+            print("Migration: Adding version_id column...")
+            cursor.execute("ALTER TABLE project_budget_values ADD COLUMN version_id INT")
+            
+        # Create "Version 1" for existing projects
+        print("Migration: Creating Version 1 for existing projects...")
+        cursor.execute("""
+            INSERT INTO budget_versions (project_id, version_number)
+            SELECT DISTINCT project_id, 1 
+            FROM project_budget_values 
+            WHERE project_id NOT IN (SELECT DISTINCT project_id FROM budget_versions)
+        """)
+        
+        # Link budget values to Version 1
+        print("Migration: Linking budget values to Version 1...")
+        cursor.execute("""
+            UPDATE project_budget_values pbv
+            JOIN budget_versions bv ON pbv.project_id = bv.project_id AND bv.version_number = 1
+            SET pbv.version_id = bv.id
+            WHERE pbv.version_id IS NULL
+        """)
+        
+        # Handle index update
+        print("Migration: Updating index...")
+        try:
+            cursor.execute("ALTER TABLE project_budget_values DROP INDEX project_id")
+            print("Migration: Dropped old index.")
+        except:
+            pass
+        try:
+            cursor.execute("CREATE UNIQUE INDEX idx_version_item ON project_budget_values (version_id, budget_item_id)")
+            print("Migration: Created new unique index.")
+        except:
+            pass
+
+        print("Migration: Committing...")
+        conn.commit()
+        print("Migration: Success!")
+        return "Migration Success"
+    except Exception as e:
+        print(f"Migration: Error - {str(e)}")
+        conn.rollback()
+        return f"Migration failed: {str(e)}"
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# ── Schedule Tasks ────────────────────────────────────────────────────────────
+
+
+def get_schedule_tasks(year, month):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    # Fetch tasks for the specific month with project info
+    query = """
+        SELECT t.*, u.username as creator_name, p.project_name
+        FROM schedule_tasks t
+        JOIN users u ON t.created_by = u.id
+        LEFT JOIN projects p ON t.project_id = p.id
+        WHERE YEAR(t.task_date) = %s AND MONTH(t.task_date) = %s
+        ORDER BY t.task_date ASC, t.id ASC
+    """
+    cursor.execute(query, (year, month))
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return result
+
+
+def insert_schedule_task(
+    title, description, task_date, created_by, is_visiondivision=1, project_id=None, task_color='#a78bfa'
+):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """INSERT INTO schedule_tasks (title, description, task_date, created_by, is_visiondivision, project_id, task_color) 
+           VALUES (%s, %s, %s, %s, %s, %s, %s)""",
+        (title, description, task_date, created_by, is_visiondivision, project_id, task_color),
     )
     conn.commit()
     new_id = cursor.lastrowid
@@ -299,133 +749,65 @@ def create_user(username, password_hash, role, is_approved=0):
     return new_id
 
 
-def get_pending_users():
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT id, username, role, is_approved FROM users WHERE is_approved = 0")
-    users = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return users
-
-
-def get_all_users():
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT id, username, role, is_approved FROM users")
-    users = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return users
-
-
-def approve_user(user_id):
+def update_schedule_task(
+    task_id, title, description, project_id=None, task_color='#a78bfa'
+):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("UPDATE users SET is_approved = 1 WHERE id = %s", (user_id,))
+    cursor.execute(
+        """UPDATE schedule_tasks 
+           SET title = %s, description = %s, project_id = %s, task_color = %s 
+           WHERE id = %s""",
+        (title, description, project_id, task_color, task_id),
+    )
     conn.commit()
     cursor.close()
     conn.close()
     return True
 
 
-def insert_super_batch(rows):
-    """
-    rows: list of { project_name, department_name, category_name, item_name, quantity, rate }
-    Creates entities if they don't exist and links them.
-    Returns count of budget values affected.
-    """
-    if not rows:
-        return 0
+def delete_schedule_task(task_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM schedule_tasks WHERE id = %s", (task_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return True
 
+
+# ── Task Notes ──────────────────────────────────────────────────────────────
+
+
+def get_task_notes(task_id):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
-    affected = 0
+    query = """
+        SELECT n.*, u.username, u.role
+        FROM task_notes n
+        JOIN users u ON n.user_id = u.id
+        WHERE n.task_id = %s
+        ORDER BY n.created_at ASC
+    """
+    cursor.execute(query, (task_id,))
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return result
 
-    try:
-        for row in rows:
-            p_name = row.get("project_name", "").strip()
-            d_name = row.get("department_name", "").strip()
-            c_name = row.get("category_name", "").strip()
-            i_name = row.get("item_name", "").strip()
-            qty = float(row.get("quantity", 0))
-            rate = float(row.get("rate", 0))
-            total = round(qty * rate, 2)
 
-            if not all([p_name, d_name, c_name, i_name]):
-                continue
+def insert_task_note(task_id, user_id, note_text):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """INSERT INTO task_notes (task_id, user_id, note_text) 
+           VALUES (%s, %s, %s)""",
+        (task_id, user_id, note_text),
+    )
+    conn.commit()
+    new_id = cursor.lastrowid
+    cursor.close()
+    conn.close()
+    return new_id
 
-            # 1. Project
-            cursor.execute("SELECT id FROM projects WHERE project_name = %s", (p_name,))
-            p_res = cursor.fetchone()
-            if p_res:
-                p_id = p_res["id"]
-            else:
-                cursor.execute(
-                    "INSERT INTO projects (project_name) VALUES (%s)", (p_name,)
-                )
-                p_id = cursor.lastrowid
 
-            # 2. Department
-            cursor.execute(
-                "SELECT id FROM departments WHERE department_name = %s", (d_name,)
-            )
-            d_res = cursor.fetchone()
-            if d_res:
-                d_id = d_res["id"]
-            else:
-                cursor.execute(
-                    "INSERT INTO departments (department_name) VALUES (%s)", (d_name,)
-                )
-                d_id = cursor.lastrowid
-
-            # 3. Category
-            cursor.execute(
-                "SELECT id FROM categories WHERE category_name = %s AND department_id = %s",
-                (c_name, d_id),
-            )
-            c_res = cursor.fetchone()
-            if c_res:
-                c_id = c_res["id"]
-            else:
-                cursor.execute(
-                    "INSERT INTO categories (category_name, department_id) VALUES (%s, %s)",
-                    (c_name, d_id),
-                )
-                c_id = cursor.lastrowid
-
-            # 4. Budget Item
-            cursor.execute(
-                "SELECT id FROM budget_items WHERE item_name = %s AND category_id = %s",
-                (i_name, c_id),
-            )
-            i_res = cursor.fetchone()
-            if i_res:
-                i_id = i_res["id"]
-            else:
-                cursor.execute(
-                    "INSERT INTO budget_items (item_name, category_id) VALUES (%s, %s)",
-                    (i_name, c_id),
-                )
-                i_id = cursor.lastrowid
-
-            # 5. Budget Value
-            cursor.execute(
-                """INSERT INTO project_budget_values 
-                   (project_id, budget_item_id, quantity, rate, total)
-                   VALUES (%s, %s, %s, %s, %s)
-                   ON DUPLICATE KEY UPDATE 
-                   quantity = VALUES(quantity), rate = VALUES(rate), total = VALUES(total)""",
-                (p_id, i_id, qty, rate, total),
-            )
-            affected += 1
-
-        conn.commit()
-    except Exception as e:
-        conn.rollback()
-        raise e
-    finally:
-        cursor.close()
-        conn.close()
-
-    return affected

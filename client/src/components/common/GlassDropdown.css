@@ -1,0 +1,171 @@
+.glass-dropdown-container {
+  position: relative;
+  width: 100%;
+  font-family: inherit;
+  margin-bottom: 0.1rem;
+}
+
+.glass-dropdown-label {
+  display: block;
+  font-size: 0.85rem;
+  color: #60a5fa;
+  margin-bottom: 0.1rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.glass-dropdown-trigger {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  padding: 5px 8px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  color: #fff;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 35px;
+}
+
+.glass-dropdown-trigger:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(0, 198, 230, 0.4);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.glass-dropdown-trigger.active {
+  border-color: #00c6e6;
+  background: rgba(0, 198, 230, 0.15);
+  box-shadow: 0 0 15px rgba(0, 198, 230, 0.3);
+}
+
+.trigger-text {
+  font-size: 0.95rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 4px;
+}
+
+.trigger-arrow {
+  font-size: 0.75rem;
+  color: #00c6e6;
+  transition: transform 0.3s ease;
+}
+
+.trigger-arrow.up {
+  transform: rotate(180deg);
+}
+
+.glass-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 100%;
+  background: rgba(30, 30, 35, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 198, 230, 0.3);
+  border-radius: 16px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  padding: 10px;
+  animation: slideInDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.glass-dropdown-item {
+  padding: 5px 8px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 2px;
+}
+
+.glass-dropdown-item:last-child {
+  margin-bottom: 0;
+}
+
+.glass-dropdown-item:hover {
+  background: rgba(0, 198, 230, 0.15);
+  color: #fff;
+  transform: translateX(4px);
+}
+
+.glass-dropdown-item.selected {
+  background: rgba(0, 198, 230, 0.25);
+  color: #fff;
+  font-weight: 600;
+}
+
+.glass-dropdown-no-options {
+  padding: 16px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.glass-checkbox {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(0, 198, 230, 0.5);
+  border-radius: 4px;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.glass-checkbox.checked {
+  background: #00c6e6;
+  border-color: #00c6e6;
+}
+
+.check-mark {
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.item-label {
+  font-size: 0.95rem;
+}
+
+/* Custom Scrollbar for the menu */
+.glass-dropdown-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.glass-dropdown-menu::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+.glass-dropdown-menu::-webkit-scrollbar-thumb {
+  background: rgba(0, 198, 230, 0.3);
+  border-radius: 10px;
+}
+
+.glass-dropdown-menu::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 198, 230, 0.5);
+}

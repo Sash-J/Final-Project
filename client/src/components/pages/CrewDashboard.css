@@ -1,0 +1,506 @@
+.crew-root {
+  padding: 100px 40px 60px;
+  min-height: 100vh;
+  color: #eee;
+}
+
+.crew-header {
+  margin-bottom: 50px;
+  text-align: center;
+}
+
+.crew-header h2 {
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+  letter-spacing: -1px;
+  background: linear-gradient(to right, #fff, #fb923c, #ea580c);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 10px rgba(251, 146, 60, 0.3));
+}
+
+.crew-header p {
+  color: #a0aec0;
+  font-size: 1.1rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.crew-loading,
+.crew-error,
+.crew-empty {
+  text-align: center;
+  padding: 100px 20px;
+  font-size: 1.2rem;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  margin: 40px auto;
+  max-width: 500px;
+}
+
+.crew-projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  gap: 35px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.crew-project-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 35px;
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.3),
+    inset 0 0 20px rgba(255, 255, 255, 0.02);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
+}
+
+.crew-project-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #fb923c, #ea580c);
+  opacity: 0.8;
+}
+
+.crew-project-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(251, 146, 60, 0.4);
+  box-shadow:
+    0 30px 60px rgba(0, 0, 0, 0.5),
+    0 0 30px rgba(251, 146, 60, 0.2);
+}
+
+.crew-project-completed {
+  align-self: flex-start;
+}
+
+.crew-card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.crew-card-header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.crew-card-header h3 {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.5px;
+}
+
+.crew-status-label {
+  font-size: 0.8rem;
+  padding: 4px 12px;
+  border-radius: 12px;
+  background: rgba(251, 146, 60, 0.1);
+  color: #fb923c;
+  border: 1px solid rgba(251, 146, 60, 0.2);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.crew-status-label.completed {
+  background: rgba(74, 222, 128, 0.1);
+  color: #4ade80;
+  border: 1px solid rgba(74, 222, 128, 0.2);
+}
+
+.crew-date {
+  font-size: 0.8rem;
+  color: #718096;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Mini Timeline Preview */
+.crew-mini-timeline-preview {
+  aspect-ratio: 3/2;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  margin: 20px 0;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+  position: relative;
+}
+
+.crew-mini-timeline-preview-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.crew-project-completed-msg {
+  padding: 20px 0;
+  text-align: center;
+  color: #4ade80;
+  font-style: italic;
+  font-weight: bold;
+}
+
+/* Financial summary */
+.crew-financials {
+  display: flex;
+  justify-content: space-between;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  border-radius: 16px;
+  margin-bottom: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.crew-fin-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.crew-fin-item span {
+  font-size: 0.75rem;
+  color: #718096;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.crew-fin-item strong {
+  font-size: 1.3rem;
+  color: #fff;
+  font-weight: 700;
+}
+
+.highlight-paid strong {
+  color: #34d399;
+  text-shadow: 0 0 10px rgba(52, 211, 153, 0.3);
+}
+
+.highlight-balance strong {
+  color: #f87171;
+  text-shadow: 0 0 10px rgba(248, 113, 113, 0.3);
+}
+
+/* Progress Bar */
+.crew-progress-section {
+  margin-bottom: 35px;
+}
+
+.crew-progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.crew-progress-info span {
+  font-size: 0.85rem;
+  color: #a0aec0;
+  font-weight: 500;
+}
+
+.crew-progress-container {
+  width: 100%;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.crew-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #fb923c, #ea580c);
+  border-radius: 10px;
+  transition: width 1s cubic-bezier(0.1, 0.7, 0.1, 1);
+  box-shadow: 0 0 15px rgba(251, 146, 60, 0.4);
+}
+
+/* Timeline Preview Helper */
+.crew-timeline-preview {
+  margin-bottom: 30px;
+  background: rgba(0, 0, 0, 0.15);
+  padding: 15px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.crew-timeline-labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 0.75rem;
+  color: #a0aec0;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.crew-timeline-status {
+  color: #fb923c;
+  font-size: 0.7rem;
+  background: rgba(251, 146, 60, 0.1);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.crew-timeline-track {
+  height: 6px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.crew-timeline-fill {
+  background: linear-gradient(90deg, #fb923c, #ea580c) !important;
+  box-shadow: 0 0 10px rgba(251, 146, 60, 0.5) !important;
+}
+
+/* Payments Table */
+.crew-payments-section {
+  margin-top: auto;
+}
+
+.crew-payments-section h4 {
+  margin: 0 0 20px 0;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.crew-payments-section h4::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.crew-payments-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+  font-size: 0.9rem;
+}
+
+.crew-payments-table th {
+  text-align: left;
+  color: #718096;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 0 12px 10px;
+}
+
+.crew-payments-table td {
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.crew-payments-table td:first-child {
+  border-left: 1px solid rgba(255, 255, 255, 0.04);
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+.crew-payments-table td:last-child {
+  border-right: 1px solid rgba(255, 255, 255, 0.04);
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.payment-amount {
+  color: #34d399 !important;
+  font-weight: 700;
+}
+
+.payment-notes {
+  color: #718096 !important;
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+/* Modal Styles */
+.crew-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.crew-modal-content {
+  background: rgba(13, 14, 21, 0.95);
+  border: 1px solid rgba(251, 146, 60, 0.2);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 1000px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow:
+    0 25px 50px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(251, 146, 60, 0.1);
+  overflow: hidden;
+}
+
+.crew-modal-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 30px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  min-height: 80px;
+}
+
+.crew-modal-header-row h3 {
+  margin: 0;
+  color: #fff;
+  font-size: 1.4rem;
+  letter-spacing: -0.5px;
+}
+
+.crew-version-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-right: 50px;
+}
+
+.crew-version-selector label {
+  font-size: 0.85rem;
+  color: #a0aec0;
+  font-weight: 600;
+}
+
+.crew-version-selector select {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.crew-version-selector select:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(251, 146, 60, 0.3);
+}
+
+.crew-modal-close {
+  position: absolute;
+  top: 25px;
+  right: 25px;
+  background: none;
+  border: none;
+  color: #f87171;
+  font-size: 2.2rem;
+  cursor: pointer;
+  transition: 0.2s;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.crew-modal-close:hover {
+  color: #fff;
+  transform: scale(1.1);
+}
+
+.crew-table-container {
+  overflow-y: auto;
+  padding: 0;
+}
+
+/* Actions */
+.crew-card-actions {
+  margin-top: 25px;
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 20px;
+}
+
+.crew-action-btn {
+  border: none;
+  color: #fff;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.crew-action-btn.timeline-btn {
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+  box-shadow: 0 4px 15px rgba(79, 172, 254, 0.2);
+}
+
+.crew-action-btn.budget-btn {
+  background: linear-gradient(135deg, #fb923c, #ea580c);
+  box-shadow: 0 4px 15px rgba(234, 88, 12, 0.2);
+}
+
+.crew-action-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 1100px) {
+  .crew-projects-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .crew-root {
+    padding: 100px 20px 40px;
+  }
+  .crew-projects-grid {
+    grid-template-columns: 1fr;
+  }
+}

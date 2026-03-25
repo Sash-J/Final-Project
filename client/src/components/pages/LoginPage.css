@@ -7,13 +7,15 @@
 }
 
 .login-card {
-    background: #111;
-    border: 1px solid #222;
+    background: rgba(37, 99, 235, 0.05); /* Purplish glass tint */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 198, 230, 0.15); /* Subtle purplish border */
     padding: 40px;
     border-radius: 16px;
     width: 100%;
     max-width: 400px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    box-shadow: 0 10px 40px rgba(37, 99, 235, 0.15); /* Soft purplish glow */
     text-align: center;
 }
 
@@ -48,7 +50,7 @@
 }
 
 .form-group input:focus {
-    border-color: #7c3aed;
+    border-color: #2563eb;
 }
 
 .error-msg {
@@ -59,7 +61,7 @@
 
 .login-btn {
     width: 100%;
-    background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+    background: linear-gradient(135deg, #00c6e6 0%, #2563eb 100%);
     color: #fff;
     border: none;
     padding: 14px;
@@ -81,5 +83,5 @@
 }
 
 .login-hint code {
-    color: #a78bfa;
+    color: #00c6e6;
 }

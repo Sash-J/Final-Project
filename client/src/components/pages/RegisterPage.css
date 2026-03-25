@@ -1,107 +1,208 @@
 .register-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 90vh;
+  padding: 40px 20px;
 }
 
 .register-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    padding: 2.5rem;
-    border-radius: 15px;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    width: 100%;
-    max-width: 400px;
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(37, 99, 235, 0.05);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(0, 198, 230, 0.2);
+  padding: 40px;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4);
+  color: white;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s ease;
+}
+
+/* Progress Bar */
+.progress-bar-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+  box-shadow: 0 0 10px rgba(79, 172, 254, 0.5);
+  transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .register-card h2 {
-    text-align: center;
-    margin-bottom: 2rem;
-    letter-spacing: 2px;
-    font-weight: 300;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  letter-spacing: 4px;
+  font-weight: 700;
+  font-size: 1.5rem;
+  background: linear-gradient(to right, #fff, #00c6e6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.step-indicator {
+  text-align: center;
+  color: #00c6e6;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+  letter-spacing: 1.5px;
+}
+
+.step-content h3 {
+  font-size: 1.1rem;
+  color: #fff;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 10px;
 }
 
 .form-group {
-    margin-bottom: 1.5rem;
+  margin-bottom: 1.2rem;
+  text-align: left;
 }
 
 .form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-    color: #ccc;
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.85rem;
+  color: #a0aec0;
+  font-weight: 500;
 }
 
-.form-group input, .form-group select {
-    width: 100%;
-    padding: 0.8rem;
-    border-radius: 5px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    outline: none;
-    transition: 0.3s;
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 92%;
+  display: block;
+  align-self: center;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  outline: none;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
 }
 
-.form-group input:focus, .form-group select:focus {
-    border-color: #4facfe;
-    box-shadow: 0 0 8px rgba(79, 172, 254, 0.5);
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #00c6e6;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 15px rgba(0, 198, 230, 0.2);
+}
+
+.btn-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 1rem;
 }
 
 .register-btn {
-    width: 100%;
-    padding: 1rem;
-    background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
-    border: none;
-    border-radius: 5px;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
-    margin-top: 1rem;
+  flex: 1;
+  padding: 14px;
+  background: linear-gradient(135deg, #2563eb 0%, #4facfe 100%);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.prev-btn {
+  padding: 14px 24px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #ccc;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.prev-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
 }
 
 .register-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 198, 230, 0.4);
+  filter: brightness(1.1);
+}
+
+.register-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.animate-in {
+  animation: slideIn 0.4s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.error-msg,
+.success-msg {
+  padding: 12px;
+  border-radius: 10px;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  text-align: center;
 }
 
 .error-msg {
-    color: #ff4d4d;
-    background: rgba(255, 77, 77, 0.1);
-    padding: 0.8rem;
-    border-radius: 5px;
-    margin-bottom: 1rem;
-    text-align: center;
-    font-size: 0.9rem;
+  background: rgba(248, 113, 113, 0.1);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.2);
 }
-
 .success-msg {
-    color: #4dff88;
-    background: rgba(77, 255, 136, 0.1);
-    padding: 0.8rem;
-    border-radius: 5px;
-    margin-bottom: 1rem;
-    text-align: center;
-    font-size: 0.9rem;
+  background: rgba(52, 211, 153, 0.1);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.2);
 }
 
 .register-footer {
-    margin-top: 2rem;
-    text-align: center;
-    font-size: 0.9rem;
-    color: #ccc;
+  margin-top: 2rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #718096;
 }
 
 .register-footer a {
-    color: #4facfe;
-    text-decoration: none;
+  color: #00c6e6;
+  text-decoration: none;
+  font-weight: 600;
+  margin-left: 5px;
 }
 
 .register-footer a:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }

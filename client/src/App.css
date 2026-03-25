@@ -1,5 +1,17 @@
+@import url("https://fonts.googleapis.com/css2?family=Funnel+Sans:ital,wght@0,300..800;1,300..800&family=Rethink+Sans:ital,wght@0,400..800;1,300..800&display=swap");
+
+*,
+body,
+input,
+button,
+select,
+textarea {
+  font-family: "Funnel Sans", "Rethink Sans", sans-serif !important;
+}
+
 .App {
   text-align: center;
+  background: rgba(0, 0, 0, 0.332); /* Darker glass background */
 }
 
 /* Sections */
@@ -21,20 +33,23 @@ h2 {
   justify-content: space-between;
   align-items: center;
   padding: 20px 50px;
-  background-color: rgba(18, 18, 18, 0.95);
+  background: rgba(5, 5, 10, 0.7); /* Darker glass background */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+
+  border-bottom: var(--glass-border);
+  box-shadow: var(--glass-shadow);
   position: fixed;
   width: 100%;
   top: 0;
   z-index: 1000;
   box-sizing: border-box;
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--surface-color);
 }
 
 .logo {
-  font-size: 1.5rem;
+  font-size: 1rem;
   font-weight: bold;
-  color: var(--accent-color);
+  color: #ffffff;
   text-decoration: none;
   letter-spacing: 1px;
 }
@@ -42,14 +57,15 @@ h2 {
 .nav-links {
   list-style: none;
   display: flex;
-  gap: 30px;
+  gap: 45px;
 }
 
 .nav-links a {
   text-decoration: none;
-  color: var(--text-primary);
+  color: #ffffff; /* Brighter white for contrast */
   font-weight: 500;
   transition: color 0.3s;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5); /* Subtle shadow to pop */
 }
 
 .nav-links a:hover {
@@ -57,10 +73,12 @@ h2 {
 }
 
 .user-welcome {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 500;
   display: flex;
   align-items: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .logout-btn {
@@ -101,10 +119,7 @@ h2 {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1536240478700-b869070f9279?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
+  background: radial-gradient(circle at center, #0a0a0a 0%, #000000 70%);
 }
 
 .hero h1 {
@@ -140,6 +155,13 @@ h2 {
   color: var(--bg-color);
 }
 
+body {
+  background-color: #040911;
+  color: white;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
 /* Projects Grid */
 .projects-grid {
   display: grid;
@@ -171,7 +193,7 @@ h2 {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.8);
+  background: rgba(0, 0, 0, 0.8);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -239,9 +261,13 @@ h2 {
 }
 
 .testimonial-card {
-  background-color: var(--surface-color);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow);
   padding: 40px;
-  border-radius: 8px;
+  border-radius: 12px;
   margin-bottom: 20px;
 }
 
@@ -259,9 +285,65 @@ h2 {
 
 /* Footer */
 footer {
-  background-color: #000;
+  background: rgba(5, 5, 10, 0.7); /* Dark glass to match navbar */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: var(--glass-border);
   padding: 40px 20px;
-  color: var(--text-secondary);
+  color: #eeeeee; /* Lighter text */
   font-size: 0.9rem;
   margin-top: 60px;
+}
+
+/* ── Global Modal Fixes for Navbar Overlap ──────────────────────────────────── */
+.sui-modal-overlay {
+  z-index: 99999 !important; /* Extremely high to be above fixed navbar (1000) */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.sui-modal-content {
+  z-index: 100000 !important;
+  position: relative;
+  max-width: 450px;
+  width: 90%;
+  background: rgba(20, 20, 30, 0.95);
+  backdrop-filter: blur(30px);
+  border: 1px solid rgba(0, 198, 230, 0.2);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.2s;
+  z-index: 100010;
+}
+
+.modal-close-btn:hover {
+  background: #ef4444;
+  border-color: #ef4444;
+  transform: rotate(90deg) scale(1.1);
 }
