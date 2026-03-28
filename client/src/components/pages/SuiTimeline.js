@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import "./SuiTimeline.css";
 import GlassDropdown from "../common/GlassDropdown";
+import ModalPortal from "../common/ModalPortal";
+import ConfirmationModal from "../common/ConfirmationModal";
 
 const API = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
@@ -11,11 +13,13 @@ const SuiTimeline = ({
   preview = false,
   updateTrigger = 0,
   onMilestonesChange,
+  onClick,
 }) => {
   const [milestones, setMilestones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedMilestone, setSelectedMilestone] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Form state
   const [status, setStatus] = useState("pending");
@@ -54,12 +58,14 @@ const SuiTimeline = ({
     const updateDims = () => {
       if (containerRef.current) {
         let { clientWidth, clientHeight } = containerRef.current;
-        // If clientHeight is 0 (parent has flex:1 but no set height), 
+        // If clientHeight is 0 (parent has flex:1 but no set height),
         // fallback to a reasonable percentage of viewport or fixed value
         if (clientHeight < 100) clientHeight = window.innerHeight * 0.6;
         if (clientWidth < 100) clientWidth = 800;
 
-        console.log(`DEBUG: Dimensions updated to ${clientWidth}x${clientHeight}`);
+        console.log(
+          `DEBUG: Dimensions updated to ${clientWidth}x${clientHeight}`,
+        );
         setDimensions({ width: clientWidth, height: clientHeight });
       }
     };
@@ -114,6 +120,10 @@ const SuiTimeline = ({
   };
 
   const handleSave = async () => {
+    if (!title.trim() || !targetDate) {
+      alert("Title and Target Date are required.");
+      return;
+    }
     try {
       let finalNote = clientNote || "";
       if (finalNote.trim()) {
@@ -156,12 +166,15 @@ const SuiTimeline = ({
   };
 
   const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this milestone?"))
-      return;
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = async () => {
     try {
       await axios.delete(`${API}/api/milestones/${selectedMilestone.id}`, {
         withCredentials: true,
       });
+      setShowDeleteConfirm(false);
       closeModal();
       fetchMilestones();
       if (onMilestonesChange) onMilestonesChange();
@@ -204,9 +217,9 @@ const SuiTimeline = ({
 
     const xOffset = 80; // The curve amplitude
     const isLeft = i % 2 === 0;
-    const x = isLeft 
-      ? (dimensions.width * 0.5 - xOffset) 
-      : (dimensions.width * 0.5 + xOffset);
+    const x = isLeft
+      ? dimensions.width * 0.5 - xOffset
+      : dimensions.width * 0.5 + xOffset;
 
     return { x, y, isLeft, ...m };
   });
@@ -237,7 +250,7 @@ const SuiTimeline = ({
     const getColor = (status) => {
       if (status === "completed") return "#00c6e6"; // Blue accent for completed
       if (status === "in_progress") return "#60a5fa"; // Brighter blue for in-progress
-      return "transparent"; 
+      return "transparent";
     };
 
     if (preview) {
@@ -353,7 +366,7 @@ const SuiTimeline = ({
           style={{
             fill: "none",
             stroke: "rgba(255, 255, 255, 0.15)",
-            strokeWidth: "6px",
+            strokeWidth: "4px",
             strokeLinecap: "round",
           }}
         />
@@ -366,11 +379,11 @@ const SuiTimeline = ({
           style={{
             fill: "none",
             stroke: `url(#${gradientId})`,
-            strokeWidth: "8px",
+            strokeWidth: "6px",
             strokeLinecap: "round",
             strokeDasharray: "100",
             strokeDashoffset: "100",
-            filter: "drop-shadow(0 0 15px currentColor)",
+            filter: "drop-shadow(0 0 10px currentColor)",
             animation: `drawMasterPath_${projectId} ${totalDuration}s infinite linear`,
           }}
         />
@@ -393,7 +406,7 @@ const SuiTimeline = ({
 
   return (
     <div
-      className={`sui-timeline-wrapper sui-fade-in ${preview ? "sui-preview-mode" : ""}`}
+      className={`sui-timeline-wrapper sui-fade-in ${preview ? "sui-preview-mode sui-preview-clickable" : ""}`}
       ref={containerRef}
       style={{
         height: "100%",
@@ -402,7 +415,13 @@ const SuiTimeline = ({
         position: "relative",
         background: "rgba(0,0,0,0.1)", // Slight bg to see the area
       }}
+      onClick={preview && onClick ? onClick : undefined}
     >
+      {preview && (
+        <div className="sui-preview-overlay">
+          <span>View full timeline</span>
+        </div>
+      )}
       <svg
         className="sui-svg-container"
         viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
@@ -528,34 +547,13 @@ const SuiTimeline = ({
                               : "Client";
                         }
                         return (
-                          <div
-                            className="sui-note"
-                            style={{
-                              display: "flex",
-                              alignItems: "flex-start",
-                              marginTop: "8px",
-                            }}
-                          >
+                          <div className="sui-note">
                             {roleTag && (
-                              <span
-                                className="sui-client-badge"
-                                style={{
-                                  marginRight: "8px",
-                                  marginLeft: 0,
-                                  marginTop: "2px",
-                                  flexShrink: 0,
-                                }}
-                              >
+                              <span className="sui-client-badge sui-client-badge--note">
                                 {roleTag}
                               </span>
                             )}
-                            <span
-                              style={{
-                                opacity: 0.9,
-                                lineHeight: "1.4",
-                                marginTop: "2px",
-                              }}
-                            >
+                            <span className="sui-note-text">
                               {text}
                             </span>
                           </div>
@@ -570,163 +568,194 @@ const SuiTimeline = ({
       </div>
 
       {!preview && isModalOpen && selectedMilestone && (
-        <div className="sui-modal-overlay">
-          <div className="sui-modal-content sui-modal-small">
-            <h3 style={{ color: "#fff" }}>
-              {userRole === "admin" || userRole === "manager" ? "Edit Milestone" : "Milestone Details"}
-            </h3>
+        <ModalPortal>
+          <div className="sui-modal-overlay">
+            <div className="sui-modal-content sui-modal-small">
+              <h3>
+                {userRole === "admin" || userRole === "manager"
+                  ? "Edit Milestone"
+                  : "Milestone Details"}
+              </h3>
 
-            {userRole !== "client" ? (
-              <>
-                <div className="sui-form-group">
-                  <label>Title</label>
-                  <input
-                    type="text"
-                    className="sui-form-control"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                  />
+              {userRole !== "client" ? (
+                <>
+                  <div className="sui-form-group">
+                    <label>Title</label>
+                    <input
+                      type="text"
+                      className="sui-form-control"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      onFocus={(e) => e.target.select()}
+                      required
+                    />
+                  </div>
+                  <div className="sui-form-group">
+                    <label>Description (Optional)</label>
+                    <textarea
+                      className="sui-form-control"
+                      rows="2"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="Enter milestone details..."
+                    ></textarea>
+                  </div>
+                  
+                  <div className="sui-form-row">
+                    <div className="sui-form-col">
+                      <div className="sui-form-group">
+                        <label>Target Date</label>
+                        <input
+                          type="date"
+                          className="sui-form-control"
+                          value={targetDate}
+                          onChange={(e) => setTargetDate(e.target.value)}
+                          onFocus={(e) => e.target.select()}
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="sui-form-col">
+                      <div className="sui-form-group">
+                        <label>Assignee</label>
+                        <GlassDropdown
+                          options={[
+                            { value: 1, label: "VisionDivision" },
+                            { value: 0, label: "Client" },
+                          ]}
+                          value={isVisionDivision}
+                          onChange={(val) => setIsVisionDivision(val)}
+                          placeholder="Select..."
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="sui-form-group">
+                    <label>Status</label>
+                    <GlassDropdown
+                      options={[
+                        { value: "pending", label: "Pending" },
+                        { value: "in_progress", label: "In Progress" },
+                        { value: "completed", label: "Completed" },
+                      ]}
+                      value={status}
+                      onChange={(val) => setStatus(val)}
+                      placeholder="Select Status..."
+                    />
+                  </div>
+                </>
+              ) : userRole === "production_crew" ? (
+                <div className="sui-milestone-readonly">
+                  <strong className="sui-milestone-readonly-title">
+                    {title}
+                  </strong>
+                  <p className="sui-milestone-readonly-desc">
+                    {description}
+                  </p>
+                  <div className="sui-milestone-readonly-status">
+                    Status:{" "}
+                    <strong>{status.replace("_", " ").toUpperCase()}</strong>
+                  </div>
+                  <div className="sui-milestone-readonly-date">
+                    Target Date: <strong>{targetDate}</strong>
+                  </div>
+                  {clientNote && (
+                    <div className="sui-milestone-readonly-notes">
+                      <span className="sui-milestone-notes-label">Notes: </span>
+                      {clientNote}
+                    </div>
+                  )}
                 </div>
+              ) : (
+                <div className="sui-milestone-readonly">
+                  <strong className="sui-milestone-readonly-title">
+                    {title}
+                  </strong>
+                  <p className="sui-milestone-readonly-desc">
+                    {description}
+                  </p>
+                  <div className="sui-milestone-readonly-status">
+                    Status:{" "}
+                    <strong>{status.replace("_", " ").toUpperCase()}</strong>
+                  </div>
+                </div>
+              )}
+              {userRole !== "production_crew" && (
                 <div className="sui-form-group">
-                  <label>Description</label>
+                  <label className="sui-label-flex">
+                    Timeline Notes (Optional)
+                    {(() => {
+                      const noteContent = selectedMilestone?.client_note || "";
+                      const origMatch = noteContent.match(
+                        /^\[(Admin|Manager|Client|VisionDivision)\]/i,
+                      );
+                      if (origMatch) {
+                        const rawTag = origMatch[1];
+                        const roleTag =
+                          rawTag.toLowerCase() === "admin" ||
+                          rawTag.toLowerCase() === "manager" ||
+                          rawTag.toLowerCase() === "visiondivision"
+                            ? "VisionDivision"
+                            : "Client";
+                        return (
+                          <span
+                            className="sui-client-badge sui-client-badge--no-margin"
+                            style={{ 
+                              background: roleTag === "Client" ? "#2dd4bf" : "#6366f1",
+                              color: "#fff",
+                              padding: "2px 10px",
+                              borderRadius: "4px"
+                            }}
+                          >
+                            PROVENANCE: {roleTag}
+                          </span>
+                        );
+                      }
+                      return null;
+                    })()}
+                  </label>
                   <textarea
                     className="sui-form-control"
-                    rows="2"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
+                    rows="3"
+                    value={clientNote}
+                    onChange={(e) => setClientNote(e.target.value)}
+                    placeholder="Add latest update or feedback here..."
                   ></textarea>
                 </div>
-                <div className="sui-form-group">
-                  <label>Target Date</label>
-                  <input
-                    type="date"
-                    className="sui-form-control"
-                    value={targetDate}
-                    onChange={(e) => setTargetDate(e.target.value)}
-                  />
-                </div>
-                <div className="sui-form-group">
-                  <label>Assignee</label>
-                  <GlassDropdown
-                    options={[
-                      { value: 1, label: "VisionDivision" },
-                      { value: 0, label: "Client" },
-                    ]}
-                    value={isVisionDivision}
-                    onChange={(val) => setIsVisionDivision(val)}
-                    placeholder="Select Assignee..."
-                  />
-                </div>
-                <div className="sui-form-group">
-                  <label>Status</label>
-                  <GlassDropdown
-                    options={[
-                      { value: "pending", label: "Pending" },
-                      { value: "in_progress", label: "In Progress" },
-                      { value: "completed", label: "Completed" },
-                    ]}
-                    value={status}
-                    onChange={(val) => setStatus(val)}
-                    placeholder="Select Status..."
-                  />
-                </div>
-              </>
-            ) : userRole === "production_crew" ? (
-              <div style={{ marginBottom: "20px", color: "#a0aec0" }}>
-                <strong style={{ color: "#fff", fontSize: "1.1rem" }}>
-                  {title}
-                </strong>
-                <p style={{ margin: "5px 0", fontSize: "0.9rem" }}>
-                  {description}
-                </p>
-                <div style={{ fontSize: "0.85rem", marginTop: "10px" }}>
-                  Status:{" "}
-                  <strong>{status.replace("_", " ").toUpperCase()}</strong>
-                </div>
-                <div style={{ fontSize: "0.85rem", marginTop: "6px" }}>
-                  Target Date:{" "}
-                  <strong>{targetDate}</strong>
-                </div>
-                {clientNote && (
-                  <div style={{ fontSize: "0.85rem", marginTop: "10px", padding: "10px", background: "rgba(255,255,255,0.03)", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.05)" }}>
-                    <span style={{ color: "#718096" }}>Notes: </span>{clientNote}
-                  </div>
+              )}
+              <div className="sui-modal-actions">
+                {userRole !== "client" && userRole !== "production_crew" && (
+                  <button
+                    className="sui-btn sui-btn-delete"
+                    onClick={handleDelete}
+                  >
+                    Delete
+                  </button>
+                )}
+                <button className="sui-btn sui-btn-cancel" onClick={closeModal}>
+                  {userRole === "production_crew" ? "Close" : "Cancel"}
+                </button>
+                {userRole !== "production_crew" && (
+                  <button className="sui-btn sui-btn-save" onClick={handleSave}>
+                    Save Changes
+                  </button>
                 )}
               </div>
-            ) : (
-              <div style={{ marginBottom: "20px", color: "#a0aec0" }}>
-                <strong style={{ color: "#fff", fontSize: "1.1rem" }}>
-                  {title}
-                </strong>
-                <p style={{ margin: "5px 0", fontSize: "0.9rem" }}>
-                  {description}
-                </p>
-                <div style={{ fontSize: "0.85rem", marginTop: "10px" }}>
-                  Status:{" "}
-                  <strong>{status.replace("_", " ").toUpperCase()}</strong>
-                </div>
-              </div>
-            )}
-            {userRole !== "production_crew" && (
-              <div className="sui-form-group">
-                <label
-                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
-                >
-                  Timeline Notes (Optional)
-                  {(() => {
-                    const noteContent = selectedMilestone?.client_note || "";
-                    const origMatch = noteContent.match(
-                      /^\[(Admin|Manager|Client|VisionDivision)\]/i,
-                    );
-                    if (origMatch) {
-                      const rawTag = origMatch[1];
-                      const roleTag =
-                        rawTag.toLowerCase() === "admin" ||
-                        rawTag.toLowerCase() === "manager" ||
-                        rawTag.toLowerCase() === "visiondivision"
-                          ? "VisionDivision"
-                          : "Client";
-                      return (
-                        <span
-                          className="sui-client-badge"
-                          style={{ marginLeft: 0 }}
-                        >
-                          Last Edit: {roleTag}
-                        </span>
-                      );
-                    }
-                    return null;
-                  })()}
-                </label>
-                <textarea
-                  className="sui-form-control"
-                  rows="4"
-                  value={clientNote}
-                  onChange={(e) => setClientNote(e.target.value)}
-                  placeholder="Add any notes or updates here..."
-                ></textarea>
-              </div>
-            )}
-            <div className="sui-modal-actions">
-              {userRole !== "client" && userRole !== "production_crew" && (
-                <button
-                  className="sui-btn sui-btn-delete"
-                  onClick={handleDelete}
-                >
-                  Delete
-                </button>
-              )}
-              <button className="sui-btn sui-btn-cancel" onClick={closeModal}>
-                {userRole === "production_crew" ? "Close" : "Cancel"}
-              </button>
-              {userRole !== "production_crew" && (
-                <button className="sui-btn sui-btn-save" onClick={handleSave}>
-                  Save Changes
-                </button>
-              )}
             </div>
           </div>
-        </div>
+        </ModalPortal>
+      )}
+
+      {showDeleteConfirm && (
+        <ConfirmationModal
+          title="Delete Milestone"
+          message={`Are you sure you want to delete the milestone "${selectedMilestone?.title}"? This action cannot be undone.`}
+          confirmLabel="Delete"
+          cancelLabel="Keep Milestone"
+          onConfirm={confirmDelete}
+          onCancel={() => setShowDeleteConfirm(false)}
+        />
       )}
     </div>
   );

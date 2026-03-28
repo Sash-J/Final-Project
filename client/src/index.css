@@ -1,29 +1,23 @@
 @import url("https://fonts.googleapis.com/css2?family=Funnel+Sans:ital,wght@0,300..800;1,300..800&display=swap");
 
 :root {
-  --bg-color: #000000; /* Pure black background */
-  --surface-color: rgba(
-    255,
-    255,
-    255,
-    0.05
-  ); /* Very subtle white for glass surface */
+  --bg-color: #000000;
+  --surface-color: rgba(255, 255, 255, 0.05);
   --text-primary: #e0e0e0;
   --text-secondary: #a0a0a0;
-  --accent-color: #00c6e6; /* Cyan-Blue */
+  --accent-color: #00c6e6;
 
   /* Glassmorphism Variables */
-  --glass-bg: rgba(
-    243,
-    243,
-    243,
-    0.04
-  ); /* Neutral white frost to pop against black */
+  --glass-bg: rgba(243, 243, 243, 0.04);
   --glass-border: 1px solid rgba(255, 255, 255, 0.08);
   --glass-blur: blur(15px);
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
 
   --font-main: "Funnel Sans";
+
+  /* Animation Tokens */
+  --transition-smooth: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 *,
@@ -69,4 +63,87 @@ code {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--accent-color);
+}
+
+/* ── Neo-Button Design System ────────────────────────────────────────────── */
+.btn-neo {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 28px;
+  background: rgba(255, 255, 255, 0.03) !important;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 50px !important;
+  color: #ffffff !important;
+  font-size: 0.9rem !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  letter-spacing: 0.5px !important;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 
+    0 4px 15px rgba(0, 0, 0, 0.2),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
+  overflow: hidden;
+  white-space: nowrap;
+  outline: none;
+  text-decoration: none;
+}
+
+.btn-neo:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.3),
+    inset 0 1px 2px rgba(255, 255, 255, 0.2) !important;
+  transform: translateY(-2px) scale(1.02);
+}
+
+.btn-neo:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Solid/Primary variant as refined Clear Glass with tint */
+.btn-neo-solid {
+  background: rgba(0, 198, 230, 0.1) !important;
+  border: 1px solid rgba(0, 198, 230, 0.3) !important;
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.3),
+    inset 0 1px 2px rgba(255, 255, 255, 0.2) !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+}
+
+.btn-neo-solid:hover {
+  background: rgba(0, 198, 230, 0.18) !important;
+  border-color: rgba(0, 198, 230, 0.5) !important;
+  box-shadow: 
+    0 15px 40px rgba(0, 198, 230, 0.2),
+    inset 0 1px 3px rgba(255, 255, 255, 0.3) !important;
+  transform: translateY(-2px) scale(1.02);
+}
+
+/* ── Neo Background Grain Overlay ─────────────────────────────────────── */
+.btn-neo::after,
+.btn-neo-solid::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E") !important;
+  opacity: 0.1 !important;
+  mix-blend-mode: overlay !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
+}
+
+.btn-neo > *,
+.btn-neo-solid > * {
+  position: relative;
+  z-index: 2;
 }

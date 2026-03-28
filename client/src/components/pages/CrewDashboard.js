@@ -4,10 +4,11 @@ import { useAuth } from '../../contexts/AuthContext';
 import './CrewDashboard.css';
 import './BudgetEntryForm.css'; // Reuse the admin sheet styles
 import SuiTimeline from './SuiTimeline';
+import ModalPortal from '../common/ModalPortal';
 
 const API = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-const TimelinePreview = ({ startDate, endDate }) => {
+const TimelinePreview = ({ startDate, endDate, projectStatus }) => {
     if (!startDate || !endDate) return null;
     
     const start = new Date(startDate);
@@ -27,7 +28,13 @@ const TimelinePreview = ({ startDate, endDate }) => {
             <div className="crew-timeline-labels">
                 <span>{formatDt(start)}</span>
                 <span className="crew-timeline-status">
-                    {progress === 0 ? 'Upcoming' : progress === 100 ? 'Completed' : 'In Progress'}
+                    {projectStatus === 'completed' 
+                        ? 'Completed' 
+                        : progress === 0 
+                            ? 'Upcoming' 
+                            : progress === 100 
+                                ? 'In Progress (Late)' 
+                                : 'In Progress'}
                 </span>
                 <span>{formatDt(end)}</span>
             </div>
@@ -100,11 +107,11 @@ const CrewDashboard = () => {
     const fetchBudgetData = async (projectId, versionId) => {
         try {
             const url = versionId 
-                ? `${API}/budget-values/project/${projectId}?version_id=${versionId}`
-                : `${API}/budget-values/project/${projectId}`;
+                ? `${API}/api/budget-values/project/${projectId}?version_id=${versionId}`
+                : `${API}/api/budget-values/project/${projectId}`;
 
             const [hierRes, valRes] = await Promise.all([
-                axios.get(`${API}/hierarchy`, { withCredentials: true }),
+                axios.get(`${API}/api/hierarchy`, { withCredentials: true }),
                 axios.get(url, { withCredentials: true })
             ]);
             
@@ -232,8 +239,8 @@ const CrewDashboard = () => {
                                 
                                 {!isCompleted && (
                                     <div className="crew-mini-timeline-preview">
-                                        <div className="crew-mini-timeline-preview-inner">
-                                            <SuiTimeline projectId={project.id} userRole="production_crew" preview={true} updateTrigger={milestoneUpdateTrigger} />
+                                        <div className="crew-mini-timeline-preview-inner" onClick={() => setSelectedTimelineProject(project)} style={{ cursor: 'pointer' }}>
+                                            <SuiTimeline projectId={project.id} userRole="production_crew" preview={true} updateTrigger={milestoneUpdateTrigger} onClick={() => setSelectedTimelineProject(project)} />
                                         </div>
                                     </div>
                                 )}
@@ -243,7 +250,11 @@ const CrewDashboard = () => {
                                         Project Completed
                                     </div>
                                 ) : (
-                                    <TimelinePreview startDate={project.start_date} endDate={project.end_date} />
+                                    <TimelinePreview 
+                                        startDate={project.start_date} 
+                                        endDate={project.end_date} 
+                                        projectStatus={project.status}
+                                    />
                                 )}
 
                                 <div className="crew-financials">
@@ -299,10 +310,7 @@ const CrewDashboard = () => {
                                 )}
 
                                 <div className="crew-card-actions">
-                                    <button className="crew-action-btn timeline-btn" onClick={() => setSelectedTimelineProject(project)} style={{ marginRight: '10px' }}>
-                                        View Full Timeline
-                                    </button>
-                                    <button className="crew-action-btn budget-btn" onClick={() => openBudgetModal(project)}>
+                                    <button className="crew-action-btn budget-btn" onClick={() => openBudgetModal(project)} style={{ width: '100%' }}>
                                         View Budget Sheet
                                     </button>
                                 </div>
@@ -314,149 +322,140 @@ const CrewDashboard = () => {
 
             {/* Budget Sheet Modal */}
             {selectedProject && (
-                <div className="crew-modal-overlay" onClick={closeBudgetModal}>
-                    <div className="crew-modal-content" onClick={e => e.stopPropagation()}>
-                        <button className="crew-modal-close" onClick={closeBudgetModal}>&times;</button>
-                        
-                        <div className="crew-modal-header-row">
-                            <h3>Budget Sheet - {selectedProject.project_name} 
-                                {currentVersionId && versions.find(v => v.id === currentVersionId) && 
-                                    ` (Version ${versions.find(v => v.id === currentVersionId).version_number})`}
-                            </h3>
+                <ModalPortal>
+                    <div className="crew-modal-overlay" onClick={closeBudgetModal}>
+                        <div className="crew-modal-content" onClick={e => e.stopPropagation()}>
+                            <button className="crew-modal-close" onClick={closeBudgetModal}>&times;</button>
                             
-                            {versions.length > 0 && (
-                                <div className="crew-version-selector">
-                                    <label>Version:</label>
-                                    <select 
-                                        value={currentVersionId || ""} 
-                                        onChange={(e) => handleVersionChange(e.target.value)}
-                                    >
-                                        {versions.map(v => (
-                                            <option key={v.id} value={v.id}>Version {v.version_number}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            )}
-                        </div>
-                        
-                        {budgetLoading ? (
-                            <div className="crew-loading crew-modal-loading">Loading budget...</div>
-                        ) : budgetData && budgetData.hierarchy.length > 0 ? (
-                            <div className="crew-table-container">
-                                <div className="bef-sheet" style={{ margin: 0, overflowY: 'auto', maxHeight: '60vh', borderRadius: '12px' }}>
-                                    <table className="bef-table">
-                                        <thead>
-                                            <tr>
-                                                <th className="col-item-name">Item Name</th>
-                                                <th className="col-num">Qty</th>
-                                                <th className="col-rate-type" style={{ width: '80px', textAlign: 'center' }}>Type</th>
-                                                <th className="col-num">Rate</th>
-                                                <th className="col-num">Total</th>
-                                            </tr>
-                                        </thead>
-                                        {budgetData.hierarchy.map((dept, deptIdx) => (
-                                            <React.Fragment key={dept.id}>
-                                                <tbody className="bef-dept-body">
-                                                    <tr className="bef-dept-row">
-                                                        <td colSpan="5">
-                                                            <div className="dept-header-content">
-                                                                <span className="dept-id">{String(deptIdx + 1).padStart(2, "0")}</span>
-                                                                <span className="dept-name">{dept.department_name}</span>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                                {dept.categories.map((cat, catIdx) => (
-                                                    <tbody className="bef-cat-body" key={cat.id}>
-                                                        <tr className="bef-cat-row">
-                                                            <td colSpan="4">
-                                                                <span className="cat-id">{deptIdx + 1}.{catIdx + 1}</span>
-                                                                <span className="cat-name">{cat.category_name}</span>
-                                                            </td>
-                                                            <td className="col-num cat-subtotal">
-                                                                {formatCurrency(cat.catTotal)}
+                            <div className="crew-modal-header-row">
+                                <h3>Budget Sheet - {selectedProject.project_name} 
+                                    {currentVersionId && versions.find(v => v.id === currentVersionId) && 
+                                        ` (Version ${versions.find(v => v.id === currentVersionId).version_number})`}
+                                </h3>
+                                
+                                {versions.length > 0 && (
+                                    <div className="crew-version-selector">
+                                        <label>Version:</label>
+                                        <select 
+                                            value={currentVersionId || ""} 
+                                            onChange={(e) => handleVersionChange(e.target.value)}
+                                        >
+                                            {versions.map(v => (
+                                                <option key={v.id} value={v.id}>Version {v.version_number}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
+                            </div>
+                            
+                            {budgetLoading ? (
+                                <div className="crew-loading crew-modal-loading">Loading budget...</div>
+                            ) : budgetData && budgetData.hierarchy.length > 0 ? (
+                                <div className="crew-table-container">
+                                    <div className="bef-sheet" style={{ margin: 0, overflowY: 'auto', maxHeight: '60vh', borderRadius: '12px' }}>
+                                        <table className="bef-table">
+                                            <thead>
+                                                <tr>
+                                                    <th className="col-item-name">Item Name</th>
+                                                    <th className="col-num">Qty</th>
+                                                    <th className="col-rate-type" style={{ width: '80px', textAlign: 'center' }}>Type</th>
+                                                    <th className="col-num">Rate</th>
+                                                    <th className="col-num">Total</th>
+                                                </tr>
+                                            </thead>
+                                            {budgetData.hierarchy.map((dept, deptIdx) => (
+                                                <React.Fragment key={dept.id}>
+                                                    <tbody className="bef-dept-body">
+                                                        <tr className="bef-dept-row">
+                                                            <td colSpan="5">
+                                                                <div className="dept-header-content">
+                                                                    <span className="dept-id">{String(deptIdx + 1).padStart(2, "0")}</span>
+                                                                    <span className="dept-name">{dept.department_name}</span>
+                                                                </div>
                                                             </td>
                                                         </tr>
-                                                        {cat.items.map((item) => (
-                                                            <tr key={item.id} className="bef-row filled">
-                                                                <td className="col-item-name">{item.item_name}</td>
-                                                                <td className="col-num" style={{ textAlign: 'center' }}>{item.val.qty}</td>
-                                                                <td className="col-rate-type" style={{ fontSize: '0.8rem', color: '#a0aec0', width: '80px', textAlign: 'center' }}>{item.val.rate_type}</td>
-                                                                <td className="col-num" style={{ textAlign: 'center' }}>{formatCurrency(item.val.rate)}</td>
-                                                                <td className="col-num total-cell has-value">{formatCurrency(item.val.total)}</td>
-                                                            </tr>
-                                                        ))}
                                                     </tbody>
-                                                ))}
-                                            </React.Fragment>
-                                        ))}
-                                    </table>
-                                </div>
-                                <div className="bef-footer" style={{ marginTop: '20px', padding: '15px 20px', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', justifyContent: 'flex-end' }}>
-                                    <div className="bef-grand-total">
-                                        Grand Total: <strong>{formatCurrency(budgetData.grandTotal)}</strong>
+                                                    {dept.categories.map((cat, catIdx) => (
+                                                        <tbody className="bef-cat-body" key={cat.id}>
+                                                            <tr className="bef-cat-row">
+                                                                <td colSpan="4">
+                                                                    <span className="cat-id">{deptIdx + 1}.{catIdx + 1}</span>
+                                                                    <span className="cat-name">{cat.category_name}</span>
+                                                                </td>
+                                                                <td className="col-num cat-subtotal">
+                                                                    {formatCurrency(cat.catTotal)}
+                                                                </td>
+                                                            </tr>
+                                                            {cat.items.map((item) => (
+                                                                <tr key={item.id} className="bef-row filled">
+                                                                    <td className="col-item-name">{item.item_name}</td>
+                                                                    <td className="col-num" style={{ textAlign: 'center' }}>{item.val.qty}</td>
+                                                                    <td className="col-rate-type" style={{ fontSize: '0.8rem', color: '#a0aec0', width: '80px', textAlign: 'center' }}>{item.val.rate_type}</td>
+                                                                    <td className="col-num" style={{ textAlign: 'center' }}>{formatCurrency(item.val.rate)}</td>
+                                                                    <td className="col-num total-cell has-value">{formatCurrency(item.val.total)}</td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    ))}
+                                                </React.Fragment>
+                                            ))}
+                                        </table>
+                                    </div>
+                                    <div className="bef-footer" style={{ marginTop: '20px', padding: '15px 20px', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', justifyContent: 'flex-end' }}>
+                                        <div className="bef-grand-total">
+                                            Grand Total: <strong>{formatCurrency(budgetData.grandTotal)}</strong>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ) : (
-                            <div className="crew-empty crew-modal-empty">No filled budget rows found for this project.</div>
-                        )}
+                            ) : (
+                                <div className="crew-empty crew-modal-empty">No filled budget rows found for this project.</div>
+                            )}
+                        </div>
                     </div>
-                </div>
+                </ModalPortal>
             )}
 
             {/* TIMELINE MODAL (Read Only) */}
             {selectedTimelineProject && (
-                <div className="sui-modal-overlay">
-                    <div 
-                        className="sui-modal-content milestone-modal-content" 
-                        style={{ 
-                            maxWidth: '1800px', 
-                            width: '98%', 
-                            height: '92vh', 
-                            display: 'flex', 
-                            flexDirection: 'column',
-                            gap: '20px', 
-                            position: 'relative',
-                            padding: '40px',
-                            border: '1px solid rgba(255, 255, 255, 0.1)'
-                        }}
-                    >
-                        <button 
-                            className="crew-modal-close-btn" 
-                            style={{ 
-                                position: 'absolute', 
-                                top: '10px', 
-                                right: '15px', 
-                                background: 'rgba(255, 255, 255, 0.1)', 
-                                border: '1px solid rgba(255, 255, 255, 0.2)', 
-                                color: '#fff', 
-                                fontSize: '1.2rem', 
-                                cursor: 'pointer', 
-                                zIndex: 99999,
-                                width: '36px',
-                                height: '36px',
-                                borderRadius: '50%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                transition: '0.2s'
-                            }} 
-                            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255, 60, 60, 0.8)'}
-                            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
-                            onClick={() => setSelectedTimelineProject(null)}
-                        >
-                            ✕
-                        </button>
+                <ModalPortal>
+                    <div className="sui-modal-overlay">
+                        <div className="milestone-modal-content-wide">
+                            <button 
+                                className="crew-modal-close-btn" 
+                                style={{ 
+                                    position: 'absolute', 
+                                    top: '10px', 
+                                    right: '15px', 
+                                    background: 'rgba(255, 255, 255, 0.1)', 
+                                    border: '1px solid rgba(255, 255, 255, 0.2)', 
+                                    color: '#fff', 
+                                    fontSize: '1.2rem', 
+                                    cursor: 'pointer', 
+                                    zIndex: 99999,
+                                    width: '36px',
+                                    height: '36px',
+                                    borderRadius: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    transition: '0.2s'
+                                }} 
+                                onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255, 60, 60, 0.8)'}
+                                onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
+                                onClick={() => setSelectedTimelineProject(null)}
+                            >
+                                ✕
+                            </button>
 
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                            <h3 style={{ marginBottom: '10px', color: '#fff', flexShrink: 0 }}>Project Timeline: {selectedTimelineProject.project_name}</h3>
-                            <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', flex: 1, overflow: 'hidden', position: 'relative' }}>
-                                <SuiTimeline projectId={selectedTimelineProject.id} key={selectedTimelineProject._t || '1'} userRole="production_crew" updateTrigger={milestoneUpdateTrigger} onMilestonesChange={() => setMilestoneUpdateTrigger(prev => prev + 1)} />
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                                <h3 style={{ marginBottom: '10px', color: '#fff', flexShrink: 0 }}>Project Timeline: {selectedTimelineProject.project_name}</h3>
+                                <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', flex: 1, overflow: 'hidden', position: 'relative' }}>
+                                    <SuiTimeline projectId={selectedTimelineProject.id} key={selectedTimelineProject._t || '1'} userRole="production_crew" updateTrigger={milestoneUpdateTrigger} onMilestonesChange={() => setMilestoneUpdateTrigger(prev => prev + 1)} />
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </ModalPortal>
             )}
         </div>
     );

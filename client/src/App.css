@@ -42,7 +42,7 @@ h2 {
   position: fixed;
   width: 100%;
   top: 0;
-  z-index: 1000;
+  z-index: 500;
   box-sizing: border-box;
 }
 
@@ -52,6 +52,61 @@ h2 {
   color: #ffffff;
   text-decoration: none;
   letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  height: 40px;
+  transition: all 1s ease;
+}
+
+.logo-text-wrapper,
+.logo-img-wrapper {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  transition:
+    max-width 0.6s cubic-bezier(0.65, 0, 0.35, 1),
+    opacity 0.4s cubic-bezier(0.65, 0, 0.35, 1),
+    transform 0.6s cubic-bezier(0.65, 0, 0.35, 1),
+    filter 0.4s ease;
+  will-change: max-width, opacity, transform, filter;
+}
+
+.logo-text {
+  white-space: nowrap;
+  padding-right: 10px;
+}
+
+.logo-img {
+  height: 36px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* Transitions */
+.logo.is-text-mode .logo-text-wrapper {
+  max-width: 300px;
+  opacity: 1;
+  transform: scale(1) translateX(0);
+  filter: blur(0) brightness(1);
+}
+.logo.is-text-mode .logo-img-wrapper {
+  max-width: 0;
+  opacity: 0;
+  transform: scale(0.95) translateX(5px);
+  filter: blur(2px) brightness(1.2);
+}
+
+.logo.is-image-mode .logo-text-wrapper {
+  max-width: 0;
+  opacity: 0;
+  transform: scale(0.95) translateX(-5px);
+  filter: blur(2px) brightness(1.2);
+}
+.logo.is-image-mode .logo-img-wrapper {
+  max-width: 150px;
+  opacity: 1;
+  transform: scale(1) translateX(0);
+  filter: blur(0) brightness(1);
 }
 
 .nav-links {
@@ -82,34 +137,66 @@ h2 {
 }
 
 .logout-btn {
-  background: transparent;
-  border: 1px solid var(--accent-color);
-  color: var(--accent-color);
-  padding: 8px 16px;
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--accent-color) !important;
+  color: var(--accent-color) !important;
+  padding: 8px 20px !important;
+  border-radius: 50px !important;
   cursor: pointer;
-  font-size: 0.8rem;
-  font-weight: 600;
-  transition: all 0.3s;
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
 }
 
 .logout-btn:hover {
-  background: var(--accent-color);
-  color: var(--bg-color);
+  background: var(--accent-color) !important;
+  color: #00c6e6 !important;
+  box-shadow: 0 0 15px rgba(0, 198, 230, 0.4);
 }
 
 .login-link {
-  background: var(--accent-color);
-  color: var(--bg-color) !important;
-  padding: 8px 16px;
-  border-radius: 4px;
-  font-weight: 600;
+  background: rgba(0, 198, 230, 0.1) !important;
+  backdrop-filter: blur(16px);
+  color: #fff !important;
+  padding: 8px 24px !important;
+  border-radius: 50px !important;
+  font-weight: 600 !important;
+  text-transform: none;
+  letter-spacing: 0.5px;
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.2),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
+  text-decoration: none;
+  font-size: 0.8rem;
+  transition: all 0.3s ease;
+}
+
+.login-link:hover {
+  background: rgba(0, 198, 230, 0.18) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3) !important;
+  transform: translateY(-1px);
 }
 
 /* Main Content Wrapper */
 .main-content {
-  padding-top: 80px; /* Space for fixed navbar */
+  padding-top: 80px;
   min-height: calc(100vh - 80px);
+  animation: pageFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Hero */
@@ -139,20 +226,27 @@ h2 {
 
 .cta-button {
   margin-top: 40px;
-  padding: 15px 40px;
-  background-color: transparent;
-  border: 2px solid var(--accent-color);
-  color: var(--accent-color);
-  font-size: 1rem;
+  padding: 15px 50px;
+  background: rgba(0, 198, 230, 0.1) !important;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  color: #fff !important;
+  font-size: 1.15rem;
+  font-weight: 600 !important;
+  border-radius: 50px;
   cursor: pointer;
-  transition: all 0.3s;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  text-transform: none;
+  letter-spacing: 1.5px;
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.3),
+    inset 0 1px 2px rgba(255, 255, 255, 0.2) !important;
 }
 
 .cta-button:hover {
-  background-color: var(--accent-color);
-  color: var(--bg-color);
+  background: rgba(0, 198, 230, 0.2) !important;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5) !important;
+  transform: translateY(-3px) scale(1.06);
 }
 
 body {
@@ -295,9 +389,9 @@ footer {
   margin-top: 60px;
 }
 
-/* ── Global Modal Fixes for Navbar Overlap ──────────────────────────────────── */
+/*fixing navbar overlapping issue*/
 .sui-modal-overlay {
-  z-index: 99999 !important; /* Extremely high to be above fixed navbar (1000) */
+  z-index: 99999 !important;
   position: fixed;
   top: 0;
   left: 0;
@@ -308,6 +402,7 @@ footer {
   display: flex !important;
   align-items: center;
   justify-content: center;
+  animation: fadeIn 0.3s ease forwards;
 }
 
 .sui-modal-content {
@@ -321,6 +416,27 @@ footer {
   border-radius: 20px;
   padding: 40px;
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+  animation: modalScaleIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes modalScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .modal-close-btn {
@@ -346,4 +462,21 @@ footer {
   background: #ef4444;
   border-color: #ef4444;
   transform: rotate(90deg) scale(1.1);
+}
+
+/* ── Milestone Timeline Modal (Global Wide Layout) ────────────────────────── */
+.milestone-modal-content-wide {
+  max-width: 1800px !important;
+  width: 98% !important;
+  height: 92vh;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 20px;
+  position: relative;
+  padding: 40px !important;
+  background: rgba(20, 20, 30, 0.95) !important;
+  backdrop-filter: blur(30px) !important;
+  border: 1px solid rgba(0, 198, 230, 0.2) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6) !important;
 }

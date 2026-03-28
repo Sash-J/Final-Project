@@ -50,7 +50,9 @@ const AddDepartment = ({ onAdded }) => {
         required
       />
       <button type="submit">Add Department</button>
-      <StatusMsg msg={msg} />
+      <div className="status-msg-container" style={{ minHeight: '32px', marginTop: '0.5rem' }}>
+        <StatusMsg msg={msg} />
+      </div>
     </form>
   );
 };
@@ -107,7 +109,9 @@ const AddCategory = ({ departments, onAdded }) => {
         onChange={(val) => setDeptId(val)}
       />
       <button type="submit">Add Category</button>
-      <StatusMsg msg={msg} />
+      <div className="status-msg-container" style={{ minHeight: '32px', marginTop: '0.5rem' }}>
+        <StatusMsg msg={msg} />
+      </div>
     </form>
   );
 };
@@ -161,7 +165,9 @@ const AddBudgetItem = ({ categories, onAdded }) => {
         onChange={(val) => setCatId(val)}
       />
       <button type="submit">Add Budget Item</button>
-      <StatusMsg msg={msg} />
+      <div className="status-msg-container" style={{ minHeight: '32px', marginTop: '0.5rem' }}>
+        <StatusMsg msg={msg} />
+      </div>
     </form>
   );
 };

@@ -3,6 +3,7 @@ import "./AdminDashboard.css";
 import SuiTimeline from "./SuiTimeline";
 import { useModal } from "../../contexts/ModalContext";
 import GlassDropdown from "../common/GlassDropdown";
+import ModalPortal from "../common/ModalPortal";
 
 const API = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
@@ -228,7 +229,9 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit }) => {
         )}
       </div>
 
-      <StatusMsg msg={msg} />
+      <div className="status-msg-container" style={{ minHeight: '32px', marginTop: '1rem' }}>
+        <StatusMsg msg={msg} />
+      </div>
     </form>
   );
 };
@@ -439,185 +442,174 @@ const AdminDashboard = () => {
 
       {/* Project Add/Edit Modal */}
       {showProjectModal && (
-        <div className="sui-modal-overlay">
-          <div className="sui-modal-content add-edit-modal-content">
-            <button
-              className="modal-close-btn"
-              onClick={() => {
-                setEditingProject(null);
-                setShowProjectModal(false);
-              }}
-            >
-              ✕
-            </button>
-            <ProjectForm
-              onAdded={handleAdded}
-              editingProject={editingProject}
-              onCancelEdit={() => {
-                setEditingProject(null);
-                setShowProjectModal(false);
-              }}
-            />
+        <ModalPortal>
+          <div className="sui-modal-overlay">
+            <div className="sui-modal-content add-edit-modal-content">
+              <button
+                className="modal-close-btn"
+                onClick={() => {
+                  setEditingProject(null);
+                  setShowProjectModal(false);
+                }}
+              >
+                ✕
+              </button>
+              <ProjectForm
+                onAdded={handleAdded}
+                editingProject={editingProject}
+                onCancelEdit={() => {
+                  setEditingProject(null);
+                  setShowProjectModal(false);
+                }}
+              />
+            </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
+      {/* Milestone Timeline Modal */}
       {selectedTimelineProject && (
-        <div className="sui-modal-overlay">
-          <div 
-            className="milestone-modal-content-wide"
-            style={{
-              maxWidth: "1800px",
-              width: "98%",
-              height: "92vh",
-              display: "flex",
-              flexDirection: "column",
-              gap: "20px",
-              padding: "40px",
-              border: "2px solid rgba(255, 255, 255, 0.2)",
-              backgroundColor: "#1a1a2e",
-              boxSizing: "border-box",
-              overflow: "hidden",
-              borderRadius: "16px",
-              boxShadow: "0 20px 40px rgba(0, 0, 0, 0.5)",
-              position: "relative"
-            }}
-          >
-            <button
-              className="modal-close-btn"
-              onClick={() => setSelectedTimelineProject(null)}
-            >
-              ✕
-            </button>
+        <ModalPortal>
+          <div className="sui-modal-overlay">
+            <div className="milestone-modal-content-wide">
+              <button
+                className="modal-close-btn"
+                onClick={() => setSelectedTimelineProject(null)}
+              >
+                ✕
+              </button>
 
-            <h3 className="milestone-modal-title">
-              Milestones: {selectedTimelineProject.project_name}
-            </h3>
+              <h3 className="milestone-modal-title">
+                Milestones: {selectedTimelineProject.project_name}
+              </h3>
 
-            <div 
-              className="milestone-modal-body"
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                gap: "20px",
-                flex: 1,
-                minHeight: 0,
-                width: "100%",
-                boxSizing: "border-box"
-              }}
-            >
               <div 
-                className="milestone-modal-main"
+                className="milestone-modal-body"
                 style={{
-                  flex: 1,
                   display: "flex",
-                  flexDirection: "column",
-                  minWidth: 0,
-                  height: "100%",
-                  backgroundColor: "rgba(0, 198, 230, 0.05)",
-                  border: "1px solid rgba(0, 198, 230, 0.2)"
+                  flexDirection: "row",
+                  gap: "20px",
+                  flex: 1,
+                  minHeight: 0,
+                  width: "100%",
+                  boxSizing: "border-box"
                 }}
               >
                 <div 
-                  className="milestone-timeline-wrapper"
+                  className="milestone-modal-main"
                   style={{
                     flex: 1,
-                    minHeight: "500px",
-                    background: "rgba(0,0,0,0.5)",
-                    position: "relative",
-                    overflow: "hidden",
-                    width: "100%",
                     display: "flex",
-                    boxSizing: "border-box"
+                    flexDirection: "column",
+                    minWidth: 0,
+                    height: "100%",
+                    backgroundColor: "rgba(0, 198, 230, 0.05)",
+                    border: "1px solid rgba(0, 198, 230, 0.2)"
                   }}
                 >
-                  <SuiTimeline
-                    projectId={selectedTimelineProject.id}
-                    userRole="admin"
-                    key={selectedTimelineProject._t || "1"}
-                  />
-                </div>
-              </div>
-
-              <div 
-                className="milestone-sidebar"
-                style={{
-                  width: "400px",
-                  flexShrink: 0,
-                  background: "rgba(255,255,255,0.05)",
-                  padding: "20px",
-                  borderRadius: "12px",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  display: "block"
-                }}
-              >
-                <div className="milestone-sidebar-header">
-                  <h4>Add Milestone to Timeline</h4>
-                </div>
-                <form onSubmit={handleAddMilestone}>
-                  <div className="sui-form-group">
-                    <label>Milestone Title</label>
-                    <input
-                      type="text"
-                      className="sui-form-control"
-                      required
-                      value={msForm.title}
-                      onChange={(e) =>
-                        setMsForm({ ...msForm, title: e.target.value })
-                      }
-                      placeholder="e.g. Phase 1 Delivery"
-                    />
-                  </div>
-                  <div className="sui-form-group">
-                    <label>Target Date</label>
-                    <input
-                      type="date"
-                      className="sui-form-control"
-                      required
-                      value={msForm.target_date}
-                      onChange={(e) =>
-                        setMsForm({ ...msForm, target_date: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="sui-form-group">
-                    <label>Assignee</label>
-                    <GlassDropdown
-                      options={[
-                        { value: 1, label: "VisionDivision" },
-                        { value: 0, label: "Client" },
-                      ]}
-                      value={msForm.is_visiondivision}
-                      onChange={(val) =>
-                        setMsForm({ ...msForm, is_visiondivision: val })
-                      }
-                      placeholder="Select Assignee..."
-                    />
-                  </div>
-                  <div className="sui-form-group">
-                    <label>Description (Optional)</label>
-                    <textarea
-                      className="sui-form-control"
-                      rows="3"
-                      value={msForm.description}
-                      onChange={(e) =>
-                        setMsForm({ ...msForm, description: e.target.value })
-                      }
-                      placeholder="Detailed description..."
-                    ></textarea>
-                  </div>
-                  <button
-                    type="submit"
-                    className="sui-btn sui-btn-save milestone-sidebar-submit"
-                    disabled={msLoading}
+                  <div 
+                    className="milestone-timeline-wrapper"
+                    style={{
+                      flex: 1,
+                      minHeight: "500px",
+                      background: "rgba(0,0,0,0.5)",
+                      position: "relative",
+                      overflow: "hidden",
+                      width: "100%",
+                      display: "flex",
+                      boxSizing: "border-box"
+                    }}
                   >
-                    {msLoading ? "Adding..." : "Add Milestone to Timeline"}
-                  </button>
-                </form>
+                    <SuiTimeline
+                      projectId={selectedTimelineProject.id}
+                      userRole="admin"
+                      key={selectedTimelineProject._t || "1"}
+                    />
+                  </div>
+                </div>
+
+                <div 
+                  className="milestone-sidebar"
+                  style={{
+                    width: "400px",
+                    flexShrink: 0,
+                    background: "rgba(255,255,255,0.05)",
+                    padding: "20px",
+                    borderRadius: "12px",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    display: "block"
+                  }}
+                >
+                  <div className="milestone-sidebar-header">
+                    <h4>Add Milestone to Timeline</h4>
+                  </div>
+                  <form onSubmit={handleAddMilestone}>
+                    <div className="sui-form-group">
+                      <label>Milestone Title</label>
+                      <input
+                        type="text"
+                        className="sui-form-control"
+                        required
+                        value={msForm.title}
+                        onChange={(e) =>
+                          setMsForm({ ...msForm, title: e.target.value })
+                        }
+                        onFocus={(e) => e.target.select()}
+                        placeholder="e.g. Phase 1 Delivery"
+                      />
+                    </div>
+                    <div className="sui-form-group">
+                      <label>Target Date</label>
+                      <input
+                        type="date"
+                        className="sui-form-control"
+                        required
+                        value={msForm.target_date}
+                        onChange={(e) =>
+                          setMsForm({ ...msForm, target_date: e.target.value })
+                        }
+                        onFocus={(e) => e.target.select()}
+                      />
+                    </div>
+                    <div className="sui-form-group">
+                      <label>Assignee</label>
+                      <GlassDropdown
+                        options={[
+                          { value: 1, label: "VisionDivision" },
+                          { value: 0, label: "Client" },
+                        ]}
+                        value={msForm.is_visiondivision}
+                        onChange={(val) =>
+                          setMsForm({ ...msForm, is_visiondivision: val })
+                        }
+                        placeholder="Select Assignee..."
+                      />
+                    </div>
+                    <div className="sui-form-group">
+                      <label>Description (Optional)</label>
+                      <textarea
+                        className="sui-form-control"
+                        rows="3"
+                        value={msForm.description}
+                        onChange={(e) =>
+                          setMsForm({ ...msForm, description: e.target.value })
+                        }
+                        placeholder="Detailed description..."
+                      ></textarea>
+                    </div>
+                    <button
+                      type="submit"
+                      className="sui-btn sui-btn-save milestone-sidebar-submit"
+                      disabled={msLoading}
+                    >
+                      {msLoading ? "Adding..." : "Add Milestone to Timeline"}
+                    </button>
+                  </form>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </section>
   );

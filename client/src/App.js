@@ -15,6 +15,7 @@ import UserManagement from "./components/pages/UserManagement";
 import ClientDashboard from "./components/pages/ClientDashboard";
 import CrewDashboard from "./components/pages/CrewDashboard";
 import Schedule from "./components/pages/Schedule";
+import FinancialDashboard from "./components/pages/FinancialDashboard";
 import Footer from "./components/ui/Footer";
 import Starfield from "./components/ui/Starfield";
 
@@ -79,6 +80,14 @@ function AppContent() {
             element={
               <ProtectedRoute roles={["admin", "manager", "production_crew", "client"]}>
                 <Schedule />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/finance"
+            element={
+              <ProtectedRoute roles={["admin", "manager", "client"]}>
+                <FinancialDashboard />
               </ProtectedRoute>
             }
           />

@@ -1,0 +1,203 @@
+/* ── Financial Dashboard Styles ───────────────────────────────────────────── */
+.fd-root {
+  padding: 40px;
+  min-height: 100vh;
+  color: #fff;
+  font-family: "Funnel Sans", sans-serif;
+  animation: fd-fade-in 0.6s ease-out;
+}
+
+@keyframes fd-fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Summary Stats ── */
+.fd-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.fd-stat-card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  border-radius: 20px;
+  padding: 30px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.fd-stat-card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.fd-stat-card::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(var(--accent-rgb), 0.1) 0%, transparent 60%);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.fd-stat-card h3 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 12px;
+}
+
+.fd-stat-value {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #fff;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.fd-stat-currency {
+  font-size: 1rem;
+  color: var(--accent-color);
+  font-weight: 600;
+}
+
+/* ── Project Table ── */
+.fd-section-header {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.fd-section-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.fd-table-container {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: var(--glass-shadow);
+}
+
+.fd-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.fd-table th {
+  padding: 20px 24px;
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #888;
+  letter-spacing: 1px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.fd-table td {
+  padding: 18px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 0.9rem;
+  color: #ddd;
+}
+
+.fd-table tr:hover td {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.fd-project-name {
+  font-weight: 600;
+  color: #fff;
+}
+
+.fd-project-code {
+  font-size: 0.75rem;
+  color: #666;
+  margin-left: 8px;
+  font-family: "JetBrains Mono", monospace;
+}
+
+.fd-amount-pos { color: #fff; font-weight: 600; }
+.fd-amount-neg { color: #fb7185; } /* Rose 400 for balance */
+.fd-amount-paid { color: #34d399; } /* Emerald 400 */
+
+/* ── Progress Ring ── */
+.fd-progress-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.fd-progress-bar {
+  flex: 1;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+  overflow: hidden;
+  max-width: 100px;
+}
+
+.fd-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-color), #0ea5e9);
+  border-radius: 3px;
+  transition: width 1s ease-out;
+}
+
+.fd-progress-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #888;
+  min-width: 35px;
+}
+
+/* ── Actions ── */
+.fd-btn-view {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.fd-btn-view:hover {
+  background: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+/* ── Empty State ── */
+.fd-empty {
+  padding: 60px;
+  text-align: center;
+  color: #666;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .fd-root { padding: 20px; }
+  .fd-table th:nth-child(4),
+  .fd-table td:nth-child(4) { display: none; }
+}

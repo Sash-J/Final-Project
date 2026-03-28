@@ -122,14 +122,14 @@
 .calendar-cell {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  height: 150px; /* Fixed height to prevent resizing */
+  height: 110px;
   border-radius: 12px;
   padding: 10px;
   display: flex;
   flex-direction: column;
   transition: all 0.2s ease;
   position: relative;
-  overflow: hidden; /* Hide anything that goes out */
+  overflow: hidden;
 }
 
 .calendar-cell:hover:not(.empty) {

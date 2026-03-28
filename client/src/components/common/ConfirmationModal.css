@@ -57,40 +57,37 @@
   gap: 12px;
 }
 
-.btn-modal-cancel {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #eee;
-  padding: 10px 20px;
-  border-radius: 10px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 0.9rem;
-}
-
-.btn-modal-cancel:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
+/* ── Common Button Base ── */
+.btn-modal-cancel,
 .btn-modal-confirm {
-  background: linear-gradient(135deg, #a78bfa, #7c3aed);
-  border: none;
-  color: #fff;
-  padding: 10px 24px;
-  border-radius: 10px;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
-  transition: all 0.2s;
-  font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #eee !important;
+  padding: 10px 24px !important;
+  border-radius: 10px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 0.9rem !important;
+  box-shadow: none !important;
 }
 
+/* ── Cancel Hover (Subtle Red) ── */
+.btn-modal-cancel:hover {
+  background: rgba(248, 113, 113, 0.1) !important;
+  border-color: rgba(248, 113, 113, 0.4) !important;
+  color: #f87171 !important;
+  transform: translateY(-1px);
+}
+
+/* ── Confirm Hover (Cyan Accent) ── */
 .btn-modal-confirm:hover {
-  opacity: 0.9;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+  background: linear-gradient(135deg, var(--accent-color), #00c6e6) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: #00c6e6 !important;
+  box-shadow: 0 4px 20px rgba(0, 198, 230, 0.4) !important;
+  transform: translateY(-1px);
+  font-weight: 700 !important;
 }
 
 @keyframes modalSlideUp {

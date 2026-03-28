@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { createPortal } from "react-dom";
 import "./Schedule.css";
+import ModalPortal from "../common/ModalPortal";
 import html2pdf from "html2pdf.js";
 
 // Sri Lankan Public Holidays 2026 (Hardcoded for simplicity)
@@ -513,9 +513,8 @@ const Schedule = () => {
         </div>
       )}
 
-      {/* Add Task Modal */}
-      {showTaskModal &&
-        createPortal(
+      {showTaskModal && (
+        <ModalPortal>
           <div className="sui-modal-overlay">
             <div className="sui-modal-content login-modal-window">
               <button
@@ -599,14 +598,13 @@ const Schedule = () => {
                 </button>
               </form>
             </div>
-          </div>,
-          document.body,
-        )}
+          </div>
+        </ModalPortal>
+      )}
 
       {/* Task Notes Modal */}
-      {showNotesModal &&
-        selectedTask &&
-        createPortal(
+      {showNotesModal && selectedTask && (
+        <ModalPortal>
           <div className="sui-modal-overlay">
             <div className="sui-modal-content login-modal-window">
               <button
@@ -632,12 +630,7 @@ const Schedule = () => {
                   </span>
                 </div>
                 {selectedTask.description && (
-                  <p
-                    className="task-desc-text"
-                    style={{ marginTop: "15px", opacity: 0.8 }}
-                  >
-                    {selectedTask.description}
-                  </p>
+                  <p className="task-desc-text">{selectedTask.description}</p>
                 )}
               </div>
 
@@ -701,12 +694,6 @@ const Schedule = () => {
                                 selectedTask,
                               );
                             }}
-                            style={{
-                              marginLeft: "auto",
-                              background: "rgba(0, 198, 230, 0.2)",
-                              border: "1px solid rgba(0, 198, 230, 0.4)",
-                              color: "#93c5fd",
-                            }}
                           >
                             Edit
                           </button>
@@ -729,9 +716,9 @@ const Schedule = () => {
                 </div>
               </div>
             </div>
-          </div>,
-          document.body,
-        )}
+          </div>
+        </ModalPortal>
+      )}
     </div>
   );
 };

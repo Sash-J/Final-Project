@@ -163,7 +163,9 @@ def get_client_projects(user_id):
     cursor = conn.cursor(dictionary=True)
     query = """
     SELECT p.id, p.project_name, p.client_name, p.created_at, p.start_date, p.end_date, p.status, p.location, p.code_name,
-           (SELECT COALESCE(SUM(total), 0) FROM project_budget_values WHERE project_id = p.id) as total_budget,
+           (SELECT COALESCE(SUM(total), 0) FROM project_budget_values 
+            WHERE version_id = (SELECT id FROM budget_versions WHERE project_id = p.id ORDER BY version_number DESC LIMIT 1)
+           ) as total_budget,
            (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE project_id = p.id) as total_paid
     FROM projects p
     JOIN client_projects cp ON p.id = cp.project_id
@@ -183,7 +185,9 @@ def get_crew_projects(user_id):
     cursor = conn.cursor(dictionary=True)
     query = """
     SELECT p.id, p.project_name, p.client_name, p.created_at, p.start_date, p.end_date, p.status, p.location, p.code_name,
-           (SELECT COALESCE(SUM(total), 0) FROM project_budget_values WHERE project_id = p.id) as total_budget,
+           (SELECT COALESCE(SUM(total), 0) FROM project_budget_values 
+            WHERE version_id = (SELECT id FROM budget_versions WHERE project_id = p.id ORDER BY version_number DESC LIMIT 1)
+           ) as total_budget,
            (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE project_id = p.id) as total_paid
     FROM projects p
     JOIN crew_projects crp ON p.id = crp.project_id

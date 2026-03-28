@@ -15,6 +15,7 @@ const SkeletonTable = () => (
           <th className="col-num">Qty</th>
           <th className="col-rate-type">Type</th>
           <th className="col-num">Rate</th>
+          <th className="col-num">Gross (Rs.)</th>
           <th className="col-num">Additional</th>
           <th className="col-num">Total (Rs.)</th>
         </tr>
@@ -44,6 +45,12 @@ const SkeletonTable = () => (
               <div
                 className="skeleton-box"
                 style={{ width: "80px", height: "24px", margin: "0 auto" }}
+              ></div>
+            </td>
+            <td className="col-num">
+              <div
+                className="skeleton-box"
+                style={{ width: "60px", height: "14px", marginLeft: "auto" }}
               ></div>
             </td>
             <td className="col-num">
@@ -133,6 +140,7 @@ const BudgetEntryForm = ({
             rate: String(parseFloat(data[itemId].rate) || ""),
             rate_type: data[itemId].rate_type || "day",
             multiplier: String(parseFloat(data[itemId].rate_multiplier) || "1"),
+            gross: String(parseFloat(data[itemId].gross_revenue) || ""),
             add1: String(parseFloat(data[itemId].additional1) || ""),
             add2: String(parseFloat(data[itemId].additional2) || ""),
             c1: data[itemId].comment1 || "",
@@ -198,13 +206,23 @@ const BudgetEntryForm = ({
     }));
   };
 
-  const calcItemTotal = (itemValues) => {
+  const calcGross = (itemValues) => {
     const q = parseFloat(itemValues.qty) || 0;
     const m = parseFloat(itemValues.multiplier) || 1;
     const r = parseFloat(itemValues.rate) || 0;
+    return +(q * m * r).toFixed(2);
+  };
+
+  const calcItemTotal = (itemValues) => {
+    const grossVal = calcGross(itemValues);
     const a1 = parseFloat(itemValues.add1) || 0;
     const a2 = parseFloat(itemValues.add2) || 0;
-    return +(q * m * r + a1 + a2).toFixed(2);
+    return +(grossVal + a1 + a2).toFixed(2);
+  };
+
+  const grossRaw = (itemId) => {
+    const itemValues = values[itemId] || {};
+    return calcGross(itemValues);
   };
 
   const totalRaw = (itemId) => {
@@ -222,6 +240,8 @@ const BudgetEntryForm = ({
       maximumFractionDigits: 2,
     });
   };
+
+  const grossDisplay = (itemId) => formatCurrency(grossRaw(itemId));
 
   const totalDisplay = (itemId) => formatCurrency(totalRaw(itemId));
 
@@ -268,6 +288,7 @@ const BudgetEntryForm = ({
           additional2: a2,
           comment1: c1,
           comment2: c2,
+          gross_revenue: calcGross(v),
           total: calcItemTotal(v),
         });
       }
@@ -396,6 +417,19 @@ const BudgetEntryForm = ({
       (parseFloat(v.add2) || 0) > 0,
   ).length;
 
+  const BudgetColGroup = () => (
+    <colgroup>
+      <col style={{ width: "40px", minWidth: "40px" }} />
+      <col style={{ width: "auto" }} />
+      <col style={{ width: "60px", minWidth: "60px" }} />
+      <col style={{ width: "200px", minWidth: "200px" }} />
+      <col style={{ width: "100px", minWidth: "100px" }} />
+      <col style={{ width: "115px", minWidth: "115px" }} />
+      <col style={{ width: "115px", minWidth: "115px" }} />
+      <col style={{ width: "130px", minWidth: "130px" }} />
+    </colgroup>
+  );
+
   const showVersionWarning = externalProjectId && !versionId;
 
   return (
@@ -424,15 +458,17 @@ const BudgetEntryForm = ({
           <div className="bef-sheet">
             <DragDropContext onDragEnd={onDragEnd}>
               <table className="bef-table header-only-table">
+                <BudgetColGroup />
                 <thead>
                   <tr>
-                    <th className="col-drag" style={{ width: "30px" }}></th>
+                    <th className="col-drag"></th>
                     <th className="col-item-name">Item Name</th>
-                    <th className="col-num">Qty</th>
+                    <th className="col-units">Units</th>
                     <th className="col-rate-type">Type</th>
-                    <th className="col-num">Rate</th>
-                    <th className="col-num">Additional</th>
-                    <th className="col-num">Total (Rs.)</th>
+                    <th className="col-rate">Rate</th>
+                    <th className="col-gross">Gross (Rs.)</th>
+                    <th className="col-add">Additional</th>
+                    <th className="col-total">Total (Rs.)</th>
                   </tr>
                 </thead>
               </table>
@@ -440,9 +476,10 @@ const BudgetEntryForm = ({
               {hierarchy.map((dept, deptIdx) => (
                 <div key={dept.id} className="dept-section">
                   <table className="bef-table dept-header-table">
+                    <BudgetColGroup />
                     <tbody className="bef-dept-body">
                       <tr className="bef-dept-row">
-                        <td colSpan="7">
+                        <td colSpan="8">
                           <div className="dept-header-content">
                             <span className="dept-id">
                               {String(deptIdx + 1).padStart(2, "0")}
@@ -466,6 +503,7 @@ const BudgetEntryForm = ({
                         ref={provided.innerRef}
                         {...provided.droppableProps}
                       >
+                        <BudgetColGroup />
                         {dept.categories.map((cat, catIdx) => (
                           <Draggable
                             key={cat.id}
@@ -494,14 +532,14 @@ const BudgetEntryForm = ({
                                       >
                                         <i className="fas fa-ellipsis-v"></i>
                                       </td>
-                                      <td colSpan="5">
+                                      <td colSpan="6" className="cat-name-cell">
                                         <div className="cat-header-row">
                                           <span className="cat-name">
                                             {cat.category_name}
                                           </span>
                                         </div>
                                       </td>
-                                      <td className="col-num cat-subtotal">
+                                      <td className="col-total cat-subtotal">
                                         {getCategorySubtotal(cat) > 0
                                           ? formatCurrency(
                                               getCategorySubtotal(cat),
@@ -552,7 +590,7 @@ const BudgetEntryForm = ({
                                               <td className="col-item-name">
                                                 {item.item_name}
                                               </td>
-                                              <td className="col-num">
+                                              <td className="col-units">
                                                 <input
                                                   type="number"
                                                   min="0"
@@ -605,7 +643,7 @@ const BudgetEntryForm = ({
                                                   </div>
                                                 </div>
                                               </td>
-                                              <td className="col-num">
+                                              <td className="col-rate">
                                                 <input
                                                   type="number"
                                                   min="0"
@@ -619,7 +657,10 @@ const BudgetEntryForm = ({
                                                   disabled={showVersionWarning}
                                                 />
                                               </td>
-                                              <td className="col-num bef-relative">
+                                              <td className={`col-gross gross-cell ${isFilled ? "has-value" : ""}`}>
+                                                {grossDisplay(item.id)}
+                                              </td>
+                                              <td className="col-add bef-relative">
                                                 <div className="add-input-group">
                                                   <input
                                                     type="number"
@@ -660,7 +701,7 @@ const BudgetEntryForm = ({
                                                   )}
                                                 </div>
                                               </td>
-                                              <td className={`col-num total-cell ${isFilled ? "has-value" : ""}`}>
+                                              <td className={`col-total total-cell ${isFilled ? "has-value" : ""}`}>
                                                 {totalDisplay(item.id)}
                                               </td>
                                             </tr>
@@ -713,9 +754,11 @@ const BudgetEntryForm = ({
           </div>
         )}
 
-        {status && (
-          <div className={`bef-status ${status.type}`}>{status.text}</div>
-        )}
+        <div className="status-msg-container" style={{ minHeight: '40px', marginTop: '1rem' }}>
+          {status && (
+            <div className={`bef-status ${status.type}`}>{status.text}</div>
+          )}
+        </div>
       </div>
     </div>
   );

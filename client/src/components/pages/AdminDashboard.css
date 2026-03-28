@@ -163,9 +163,22 @@ label {
 
 .btn-cancel {
   flex: 1;
-  background: rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  border-radius: 50px !important;
+  padding: 10px 20px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+}
+
+.btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
   color: #fff !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
 }
 
 .btn-submit-flex {
@@ -201,34 +214,47 @@ label {
 }
 
 .edit-btn {
-  background: rgba(0, 198, 230, 0.1) !important;
+  background: rgba(0, 198, 230, 0.05) !important;
+  backdrop-filter: blur(8px);
   color: #00c6e6 !important;
   border: 1px solid rgba(0, 198, 230, 0.3) !important;
-  padding: 6px 16px !important;
-  border-radius: 8px !important;
+  padding: 6px 18px !important;
+  border-radius: 50px !important;
   font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 1px;
   cursor: pointer;
-  width: auto !important;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .edit-btn:hover {
-  background: rgba(0, 198, 230, 0.2) !important;
+  background: rgba(0, 198, 230, 0.15) !important;
   border-color: #00c6e6 !important;
+  box-shadow: 0 0 15px rgba(0, 198, 230, 0.4);
   transform: translateY(-1px);
 }
 
 .milestone-btn {
   margin-right: 8px;
-  background: linear-gradient(135deg, #00c6e6, #0088cc) !important;
-  color: #000 !important;
-  font-weight: 700 !important;
-  border: none !important;
+  background: rgba(0, 198, 230, 0.1) !important;
+  backdrop-filter: blur(20px);
+  color: #fff !important;
+  font-weight: 600 !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 50px !important;
+  padding: 6px 18px !important;
+  text-transform: none;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.2),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
 }
 
 .milestone-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 15px rgba(0, 198, 230, 0.4);
+  transform: translateY(-2px);
+  background: rgba(0, 198, 230, 0.18) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3) !important;
 }
 
 .delete-btn {
@@ -262,21 +288,27 @@ label {
 
 /* ── Modal Overrides & Enhancements ────────────────────────────────────────── */
 .new-project-btn {
-  background: #00c6e6 !important;
-  color: #000 !important;
-  border: none !important;
-  padding: 10px 24px;
-  font-size: 1rem;
-  font-weight: 700 !important;
+  background: rgba(0, 198, 230, 0.12) !important;
+  backdrop-filter: blur(24px);
+  color: #fff !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  padding: 12px 32px !important;
+  font-size: 0.9rem;
+  font-weight: 600 !important;
   margin-top: 20px;
-  border-radius: 12px !important;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 198, 230, 0.3);
+  border-radius: 50px !important;
+  text-transform: none;
+  letter-spacing: 1px;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.4),
+    inset 0 1px 2px rgba(255, 255, 255, 0.2) !important;
 }
 
 .new-project-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 198, 230, 0.4);
+  transform: translateY(-2px) scale(1.02);
+  background: rgba(0, 198, 230, 0.2) !important;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5) !important;
 }
 
 .add-edit-modal-content {
@@ -308,16 +340,6 @@ label {
 }
 
 /* ── Milestone Timeline Modal ──────────────────────────────────────────────── */
-.milestone-modal-content-wide {
-  max-width: 1800px !important;
-  width: 98% !important;
-  height: 92vh;
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 20px;
-  position: relative;
-  padding: 40px !important;
-}
 
 .milestone-modal-body {
   display: flex;

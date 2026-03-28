@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import axios from "axios";
+import SessionTimeoutModal from "../components/common/SessionTimeoutModal";
 
 const AuthContext = createContext();
 
@@ -9,6 +10,7 @@ axios.defaults.withCredentials = true;
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [sessionExpired, setSessionExpired] = useState(false);
 
   const checkAuth = async () => {
     try {
@@ -62,7 +64,7 @@ export const AuthProvider = ({ children }) => {
       if (timeoutId) clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
         logout();
-        alert("Session expired due to inactivity. Please log in again.");
+        setSessionExpired(true);
       }, IDLE_TIMEOUT);
     };
 
@@ -88,8 +90,16 @@ export const AuthProvider = ({ children }) => {
   }, [user]);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, checkAuth }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, checkAuth, sessionExpired }}>
       {children}
+      {sessionExpired && (
+        <SessionTimeoutModal 
+          onLogin={() => {
+            setSessionExpired(false);
+            window.location.href = "/login";
+          }}
+        />
+      )}
     </AuthContext.Provider>
   );
 };
