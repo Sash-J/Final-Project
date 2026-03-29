@@ -1,6 +1,11 @@
+import sys
+import os
 from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
+
+# Fix for Vercel ModuleNotFoundError: Ensure current directory is in sys.path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import re
 
