@@ -2,6 +2,8 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 
+import re
+
 app = Flask(__name__)
 app.secret_key = "super_secret_key"  # Change this in production
 
@@ -12,12 +14,17 @@ app.config.update(
     SESSION_COOKIE_HTTPONLY=True
 )
 
+# Robust Dynamic CORS (Supports Credentials for Auth)
 CORS(
     app,
     supports_credentials=True,
-    origins=["http://localhost:3000", "https://vision-division-studios.vercel.app"] 
+    origins=[
+        "http://localhost:3000",
+        "https://vision-division-studios.vercel.app",
+        re.compile(r"https://.*\.vercel\.app$")
+    ]
 )
-# Note: Add any other custom Vercel domains to the list above if you use them.
+# Note: Re-compiled Regex origin allows any of your branch deployments to work correctly.
 bcrypt = Bcrypt(app)
 
 # ── Blueprint Registration ────────────────────────────────────────────────────
@@ -44,6 +51,7 @@ app.register_blueprint(prediction_bp)
 
 
 # ── Root Route ────────────────────────────────────────────────────────────────
+
 
 @app.route("/", methods=["GET"])
 def home():

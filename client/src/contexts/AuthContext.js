@@ -8,7 +8,8 @@ const AuthContext = createContext();
 // Configure axios for credentials (sessions)
 axios.defaults.withCredentials = true;
 
-const API = process.env.REACT_APP_API_URL || "http://localhost:5000";
+const rawAPI = process.env.REACT_APP_API_URL || "http://localhost:5000";
+const API = rawAPI.endsWith("/") ? rawAPI.slice(0, -1) : rawAPI;
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -45,7 +46,7 @@ export const AuthProvider = ({ children }) => {
           }
         }
         return Promise.reject(error);
-      }
+      },
     );
     return () => axios.interceptors.response.eject(interceptor);
   }, [sessionExpired]);
@@ -78,7 +79,7 @@ export const AuthProvider = ({ children }) => {
 
   const startTransition = (to) => {
     setIsTransiting(true);
-    
+
     // Fail-safe: Always hide overlay after 1.5s max
     const failSafeId = setTimeout(() => setIsTransiting(false), 1500);
 
@@ -128,10 +129,21 @@ export const AuthProvider = ({ children }) => {
   }, [user]);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, checkAuth, sessionExpired, isTransiting, startTransition }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        logout,
+        checkAuth,
+        sessionExpired,
+        isTransiting,
+        startTransition,
+      }}
+    >
       {children}
       {sessionExpired && (
-        <SessionTimeoutModal 
+        <SessionTimeoutModal
           onLogin={() => {
             setSessionExpired(false);
             startTransition("/login");
