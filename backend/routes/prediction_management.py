@@ -11,10 +11,20 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "models", "xgboost_budget_model.pkl")
 model = None
 try:
+    import joblib
+    import numpy as np
+    import xgboost as xgb
+    
+    BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+    MODEL_PATH = os.path.join(BASE_DIR, "models", "xgboost_budget_model.pkl")
+    
     if os.path.exists(MODEL_PATH):
         model = joblib.load(MODEL_PATH)
+        print("Budget model loaded successfully.")
 except Exception as e:
-    print(f"Error loading budget model: {e}")
+    print(f"CRITICAL: Could not load machine learning dependencies or model: {e}")
+    # We set model to None so the rest of the app still runs
+    model = None
 
 @prediction_bp.route("/api/predict-budget", methods=["POST"])
 @roles_required("admin", "manager")

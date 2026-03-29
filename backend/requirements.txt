@@ -3,3 +3,6 @@ flask-cors
 flask-bcrypt
 mysql-connector-python
 python-dotenv
+joblib
+numpy
+xgboost
