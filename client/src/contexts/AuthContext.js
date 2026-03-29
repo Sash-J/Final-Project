@@ -10,6 +10,7 @@ axios.defaults.withCredentials = true;
 
 const rawAPI = process.env.REACT_APP_API_URL || "http://localhost:5000";
 const API = rawAPI.endsWith("/") ? rawAPI.slice(0, -1) : rawAPI;
+console.log("DETECTED API URL:", API);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);

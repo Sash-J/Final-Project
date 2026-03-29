@@ -29,6 +29,10 @@ CORS(
         re.compile(r"https://.*\.vercel\.app$")
     ]
 )
+
+@app.route("/api/health")
+def health():
+    return jsonify({"status": "healthy", "message": "Vercel Backend is Online!"}), 200
 # Note: Re-compiled Regex origin allows any of your branch deployments to work correctly.
 bcrypt = Bcrypt(app)
 
