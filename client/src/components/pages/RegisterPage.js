@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import './RegisterPage.css';
 
@@ -11,7 +11,6 @@ const RegisterPage = () => {
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
     const { startTransition } = useAuth();
-    const navigate = useNavigate();
 
     // Field States
     const [formData, setFormData] = useState({

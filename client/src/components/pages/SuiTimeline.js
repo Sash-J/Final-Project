@@ -52,6 +52,7 @@ const SuiTimeline = ({
       console.log("DEBUG: SuiTimeline initialized for project", projectId);
       fetchMilestones();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId, updateTrigger]);
 
   useEffect(() => {

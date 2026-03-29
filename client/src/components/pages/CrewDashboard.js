@@ -7,7 +7,6 @@ import SuiTimeline from './SuiTimeline';
 import ModalPortal from '../common/ModalPortal';
 import html2pdf from 'html2pdf.js';
 import Skeleton from '../ui/Skeleton';
-import { DashboardMetricsSkeleton } from '../ui/DashboardSkeleton';
 
 const API = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -221,8 +220,8 @@ const CrewDashboard = () => {
         : "Project";
 
       const vNumber =
-        currentVersionId && versions.find((v) => v.id == currentVersionId)
-          ? versions.find((v) => v.id == currentVersionId).version_number
+        currentVersionId && versions.find((v) => v.id === currentVersionId)
+          ? versions.find((v) => v.id === currentVersionId).version_number
           : "Draft";
 
       const filename = `${pName}_Version_${vNumber}_${dateStr}.pdf`;

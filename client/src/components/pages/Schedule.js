@@ -51,7 +51,6 @@ const Schedule = () => {
   const [tasks, setTasks] = useState([]);
   const [user, setUser] = useState(null);
   const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
   // Modals
@@ -78,11 +77,13 @@ const Schedule = () => {
 
   useEffect(() => {
     fetchUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     fetchTasks();
     fetchProjects();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewMonth, viewYear]);
 
   const fetchUser = async () => {
@@ -98,7 +99,6 @@ const Schedule = () => {
   };
 
   const fetchTasks = async () => {
-    setLoading(true);
     try {
       const res = await fetch(
         `/api/schedule/tasks?year=${viewYear}&month=${viewMonth + 1}`,
@@ -107,8 +107,6 @@ const Schedule = () => {
       setTasks(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Error fetching tasks:", err);
-    } finally {
-      setLoading(false);
     }
   };
 
