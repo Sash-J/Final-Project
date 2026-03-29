@@ -6,6 +6,8 @@ import "./BudgetEntryForm.css"; // Reuse the admin sheet styles
 import SuiTimeline from "./SuiTimeline";
 import ModalPortal from "../common/ModalPortal";
 import html2pdf from "html2pdf.js";
+import Skeleton from "../ui/Skeleton";
+import { DashboardMetricsSkeleton } from "../ui/DashboardSkeleton"; 
 
 const API = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
@@ -281,7 +283,25 @@ const ClientDashboard = () => {
     html2pdf().set(opt).from(element).save();
   };
 
-  if (loading) return <div className="cd-loading">Loading Dashboard...</div>;
+  if (loading) {
+    return (
+      <div className="cd-root">
+        <div className="cd-header">
+          <Skeleton width="300px" height="32px" style={{ marginBottom: '10px' }} />
+          <Skeleton width="200px" height="18px" />
+        </div>
+        <div className="cd-projects-grid">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="cd-project-card skeleton-card">
+              <Skeleton height="200px" borderRadius="15px" style={{ marginBottom: '15px' }} />
+              <Skeleton width="60%" height="24px" style={{ marginBottom: '10px' }} />
+              <Skeleton width="100%" height="40px" borderRadius="8px" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
   if (error) return <div className="cd-error">{error}</div>;
 
   return (

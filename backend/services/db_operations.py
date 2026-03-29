@@ -97,21 +97,15 @@ def delete_project(project_id):
     cursor = conn.cursor()
     try:
         # Delete related records to handle foreign keys
-        cursor.execute(
-            "DELETE FROM client_projects WHERE project_id = %s", (project_id,)
-        )
-        cursor.execute(
-            "DELETE FROM project_budget_values WHERE project_id = %s", (project_id,)
-        )
+        cursor.execute("DELETE FROM client_projects WHERE project_id = %s", (project_id,))
+        cursor.execute("DELETE FROM crew_projects WHERE project_id = %s", (project_id,))
+        cursor.execute("DELETE FROM project_budget_values WHERE project_id = %s", (project_id,))
         cursor.execute("DELETE FROM payments WHERE project_id = %s", (project_id,))
-        # Delete budget versions associated with the project
-        cursor.execute(
-            "DELETE FROM budget_versions WHERE project_id = %s", (project_id,)
-        )
-
+        cursor.execute("DELETE FROM budget_versions WHERE project_id = %s", (project_id,))
+        
         # Delete the project itself
         cursor.execute("DELETE FROM projects WHERE id = %s", (project_id,))
-
+        
         conn.commit()
     except Exception as e:
         conn.rollback()
@@ -120,6 +114,15 @@ def delete_project(project_id):
         cursor.close()
         conn.close()
     return True
+
+def get_project_name(project_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT project_name FROM projects WHERE id = %s", (project_id,))
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return result[0] if result else "Unknown Project"
 
 
 # ── Departments ───────────────────────────────────────────────────────────────

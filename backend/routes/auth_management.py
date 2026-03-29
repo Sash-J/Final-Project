@@ -1,4 +1,5 @@
 import services.auth_operations as auth
+from routes.notifications_management import notify_all_admins
 import time
 import re
 from flask import Blueprint, jsonify, request
@@ -143,7 +144,7 @@ def register():
         return jsonify({"error": "Username already exists"}), 400
 
     hashed = _bcrypt.generate_password_hash(password).decode("utf-8")
-    auth.create_user(
+    new_user_id = auth.create_user(
         username,
         hashed,
         role,
@@ -152,7 +153,8 @@ def register():
         address=address,
         telephone=telephone,
     )
+    notify_all_admins(f"New user registered: {username}. Awaiting approval.", "info")
     return (
-        jsonify({"message": "Registration successful. Pending admin approval."}),
+        jsonify({"message": "Registration successful. Pending admin approval.", "id": new_user_id}),
         201,
     )

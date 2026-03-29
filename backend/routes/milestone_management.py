@@ -1,6 +1,9 @@
 from flask import Blueprint, jsonify, request, session
 from services.database import get_connection
-from core.session_handler import login_required, roles_required
+from core.session_handler import login_required, roles_required, get_current_user_id
+from routes.notifications_management import create_notification, notify_project_stakeholders
+import services.auth_operations as auth
+import services.db_operations as db
 
 milestone_bp = Blueprint('milestone_management', __name__)
 
@@ -115,6 +118,17 @@ def create_milestone(project_id):
     
     try:
         new_id = insert_milestone(project_id, title, description, target_date, status, client_note, is_visiondivision)
+        
+        # Notify project stakeholders
+        proj_name = db.get_project_name(project_id)
+        sender_id = get_current_user_id()
+        notify_project_stakeholders(
+            project_id, 
+            f"New milestone added to {proj_name}: {title}", 
+            exclude_user_id=sender_id,
+            msg_type="success"
+        )
+
         return jsonify({"message": "Milestone created", "id": new_id}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -160,6 +174,21 @@ def edit_milestone(milestone_id):
             
     try:
         update_milestone(milestone_id, status=status, client_note=client_note, title=title, description=description, target_date=target_date, is_visiondivision=is_visiondivision)
+        
+        # Notify stakeholders of change
+        proj_name = db.get_project_name(milestone['project_id'])
+        sender_id = get_current_user_id()
+        msg = f"Milestone updated in {proj_name}: {milestone['title']}"
+        if status:
+            msg = f"Milestone update in {proj_name}: {milestone['title']} is now {status.replace('_', ' ')}"
+            
+        notify_project_stakeholders(
+            milestone['project_id'], 
+            msg, 
+            exclude_user_id=sender_id,
+            msg_type="info"
+        )
+
         return jsonify({"message": "Milestone fully updated"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -177,6 +206,17 @@ def remove_milestone(milestone_id):
         
     try:
         delete_milestone(milestone_id)
+        
+        # Notify stakeholders
+        proj_name = db.get_project_name(milestone['project_id'])
+        sender_id = get_current_user_id()
+        notify_project_stakeholders(
+            milestone['project_id'], 
+            f"Milestone deleted from {proj_name}: {milestone['title']}", 
+            exclude_user_id=sender_id,
+            msg_type="warning"
+        )
+        
         return jsonify({"message": "Milestone deleted"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

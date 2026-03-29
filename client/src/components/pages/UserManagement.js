@@ -3,7 +3,7 @@ import ConfirmationModal from '../common/ConfirmationModal';
 import GlassDropdown from '../common/GlassDropdown';
 import './UserManagement.css';
 
-const API = 'http://localhost:5000';
+const API = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const StatusMsg = ({ msg }) => {
     if (!msg) return null;

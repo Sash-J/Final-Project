@@ -1,9 +1,9 @@
-/* ── Financial Dashboard Styles ───────────────────────────────────────────── */
 .fd-root {
-  padding: 40px;
-  min-height: 100vh;
   color: #fff;
   font-family: "Funnel Sans", sans-serif;
+}
+
+.fd-content-wrap {
   animation: fd-fade-in 0.6s ease-out;
 }
 
@@ -76,17 +76,10 @@
 
 /* ── Project Table ── */
 .fd-section-header {
-  margin-bottom: 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  text-align: center;
+  margin-bottom: 40px;
 }
 
-.fd-section-header h2 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-}
 
 .fd-table-container {
   background: var(--glass-bg);

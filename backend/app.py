@@ -7,8 +7,8 @@ app.secret_key = "super_secret_key"  # Change this in production
 CORS(
     app,
     supports_credentials=True,
-    origins=["http://localhost:3000", "http://127.0.0.1:3000"],
-    resources={r"/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:3000"]}},
+    origins="*",
+    resources={r"/*": {"origins": "*"}},
 )
 bcrypt = Bcrypt(app)
 
@@ -20,6 +20,7 @@ from routes.project_management import project_bp
 from routes.budget_management import budget_bp
 from routes.schedule_management import schedule_bp
 from routes.milestone_management import milestone_bp
+from routes.notifications_management import notifications_bp
 from routes.prediction_management import prediction_bp
 
 init_auth(bcrypt)
@@ -30,6 +31,7 @@ app.register_blueprint(project_bp)
 app.register_blueprint(budget_bp)
 app.register_blueprint(schedule_bp)
 app.register_blueprint(milestone_bp)
+app.register_blueprint(notifications_bp)
 app.register_blueprint(prediction_bp)
 
 
@@ -40,7 +42,7 @@ def home():
     return jsonify({"message": "Budget API is active and running!"}), 200
 
 
-# ── Run ───────────────────────────────────────────────────────────────────────
+# ── Run (For Local Development Only) ──────────────────────────────────────────
 
 if __name__ == "__main__":
     print("Server started on port 5000")

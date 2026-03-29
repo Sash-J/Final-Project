@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+from routes.notifications_management import notify_all_admins
 from flask_cors import cross_origin
 import services.db_operations as db
 import services.auth_operations as auth
@@ -53,6 +54,7 @@ def projects_post():
             except:
                 pass
 
+    notify_all_admins(f"New project created: {project_name}.", "info")
     return jsonify({"message": "Project added successfully", "id": new_id}), 201
 
 

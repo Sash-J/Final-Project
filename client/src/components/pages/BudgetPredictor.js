@@ -1,7 +1,8 @@
 import React, { useState } from "react";
+import PageHeader from "../common/PageHeader";
 import "./BudgetPredictor.css";
 
-const API = "http://localhost:5000";
+const API = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 const BudgetPredictor = () => {
   const [formData, setFormData] = useState({
@@ -67,17 +68,17 @@ const BudgetPredictor = () => {
 
   return (
     <div className="predictor-container">
-      <div className="predictor-glass-card">
-        <div className="predictor-header">
-          <h1>Budget Predictor</h1>
-          <p>Estimate project's total budget using our Model.</p>
-        </div>
+      <PageHeader 
+        title="Budget Predictor" 
+        description="Estimate project's total budget using our Model."
+      />
 
+      <div className="predictor-glass-card">
         <form onSubmit={handlePredict} className="predictor-form-bento">
           {/* Box 1: Scale & Logistics */}
           <div className="bento-box box-logistics">
             <h3>
-              <i className="fas fa-truck"></i> Logistics & Scale
+              <span className="material-symbols-outlined">local_shipping</span> Logistics & Scale
             </h3>
             <div className="input-field">
               <label>Shooting Days</label>
@@ -139,7 +140,7 @@ const BudgetPredictor = () => {
           {/* Box 2: Financial Breakdown */}
           <div className="bento-box box-finance">
             <h3>
-              <i className="fas fa-wallet"></i> Dept. Estimates (Rs.)
+              <span className="material-symbols-outlined">account_balance_wallet</span> Dept. Estimates (Rs.)
             </h3>
             <div className="finance-grid">
               <div className="input-field">
@@ -208,7 +209,7 @@ const BudgetPredictor = () => {
           {/* Box 3: Quality Factors */}
           <div className="bento-box box-quality">
             <h3>
-              <i className="fas fa-star"></i> Production Value
+              <span className="material-symbols-outlined">star</span> Production Value
             </h3>
             <div className="input-field">
               <label>Artist Popularity (1-5)</label>
@@ -245,7 +246,7 @@ const BudgetPredictor = () => {
           {/* Box 4: User Consideration Notes */}
           <div className="bento-box box-notes">
             <h3>
-              <i className="fas fa-info-circle"></i> User Considerations
+              <span className="material-symbols-outlined">info</span> User Considerations
             </h3>
             <p className="notes-text">
               This model is optimized for projects with a total budget{" "}

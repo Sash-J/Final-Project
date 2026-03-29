@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request, session
 import services.db_operations as db
 from services.database import get_connection
 from core.session_handler import login_required, roles_required, get_current_user_id
+from routes.notifications_management import notify_project_stakeholders
 
 schedule_bp = Blueprint('schedule_management', __name__)
 
@@ -127,6 +128,17 @@ def schedule_tasks_post():
             project_id=project_id, 
             task_color=task_color
         )
+        
+        # Notify project stakeholders
+        if project_id:
+            proj_name = db.get_project_name(project_id)
+            notify_project_stakeholders(
+                project_id, 
+                f"New task added to schedule for {proj_name}: {title}", 
+                exclude_user_id=created_by,
+                msg_type="info"
+            )
+            
         return (
             jsonify({"message": "Schedule task created", "id": new_id}),
             201,
@@ -159,6 +171,17 @@ def schedule_task_put(task_id):
         update_schedule_task(
             task_id, title, description, project_id, task_color
         )
+        # Notify stakeholders
+        if project_id:
+            proj_name = db.get_project_name(project_id)
+            sender_id = get_current_user_id()
+            notify_project_stakeholders(
+                project_id, 
+                f"Schedule task updated in {proj_name}: {title}", 
+                exclude_user_id=sender_id,
+                msg_type="info"
+            )
+            
         return jsonify({"message": "Schedule task updated successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -183,6 +206,23 @@ def task_notes_post(task_id):
     user_id = get_current_user_id()
     try:
         new_id = insert_task_note(task_id, user_id, note_text)
+        # Notify stakeholders (find project_id from task)
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT project_id, title FROM schedule_tasks WHERE id = %s", (task_id,))
+        task = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        
+        if task and task['project_id']:
+            proj_name = db.get_project_name(task['project_id'])
+            notify_project_stakeholders(
+                task['project_id'], 
+                f"New note on task '{task['title']}' in {proj_name}", 
+                exclude_user_id=user_id,
+                msg_type="info"
+            )
+
         return (
             jsonify({"message": "Note added successfully", "id": new_id}),
             201,

@@ -213,6 +213,27 @@ def get_project_clients(project_id):
     
     return [row["user_id"] for row in result]
 
+def get_project_crew(project_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    # Returns the list of crew user IDs assigned to this project
+    cursor.execute("SELECT user_id FROM crew_projects WHERE project_id = %s", (project_id,))
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    
+    return [row["user_id"] for row in result]
+
+def get_all_admins_and_managers():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT id FROM users WHERE role IN ('admin', 'manager') AND is_approved = 1")
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return [row["id"] for row in result]
+
 def assign_crew_to_project(user_id, project_id):
     """Links a production crew member to a project."""
     conn = get_connection()

@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useModal } from "../../contexts/ModalContext";
 import BudgetEntryForm from "./BudgetEntryForm";
 import GlassDropdown from "../common/GlassDropdown";
+import PageHeader from "../common/PageHeader";
 import "./AdminBudget.css";
 
-const API = "http://localhost:5000";
+const API = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 // ── Reusable status message ───────────────────────────────────────────────────
 const StatusMsg = ({ msg }) => {
@@ -325,14 +326,13 @@ const AdminBudget = () => {
 
   return (
     <section id="admin-budget">
-      <div className="admin-header">
-        <h2>Budget Entry Dashboard</h2>
-        <p>
-          Consolidated view for managing hierarchy and entering project budgets
-        </p>
-      </div>
+      <PageHeader 
+        title="Budget Entry Dashboard" 
+        description="Consolidated view for managing hierarchy and entering project budgets"
+      />
 
-      <div className="admin-budget-content">
+      <div className="admin-content-animated">
+        <div className="admin-budget-content">
         {/* ── Left Sidebar: Controls & Management ── */}
         <div className="admin-sidebar">
           {/* 1. Project Selection */}
@@ -435,6 +435,7 @@ const AdminBudget = () => {
               }
             />
           </div>
+        </div>
         </div>
       </div>
     </section>

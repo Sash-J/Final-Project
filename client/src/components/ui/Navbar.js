@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import NotificationBell from "./NotificationBell";
+import "./Navbar.css";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -83,6 +85,11 @@ const Navbar = () => {
           </li>
         )}
 
+        {user && (
+          <li>
+            <NotificationBell />
+          </li>
+        )}
         {user ? (
           <li>
             <button onClick={handleLogout} className="logout-btn">

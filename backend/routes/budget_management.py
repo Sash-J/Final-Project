@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+from routes.notifications_management import notify_all_admins, notify_project_stakeholders
 import services.db_operations as db
 import services.auth_operations as auth
 from core.session_handler import login_required, roles_required, get_current_user_id, get_current_user_role
@@ -153,6 +154,17 @@ def budget_values_batch():
         affected = db.insert_budget_values_batch(
             project_id, version_id, values, client_ids
         )
+        
+        # Notify project stakeholders
+        proj_name = db.get_project_name(project_id)
+        sender_id = get_current_user_id()
+        notify_project_stakeholders(
+            project_id, 
+            f"Budget updated for {proj_name}", 
+            exclude_user_id=sender_id,
+            msg_type="success"
+        )
+        
         return jsonify({"message": f"{affected} rows saved", "affected": affected}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -167,6 +179,7 @@ def budget_versions_post(project_id):
     source_version_id = data.get("source_version_id")
     try:
         new_id = db.create_budget_version(project_id, source_version_id)
+        notify_all_admins(f"New budget version created for Project ID: {project_id}.", "success")
         return jsonify({"message": "New budget version created", "id": new_id}), 201
     except Exception as e:
         import traceback
@@ -245,6 +258,17 @@ def payments_post():
 
     try:
         new_id = db.insert_payment(project_id, amount, payment_date, notes)
+        
+        # Notify project stakeholders
+        proj_name = db.get_project_name(project_id)
+        sender_id = get_current_user_id()
+        notify_project_stakeholders(
+            project_id, 
+            f"Payment of {amount} recorded for {proj_name}", 
+            exclude_user_id=sender_id,
+            msg_type="success"
+        )
+        
         return jsonify({"message": "Payment recorded successfully", "id": new_id}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500

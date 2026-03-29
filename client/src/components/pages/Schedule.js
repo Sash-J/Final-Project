@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import PageHeader from "../common/PageHeader";
 import "./Schedule.css";
 import ModalPortal from "../common/ModalPortal";
 import html2pdf from "html2pdf.js";
@@ -394,12 +395,11 @@ const Schedule = () => {
   };
 
   return (
-    <div className="schedule-container sui-fade-in">
-      <div className="schedule-header">
-        <h2>Production Schedule</h2>
-      </div>
+    <div className="schedule-container">
+      <PageHeader title="Production Schedule" />
 
-      <div className="schedule-main-content">
+      <div className="schedule-content-animated">
+        <div className="schedule-main-content">
         <div className="calendar-window grid-window">
           <div className="calendar-controls">
             <button onClick={handlePrevMonth} className="cal-nav-btn">
@@ -512,6 +512,8 @@ const Schedule = () => {
           </ul>
         </div>
       )}
+
+      </div>
 
       {showTaskModal && (
         <ModalPortal>

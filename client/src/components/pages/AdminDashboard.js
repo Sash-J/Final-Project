@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
+import PageHeader from "../common/PageHeader";
 import "./AdminDashboard.css";
 import SuiTimeline from "./SuiTimeline";
+import "../ui/Skeleton.css";
 import { useModal } from "../../contexts/ModalContext";
 import GlassDropdown from "../common/GlassDropdown";
 import ModalPortal from "../common/ModalPortal";
@@ -238,6 +240,7 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit }) => {
 
 const AdminDashboard = () => {
   const [projects, setProjects] = useState([]);
+  const [projectsLoading, setProjectsLoading] = useState(true);
   const [editingProject, setEditingProject] = useState(null);
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [selectedTimelineProject, setSelectedTimelineProject] = useState(null);
@@ -289,6 +292,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
+        setProjectsLoading(true);
         const res = await fetch(`${API}/api/projects`, {
           credentials: "include",
         });
@@ -296,6 +300,8 @@ const AdminDashboard = () => {
         setProjects(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("Failed to fetch projects:", err);
+      } finally {
+        setProjectsLoading(false);
       }
     };
     fetchProjects();
@@ -330,9 +336,10 @@ const AdminDashboard = () => {
 
   return (
     <section id="admin-dashboard">
-      <div className="admin-header">
-        <h2>Admin Dashboard</h2>
-        <p>Centralized project management and system configuration.</p>
+      <PageHeader 
+        title="Admin Dashboard" 
+        description="Centralized project management and system configuration."
+      >
         <button
           className="sui-btn sui-btn-save new-project-btn"
           onClick={() => {
@@ -342,103 +349,118 @@ const AdminDashboard = () => {
         >
           + New Project
         </button>
-      </div>
+      </PageHeader>
 
-      <div className="admin-dashboard-grid single-column">
+      <div className="admin-content-animated">
+        <div className="admin-dashboard-grid single-column">
         {/* Project List - Now spanning full width */}
         <div className="grid-window full-width">
           <h3 className="project-list-header">Existing Projects</h3>
           <div className="um-table-container">
-            <table className="um-table">
-              <thead>
-                <tr>
-                  <th>Project Name</th>
-                  <th>Code</th>
-                  <th>Clients</th>
-                  <th>Crew</th>
-                  <th>Budget Versions</th>
-                  <th>Dates</th>
-                  <th>Location</th>
-                  <th className="project-action-cell">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {projects.map((p) => (
-                  <tr key={p.id}>
-                    <td className="project-name-cell">{p.project_name}</td>
-                    <td>
-                      <code className="project-code-box">
-                        {p.code_name || "-"}
-                      </code>
-                    </td>
-                    <td className="clients-cell">
-                      {p.client_usernames ? (
-                        p.client_usernames
-                      ) : (
-                        <span className="no-clients-tag warning-tag pulse">
-                          ⚠️ Missing Client
-                        </span>
-                      )}
-                    </td>
-                    <td className="clients-cell">
-                      {p.crew_usernames || (
-                        <span className="no-clients-tag">None</span>
-                      )}
-                    </td>
-                    <td className="version-count-cell">
-                      <span className="version-badge">
-                        {p.version_count || 0}
-                      </span>
-                    </td>
-                    <td className="project-dates-cell">
-                      {p.start_date
-                        ? new Date(p.start_date).toLocaleDateString()
-                        : "-"}{" "}
-                      -{" "}
-                      {p.end_date
-                        ? new Date(p.end_date).toLocaleDateString()
-                        : "-"}
-                    </td>
-                    <td>{p.location || "-"}</td>
-                    <td className="project-action-cell">
-                      <div className="action-buttons">
-                        <button
-                          onClick={() => setSelectedTimelineProject(p)}
-                          className="approve-btn milestone-btn"
-                        >
-                          Milestones
-                        </button>
-                        <button
-                          onClick={() => {
-                            setEditingProject(p);
-                            setShowProjectModal(true);
-                          }}
-                          className="approve-btn edit-btn"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(p.id)}
-                          className="reject-btn delete-btn"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {projects.length === 0 && (
+            {projectsLoading ? (
+              <div style={{ padding: '10px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} style={{ display: 'flex', gap: '15px', padding: '15px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                      <div style={{ flex: 2 }}><div className="skeleton-base" style={{ width: '80%', height: '16px' }} /></div>
+                      <div style={{ flex: 1 }}><div className="skeleton-base" style={{ width: '40%', height: '16px' }} /></div>
+                      <div style={{ flex: 2 }}><div className="skeleton-base" style={{ width: '70%', height: '16px' }} /></div>
+                      <div style={{ flex: 3 }}><div className="skeleton-base" style={{ width: '90%', height: '32px', borderRadius: '16px' }} /></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <table className="um-table">
+                <thead>
                   <tr>
-                    <td colSpan="6" className="no-projects-cell">
-                      No projects found.
-                    </td>
+                    <th>Project Name</th>
+                    <th>Code</th>
+                    <th>Clients</th>
+                    <th>Crew</th>
+                    <th>Budget Versions</th>
+                    <th>Dates</th>
+                    <th>Location</th>
+                    <th className="project-action-cell">Action</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {projects.map((p) => (
+                    <tr key={p.id}>
+                      <td className="project-name-cell">{p.project_name}</td>
+                      <td>
+                        <code className="project-code-box">
+                          {p.code_name || "-"}
+                        </code>
+                      </td>
+                      <td className="clients-cell">
+                        {p.client_usernames ? (
+                          p.client_usernames
+                        ) : (
+                          <span className="no-clients-tag warning-tag pulse">
+                            ⚠️ Missing Client
+                          </span>
+                        )}
+                      </td>
+                      <td className="clients-cell">
+                        {p.crew_usernames || (
+                          <span className="no-clients-tag">None</span>
+                        )}
+                      </td>
+                      <td className="version-count-cell">
+                        <span className="version-badge">
+                          {p.version_count || 0}
+                        </span>
+                      </td>
+                      <td className="project-dates-cell">
+                        {p.start_date
+                          ? new Date(p.start_date).toLocaleDateString()
+                          : "-"} - {p.end_date
+                          ? new Date(p.end_date).toLocaleDateString()
+                          : "-"}
+                      </td>
+                      <td>{p.location || "-"}</td>
+                      <td className="project-action-cell">
+                        <div className="action-buttons">
+                          <button
+                            onClick={() => setSelectedTimelineProject(p)}
+                            className="approve-btn milestone-btn"
+                          >
+                            Milestones
+                          </button>
+                          <button
+                            onClick={() => {
+                              setEditingProject(p);
+                              setShowProjectModal(true);
+                            }}
+                            className="approve-btn edit-btn"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(p.id)}
+                            className="reject-btn delete-btn"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {projects.length === 0 && (
+                    <tr>
+                      <td colSpan="8" className="no-projects-cell">
+                        No projects found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       </div>
+    </div>
 
       {/* Project Add/Edit Modal */}
       {showProjectModal && (
