@@ -1,27 +1,41 @@
 import React, { useState, useEffect } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import "./BudgetEntryForm.css";
+import html2pdf from "html2pdf.js";
 
 const API = "http://localhost:5000";
 
 // ── Skeletal Loading Component ──────────────────────────────────────────────
-const SkeletonTable = () => (
+const SkeletonTable = ({ BudgetColGroup }) => (
   <div className="bef-sheet skeleton-sheet">
     <table className="bef-table">
+      <BudgetColGroup />
       <thead>
         <tr>
-          <th style={{ width: "30px" }}></th>
+          <th className="col-drag"></th>
           <th className="col-item-name">Item Name</th>
-          <th className="col-num">Qty</th>
+          <th className="col-units">Units</th>
           <th className="col-rate-type">Type</th>
-          <th className="col-num">Rate</th>
-          <th className="col-num">Gross (Rs.)</th>
-          <th className="col-num">Additional</th>
-          <th className="col-num">Total (Rs.)</th>
+          <th className="col-rate">Rate</th>
+          <th className="col-gross">Gross (Rs.)</th>
+          <th className="col-add">Additional</th>
+          <th className="col-total">Total (Rs.)</th>
         </tr>
       </thead>
+    </table>
+
+    {/* Mock Phase 1 */}
+    <div className="skeleton-phase-header">
+      <div
+        className="skeleton-box"
+        style={{ width: "150px", height: "18px" }}
+      ></div>
+    </div>
+    <div className="skeleton-dept-header"></div>
+    <table className="bef-table">
+      <BudgetColGroup />
       <tbody>
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+        {[1, 2, 3].map((i) => (
           <tr key={i} className="skeleton-row">
             <td className="col-drag">
               <div
@@ -35,7 +49,7 @@ const SkeletonTable = () => (
                 style={{ width: "70%", height: "14px" }}
               ></div>
             </td>
-            <td className="col-num">
+            <td className="col-units">
               <div
                 className="skeleton-box"
                 style={{ width: "40px", height: "14px", marginLeft: "auto" }}
@@ -44,33 +58,64 @@ const SkeletonTable = () => (
             <td className="col-rate-type">
               <div
                 className="skeleton-box"
-                style={{ width: "80px", height: "24px", margin: "0 auto" }}
+                style={{ width: "65px", height: "22px", margin: "0 auto" }}
               ></div>
             </td>
-            <td className="col-num">
+            <td className="col-rate">
               <div
                 className="skeleton-box"
                 style={{ width: "60px", height: "14px", marginLeft: "auto" }}
               ></div>
             </td>
-            <td className="col-num">
+            <td className="col-gross">
               <div
                 className="skeleton-box"
                 style={{ width: "60px", height: "14px", marginLeft: "auto" }}
               ></div>
             </td>
-            <td className="col-num">
+            <td className="col-add">
               <div
                 className="skeleton-box"
                 style={{ width: "60px", height: "14px", marginLeft: "auto" }}
               ></div>
             </td>
-            <td className="col-num">
+            <td className="col-total">
               <div
                 className="skeleton-box"
                 style={{ width: "80px", height: "14px", marginLeft: "auto" }}
               ></div>
             </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+
+    {/* Mock Phase 2 */}
+    <div className="skeleton-phase-header" style={{ marginTop: "20px" }}>
+      <div
+        className="skeleton-box"
+        style={{ width: "180px", height: "18px" }}
+      ></div>
+    </div>
+    <div className="skeleton-dept-header"></div>
+    <table className="bef-table">
+      <BudgetColGroup />
+      <tbody>
+        {[1, 2, 3, 4, 5].map((i) => (
+          <tr key={`p2-${i}`} className="skeleton-row">
+            <td className="col-drag">
+              <div
+                className="skeleton-box"
+                style={{ width: "16px", height: "16px", margin: "0 auto" }}
+              ></div>
+            </td>
+            <td className="col-item-name">
+              <div
+                className="skeleton-box"
+                style={{ width: "65%", height: "14px" }}
+              ></div>
+            </td>
+            <td colSpan="6"></td>
           </tr>
         ))}
       </tbody>
@@ -82,13 +127,23 @@ const BudgetEntryForm = ({
   embedded = false,
   externalProjectId = "",
   versionId = "",
+  projectName = "",
+  versionName = "",
 }) => {
-  const [hierarchy, setHierarchy] = useState([]); // departments → categories → items
-  const [values, setValues] = useState({}); // { budget_item_id: { qty, rate, add1, add2, c1, c2 } }
+  const [hierarchy, setHierarchy] = useState([]); // phases → departments → categories → items
+  const [expandedPhases, setExpandedPhases] = useState(new Set([2])); // Default: Production (id=2) open
+  const [values, setValues] = useState({}); // { budget_item_id: { qty, rate, add1, c1 } }
   const [activeComment, setActiveComment] = useState(null); // { itemId, field }
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState(null); // { type: 'success'|'error', text }
+
+  const togglePhase = (phaseId) => {
+    const next = new Set(expandedPhases);
+    if (next.has(phaseId)) next.delete(phaseId);
+    else next.add(phaseId);
+    setExpandedPhases(next);
+  };
 
   // ── Load hierarchy once ───────────────────────────────────────────────────
   useEffect(() => {
@@ -142,9 +197,7 @@ const BudgetEntryForm = ({
             multiplier: String(parseFloat(data[itemId].rate_multiplier) || "1"),
             gross: String(parseFloat(data[itemId].gross_revenue) || ""),
             add1: String(parseFloat(data[itemId].additional1) || ""),
-            add2: String(parseFloat(data[itemId].additional2) || ""),
             c1: data[itemId].comment1 || "",
-            c2: data[itemId].comment2 || "",
           };
         });
         setValues(initialValues);
@@ -178,9 +231,7 @@ const BudgetEntryForm = ({
             rate_type: "day",
             multiplier: "1",
             add1: "",
-            add2: "",
             c1: "",
-            c2: "",
           }),
           rate_type: val,
         },
@@ -197,9 +248,7 @@ const BudgetEntryForm = ({
           rate_type: "day",
           multiplier: "1",
           add1: "",
-          add2: "",
           c1: "",
-          c2: "",
         }),
         [field]: val,
       },
@@ -216,8 +265,7 @@ const BudgetEntryForm = ({
   const calcItemTotal = (itemValues) => {
     const grossVal = calcGross(itemValues);
     const a1 = parseFloat(itemValues.add1) || 0;
-    const a2 = parseFloat(itemValues.add2) || 0;
-    return +(grossVal + a1 + a2).toFixed(2);
+    return +(grossVal + a1).toFixed(2);
   };
 
   const grossRaw = (itemId) => {
@@ -231,7 +279,10 @@ const BudgetEntryForm = ({
   };
 
   const getCategorySubtotal = (category) => {
-    return category.items.reduce((sum, item) => sum + totalRaw(item.id), 0);
+    return (category.items || []).reduce(
+      (sum, item) => sum + totalRaw(item.id),
+      0,
+    );
   };
 
   const formatCurrency = (val) => {
@@ -245,13 +296,20 @@ const BudgetEntryForm = ({
 
   const totalDisplay = (itemId) => formatCurrency(totalRaw(itemId));
 
-  const grandTotal = hierarchy.reduce((deptSum, dept) => {
-    return (
-      deptSum +
-      dept.categories.reduce((catSum, cat) => {
-        return catSum + getCategorySubtotal(cat);
-      }, 0)
-    );
+  const getPhaseSubtotal = (phase) => {
+    if (!phase.departments) return 0;
+    return phase.departments.reduce((deptSum, dept) => {
+      return (
+        deptSum +
+        (dept.categories || []).reduce((catSum, cat) => {
+          return catSum + getCategorySubtotal(cat);
+        }, 0)
+      );
+    }, 0);
+  };
+
+  const grandTotal = hierarchy.reduce((total, phase) => {
+    return total + getPhaseSubtotal(phase);
   }, 0);
 
   const handleSubmit = async () => {
@@ -273,11 +331,9 @@ const BudgetEntryForm = ({
       const r = parseFloat(v.rate) || 0;
       const m = parseFloat(v.multiplier) || 1;
       const a1 = parseFloat(v.add1) || 0;
-      const a2 = parseFloat(v.add2) || 0;
       const c1 = v.c1 || "";
-      const c2 = v.c2 || "";
 
-      if (q > 0 || r > 0 || a1 > 0 || a2 > 0 || c1 || c2) {
+      if (q > 0 || r > 0 || a1 > 0 || c1) {
         payload.push({
           budget_item_id: parseInt(itemId),
           quantity: q,
@@ -285,9 +341,7 @@ const BudgetEntryForm = ({
           rate_type: v.rate_type || "day",
           rate_multiplier: m,
           additional1: a1,
-          additional2: a2,
           comment1: c1,
-          comment2: c2,
           gross_revenue: calcGross(v),
           total: calcItemTotal(v),
         });
@@ -327,6 +381,30 @@ const BudgetEntryForm = ({
     }
   };
 
+  const handleDownloadPDF = () => {
+    const element = document.getElementById("admin-budget-pdf-content");
+    if (!element) return;
+    const dateStr = new Date().toISOString().split("T")[0];
+    const pName = projectName ? projectName.replace(/\s+/g, "_") : "Project";
+    const vName = versionName ? versionName : "Draft";
+    const filename = `${pName}_Version_${vName}_${dateStr}.pdf`;
+
+    const opt = {
+      margin: 10,
+      filename: filename,
+      image: { type: "jpeg", quality: 2 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        letterRendering: true,
+        backgroundColor: "#0d0e15ff",
+        windowWidth: 1200,
+      },
+      jsPDF: { unit: "mm", format: "a3", orientation: "portrait" },
+    };
+    html2pdf().set(opt).from(element).save();
+  };
+
   const onDragEnd = async (result) => {
     const { source, destination, type } = result;
     if (!destination) return;
@@ -337,18 +415,32 @@ const BudgetEntryForm = ({
     )
       return;
 
-    const newHierarchy = Array.from(hierarchy);
+    const newHierarchy = JSON.parse(JSON.stringify(hierarchy)); // Deep clone for 4-level nest
 
     if (type === "CATEGORY") {
-      const deptId = parseInt(source.droppableId.replace("dept-", ""));
-      const deptIdx = newHierarchy.findIndex((d) => d.id === deptId);
-      if (deptIdx === -1) return;
+      // Find which phase and dept this belongs to
+      let foundPhaseIdx = -1;
+      let foundDeptIdx = -1;
+      for (let p = 0; p < newHierarchy.length; p++) {
+        const d = newHierarchy[p].departments.findIndex(
+          (dept) => `dept-${dept.id}` === source.droppableId,
+        );
+        if (d !== -1) {
+          foundPhaseIdx = p;
+          foundDeptIdx = d;
+          break;
+        }
+      }
+      if (foundDeptIdx === -1) return;
 
-      const newCategories = Array.from(newHierarchy[deptIdx].categories);
+      const newCategories = Array.from(
+        newHierarchy[foundPhaseIdx].departments[foundDeptIdx].categories,
+      );
       const [removed] = newCategories.splice(source.index, 1);
       newCategories.splice(destination.index, 0, removed);
 
-      newHierarchy[deptIdx].categories = newCategories;
+      newHierarchy[foundPhaseIdx].departments[foundDeptIdx].categories =
+        newCategories;
       setHierarchy(newHierarchy);
 
       try {
@@ -366,20 +458,25 @@ const BudgetEntryForm = ({
     }
 
     // Item dragging
+    let phaseIdx = -1;
     let deptIdx = -1;
     let catIdx = -1;
     let targetCat = null;
 
-    for (let d = 0; d < newHierarchy.length; d++) {
-      const c = newHierarchy[d].categories.findIndex(
-        (cat) => `cat-${cat.id}` === destination.droppableId,
-      );
-      if (c !== -1) {
-        deptIdx = d;
-        catIdx = c;
-        targetCat = newHierarchy[d].categories[c];
-        break;
+    for (let p = 0; p < newHierarchy.length; p++) {
+      for (let d = 0; d < newHierarchy[p].departments.length; d++) {
+        const c = newHierarchy[p].departments[d].categories.findIndex(
+          (cat) => `cat-${cat.id}` === destination.droppableId,
+        );
+        if (c !== -1) {
+          phaseIdx = p;
+          deptIdx = d;
+          catIdx = c;
+          targetCat = newHierarchy[p].departments[d].categories[c];
+          break;
+        }
       }
+      if (targetCat) break;
     }
 
     if (!targetCat) return;
@@ -388,7 +485,8 @@ const BudgetEntryForm = ({
     const [removed] = newItems.splice(source.index, 1);
     newItems.splice(destination.index, 0, removed);
 
-    newHierarchy[deptIdx].categories[catIdx].items = newItems;
+    newHierarchy[phaseIdx].departments[deptIdx].categories[catIdx].items =
+      newItems;
     setHierarchy(newHierarchy);
 
     try {
@@ -419,14 +517,14 @@ const BudgetEntryForm = ({
 
   const BudgetColGroup = () => (
     <colgroup>
-      <col style={{ width: "40px", minWidth: "40px" }} />
-      <col style={{ width: "auto" }} />
-      <col style={{ width: "60px", minWidth: "60px" }} />
-      <col style={{ width: "200px", minWidth: "200px" }} />
-      <col style={{ width: "100px", minWidth: "100px" }} />
-      <col style={{ width: "115px", minWidth: "115px" }} />
-      <col style={{ width: "115px", minWidth: "115px" }} />
-      <col style={{ width: "130px", minWidth: "130px" }} />
+      <col style={{ width: "20px" }} />
+      <col style={{ width: "auto", minWidth: "150px", maxWidth: "250px" }} />
+      <col style={{ width: "6%", minWidth: "55px" }} />
+      <col style={{ width: "10%", minWidth: "150px" }} />
+      <col style={{ width: "10%", minWidth: "100px" }} />
+      <col style={{ width: "11%", minWidth: "105px" }} />
+      <col style={{ width: "11%", minWidth: "105px" }} />
+      <col style={{ width: "12%", minWidth: "115px" }} />
     </colgroup>
   );
 
@@ -452,288 +550,529 @@ const BudgetEntryForm = ({
           </div>
         )}
 
-        {loading && <SkeletonTable />}
+        {loading && <SkeletonTable BudgetColGroup={BudgetColGroup} />}
 
         {!loading && hierarchy.length > 0 && (
-          <div className="bef-sheet">
-            <DragDropContext onDragEnd={onDragEnd}>
-              <table className="bef-table header-only-table">
-                <BudgetColGroup />
-                <thead>
-                  <tr>
-                    <th className="col-drag"></th>
-                    <th className="col-item-name">Item Name</th>
-                    <th className="col-units">Units</th>
-                    <th className="col-rate-type">Type</th>
-                    <th className="col-rate">Rate</th>
-                    <th className="col-gross">Gross (Rs.)</th>
-                    <th className="col-add">Additional</th>
-                    <th className="col-total">Total (Rs.)</th>
-                  </tr>
-                </thead>
-              </table>
+          <div
+            id="admin-budget-pdf-content"
+            className="fade-in-section"
+            style={{
+              padding: "20px",
+              backgroundColor: "#0d0e15",
+              borderRadius: "12px",
+            }}
+          >
+            <div className="bef-sheet">
+              <DragDropContext onDragEnd={onDragEnd}>
+                <table className="bef-table header-only-table">
+                  <BudgetColGroup />
+                  <thead>
+                    <tr>
+                      <th className="col-drag"></th>
+                      <th className="col-item-name">Item Name</th>
+                      <th className="col-units">Units</th>
+                      <th className="col-rate-type">Type</th>
+                      <th className="col-rate">Rate</th>
+                      <th className="col-gross">Gross (Rs.)</th>
+                      <th className="col-add">Additional</th>
+                      <th className="col-total">Total (Rs.)</th>
+                    </tr>
+                  </thead>
+                </table>
 
-              {hierarchy.map((dept, deptIdx) => (
-                <div key={dept.id} className="dept-section">
-                  <table className="bef-table dept-header-table">
-                    <BudgetColGroup />
-                    <tbody className="bef-dept-body">
-                      <tr className="bef-dept-row">
-                        <td colSpan="8">
-                          <div className="dept-header-content">
-                            <span className="dept-id">
-                              {String(deptIdx + 1).padStart(2, "0")}
-                            </span>
-                            <span className="dept-name">
-                              {dept.department_name}
-                            </span>
-                          </div>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                {hierarchy.map((phase) => {
+                  const isExpanded = expandedPhases.has(phase.phase_id);
+                  const phaseTotal = getPhaseSubtotal(phase);
 
-                  <Droppable
-                    droppableId={`dept-${dept.id}`}
-                    type="CATEGORY"
-                  >
-                    {(provided) => (
-                      <table
-                        className="bef-table cat-list-table"
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
+                  return (
+                    <div
+                      key={phase.phase_id}
+                      className={`phase-section ${isExpanded ? "expanded" : "collapsed"}`}
+                    >
+                      <div
+                        className="phase-header"
+                        onClick={() => togglePhase(phase.phase_id)}
                       >
-                        <BudgetColGroup />
-                        {dept.categories.map((cat, catIdx) => (
-                          <Draggable
-                            key={cat.id}
-                            draggableId={`cat-${cat.id}`}
-                            index={catIdx}
-                          >
-                            {(providedCat, snapshotCat) => (
+                        <div className="phase-header-left">
+                          <span
+                            className={`phase-toggle-icon ${isExpanded ? "open" : ""}`}
+                          ></span>
+                          <h3>{phase.phase_name}</h3>
+                        </div>
+                        <div className="phase-header-right">
+                          <span className="phase-total-label">Subtotal: </span>
+                          <span className="phase-total-value">
+                            Rs. {formatCurrency(phaseTotal)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {isExpanded && (
+                        <div className="phase-content">
+                          {phase.departments.map((dept, deptIdx) => (
+                            <div key={dept.id} className="dept-section">
+                              <table className="bef-table dept-header-table">
+                                <BudgetColGroup />
+                                <tbody className="bef-dept-body">
+                                  <tr className="bef-dept-row">
+                                    <td colSpan="8">
+                                      <div className="dept-header-content">
+                                        <span className="dept-id">
+                                          {String(deptIdx + 1).padStart(2, "0")}
+                                        </span>
+                                        <span className="dept-name">
+                                          {dept.department_name}
+                                        </span>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+
                               <Droppable
-                                droppableId={`cat-${cat.id}`}
-                                type="ITEM"
+                                droppableId={`dept-${dept.id}`}
+                                type="CATEGORY"
                               >
-                                {(providedItem) => (
-                                  <tbody
-                                    className={`bef-cat-body ${snapshotCat.isDragging ? "dragging-cat" : ""}`}
-                                    ref={(el) => {
-                                      providedCat.innerRef(el);
-                                      providedItem.innerRef(el);
-                                    }}
-                                    {...providedCat.draggableProps}
-                                    {...providedItem.droppableProps}
+                                {(provided) => (
+                                  <table
+                                    className="bef-table cat-list-table"
+                                    ref={provided.innerRef}
+                                    {...provided.droppableProps}
                                   >
-                                    <tr className="bef-cat-row">
-                                      <td
-                                        className="col-drag"
-                                        {...providedCat.dragHandleProps}
+                                    <BudgetColGroup />
+                                    {dept.categories.map((cat, catIdx) => (
+                                      <Draggable
+                                        key={cat.id}
+                                        draggableId={`cat-${cat.id}`}
+                                        index={catIdx}
                                       >
-                                        <i className="fas fa-ellipsis-v"></i>
-                                      </td>
-                                      <td colSpan="6" className="cat-name-cell">
-                                        <div className="cat-header-row">
-                                          <span className="cat-name">
-                                            {cat.category_name}
-                                          </span>
-                                        </div>
-                                      </td>
-                                      <td className="col-total cat-subtotal">
-                                        {getCategorySubtotal(cat) > 0
-                                          ? formatCurrency(
-                                              getCategorySubtotal(cat),
-                                            )
-                                          : ""}
-                                      </td>
-                                    </tr>
-
-                                    {cat.items.map((item, index) => {
-                                      const v = values[item.id] || {};
-                                      const isFilled =
-                                        (parseFloat(v.qty) || 0) > 0 ||
-                                        (parseFloat(v.rate) || 0) > 0 ||
-                                        (parseFloat(v.add1) || 0) > 0 ||
-                                        (parseFloat(v.add2) || 0) > 0;
-
-                                      return (
-                                        <Draggable
-                                          key={item.id}
-                                          draggableId={String(item.id)}
-                                          index={index}
-                                        >
-                                          {(providedRow, snapshotRow) => (
-                                            <tr
-                                              ref={providedRow.innerRef}
-                                              {...providedRow.draggableProps}
-                                              className={`bef-row ${isFilled ? "filled" : ""} ${snapshotRow.isDragging ? "dragging" : ""}`}
-                                            >
-                                              <td
-                                                className="col-drag"
-                                                {...providedRow.dragHandleProps}
+                                        {(providedCat, snapshotCat) => (
+                                          <Droppable
+                                            droppableId={`cat-${cat.id}`}
+                                            type="ITEM"
+                                          >
+                                            {(providedItem) => (
+                                              <tbody
+                                                className={`bef-cat-body ${snapshotCat.isDragging ? "dragging-cat" : ""}`}
+                                                ref={(el) => {
+                                                  providedCat.innerRef(el);
+                                                  providedItem.innerRef(el);
+                                                }}
+                                                {...providedCat.draggableProps}
+                                                {...providedItem.droppableProps}
                                               >
-                                                <svg
-                                                  width="16"
-                                                  height="16"
-                                                  viewBox="0 0 24 24"
-                                                  fill="none"
-                                                  stroke="currentColor"
-                                                  strokeWidth="2"
-                                                  strokeLinecap="round"
-                                                  strokeLinejoin="round"
-                                                >
-                                                  <line x1="8" y1="9" x2="16" y2="9"></line>
-                                                  <line x1="8" y1="12" x2="16" y2="12"></line>
-                                                  <line x1="8" y1="15" x2="16" y2="15"></line>
-                                                </svg>
-                                              </td>
-                                              <td className="col-item-name">
-                                                {item.item_name}
-                                              </td>
-                                              <td className="col-units">
-                                                <input
-                                                  type="number"
-                                                  min="0"
-                                                  step="any"
-                                                  placeholder="0"
-                                                  value={getVal(item.id, "qty")}
-                                                  onChange={(e) => {
-                                                    if (showVersionWarning) return;
-                                                    handleChange(item.id, "qty", e.target.value);
-                                                  }}
-                                                  disabled={showVersionWarning}
-                                                />
-                                              </td>
-                                              <td className="col-rate-type">
-                                                <div className="rate-type-column-content">
-                                                  <input
-                                                    type="number"
-                                                    min="0"
-                                                    step="any"
-                                                    className="multiplier-input"
-                                                    placeholder="1"
-                                                    value={getVal(item.id, "multiplier")}
-                                                    onChange={(e) => {
-                                                      if (showVersionWarning) return;
-                                                      handleChange(item.id, "multiplier", e.target.value);
-                                                    }}
-                                                    disabled={showVersionWarning}
-                                                  />
-                                                  <div className="rate-type-toggle">
-                                                    <label className={`rt-option ${getVal(item.id, "rate_type") === "day" ? "active" : ""}`}>
-                                                      <input
-                                                        type="radio"
-                                                        name={`rate_type-${item.id}`}
-                                                        value="day"
-                                                        checked={getVal(item.id, "rate_type") === "day"}
-                                                        onChange={() => handleChange(item.id, "day_cs", "day")}
-                                                      />
-                                                      Day
-                                                    </label>
-                                                    <label className={`rt-option ${getVal(item.id, "rate_type") === "cs" ? "active" : ""}`}>
-                                                      <input
-                                                        type="radio"
-                                                        name={`rate_type-${item.id}`}
-                                                        value="cs"
-                                                        checked={getVal(item.id, "rate_type") === "cs"}
-                                                        onChange={() => handleChange(item.id, "day_cs", "cs")}
-                                                      />
-                                                      CS
-                                                    </label>
-                                                  </div>
-                                                </div>
-                                              </td>
-                                              <td className="col-rate">
-                                                <input
-                                                  type="number"
-                                                  min="0"
-                                                  step="any"
-                                                  placeholder="0.00"
-                                                  value={getVal(item.id, "rate")}
-                                                  onChange={(e) => {
-                                                    if (showVersionWarning) return;
-                                                    handleChange(item.id, "rate", e.target.value);
-                                                  }}
-                                                  disabled={showVersionWarning}
-                                                />
-                                              </td>
-                                              <td className={`col-gross gross-cell ${isFilled ? "has-value" : ""}`}>
-                                                {grossDisplay(item.id)}
-                                              </td>
-                                              <td className="col-add bef-relative">
-                                                <div className="add-input-group">
-                                                  <input
-                                                    type="number"
-                                                    min="0"
-                                                    step="any"
-                                                    placeholder="0.00"
-                                                    value={getVal(item.id, "add1")}
-                                                    onChange={(e) => {
-                                                      if (showVersionWarning) return;
-                                                      handleChange(item.id, "add1", e.target.value);
-                                                    }}
-                                                    disabled={showVersionWarning}
-                                                  />
-                                                  <button
-                                                    className={`bef-comment-btn ${getVal(item.id, "c1") ? "has-comment" : ""}`}
-                                                    onClick={(e) => {
-                                                      e.stopPropagation();
-                                                      setActiveComment({ itemId: item.id, field: "c1" });
-                                                    }}
+                                                <tr className="bef-cat-row">
+                                                  <td
+                                                    className="col-drag"
+                                                    {...providedCat.dragHandleProps}
                                                   >
-                                                    <svg className="comment-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                      <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" />
-                                                    </svg>
-                                                    {getVal(item.id, "c1") && (
-                                                      <div className="bef-comment-preview">{getVal(item.id, "c1")}</div>
-                                                    )}
-                                                  </button>
-                                                  {activeComment?.itemId === item.id && activeComment?.field === "c1" && (
-                                                    <div className="bef-comment-popover" onClick={(e) => e.stopPropagation()}>
-                                                      <textarea
-                                                        placeholder="Comment for Add. 1..."
-                                                        value={getVal(item.id, "c1")}
-                                                        onChange={(e) => handleChange(item.id, "c1", e.target.value)}
-                                                        autoFocus
-                                                      />
-                                                      <button onClick={() => setActiveComment(null)}>Close</button>
+                                                    <i className="fas fa-ellipsis-v"></i>
+                                                  </td>
+                                                  <td
+                                                    colSpan="6"
+                                                    className="cat-name-cell"
+                                                  >
+                                                    <div className="cat-header-row">
+                                                      <span className="cat-name">
+                                                        {cat.category_name}
+                                                      </span>
                                                     </div>
-                                                  )}
-                                                </div>
-                                              </td>
-                                              <td className={`col-total total-cell ${isFilled ? "has-value" : ""}`}>
-                                                {totalDisplay(item.id)}
-                                              </td>
-                                            </tr>
-                                          )}
-                                        </Draggable>
-                                      );
-                                    })}
-                                    {providedItem.placeholder}
-                                  </tbody>
+                                                  </td>
+                                                  <td className="col-total cat-subtotal">
+                                                    {getCategorySubtotal(cat) >
+                                                    0
+                                                      ? formatCurrency(
+                                                          getCategorySubtotal(
+                                                            cat,
+                                                          ),
+                                                        )
+                                                      : ""}
+                                                  </td>
+                                                </tr>
+
+                                                {cat.items.map(
+                                                  (item, index) => {
+                                                    const v =
+                                                      values[item.id] || {};
+                                                    const isFilled =
+                                                      (parseFloat(v.qty) || 0) >
+                                                        0 ||
+                                                      (parseFloat(v.rate) ||
+                                                        0) > 0 ||
+                                                      (parseFloat(v.add1) ||
+                                                        0) > 0;
+
+                                                    return (
+                                                      <Draggable
+                                                        key={item.id}
+                                                        draggableId={String(
+                                                          item.id,
+                                                        )}
+                                                        index={index}
+                                                      >
+                                                        {(
+                                                          providedRow,
+                                                          snapshotRow,
+                                                        ) => (
+                                                          <tr
+                                                            ref={
+                                                              providedRow.innerRef
+                                                            }
+                                                            {...providedRow.draggableProps}
+                                                            className={`bef-row ${isFilled ? "filled" : ""} ${snapshotRow.isDragging ? "dragging" : ""}`}
+                                                          >
+                                                            <td
+                                                              className="col-drag"
+                                                              {...providedRow.dragHandleProps}
+                                                            >
+                                                              <svg
+                                                                width="16"
+                                                                height="16"
+                                                                viewBox="0 0 24 24"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                strokeWidth="2"
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                              >
+                                                                <line
+                                                                  x1="8"
+                                                                  y1="9"
+                                                                  x2="16"
+                                                                  y2="9"
+                                                                ></line>
+                                                                <line
+                                                                  x1="8"
+                                                                  y1="12"
+                                                                  x2="16"
+                                                                  y2="12"
+                                                                ></line>
+                                                                <line
+                                                                  x1="8"
+                                                                  y1="15"
+                                                                  x2="16"
+                                                                  y2="15"
+                                                                ></line>
+                                                              </svg>
+                                                            </td>
+                                                            <td className="col-item-name">
+                                                              {item.item_name}
+                                                            </td>
+                                                            <td className="col-units">
+                                                              <input
+                                                                type="number"
+                                                                min="0"
+                                                                step="any"
+                                                                placeholder="0"
+                                                                value={getVal(
+                                                                  item.id,
+                                                                  "qty",
+                                                                )}
+                                                                onChange={(
+                                                                  e,
+                                                                ) => {
+                                                                  if (
+                                                                    showVersionWarning
+                                                                  )
+                                                                    return;
+                                                                  handleChange(
+                                                                    item.id,
+                                                                    "qty",
+                                                                    e.target
+                                                                      .value,
+                                                                  );
+                                                                }}
+                                                                disabled={
+                                                                  showVersionWarning
+                                                                }
+                                                              />
+                                                            </td>
+                                                            <td className="col-rate-type">
+                                                              <div className="rate-type-column-content">
+                                                                <input
+                                                                  type="number"
+                                                                  min="0"
+                                                                  step="any"
+                                                                  className="multiplier-input"
+                                                                  placeholder="1"
+                                                                  value={getVal(
+                                                                    item.id,
+                                                                    "multiplier",
+                                                                  )}
+                                                                  onChange={(
+                                                                    e,
+                                                                  ) => {
+                                                                    if (
+                                                                      showVersionWarning
+                                                                    )
+                                                                      return;
+                                                                    handleChange(
+                                                                      item.id,
+                                                                      "multiplier",
+                                                                      e.target
+                                                                        .value,
+                                                                    );
+                                                                  }}
+                                                                  disabled={
+                                                                    showVersionWarning
+                                                                  }
+                                                                />
+                                                                <div className="rate-type-toggle">
+                                                                  <label
+                                                                    className={`rt-option ${getVal(item.id, "rate_type") === "day" ? "active" : ""}`}
+                                                                  >
+                                                                    <input
+                                                                      type="radio"
+                                                                      name={`rate_type-${item.id}`}
+                                                                      value="day"
+                                                                      checked={
+                                                                        getVal(
+                                                                          item.id,
+                                                                          "rate_type",
+                                                                        ) ===
+                                                                        "day"
+                                                                      }
+                                                                      onChange={() =>
+                                                                        handleChange(
+                                                                          item.id,
+                                                                          "day_cs",
+                                                                          "day",
+                                                                        )
+                                                                      }
+                                                                    />
+                                                                    Day
+                                                                  </label>
+                                                                  <label
+                                                                    className={`rt-option ${getVal(item.id, "rate_type") === "cs" ? "active" : ""}`}
+                                                                  >
+                                                                    <input
+                                                                      type="radio"
+                                                                      name={`rate_type-${item.id}`}
+                                                                      value="cs"
+                                                                      checked={
+                                                                        getVal(
+                                                                          item.id,
+                                                                          "rate_type",
+                                                                        ) ===
+                                                                        "cs"
+                                                                      }
+                                                                      onChange={() =>
+                                                                        handleChange(
+                                                                          item.id,
+                                                                          "day_cs",
+                                                                          "cs",
+                                                                        )
+                                                                      }
+                                                                    />
+                                                                    CS
+                                                                  </label>
+                                                                </div>
+                                                              </div>
+                                                            </td>
+                                                            <td className="col-rate">
+                                                              <input
+                                                                type="number"
+                                                                min="0"
+                                                                step="any"
+                                                                placeholder="0.00"
+                                                                value={getVal(
+                                                                  item.id,
+                                                                  "rate",
+                                                                )}
+                                                                onChange={(
+                                                                  e,
+                                                                ) => {
+                                                                  if (
+                                                                    showVersionWarning
+                                                                  )
+                                                                    return;
+                                                                  handleChange(
+                                                                    item.id,
+                                                                    "rate",
+                                                                    e.target
+                                                                      .value,
+                                                                  );
+                                                                }}
+                                                                disabled={
+                                                                  showVersionWarning
+                                                                }
+                                                              />
+                                                            </td>
+                                                            <td
+                                                              className={`col-gross gross-cell ${isFilled ? "has-value" : ""}`}
+                                                            >
+                                                              {grossDisplay(
+                                                                item.id,
+                                                              )}
+                                                            </td>
+                                                            <td className="col-add bef-relative">
+                                                              <div className="add-input-group">
+                                                                <input
+                                                                  type="number"
+                                                                  min="0"
+                                                                  step="any"
+                                                                  placeholder="0.00"
+                                                                  value={getVal(
+                                                                    item.id,
+                                                                    "add1",
+                                                                  )}
+                                                                  onChange={(
+                                                                    e,
+                                                                  ) => {
+                                                                    if (
+                                                                      showVersionWarning
+                                                                    )
+                                                                      return;
+                                                                    handleChange(
+                                                                      item.id,
+                                                                      "add1",
+                                                                      e.target
+                                                                        .value,
+                                                                    );
+                                                                  }}
+                                                                  disabled={
+                                                                    showVersionWarning
+                                                                  }
+                                                                />
+                                                                <button
+                                                                  className={`bef-comment-btn ${getVal(item.id, "c1") ? "has-comment" : ""}`}
+                                                                  onClick={(
+                                                                    e,
+                                                                  ) => {
+                                                                    e.stopPropagation();
+                                                                    setActiveComment(
+                                                                      {
+                                                                        itemId:
+                                                                          item.id,
+                                                                        field:
+                                                                          "c1",
+                                                                      },
+                                                                    );
+                                                                  }}
+                                                                >
+                                                                  <svg
+                                                                    className="comment-icon"
+                                                                    xmlns="http://www.w3.org/2000/svg"
+                                                                    viewBox="0 0 24 24"
+                                                                    width="16"
+                                                                    height="16"
+                                                                    fill="none"
+                                                                    stroke="currentColor"
+                                                                    strokeWidth="2"
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
+                                                                  >
+                                                                    <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" />
+                                                                  </svg>
+                                                                  {getVal(
+                                                                    item.id,
+                                                                    "c1",
+                                                                  ) && (
+                                                                    <div className="bef-comment-preview">
+                                                                      {getVal(
+                                                                        item.id,
+                                                                        "c1",
+                                                                      )}
+                                                                    </div>
+                                                                  )}
+                                                                </button>
+                                                                {activeComment?.itemId ===
+                                                                  item.id &&
+                                                                  activeComment?.field ===
+                                                                    "c1" && (
+                                                                    <div
+                                                                      className="bef-comment-popover"
+                                                                      onClick={(
+                                                                        e,
+                                                                      ) =>
+                                                                        e.stopPropagation()
+                                                                      }
+                                                                    >
+                                                                      <textarea
+                                                                        placeholder="Comment for Add. 1..."
+                                                                        value={getVal(
+                                                                          item.id,
+                                                                          "c1",
+                                                                        )}
+                                                                        onChange={(
+                                                                          e,
+                                                                        ) =>
+                                                                          handleChange(
+                                                                            item.id,
+                                                                            "c1",
+                                                                            e
+                                                                              .target
+                                                                              .value,
+                                                                          )
+                                                                        }
+                                                                        autoFocus
+                                                                      />
+                                                                      <button
+                                                                        onClick={() =>
+                                                                          setActiveComment(
+                                                                            null,
+                                                                          )
+                                                                        }
+                                                                      >
+                                                                        Close
+                                                                      </button>
+                                                                    </div>
+                                                                  )}
+                                                              </div>
+                                                            </td>
+                                                            <td
+                                                              className={`col-total total-cell ${isFilled ? "has-value" : ""}`}
+                                                            >
+                                                              {totalDisplay(
+                                                                item.id,
+                                                              )}
+                                                            </td>
+                                                          </tr>
+                                                        )}
+                                                      </Draggable>
+                                                    );
+                                                  },
+                                                )}
+                                                {providedItem.placeholder}
+                                              </tbody>
+                                            )}
+                                          </Droppable>
+                                        )}
+                                      </Draggable>
+                                    ))}
+                                    {provided.placeholder}
+                                  </table>
                                 )}
                               </Droppable>
-                            )}
-                          </Draggable>
-                        ))}
-                        {provided.placeholder}
-                      </table>
-                    )}
-                  </Droppable>
-                </div>
-              ))}
-            </DragDropContext>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </DragDropContext>
+            </div>
+            <div className="bef-footer">
+              <div className="bef-grand-total">
+                Grand Total:&nbsp;
+                <strong>Rs.{formatCurrency(grandTotal)}</strong>
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Footer bar */}
+        {/* Footer actions bar (outside PDF) */}
         {!loading && hierarchy.length > 0 && (
-          <div className="bef-footer">
-            <div className="bef-grand-total">
-              Grand Total:&nbsp;
-              <strong>Rs.{formatCurrency(grandTotal)}</strong>
-            </div>
-            <div className="bef-actions">
+          <div className="bef-footer bef-actions-only-footer">
+            <div className="bef-actions" style={{ marginLeft: "auto" }}>
+              <button
+                className="bef-btn-submit"
+                onClick={handleDownloadPDF}
+                style={{ background: "#4bc0c0", marginRight: "10px" }}
+              >
+                Download PDF
+              </button>
               <button
                 className="bef-btn-clear"
                 onClick={handleClear}
@@ -754,7 +1093,10 @@ const BudgetEntryForm = ({
           </div>
         )}
 
-        <div className="status-msg-container" style={{ minHeight: '40px', marginTop: '1rem' }}>
+        <div
+          className="status-msg-container"
+          style={{ minHeight: "40px", marginTop: "1rem" }}
+        >
           {status && (
             <div className={`bef-status ${status.type}`}>{status.text}</div>
           )}

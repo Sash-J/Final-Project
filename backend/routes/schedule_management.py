@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request, session
-import db_operations as db
-from database import get_connection
-from session_handler import login_required, roles_required, get_current_user_id
+import services.db_operations as db
+from services.database import get_connection
+from core.session_handler import login_required, roles_required, get_current_user_id
 
 schedule_bp = Blueprint('schedule_management', __name__)
 

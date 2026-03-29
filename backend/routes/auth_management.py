@@ -1,8 +1,8 @@
-import auth_operations as auth
+import services.auth_operations as auth
 import time
 import re
 from flask import Blueprint, jsonify, request
-from session_handler import (
+from core.session_handler import (
     login_required,
     set_user_session,
     clear_session,
@@ -26,8 +26,8 @@ def validate_register_data(username, password, role, full_name, telephone, addre
         return "Username can only contain letters and underscores."
 
     # 2. Password Validation
-    if len(password) > 8:
-        return "Password must be at most 8 characters."
+    if len(password) < 8 or len(password) > 20:
+        return "Password must be between 8 and 20 characters."
     if not any(c.isupper() for c in password) or not any(c.islower() for c in password):
         return "Password must contain both uppercase and lowercase letters."
     

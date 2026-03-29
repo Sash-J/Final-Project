@@ -14,8 +14,9 @@ const StatusMsg = ({ msg }) => {
 };
 
 // ── 1. Add Department ─────────────────────────────────────────────────────────
-const AddDepartment = ({ onAdded }) => {
+const AddDepartment = ({ phases, onAdded }) => {
   const [name, setName] = useState("");
+  const [phaseId, setPhaseId] = useState("2"); // Default to Production
   const [msg, setMsg] = useState("");
 
   const handleSubmit = async (e) => {
@@ -26,7 +27,10 @@ const AddDepartment = ({ onAdded }) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ department_name: name }),
+        body: JSON.stringify({
+          department_name: name,
+          phase_id: parseInt(phaseId),
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed");
@@ -49,8 +53,23 @@ const AddDepartment = ({ onAdded }) => {
         onChange={(e) => setName(e.target.value)}
         required
       />
+
+      <GlassDropdown
+        label="Select Phase"
+        placeholder="— Phase —"
+        options={phases.map((p) => ({
+          value: p.id,
+          label: p.phase_name,
+        }))}
+        value={phaseId}
+        onChange={(val) => setPhaseId(val)}
+      />
+
       <button type="submit">Add Department</button>
-      <div className="status-msg-container" style={{ minHeight: '32px', marginTop: '0.5rem' }}>
+      <div
+        className="status-msg-container"
+        style={{ minHeight: "32px", marginTop: "0.5rem" }}
+      >
         <StatusMsg msg={msg} />
       </div>
     </form>
@@ -109,7 +128,10 @@ const AddCategory = ({ departments, onAdded }) => {
         onChange={(val) => setDeptId(val)}
       />
       <button type="submit">Add Category</button>
-      <div className="status-msg-container" style={{ minHeight: '32px', marginTop: '0.5rem' }}>
+      <div
+        className="status-msg-container"
+        style={{ minHeight: "32px", marginTop: "0.5rem" }}
+      >
         <StatusMsg msg={msg} />
       </div>
     </form>
@@ -165,7 +187,10 @@ const AddBudgetItem = ({ categories, onAdded }) => {
         onChange={(val) => setCatId(val)}
       />
       <button type="submit">Add Budget Item</button>
-      <div className="status-msg-container" style={{ minHeight: '32px', marginTop: '0.5rem' }}>
+      <div
+        className="status-msg-container"
+        style={{ minHeight: "32px", marginTop: "0.5rem" }}
+      >
         <StatusMsg msg={msg} />
       </div>
     </form>
@@ -174,6 +199,7 @@ const AddBudgetItem = ({ categories, onAdded }) => {
 
 // ── Main AdminBudget Component ────────────────────────────────────────────────
 const AdminBudget = () => {
+  const [phases, setPhases] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [categories, setCategories] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -186,11 +212,13 @@ const AdminBudget = () => {
   const fetchMetadata = async () => {
     try {
       const options = { credentials: "include" };
-      const [d, c, p] = await Promise.all([
+      const [ph, d, c, p] = await Promise.all([
+        fetch(`${API}/api/phases`, options).then((r) => r.json()),
         fetch(`${API}/api/departments`, options).then((r) => r.json()),
         fetch(`${API}/api/categories`, options).then((r) => r.json()),
         fetch(`${API}/api/projects`, options).then((r) => r.json()),
       ]);
+      setPhases(Array.isArray(ph) ? ph : []);
       setDepartments(Array.isArray(d) ? d : []);
       setCategories(Array.isArray(c) ? c : []);
       setProjects(Array.isArray(p) ? p : []);
@@ -325,10 +353,10 @@ const AdminBudget = () => {
               {projectId && (
                 <div className="version-selection-area">
                   <label className="version-selection-label">
-                    Budget Version
+                    Select Budget Version
                   </label>
                   <div className="version-controls">
-                    <div style={{ flex: 1 }}>
+                    <div className="version-select-container">
                       <GlassDropdown
                         placeholder="— Select —"
                         options={versions.map((v) => ({
@@ -340,39 +368,41 @@ const AdminBudget = () => {
                       />
                     </div>
 
-                    <button
-                      type="button"
-                      className="btn-delete-version"
-                      onClick={handleDeleteVersion}
-                      disabled={!versionId}
-                      title="Delete selected version"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                    <div className="version-actions-row">
+                      <button
+                        type="button"
+                        className="btn-delete-version"
+                        onClick={handleDeleteVersion}
+                        disabled={!versionId}
+                        title="Delete selected version"
                       >
-                        <polyline points="3 6 5 6 21 6"></polyline>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                        <line x1="10" y1="11" x2="10" y2="17"></line>
-                        <line x1="14" y1="11" x2="14" y2="17"></line>
-                      </svg>
-                    </button>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <polyline points="3 6 5 6 21 6"></polyline>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                          <line x1="10" y1="11" x2="10" y2="17"></line>
+                          <line x1="14" y1="11" x2="14" y2="17"></line>
+                        </svg>
+                      </button>
 
-                    <button
-                      type="button"
-                      className="btn-new-version"
-                      onClick={handleCreateNewVersion}
-                      title="Clone current version to a new one"
-                    >
-                      + New Version
-                    </button>
+                      <button
+                        type="button"
+                        className="btn-new-version"
+                        onClick={handleCreateNewVersion}
+                        title="Clone current version to a new one"
+                      >
+                        + New Version
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -380,7 +410,7 @@ const AdminBudget = () => {
           </div>
 
           <div className="grid-window">
-            <AddDepartment onAdded={handleDataAdded} />
+            <AddDepartment phases={phases} onAdded={handleDataAdded} />
           </div>
           <div className="grid-window">
             <AddCategory departments={departments} onAdded={handleDataAdded} />
@@ -397,6 +427,12 @@ const AdminBudget = () => {
               embedded={true}
               externalProjectId={projectId}
               versionId={versionId}
+              projectName={
+                projects.find((p) => p.id === projectId)?.project_name || ""
+              }
+              versionName={
+                versions.find((v) => v.id === versionId)?.version_number || ""
+              }
             />
           </div>
         </div>

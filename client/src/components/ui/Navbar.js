@@ -54,10 +54,13 @@ const Navbar = () => {
         {user && (user.role === "admin" || user.role === "manager") && (
           <>
             <li>
-              <Link to="/admin">Admin Dashboard</Link>
+              <Link to="/admin">Dashboard</Link>
             </li>
             <li>
-              <Link to="/admin-budget">Admin Budget</Link>
+              <Link to="/admin-budget">Budget</Link>
+            </li>
+            <li>
+              <Link to="/budget-predictor">Predictor</Link>
             </li>
           </>
         )}
@@ -68,7 +71,7 @@ const Navbar = () => {
           </li>
         )}
 
-        {user && (user.role === "admin" || user.role === "manager" || user.role === "client") && (
+        {user && (user.role === "admin" || user.role === "manager") && (
           <li>
             <Link to="/finance">Finance</Link>
           </li>
@@ -81,14 +84,11 @@ const Navbar = () => {
         )}
 
         {user ? (
-          <>
-            <li className="user-welcome">Hi, {user.username}</li>
-            <li>
-              <button onClick={handleLogout} className="logout-btn">
-                Logout
-              </button>
-            </li>
-          </>
+          <li>
+            <button onClick={handleLogout} className="logout-btn">
+              Logout
+            </button>
+          </li>
         ) : (
           <li>
             <Link to="/login" className="login-link">

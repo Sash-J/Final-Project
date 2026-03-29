@@ -438,11 +438,17 @@
   line-height: 1.2;
 }
 
+.cd-modal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-right: 60px; /* Space to avoid the absolute close button */
+}
+
 .cd-version-selector {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-right: 50px; /* Space for the close button */
   height: 100%;
 }
 

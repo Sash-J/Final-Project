@@ -1,7 +1,8 @@
 from flask import Blueprint, jsonify, request
-import db_operations as db
-import auth_operations as auth
-from session_handler import login_required, roles_required, get_current_user_id, get_current_user_role
+import services.db_operations as db
+import services.auth_operations as auth
+from core.session_handler import login_required, roles_required, get_current_user_id, get_current_user_role
+import os
 
 budget_bp = Blueprint('budget_management', __name__)
 
@@ -14,14 +15,21 @@ def departments_get():
 
 
 @budget_bp.route("/api/departments", methods=["POST"])
-@roles_required("admin")
+@roles_required("admin", "manager")
 def departments_post():
     data = request.get_json()
     department_name = data.get("department_name", "").strip()
-    if not department_name:
-        return jsonify({"error": "department_name is required"}), 400
-    new_id = db.insert_department(department_name)
+    phase_id = data.get("phase_id", 2)  # Default to Production
+    if not department_name or not phase_id:
+        return jsonify({"error": "department_name and phase_id are required"}), 400
+    new_id = db.insert_department(department_name, phase_id)
     return jsonify({"message": "Department added successfully", "id": new_id}), 201
+
+
+@budget_bp.route("/api/phases", methods=["GET"])
+@login_required
+def phases_get():
+    return jsonify(db.get_phases()), 200
 
 
 # ── Categories ────────────────────────────────────────────────────────────────
@@ -33,7 +41,7 @@ def categories_get():
 
 
 @budget_bp.route("/api/categories", methods=["POST"])
-@roles_required("admin")
+@roles_required("admin", "manager")
 def categories_post():
     data = request.get_json()
     category_name = data.get("category_name", "").strip()

@@ -16,17 +16,23 @@ import ClientDashboard from "./components/pages/ClientDashboard";
 import CrewDashboard from "./components/pages/CrewDashboard";
 import Schedule from "./components/pages/Schedule";
 import FinancialDashboard from "./components/pages/FinancialDashboard";
+import BudgetPredictor from "./components/pages/BudgetPredictor";
 import Footer from "./components/ui/Footer";
+
 import Starfield from "./components/ui/Starfield";
+
+import { useAuth } from "./contexts/AuthContext";
 
 function AppContent() {
   const location = useLocation();
+  const { isTransiting } = useAuth();
   const hideFooter = ["/login", "/register"].includes(location.pathname);
 
   return (
     <div className="App">
+      <div className={`transition-overlay ${isTransiting ? "active" : ""}`} />
       <Navbar />
-      <div className="main-content">
+      <div className={`main-content ${isTransiting ? "fading-out" : ""}`}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginPage />} />
@@ -62,7 +68,7 @@ function AppContent() {
           <Route
             path="/admin"
             element={
-              <ProtectedRoute roles={["admin"]}>
+              <ProtectedRoute roles={["admin", "manager"]}>
                 <AdminDashboard />
               </ProtectedRoute>
             }
@@ -86,8 +92,16 @@ function AppContent() {
           <Route
             path="/finance"
             element={
-              <ProtectedRoute roles={["admin", "manager", "client"]}>
+              <ProtectedRoute roles={["admin", "manager"]}>
                 <FinancialDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/budget-predictor"
+            element={
+              <ProtectedRoute roles={["admin", "manager"]}>
+                <BudgetPredictor />
               </ProtectedRoute>
             }
           />
@@ -100,14 +114,14 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <ModalProvider>
-        <Router>
+    <Router>
+      <AuthProvider>
+        <ModalProvider>
           <Starfield />
           <AppContent />
-        </Router>
-      </ModalProvider>
-    </AuthProvider>
+        </ModalProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 

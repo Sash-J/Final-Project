@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import './RegisterPage.css';
 
 const API = 'http://localhost:5000';
@@ -9,6 +10,7 @@ const RegisterPage = () => {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
+    const { startTransition } = useAuth();
     const navigate = useNavigate();
 
     // Field States
@@ -43,9 +45,9 @@ const RegisterPage = () => {
                 return;
             }
 
-            // Password Validation: Max 8 characters
-            if (password.length > 8) {
-                setError('Password must be at most 8 characters');
+            // Password Validation: 8-20 characters
+            if (password.length < 8 || password.length > 20) {
+                setError('Password must be between 8 and 20 characters');
                 return;
             }
 
@@ -105,7 +107,7 @@ const RegisterPage = () => {
 
             if (response.ok) {
                 setMessage(data.message);
-                setTimeout(() => navigate('/login'), 3000);
+                setTimeout(() => startTransition('/login'), 2500);
             } else {
                 setError(data.error || 'Registration failed');
             }

@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
-import db_operations as db
-import auth_operations as auth
-from session_handler import (
+import services.db_operations as db
+import services.auth_operations as auth
+from core.session_handler import (
     login_required,
     roles_required,
     get_current_user_id,

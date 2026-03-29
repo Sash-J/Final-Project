@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify, request
 from flask_cors import cross_origin
-import db_operations as db
-import auth_operations as auth
-from session_handler import login_required, roles_required
+import services.db_operations as db
+import services.auth_operations as auth
+from core.session_handler import login_required, roles_required
 
 project_bp = Blueprint('project_management', __name__)
 
@@ -21,7 +21,7 @@ def projects_get():
 
 
 @project_bp.route("/api/projects", methods=["POST"])
-@roles_required("admin")
+@roles_required("admin", "manager")
 def projects_post():
     data = request.get_json()
     project_name = data.get("project_name", "").strip()
@@ -71,7 +71,7 @@ def update_project_status_endpoint(project_id):
 
 
 @project_bp.route("/api/projects/<int:project_id>", methods=["PUT"])
-@roles_required("admin")
+@roles_required("admin", "manager")
 @cross_origin(supports_credentials=True)
 def projects_put(project_id):
     try:
@@ -118,7 +118,7 @@ def projects_put(project_id):
 
 
 @project_bp.route("/api/projects/<int:project_id>", methods=["DELETE"])
-@roles_required("admin")
+@roles_required("admin", "manager")
 def projects_delete(project_id):
     try:
         db.delete_project(project_id)

@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request, session
-from database import get_connection
-from session_handler import login_required, roles_required
+from services.database import get_connection
+from core.session_handler import login_required, roles_required
 
 milestone_bp = Blueprint('milestone_management', __name__)
 

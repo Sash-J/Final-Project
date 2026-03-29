@@ -1,4 +1,4 @@
-from database import get_connection
+from .database import get_connection
 
 # ── User Authentication & Management ──────────────────────────────────────────
 

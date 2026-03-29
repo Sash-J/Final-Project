@@ -5,6 +5,7 @@ import './CrewDashboard.css';
 import './BudgetEntryForm.css'; // Reuse the admin sheet styles
 import SuiTimeline from './SuiTimeline';
 import ModalPortal from '../common/ModalPortal';
+import html2pdf from 'html2pdf.js';
 
 const API = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -118,65 +119,75 @@ const CrewDashboard = () => {
             const hierarchy = hierRes.data;
             const values = valRes.data;
 
-            const filledHierarchy = [];
+            const filledPhases = [];
             let grandTotal = 0;
             
             if (Array.isArray(hierarchy)) {
-                hierarchy.forEach(dept => {
-                    const newDept = { ...dept, categories: [] };
-                    let deptTotal = 0;
+                hierarchy.forEach(phase => {
+                    const newPhase = { ...phase, departments: [] };
+                    let phaseTotal = 0;
 
-                    if (Array.isArray(dept.categories)) {
-                        dept.categories.forEach(cat => {
-                            const newCat = { ...cat, items: [] };
-                            let catTotal = 0;
+                    if (Array.isArray(phase.departments)) {
+                        phase.departments.forEach(dept => {
+                            const newDept = { ...dept, categories: [] };
+                            let deptTotal = 0;
 
-                            if (Array.isArray(cat.items)) {
-                                cat.items.forEach(item => {
-                                    const val = values[item.id];
-                                    if (val) {
-                                        const q = parseFloat(val.quantity) || 0;
-                                        const r = parseFloat(val.rate) || 0;
-                                        const a1 = parseFloat(val.additional1) || 0;
-                                        const a2 = parseFloat(val.additional2) || 0;
-                                        const t = parseFloat(val.total) || 0;
-                                        
-                                        if (q > 0 || r > 0 || t > 0 || a1 > 0 || a2 > 0) {
-                                            newCat.items.push({
-                                                ...item,
-                                                val: {
-                                                    qty: q,
-                                                    rate: r,
-                                                    rate_type: val.rate_type || 'day',
-                                                    add1: a1,
-                                                    add2: a2,
-                                                    total: t,
-                                                    c1: val.comment1,
-                                                    c2: val.comment2,
+                            if (Array.isArray(dept.categories)) {
+                                dept.categories.forEach(cat => {
+                                    const newCat = { ...cat, items: [] };
+                                    let catTotal = 0;
+
+                                    if (Array.isArray(cat.items)) {
+                                        cat.items.forEach(item => {
+                                            const val = values[item.id];
+                                            if (val) {
+                                                const q = parseFloat(val.quantity) || 0;
+                                                const r = parseFloat(val.rate) || 0;
+                                                const a1 = parseFloat(val.additional1) || 0;
+                                                const t = parseFloat(val.total) || 0;
+                                                
+                                                if (q > 0 || r > 0 || t > 0 || a1 > 0) {
+                                                    newCat.items.push({
+                                                        ...item,
+                                                        val: {
+                                                            qty: q,
+                                                            rate: r,
+                                                            rate_type: val.rate_type || 'day',
+                                                            add1: a1,
+                                                            total: t,
+                                                            c1: val.comment1,
+                                                        }
+                                                    });
+                                                    catTotal += t;
                                                 }
-                                            });
-                                            catTotal += t;
-                                        }
+                                            }
+                                        });
+                                    }
+
+                                    if (newCat.items.length > 0) {
+                                        newCat.catTotal = catTotal;
+                                        newDept.categories.push(newCat);
+                                        deptTotal += catTotal;
                                     }
                                 });
                             }
 
-                            if (newCat.items.length > 0) {
-                                newCat.catTotal = catTotal;
-                                newDept.categories.push(newCat);
-                                deptTotal += catTotal;
+                            if (newDept.categories.length > 0) {
+                                newDept.deptTotal = deptTotal;
+                                newPhase.departments.push(newDept);
+                                phaseTotal += deptTotal;
                             }
                         });
                     }
 
-                    if (newDept.categories.length > 0) {
-                        newDept.deptTotal = deptTotal;
-                        filledHierarchy.push(newDept);
-                        grandTotal += deptTotal;
+                    if (newPhase.departments.length > 0) {
+                        newPhase.phaseTotal = phaseTotal;
+                        filledPhases.push(newPhase);
+                        grandTotal += phaseTotal;
                     }
                 });
             }
-            setBudgetData({ hierarchy: filledHierarchy, grandTotal });
+            setBudgetData({ phases: filledPhases, grandTotal });
         } catch (err) {
             console.error("Error fetching budget data:", err);
             setBudgetData({ hierarchy: [], grandTotal: 0 });
@@ -197,6 +208,37 @@ const CrewDashboard = () => {
 
     const formatCurrency = (value) => {
         return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+    };
+
+    const handleDownloadPDF = () => {
+      const element = document.getElementById("crew-budget-pdf-content");
+      if (!element) return;
+      const dateStr = new Date().toISOString().split("T")[0];
+      const pName = selectedProject?.project_name
+        ? selectedProject.project_name.replace(/\s+/g, "_")
+        : "Project";
+
+      const vNumber =
+        currentVersionId && versions.find((v) => v.id == currentVersionId)
+          ? versions.find((v) => v.id == currentVersionId).version_number
+          : "Draft";
+
+      const filename = `${pName}_Version_${vNumber}_${dateStr}.pdf`;
+
+      const opt = {
+        margin: 10,
+        filename: filename,
+        image: { type: "jpeg", quality: 1 },
+        html2canvas: { 
+          scale: 2, 
+          useCORS: true, 
+          letterRendering: true, 
+          backgroundColor: "#0d0e15",
+          windowWidth: 1200 // Specify the width of the canvas to include all columns
+        },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      };
+      html2pdf().set(opt).from(element).save();
     };
 
     if (loading) return <div className="crew-loading">Loading Dashboard...</div>;
@@ -328,31 +370,39 @@ const CrewDashboard = () => {
                             <button className="crew-modal-close" onClick={closeBudgetModal}>&times;</button>
                             
                             <div className="crew-modal-header-row">
-                                <h3>Budget Sheet - {selectedProject.project_name} 
+                                <h3>
+                                    Budget Sheet - {selectedProject.project_name} 
                                     {currentVersionId && versions.find(v => v.id === currentVersionId) && 
                                         ` (Version ${versions.find(v => v.id === currentVersionId).version_number})`}
                                 </h3>
-                                
-                                {versions.length > 0 && (
-                                    <div className="crew-version-selector">
-                                        <label>Version:</label>
-                                        <select 
-                                            value={currentVersionId || ""} 
-                                            onChange={(e) => handleVersionChange(e.target.value)}
-                                        >
-                                            {versions.map(v => (
-                                                <option key={v.id} value={v.id}>Version {v.version_number}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                )}
+                                <div className="crew-modal-header-actions">
+                                    {budgetData && budgetData.phases.length > 0 && (
+                                        <button className="crew-action-btn" style={{ padding: '8px 16px', fontSize: '0.9rem' }} onClick={handleDownloadPDF}>
+                                            Download PDF
+                                        </button>
+                                    )}
+
+                                    {versions.length > 0 && (
+                                        <div className="crew-version-selector">
+                                            <label>Version:</label>
+                                            <select 
+                                                value={currentVersionId || ""} 
+                                                onChange={(e) => handleVersionChange(e.target.value)}
+                                            >
+                                                {versions.map(v => (
+                                                    <option key={v.id} value={v.id}>Version {v.version_number}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                             
                             {budgetLoading ? (
                                 <div className="crew-loading crew-modal-loading">Loading budget...</div>
-                            ) : budgetData && budgetData.hierarchy.length > 0 ? (
-                                <div className="crew-table-container">
-                                    <div className="bef-sheet" style={{ margin: 0, overflowY: 'auto', maxHeight: '60vh', borderRadius: '12px' }}>
+                            ) : budgetData && budgetData.phases.length > 0 ? (
+                                <div className="crew-table-container" id="crew-budget-pdf-content" style={{ backgroundColor: "#0d0e15", padding: "15px", borderRadius: "12px" }}>
+                                    <div className="bef-sheet" style={{ margin: 0, overflowY: 'auto', maxHeight: 'none', borderRadius: '12px' }}>
                                         <table className="bef-table">
                                             <thead>
                                                 <tr>
@@ -363,39 +413,53 @@ const CrewDashboard = () => {
                                                     <th className="col-num">Total</th>
                                                 </tr>
                                             </thead>
-                                            {budgetData.hierarchy.map((dept, deptIdx) => (
-                                                <React.Fragment key={dept.id}>
-                                                    <tbody className="bef-dept-body">
-                                                        <tr className="bef-dept-row">
-                                                            <td colSpan="5">
-                                                                <div className="dept-header-content">
-                                                                    <span className="dept-id">{String(deptIdx + 1).padStart(2, "0")}</span>
-                                                                    <span className="dept-name">{dept.department_name}</span>
-                                                                </div>
+                                            {budgetData.phases.map((phase) => (
+                                                <React.Fragment key={phase.phase_id}>
+                                                    <tbody className="bef-phase-group-header">
+                                                        <tr className="phase-header-row" style={{ background: 'rgba(99, 179, 237, 0.1)' }}>
+                                                            <td colSpan="4" style={{ padding: '12px 20px', fontWeight: '700', color: '#63b3ed', textTransform: 'uppercase', fontSize: '0.9rem', letterSpacing: '1px' }}>
+                                                                {phase.phase_name}
+                                                            </td>
+                                                            <td className="col-num phase-subtotal" style={{ padding: '12px 20px', textAlign: 'right', fontWeight: '700', color: '#63b3ed' }}>
+                                                                {formatCurrency(phase.phaseTotal)}
                                                             </td>
                                                         </tr>
                                                     </tbody>
-                                                    {dept.categories.map((cat, catIdx) => (
-                                                        <tbody className="bef-cat-body" key={cat.id}>
-                                                            <tr className="bef-cat-row">
-                                                                <td colSpan="4">
-                                                                    <span className="cat-id">{deptIdx + 1}.{catIdx + 1}</span>
-                                                                    <span className="cat-name">{cat.category_name}</span>
-                                                                </td>
-                                                                <td className="col-num cat-subtotal">
-                                                                    {formatCurrency(cat.catTotal)}
-                                                                </td>
-                                                            </tr>
-                                                            {cat.items.map((item) => (
-                                                                <tr key={item.id} className="bef-row filled">
-                                                                    <td className="col-item-name">{item.item_name}</td>
-                                                                    <td className="col-num" style={{ textAlign: 'center' }}>{item.val.qty}</td>
-                                                                    <td className="col-rate-type" style={{ fontSize: '0.8rem', color: '#a0aec0', width: '80px', textAlign: 'center' }}>{item.val.rate_type}</td>
-                                                                    <td className="col-num" style={{ textAlign: 'center' }}>{formatCurrency(item.val.rate)}</td>
-                                                                    <td className="col-num total-cell has-value">{formatCurrency(item.val.total)}</td>
+                                                    {phase.departments.map((dept, deptIdx) => (
+                                                        <React.Fragment key={dept.id}>
+                                                            <tbody className="bef-dept-body">
+                                                                <tr className="bef-dept-row">
+                                                                    <td colSpan="5">
+                                                                        <div className="dept-header-content">
+                                                                            <span className="dept-id">{String(deptIdx + 1).padStart(2, "0")}</span>
+                                                                            <span className="dept-name">{dept.department_name}</span>
+                                                                        </div>
+                                                                    </td>
                                                                 </tr>
+                                                            </tbody>
+                                                            {dept.categories.map((cat, catIdx) => (
+                                                                <tbody className="bef-cat-body" key={cat.id}>
+                                                                    <tr className="bef-cat-row">
+                                                                        <td colSpan="4">
+                                                                            <span className="cat-id">{deptIdx + 1}.{catIdx + 1}</span>
+                                                                            <span className="cat-name">{cat.category_name}</span>
+                                                                        </td>
+                                                                        <td className="col-num cat-subtotal">
+                                                                            {formatCurrency(cat.catTotal)}
+                                                                        </td>
+                                                                    </tr>
+                                                                    {cat.items.map((item) => (
+                                                                        <tr key={item.id} className="bef-row filled">
+                                                                            <td className="col-item-name">{item.item_name}</td>
+                                                                            <td className="col-num" style={{ textAlign: 'center' }}>{item.val.qty}</td>
+                                                                            <td className="col-rate-type" style={{ fontSize: '0.8rem', color: '#a0aec0', width: '80px', textAlign: 'center' }}>{item.val.rate_type}</td>
+                                                                            <td className="col-num" style={{ textAlign: 'center' }}>{formatCurrency(item.val.rate)}</td>
+                                                                            <td className="col-num total-cell has-value">{formatCurrency(item.val.total)}</td>
+                                                                        </tr>
+                                                                    ))}
+                                                                </tbody>
                                                             ))}
-                                                        </tbody>
+                                                        </React.Fragment>
                                                     ))}
                                                 </React.Fragment>
                                             ))}

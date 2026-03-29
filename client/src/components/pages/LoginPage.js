@@ -8,7 +8,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const { login } = useAuth();
+  const { login, startTransition } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -16,7 +16,7 @@ const LoginPage = () => {
     setError("");
     const res = await login(username, password);
     if (res.success) {
-      navigate("/");
+      startTransition("/");
     } else {
       setError(res.error);
     }

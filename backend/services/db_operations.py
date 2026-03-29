@@ -1,7 +1,17 @@
-from database import get_connection
+from .database import get_connection
 
 
 # ── Tables ────────────────────────────────────────────────────────────────────
+
+
+def get_phases():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM budget_phases ORDER BY sort_order ASC")
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return result
 
 
 def get_tables():
@@ -115,27 +125,30 @@ def delete_project(project_id):
 # ── Departments ───────────────────────────────────────────────────────────────
 
 
-def get_departments():
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM departments ORDER BY id DESC")
-    result = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return result
-
-
-def insert_department(department_name):
+def insert_department(department_name, phase_id=2):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO departments (department_name) VALUES (%s)", (department_name,)
+        "INSERT INTO departments (department_name, phase_id) VALUES (%s, %s)",
+        (department_name, phase_id),
     )
     conn.commit()
     new_id = cursor.lastrowid
     cursor.close()
     conn.close()
     return new_id
+
+
+def get_departments():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute(
+        "SELECT d.*, p.phase_name FROM departments d LEFT JOIN budget_phases p ON d.phase_id = p.id ORDER BY d.id DESC"
+    )
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return result
 
 
 # ── Categories ────────────────────────────────────────────────────────────────
@@ -313,30 +326,67 @@ def insert_budget_value(
 
 
 def get_hierarchy():
-    """Returns a nested structure: departments → categories → budget items."""
+    """
+    Returns the hierarchy grouped by phase:
+    [
+      {
+        "phase_id": 1,
+        "phase_name": "Pre-Production",
+        "departments": [
+          {
+            "id": 1,
+            "department_name": "Camera",
+            "categories": [ ... ]
+          }
+        ]
+      }
+    ]
+    """
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
-    cursor.execute("SELECT * FROM departments ORDER BY id")
+    # 1. Fetch Phases
+    cursor.execute("SELECT * FROM budget_phases ORDER BY sort_order ASC")
+    phases = cursor.fetchall()
+
+    # 2. Fetch Departments with Phase ID
+    cursor.execute("SELECT * FROM departments")
     departments = cursor.fetchall()
 
-    for dept in departments:
-        cursor.execute(
-            "SELECT * FROM categories WHERE department_id = %s ORDER BY sort_order, id",
-            (dept["id"],),
-        )
-        categories = cursor.fetchall()
-        for cat in categories:
-            cursor.execute(
-                "SELECT * FROM budget_items WHERE category_id = %s ORDER BY sort_order, id",
-                (cat["id"],),
-            )
-            cat["items"] = cursor.fetchall()
-        dept["categories"] = categories
+    # 3. Fetch Categories
+    cursor.execute("SELECT * FROM categories ORDER BY sort_order ASC")
+    categories = cursor.fetchall()
+
+    # 4. Fetch Budget Items
+    cursor.execute("SELECT * FROM budget_items ORDER BY sort_order ASC")
+    items = cursor.fetchall()
 
     cursor.close()
     conn.close()
-    return departments
+
+    # Nesting Logic
+    # Group items into categories
+    for cat in categories:
+        cat["items"] = [i for i in items if i["category_id"] == cat["id"]]
+    
+    # Group categories into departments
+    for dept in departments:
+        dept["categories"] = [c for c in categories if c["department_id"] == dept["id"]]
+
+    # Group departments into phases
+    hierarchy = []
+    for phase in phases:
+        phase_depts = [d for d in departments if d["phase_id"] == phase["id"]]
+        # We include the phase even if empty to show the accordion on UI
+        hierarchy.append(
+            {
+                "phase_id": phase["id"],
+                "phase_name": phase["phase_name"],
+                "departments": phase_depts,
+            }
+        )
+
+    return hierarchy
 
 
 # ── Budget values for a specific project (for pre-fill) ───────────────────────
@@ -348,14 +398,14 @@ def get_budget_values_for_project(project_id, version_id=None):
 
     if version_id:
         query = """
-            SELECT budget_item_id, quantity, rate, rate_type, rate_multiplier, gross_revenue, additional1, additional2, comment1, comment2, total
+            SELECT budget_item_id, quantity, rate, rate_type, rate_multiplier, gross_revenue, additional1, comment1, total
             FROM project_budget_values
             WHERE version_id = %s
         """
         params = (version_id,)
     else:
         query = """
-            SELECT budget_item_id, quantity, rate, rate_type, rate_multiplier, gross_revenue, additional1, additional2, comment1, comment2, total
+            SELECT budget_item_id, quantity, rate, rate_type, rate_multiplier, gross_revenue, additional1, comment1, total
             FROM project_budget_values
             WHERE version_id = (
                 SELECT id FROM budget_versions 
@@ -409,11 +459,11 @@ def create_budget_version(project_id, source_version_id=None):
                 """
                 INSERT INTO project_budget_values (
                     project_id, budget_item_id, version_id, quantity, rate, rate_type, 
-                    rate_multiplier, additional1, additional2, comment1, comment2, total
+                    rate_multiplier, additional1, comment1, total
                 )
                 SELECT 
                     project_id, budget_item_id, %s, quantity, rate, rate_type, 
-                    rate_multiplier, additional1, additional2, comment1, comment2, total
+                    rate_multiplier, additional1, comment1, total
                 FROM project_budget_values
                 WHERE version_id = %s
                 """,
@@ -492,8 +542,8 @@ def insert_budget_values_batch(project_id, version_id, values, client_ids=None):
     try:
         sql = """
             INSERT INTO project_budget_values
-                (project_id, version_id, budget_item_id, quantity, rate, rate_type, rate_multiplier, gross_revenue, additional1, additional2, comment1, comment2, total)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                (project_id, version_id, budget_item_id, quantity, rate, rate_type, rate_multiplier, gross_revenue, additional1, comment1, total)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON DUPLICATE KEY UPDATE
                 quantity    = VALUES(quantity),
                 rate        = VALUES(rate),
@@ -501,9 +551,7 @@ def insert_budget_values_batch(project_id, version_id, values, client_ids=None):
                 rate_multiplier = VALUES(rate_multiplier),
                 gross_revenue = VALUES(gross_revenue),
                 additional1 = VALUES(additional1),
-                additional2 = VALUES(additional2),
                 comment1    = VALUES(comment1),
-                comment2    = VALUES(comment2),
                 total       = VALUES(total)
         """
         rows = [
@@ -517,9 +565,7 @@ def insert_budget_values_batch(project_id, version_id, values, client_ids=None):
                 v.get("rate_multiplier", 1.0),
                 v.get("gross_revenue", 0),
                 v.get("additional1", 0),
-                v.get("additional2", 0),
                 v.get("comment1", ""),
-                v.get("comment2", ""),
                 v["total"],
             )
             for v in values

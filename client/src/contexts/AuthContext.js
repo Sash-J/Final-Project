@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import SessionTimeoutModal from "../components/common/SessionTimeoutModal";
 
 const AuthContext = createContext();
@@ -11,6 +12,8 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [sessionExpired, setSessionExpired] = useState(false);
+  const [isTransiting, setIsTransiting] = useState(false);
+  const navigate = useNavigate();
 
   const checkAuth = async () => {
     try {
@@ -26,6 +29,24 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     }
   };
+
+  // 1. Axios Interceptor for seamless 401 handling
+  useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response && error.response.status === 401) {
+          // If not already handling or on login
+          if (window.location.pathname !== "/login" && !sessionExpired) {
+            setSessionExpired(true);
+            setUser(null);
+          }
+        }
+        return Promise.reject(error);
+      }
+    );
+    return () => axios.interceptors.response.eject(interceptor);
+  }, [sessionExpired]);
 
   useEffect(() => {
     checkAuth();
@@ -51,6 +72,14 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.error("Logout failed", err);
     }
+  };
+
+  const startTransition = (to) => {
+    setIsTransiting(true);
+    setTimeout(() => {
+      navigate(to);
+      setTimeout(() => setIsTransiting(false), 500);
+    }, 400); // Wait for fade-out
   };
 
   // ── Idle Timeout Logic ───────────────────────────────────────────────────
@@ -90,13 +119,13 @@ export const AuthProvider = ({ children }) => {
   }, [user]);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, checkAuth, sessionExpired }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, checkAuth, sessionExpired, isTransiting, startTransition }}>
       {children}
       {sessionExpired && (
         <SessionTimeoutModal 
           onLogin={() => {
             setSessionExpired(false);
-            window.location.href = "/login";
+            startTransition("/login");
           }}
         />
       )}

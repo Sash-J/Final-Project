@@ -14,12 +14,13 @@ bcrypt = Bcrypt(app)
 
 # ── Blueprint Registration ────────────────────────────────────────────────────
 
-from auth_management import auth_bp, init_auth
-from user_management import user_mgmt_bp
-from project_management import project_bp
-from budget_management import budget_bp
-from schedule_management import schedule_bp
-from milestone_management import milestone_bp
+from routes.auth_management import auth_bp, init_auth
+from routes.user_management import user_mgmt_bp
+from routes.project_management import project_bp
+from routes.budget_management import budget_bp
+from routes.schedule_management import schedule_bp
+from routes.milestone_management import milestone_bp
+from routes.prediction_management import prediction_bp
 
 init_auth(bcrypt)
 
@@ -29,6 +30,7 @@ app.register_blueprint(project_bp)
 app.register_blueprint(budget_bp)
 app.register_blueprint(schedule_bp)
 app.register_blueprint(milestone_bp)
+app.register_blueprint(prediction_bp)
 
 
 # ── Root Route ────────────────────────────────────────────────────────────────
