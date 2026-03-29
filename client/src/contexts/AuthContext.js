@@ -1,14 +1,13 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { API } from "../config";
 import SessionTimeoutModal from "../components/common/SessionTimeoutModal";
 
 const AuthContext = createContext();
 
 // Configure axios for credentials (sessions)
 axios.defaults.withCredentials = true;
-
-import { API } from "../config";
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
