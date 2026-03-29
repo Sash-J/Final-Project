@@ -112,19 +112,38 @@ def get_me():
 @auth_bp.route("/api/init-admin", methods=["GET"])
 def init_admin():
     try:
-        # Only for initial setup!
+        # 1. Check if user already exists
         existing = auth.get_user_by_username("admin")
         if existing:
             return jsonify({"message": "Admin already exists"}), 200
 
+        # 2. Safety check for bcrypt
         if not _bcrypt:
-            return jsonify({"error": "Bcrypt not initialized. Restarting app/checking setup recommended."}), 500
+            return jsonify({"error": "Bcrypt not initialized. Check app.py."}), 500
 
+        # 3. Create admin with empty strings for metadata (prevent NULL crashes)
         hashed = _bcrypt.generate_password_hash("admin123").decode("utf-8")
-        auth.create_user("admin", hashed, "admin", is_approved=1)
+        auth.create_user(
+            username="admin",
+            password_hash=hashed,
+            role="admin",
+            is_approved=1,
+            full_name="Default Admin",
+            address="",
+            telephone=""
+        )
         return jsonify({"message": "Admin user created: admin / admin123"}), 201
     except Exception as e:
-        return jsonify({"error": str(e), "context": "Error during admin user initialization. Check if 'users' table exists."}), 500
+        return jsonify({"error": str(e), "context": "Error during admin user initialization. Your database might be refusing specific values or the 'users' table is missing columns."}), 500
+
+
+@auth_bp.route("/api/check-connection", methods=["GET"])
+def check_connection():
+    try:
+        auth.get_user_by_username("ping")
+        return jsonify({"status": "Database connection OK", "message": "Backend is online and communicating with MySQL."}), 200
+    except Exception as e:
+        return jsonify({"status": "Database connection FAILED", "error": str(e)}), 500
 
 
 @auth_bp.route("/api/register", methods=["POST"])
