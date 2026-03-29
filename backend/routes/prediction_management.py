@@ -1,7 +1,5 @@
 from flask import Blueprint, jsonify, request
 from core.session_handler import roles_required
-import joblib
-import numpy as np
 import os
 
 prediction_bp = Blueprint('prediction_management', __name__)
