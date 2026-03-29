@@ -3,7 +3,7 @@ import axios from "axios";
 import PageHeader from "../common/PageHeader";
 import "./FinancialDashboard.css";
 
-const API = process.env.REACT_APP_API_URL || "http://localhost:5000";
+import { API } from "../../config";
 
 const FinancialDashboard = () => {
   const [summary, setSummary] = useState(null);

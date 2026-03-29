@@ -8,13 +8,7 @@ const AuthContext = createContext();
 // Configure axios for credentials (sessions)
 axios.defaults.withCredentials = true;
 
-// Detect if running on Vercel
-const isVercel = window.location.hostname.includes("vercel.app");
-const rawAPI = process.env.REACT_APP_API_URL || "http://localhost:5000";
-
-// Use relative paths on Vercel for 100% reliability
-const API = isVercel ? "" : (rawAPI.endsWith("/") ? rawAPI.slice(0, -1) : rawAPI);
-console.log("DETECTED API MODE:", isVercel ? "Vercel (Relative)" : API);
+import { API } from "../config";
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);

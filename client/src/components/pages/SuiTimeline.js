@@ -5,7 +5,7 @@ import GlassDropdown from "../common/GlassDropdown";
 import ModalPortal from "../common/ModalPortal";
 import ConfirmationModal from "../common/ConfirmationModal";
 
-const API = process.env.REACT_APP_API_URL || "http://localhost:5000";
+import { API } from "../../config";
 
 const SuiTimeline = ({
   projectId,

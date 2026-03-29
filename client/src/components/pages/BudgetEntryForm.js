@@ -3,7 +3,7 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import "./BudgetEntryForm.css";
 import html2pdf from "html2pdf.js";
 
-const API = process.env.REACT_APP_API_URL || "http://localhost:5000";
+import { API } from "../../config";
 
 // ── Skeletal Loading Component ──────────────────────────────────────────────
 const SkeletonTable = ({ BudgetColGroup }) => (

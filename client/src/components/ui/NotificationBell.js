@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import "./NotificationBell.css";
 
-const API = process.env.REACT_APP_API_URL || "http://localhost:5000";
+import { API } from "../../config";
 
 const NotificationBell = () => {
   const [notifications, setNotifications] = useState([]);

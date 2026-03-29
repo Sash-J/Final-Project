@@ -8,7 +8,7 @@ import ModalPortal from "../common/ModalPortal";
 import html2pdf from "html2pdf.js";
 import Skeleton from "../ui/Skeleton";
 
-const API = process.env.REACT_APP_API_URL || "http://localhost:5000";
+import { API } from "../../config";
 
 const TimelinePreview = ({ startDate, endDate, projectStatus }) => {
   if (!startDate || !endDate) return null;

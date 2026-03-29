@@ -5,7 +5,7 @@ import GlassDropdown from "../common/GlassDropdown";
 import PageHeader from "../common/PageHeader";
 import "./AdminBudget.css";
 
-const API = process.env.REACT_APP_API_URL || "http://localhost:5000";
+import { API } from "../../config";
 
 // ── Reusable status message ───────────────────────────────────────────────────
 const StatusMsg = ({ msg }) => {

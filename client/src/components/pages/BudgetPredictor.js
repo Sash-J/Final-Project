@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import PageHeader from "../common/PageHeader";
 import "./BudgetPredictor.css";
 
-const API = process.env.REACT_APP_API_URL || "http://localhost:5000";
+import { API } from "../../config";
 
 const BudgetPredictor = () => {
   const [formData, setFormData] = useState({
