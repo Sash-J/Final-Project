@@ -19,16 +19,20 @@ app.config.update(
     SESSION_COOKIE_HTTPONLY=True
 )
 
-# Robust Dynamic CORS (Supports Credentials for Auth)
-CORS(
-    app,
-    supports_credentials=True,
-    origins=[
-        "http://localhost:3000",
-        "https://vision-division-studios.vercel.app",
-        re.compile(r"https://.*\.vercel\.app$")
-    ]
-)
+# Dynamic CORS Reflector (The most robust way for Vercel)
+CORS(app, supports_credentials=True)
+
+@app.after_request
+def add_cors_headers(response):
+    origin = request.headers.get('Origin')
+    if origin:
+        # If the origin is from Vercel or localhost, approve it
+        if ".vercel.app" in origin or "localhost" in origin:
+            response.headers['Access-Control-Allow-Origin'] = origin
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+            response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
+    return response
 
 @app.route("/api/health")
 def health():
