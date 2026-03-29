@@ -111,14 +111,20 @@ def get_me():
 
 @auth_bp.route("/api/init-admin", methods=["GET"])
 def init_admin():
-    # Only for initial setup!
-    existing = auth.get_user_by_username("admin")
-    if existing:
-        return jsonify({"message": "Admin already exists"}), 200
+    try:
+        # Only for initial setup!
+        existing = auth.get_user_by_username("admin")
+        if existing:
+            return jsonify({"message": "Admin already exists"}), 200
 
-    hashed = _bcrypt.generate_password_hash("admin123").decode("utf-8")
-    auth.create_user("admin", hashed, "admin", is_approved=1)
-    return jsonify({"message": "Admin user created: admin / admin123"}), 201
+        if not _bcrypt:
+            return jsonify({"error": "Bcrypt not initialized. Restarting app/checking setup recommended."}), 500
+
+        hashed = _bcrypt.generate_password_hash("admin123").decode("utf-8")
+        auth.create_user("admin", hashed, "admin", is_approved=1)
+        return jsonify({"message": "Admin user created: admin / admin123"}), 201
+    except Exception as e:
+        return jsonify({"error": str(e), "context": "Error during admin user initialization. Check if 'users' table exists."}), 500
 
 
 @auth_bp.route("/api/register", methods=["POST"])
