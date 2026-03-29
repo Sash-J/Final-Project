@@ -8,6 +8,8 @@ const AuthContext = createContext();
 // Configure axios for credentials (sessions)
 axios.defaults.withCredentials = true;
 
+const API = process.env.REACT_APP_API_URL || "http://localhost:5000";
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -17,7 +19,7 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const res = await axios.get("/api/me");
+      const res = await axios.get(`${API}/api/me`);
       if (res.data.logged_in) {
         setUser(res.data.user);
       } else {
@@ -54,7 +56,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     try {
-      const res = await axios.post("/api/login", { username, password });
+      const res = await axios.post(`${API}/api/login`, { username, password });
       setUser(res.data.user);
       return { success: true };
     } catch (err) {
@@ -67,7 +69,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await axios.post("/api/logout");
+      await axios.post(`${API}/api/logout`);
       setUser(null);
     } catch (err) {
       console.error("Logout failed", err);
@@ -76,9 +78,16 @@ export const AuthProvider = ({ children }) => {
 
   const startTransition = (to) => {
     setIsTransiting(true);
+    
+    // Fail-safe: Always hide overlay after 1.5s max
+    const failSafeId = setTimeout(() => setIsTransiting(false), 1500);
+
     setTimeout(() => {
       navigate(to);
-      setTimeout(() => setIsTransiting(false), 500);
+      setTimeout(() => {
+        setIsTransiting(false);
+        clearTimeout(failSafeId);
+      }, 500);
     }, 400); // Wait for fade-out
   };
 

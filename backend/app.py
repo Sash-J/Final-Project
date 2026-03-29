@@ -4,12 +4,20 @@ from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
 app.secret_key = "super_secret_key"  # Change this in production
+
+# Production Cookie Settings (Required for Vercel HTTPS)
+app.config.update(
+    SESSION_COOKIE_SAMESITE='Lax',
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_HTTPONLY=True
+)
+
 CORS(
     app,
     supports_credentials=True,
-    origins="*",
-    resources={r"/*": {"origins": "*"}},
+    origins=["http://localhost:3000", "https://vision-division-studios.vercel.app"] 
 )
+# Note: Add any other custom Vercel domains to the list above if you use them.
 bcrypt = Bcrypt(app)
 
 # ── Blueprint Registration ────────────────────────────────────────────────────
