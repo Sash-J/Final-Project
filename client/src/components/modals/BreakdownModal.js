@@ -8,9 +8,6 @@ const BreakdownModal = ({
   onSave,
   initialItems = [],
   itemName = "",
-  projectId,
-  versionId,
-  itemId,
 }) => {
   const [items, setItems] = useState([]);
 

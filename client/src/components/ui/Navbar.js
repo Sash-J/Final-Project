@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import NotificationBell from "./NotificationBell";
 import UserProfile from "./UserProfile";
@@ -7,7 +7,6 @@ import "./Navbar.css";
 
 const Navbar = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [useImageLogo, setUseImageLogo] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
