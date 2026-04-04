@@ -170,6 +170,42 @@ def budget_values_batch():
         return jsonify({"error": str(e)}), 500
 
 
+@budget_bp.route("/api/budget-values/breakdown", methods=["GET"])
+@login_required
+def budget_item_breakdown_get():
+    project_id = request.args.get("project_id")
+    version_id = request.args.get("version_id")
+    item_id = request.args.get("item_id")
+    
+    if not project_id or not version_id or not item_id:
+        return jsonify({"error": "project_id, version_id, and item_id are required"}), 400
+    
+    try:
+        breakdowns = db.get_budget_item_breakdowns(int(project_id), int(version_id), int(item_id))
+        return jsonify(breakdowns), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@budget_bp.route("/api/budget-values/breakdown", methods=["POST"])
+@roles_required("admin", "manager")
+def budget_item_breakdown_post():
+    data = request.get_json()
+    project_id = data.get("project_id")
+    version_id = data.get("version_id")
+    item_id = data.get("item_id")
+    breakdown_items = data.get("breakdown_items", [])
+    
+    if not project_id or not version_id or not item_id:
+        return jsonify({"error": "project_id, version_id, and item_id are required"}), 400
+    
+    try:
+        db.save_budget_item_breakdowns_batch(int(project_id), int(version_id), int(item_id), breakdown_items)
+        return jsonify({"message": "Breakdown saved successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 # ── Budget Versions ───────────────────────────────────────────────────────────
 
 @budget_bp.route("/api/projects/<int:project_id>/budget-versions", methods=["POST"])

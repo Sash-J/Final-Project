@@ -401,16 +401,36 @@ def get_budget_values_for_project(project_id, version_id=None):
 
     if version_id:
         query = """
-            SELECT budget_item_id, quantity, rate, rate_type, rate_multiplier, gross_revenue, additional1, comment1, total
-            FROM project_budget_values
-            WHERE version_id = %s
+            SELECT 
+                pv.budget_item_id, pv.quantity, pv.rate, pv.rate_type, 
+                pv.rate_multiplier, pv.gross_revenue, pv.additional1, pv.comment1,
+                COALESCE((
+                    SELECT SUM(total) FROM budget_item_breakdowns bib 
+                    WHERE bib.version_id = pv.version_id AND bib.budget_item_id = pv.budget_item_id
+                ), pv.total) as total,
+                (pv.is_itemized OR EXISTS (
+                    SELECT 1 FROM budget_item_breakdowns bib 
+                    WHERE bib.version_id = pv.version_id AND bib.budget_item_id = pv.budget_item_id
+                )) as is_itemized
+            FROM project_budget_values pv
+            WHERE pv.version_id = %s
         """
         params = (version_id,)
     else:
         query = """
-            SELECT budget_item_id, quantity, rate, rate_type, rate_multiplier, gross_revenue, additional1, comment1, total
-            FROM project_budget_values
-            WHERE version_id = (
+            SELECT 
+                pv.budget_item_id, pv.quantity, pv.rate, pv.rate_type, 
+                pv.rate_multiplier, pv.gross_revenue, pv.additional1, pv.comment1,
+                COALESCE((
+                    SELECT SUM(total) FROM budget_item_breakdowns bib 
+                    WHERE bib.version_id = pv.version_id AND bib.budget_item_id = pv.budget_item_id
+                ), pv.total) as total,
+                (pv.is_itemized OR EXISTS (
+                    SELECT 1 FROM budget_item_breakdowns bib 
+                    WHERE bib.version_id = pv.version_id AND bib.budget_item_id = pv.budget_item_id
+                )) as is_itemized
+            FROM project_budget_values pv
+            WHERE pv.version_id = (
                 SELECT id FROM budget_versions 
                 WHERE project_id = %s 
                 ORDER BY version_number DESC LIMIT 1
@@ -420,9 +440,48 @@ def get_budget_values_for_project(project_id, version_id=None):
 
     cursor.execute(query, params)
     rows = cursor.fetchall()
+    
+    # Standardize result by string ID
+    result = {str(row["budget_item_id"]): {**row, "is_itemized": bool(row.get("is_itemized", 0))} for row in rows}
+
+    # Find version_id if it wasn't provided (already queried in subquery if else block)
+    v_id = version_id
+    if not v_id and rows:
+        # If we didn't have version_id, use the one from the first row found
+        v_id = rows[0].get("version_id")
+    
+    if not v_id:
+        # As a fallback if no rows in project_budget_values, get latest version_id
+        cursor.execute("SELECT id FROM budget_versions WHERE project_id = %s ORDER BY version_number DESC LIMIT 1", (project_id,))
+        rv = cursor.fetchone()
+        v_id = rv['id'] if rv else None
+
+    if v_id:
+        # SMART DETECTION FALLBACK: Ensure items in budget_item_breakdowns are always marked itemized
+        # Also aggregate the total sum for these items
+        cursor.execute("""
+            SELECT budget_item_id, SUM(total) as agg_total 
+            FROM budget_item_breakdowns 
+            WHERE version_id = %s 
+            GROUP BY budget_item_id
+        """, (v_id,))
+        for b_row in cursor.fetchall():
+            bid_str = str(b_row["budget_item_id"])
+            if bid_str not in result:
+                result[bid_str] = {
+                    "budget_item_id": b_row["budget_item_id"],
+                    "quantity": 0, "rate": 0, "rate_type": "day", "rate_multiplier": 1,
+                    "gross_revenue": 0, "additional1": 0, "comment1": "", 
+                    "total": b_row["agg_total"] or 0,
+                    "is_itemized": True
+                }
+            else:
+                result[bid_str]["is_itemized"] = True
+                result[bid_str]["total"] = b_row["agg_total"] or result[bid_str]["total"]
+
     cursor.close()
     conn.close()
-    return {str(row["budget_item_id"]): row for row in rows}
+    return result
 
 
 def get_budget_versions(project_id):
@@ -458,16 +517,33 @@ def create_budget_version(project_id, source_version_id=None):
 
         # If source version is provided, clone values
         if source_version_id:
+            # 1. Clone main values
             cursor.execute(
                 """
                 INSERT INTO project_budget_values (
                     project_id, budget_item_id, version_id, quantity, rate, rate_type, 
-                    rate_multiplier, additional1, comment1, total
+                    rate_multiplier, additional1, comment1, total, gross_revenue, is_itemized
                 )
                 SELECT 
                     project_id, budget_item_id, %s, quantity, rate, rate_type, 
-                    rate_multiplier, additional1, comment1, total
+                    rate_multiplier, additional1, comment1, total, gross_revenue, is_itemized
                 FROM project_budget_values
+                WHERE version_id = %s
+                """,
+                (new_version_id, source_version_id),
+            )
+
+            # 2. Clone breakdowns
+            cursor.execute(
+                """
+                INSERT INTO budget_item_breakdowns (
+                    project_id, version_id, budget_item_id, description, quantity, 
+                    rate_type, rate_multiplier, rate, gross_revenue, additional1, total
+                )
+                SELECT 
+                    project_id, %s, budget_item_id, description, quantity, 
+                    rate_type, rate_multiplier, rate, gross_revenue, additional1, total
+                FROM budget_item_breakdowns
                 WHERE version_id = %s
                 """,
                 (new_version_id, source_version_id),
@@ -545,8 +621,8 @@ def insert_budget_values_batch(project_id, version_id, values, client_ids=None):
     try:
         sql = """
             INSERT INTO project_budget_values
-                (project_id, version_id, budget_item_id, quantity, rate, rate_type, rate_multiplier, gross_revenue, additional1, comment1, total)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                (project_id, version_id, budget_item_id, quantity, rate, rate_type, rate_multiplier, gross_revenue, additional1, comment1, total, is_itemized)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON DUPLICATE KEY UPDATE
                 quantity    = VALUES(quantity),
                 rate        = VALUES(rate),
@@ -555,7 +631,8 @@ def insert_budget_values_batch(project_id, version_id, values, client_ids=None):
                 gross_revenue = VALUES(gross_revenue),
                 additional1 = VALUES(additional1),
                 comment1    = VALUES(comment1),
-                total       = VALUES(total)
+                total       = VALUES(total),
+                is_itemized  = VALUES(is_itemized)
         """
         rows = [
             (
@@ -570,6 +647,7 @@ def insert_budget_values_batch(project_id, version_id, values, client_ids=None):
                 v.get("additional1", 0),
                 v.get("comment1", ""),
                 v["total"],
+                v.get("is_itemized", 0),
             )
             for v in values
         ]
@@ -600,6 +678,65 @@ def insert_budget_values_batch(project_id, version_id, values, client_ids=None):
         conn.close()
 
     return affected
+
+
+def get_budget_item_breakdowns(project_id, version_id, budget_item_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    query = """
+        SELECT * FROM budget_item_breakdowns 
+        WHERE project_id = %s AND version_id = %s AND budget_item_id = %s
+        ORDER BY id ASC
+    """
+    cursor.execute(query, (project_id, version_id, budget_item_id))
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return result
+
+
+def save_budget_item_breakdowns_batch(project_id, version_id, budget_item_id, breakdown_items):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        # Delete old breakdowns for this item
+        cursor.execute(
+            "DELETE FROM budget_item_breakdowns WHERE project_id = %s AND version_id = %s AND budget_item_id = %s",
+            (project_id, version_id, budget_item_id)
+        )
+        
+        if breakdown_items:
+            query = """
+                INSERT INTO budget_item_breakdowns 
+                (project_id, version_id, budget_item_id, description, quantity, rate_type, rate_multiplier, rate, gross_revenue, additional1, total)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            rows = [
+                (
+                    project_id,
+                    version_id,
+                    budget_item_id,
+                    b.get("description", ""),
+                    b.get("quantity", 0),
+                    b.get("rate_type", "day"),
+                    b.get("rate_multiplier", 1.0),
+                    b.get("rate", 0),
+                    b.get("gross_revenue", 0),
+                    b.get("additional1", 0),
+                    b.get("total", 0)
+                )
+                for b in breakdown_items
+            ]
+            cursor.executemany(query, rows)
+            
+        conn.commit()
+        return True
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        cursor.close()
+        conn.close()
 
 
 # Functions moved to auth_operations.py
@@ -773,6 +910,40 @@ def run_budget_migration():
             print("Migration: Created new unique index.")
         except:
             pass
+
+        # Add is_itemized column to project_budget_values
+        print("Migration: Checking for is_itemized column...")
+        cursor.execute("SHOW COLUMNS FROM project_budget_values LIKE 'is_itemized'")
+        if not cursor.fetchone():
+            print("Migration: Adding is_itemized column...")
+            cursor.execute(
+                "ALTER TABLE project_budget_values ADD COLUMN is_itemized TINYINT(1) DEFAULT 0"
+            )
+
+        # Create budget_item_breakdowns table
+        print("Migration: Creating budget_item_breakdowns table...")
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS budget_item_breakdowns (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                project_id INT NOT NULL,
+                version_id INT NOT NULL,
+                budget_item_id INT NOT NULL,
+                description TEXT,
+                quantity DECIMAL(15, 2) DEFAULT 0,
+                rate_type VARCHAR(50) DEFAULT 'day',
+                rate_multiplier DECIMAL(15, 2) DEFAULT 1.0,
+                rate DECIMAL(15, 2) DEFAULT 0,
+                gross_revenue DECIMAL(15, 2) DEFAULT 0,
+                additional1 DECIMAL(15, 2) DEFAULT 0,
+                total DECIMAL(15, 2) DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+                FOREIGN KEY (version_id) REFERENCES budget_versions(id) ON DELETE CASCADE,
+                FOREIGN KEY (budget_item_id) REFERENCES budget_items(id) ON DELETE CASCADE
+            )
+        """
+        )
 
         print("Migration: Committing...")
         conn.commit()

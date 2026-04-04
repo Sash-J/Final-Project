@@ -5,6 +5,8 @@ import "./ClientDashboard.css";
 import "./BudgetEntryForm.css"; // Reuse the admin sheet styles
 import SuiTimeline from "./SuiTimeline";
 import ModalPortal from "../common/ModalPortal";
+import GlassDropdown from "../common/GlassDropdown";
+import Icon from "../common/Icon";
 import html2pdf from "html2pdf.js";
 import Skeleton from "../ui/Skeleton";
 
@@ -184,7 +186,13 @@ const ClientDashboard = () => {
                         const a1 = parseFloat(val.additional1) || 0;
                         const t = parseFloat(val.total) || 0;
 
-                        if (q > 0 || r > 0 || t > 0 || a1 > 0) {
+                        if (
+                          q > 0 ||
+                          r > 0 ||
+                          t > 0 ||
+                          a1 > 0 ||
+                          val.is_itemized
+                        ) {
                           newCat.items.push({
                             ...item,
                             val: {
@@ -194,6 +202,7 @@ const ClientDashboard = () => {
                               add1: a1,
                               total: t,
                               c1: val.comment1,
+                              is_itemized: !!val.is_itemized,
                             },
                           });
                           catTotal += t;
@@ -218,11 +227,11 @@ const ClientDashboard = () => {
             });
           }
 
-          if (newPhase.departments.length > 0) {
-            newPhase.phaseTotal = phaseTotal;
-            filledPhases.push(newPhase);
-            grandTotal += phaseTotal;
-          }
+          // Always show the phase if it has departments (from hierarchy) OR if it was filled
+          // This keeps the structure consistent (Pre, Prod, Post)
+          newPhase.phaseTotal = phaseTotal;
+          filledPhases.push(newPhase);
+          grandTotal += phaseTotal;
         });
       }
       setBudgetData({ phases: filledPhases, grandTotal });
@@ -270,12 +279,12 @@ const ClientDashboard = () => {
       margin: 10,
       filename: filename,
       image: { type: "jpeg", quality: 1 },
-      html2canvas: { 
-        scale: 2, 
-        useCORS: true, 
-        letterRendering: true, 
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        letterRendering: true,
         backgroundColor: "#0d0e15",
-        windowWidth: 1200 // Specify the width of the canvas to include all columns
+        windowWidth: 1200, // Specify the width of the canvas to include all columns
       },
       jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
     };
@@ -286,14 +295,26 @@ const ClientDashboard = () => {
     return (
       <div className="cd-root">
         <div className="cd-header">
-          <Skeleton width="300px" height="32px" style={{ marginBottom: '10px' }} />
+          <Skeleton
+            width="300px"
+            height="32px"
+            style={{ marginBottom: "10px" }}
+          />
           <Skeleton width="200px" height="18px" />
         </div>
         <div className="cd-projects-grid">
           {[1, 2, 3].map((i) => (
             <div key={i} className="cd-project-card skeleton-card">
-              <Skeleton height="200px" borderRadius="15px" style={{ marginBottom: '15px' }} />
-              <Skeleton width="60%" height="24px" style={{ marginBottom: '10px' }} />
+              <Skeleton
+                height="200px"
+                borderRadius="15px"
+                style={{ marginBottom: "15px" }}
+              />
+              <Skeleton
+                width="60%"
+                height="24px"
+                style={{ marginBottom: "10px" }}
+              />
               <Skeleton width="100%" height="40px" borderRadius="8px" />
             </div>
           ))}
@@ -480,10 +501,6 @@ const ClientDashboard = () => {
               className="cd-modal-content"
               onClick={(e) => e.stopPropagation()}
             >
-              <button className="cd-modal-close" onClick={closeBudgetModal}>
-                &times;
-              </button>
-
               <div className="cd-modal-header-row">
                 <h3>
                   Budget Sheet - {selectedProject.project_name}
@@ -493,27 +510,39 @@ const ClientDashboard = () => {
                 </h3>
 
                 <div className="cd-modal-header-actions">
-                  {budgetData && budgetData.phases.length > 0 && (
-                    <button className="cd-view-budget-btn" style={{ padding: '8px 16px', fontSize: '0.9rem' }} onClick={handleDownloadPDF}>
+                  {budgetData && (
+                    <div
+                      className="cd-pdf-btn"
+                      onClick={handleDownloadPDF}
+                      role="button"
+                      tabIndex={0}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      <Icon name="download" modifiers="sm" />
                       Download PDF
-                    </button>
+                    </div>
                   )}
 
                   {versions.length > 0 && (
-                    <div className="cd-version-selector">
-                      <label>Version:</label>
-                      <select
-                        value={currentVersionId || ""}
-                        onChange={(e) => handleVersionChange(e.target.value)}
-                      >
-                        {versions.map((v) => (
-                          <option key={v.id} value={v.id}>
-                            Version {v.version_number}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                    <GlassDropdown
+                      className="cd-version-selector"
+                      modifiers="sm w-160"
+                      placeholder="Version"
+                      options={versions.map((v) => ({
+                        value: v.id,
+                        label: `Version ${v.version_number}`,
+                      }))}
+                      value={currentVersionId || ""}
+                      onChange={(val) => handleVersionChange(val)}
+                    />
                   )}
+                  <button className="cd-modal-close" onClick={closeBudgetModal}>
+                    &times;
+                  </button>
                 </div>
               </div>
 
@@ -522,7 +551,15 @@ const ClientDashboard = () => {
                   Loading budget...
                 </div>
               ) : budgetData && budgetData.phases.length > 0 ? (
-                <div className="client-table-container" id="client-budget-pdf-content" style={{ backgroundColor: "#0d0e15", padding: "15px", borderRadius: "12px" }}>
+                <div
+                  className="cd-table-container"
+                  id="client-budget-pdf-content"
+                  style={{
+                    backgroundColor: "#0d0e15",
+                    padding: "15px",
+                    borderRadius: "12px",
+                  }}
+                >
                   <div
                     className="bef-sheet"
                     style={{
@@ -547,69 +584,100 @@ const ClientDashboard = () => {
                           <th className="col-num">Total</th>
                         </tr>
                       </thead>
-                                            {budgetData.phases.map((phase) => (
-                                                <React.Fragment key={phase.phase_id}>
-                                                    <tbody className="bef-phase-group-header">
-                                                        <tr className="phase-header-row" style={{ background: 'rgba(99, 179, 237, 0.1)' }}>
-                                                            <td colSpan="4" style={{ padding: '12px 20px', fontWeight: '700', color: '#63b3ed', textTransform: 'uppercase', fontSize: '0.9rem', letterSpacing: '1px' }}>
-                                                                {phase.phase_name}
-                                                            </td>
-                                                            <td className="col-num phase-subtotal" style={{ padding: '12px 20px', textAlign: 'right', fontWeight: '700', color: '#63b3ed' }}>
-                                                                {formatCurrency(phase.phaseTotal)}
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                    {phase.departments.map((dept, deptIdx) => (
-                                                        <React.Fragment key={dept.id}>
-                                                            <tbody className="bef-dept-body">
-                                                                <tr className="bef-dept-row">
-                                                                    <td colSpan="5">
-                                                                        <div className="dept-header-content">
-                                                                            <span className="dept-id">{String(deptIdx + 1).padStart(2, "0")}</span>
-                                                                            <span className="dept-name">{dept.department_name}</span>
-                                                                        </div>
-                                                                    </td>
-                                                                </tr>
-                                                            </tbody>
-                                                            {dept.categories.map((cat, catIdx) => (
-                                                                <tbody className="bef-cat-body" key={cat.id}>
-                                                                    <tr className="bef-cat-row">
-                                                                        <td colSpan="4">
-                                                                            <span className="cat-id">{deptIdx + 1}.{catIdx + 1}</span>
-                                                                            <span className="cat-name">{cat.category_name}</span>
-                                                                        </td>
-                                                                        <td className="col-num cat-subtotal">
-                                                                            {formatCurrency(cat.catTotal)}
-                                                                        </td>
-                                                                    </tr>
-                                                                    {cat.items.map((item) => (
-                                                                        <tr key={item.id} className="bef-row filled">
-                                                                            <td className="col-item-name">{item.item_name}</td>
-                                                                            <td className="col-num" style={{ textAlign: 'center' }}>{item.val.qty}</td>
-                                                                            <td className="col-rate-type" style={{ fontSize: '0.8rem', color: '#a0aec0', width: '80px', textAlign: 'center' }}>{item.val.rate_type}</td>
-                                                                            <td className="col-num" style={{ textAlign: 'center' }}>{formatCurrency(item.val.rate)}</td>
-                                                                            <td className="col-num total-cell has-value">{formatCurrency(item.val.total)}</td>
-                                                                        </tr>
-                                                                    ))}
-                                                                </tbody>
-                                                            ))}
-                                                        </React.Fragment>
-                                                    ))}
-                                                </React.Fragment>
-                                            ))}
+                      {budgetData.phases.map((phase) => (
+                        <React.Fragment key={phase.phase_id}>
+                          <tbody className="bef-phase-group-header">
+                            <tr className="cd-phase-row">
+                              <td colSpan="4" className="cd-phase-header-cell">
+                                {phase.phase_name}
+                              </td>
+                              <td className="col-num cd-phase-subtotal-cell">
+                                {formatCurrency(phase.phaseTotal)}
+                              </td>
+                            </tr>
+                          </tbody>
+                          {phase.departments.map((dept, deptIdx) => (
+                            <React.Fragment key={dept.id}>
+                              <tbody className="bef-dept-body">
+                                <tr className="bef-dept-row">
+                                  <td colSpan="5">
+                                    <div className="dept-header-content">
+                                      <span className="dept-id">
+                                        {String(deptIdx + 1).padStart(2, "0")}
+                                      </span>
+                                      <span className="dept-name">
+                                        {dept.department_name}
+                                      </span>
+                                    </div>
+                                  </td>
+                                </tr>
+                              </tbody>
+                              {dept.categories.map((cat, catIdx) => (
+                                <tbody className="bef-cat-body" key={cat.id}>
+                                  <tr className="bef-cat-row">
+                                    <td colSpan="4">
+                                      <span className="cat-id">
+                                        {deptIdx + 1}.{catIdx + 1}
+                                      </span>
+                                      <span className="cat-name">
+                                        {cat.category_name}
+                                      </span>
+                                    </td>
+                                    <td className="col-num cat-subtotal">
+                                      {formatCurrency(cat.catTotal)}
+                                    </td>
+                                  </tr>
+                                  {cat.items.map((item) => (
+                                    <tr
+                                      key={item.id}
+                                      className="bef-row filled"
+                                    >
+                                      <td className="col-item-name">
+                                        {item.item_name}
+                                      </td>
+                                      <td
+                                        className="col-num"
+                                        style={{ textAlign: "center" }}
+                                      >
+                                        {item.val.is_itemized
+                                          ? "—"
+                                          : item.val.qty}
+                                      </td>
+                                      <td
+                                        className="col-rate-type"
+                                        style={{
+                                          fontSize: "0.8rem",
+                                          color: "#a0aec0",
+                                          width: "80px",
+                                          textAlign: "center",
+                                        }}
+                                      >
+                                        {item.val.is_itemized
+                                          ? "—"
+                                          : item.val.rate_type}
+                                      </td>
+                                      <td
+                                        className="col-num"
+                                        style={{ textAlign: "center" }}
+                                      >
+                                        {item.val.is_itemized
+                                          ? "—"
+                                          : formatCurrency(item.val.rate)}
+                                      </td>
+                                      <td className="col-num total-cell has-value">
+                                        {formatCurrency(item.val.total)}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              ))}
+                            </React.Fragment>
+                          ))}
+                        </React.Fragment>
+                      ))}
                     </table>
                   </div>
-                  <div
-                    className="bef-footer"
-                    style={{
-                      marginTop: "20px",
-                      padding: "15px 20px",
-                      background: "rgba(0,0,0,0.2)",
-                      borderRadius: "12px",
-                      border: "1px solid rgba(255,255,255,0.05)",
-                      justifyContent: "flex-end",
-                    }}
-                  >
+                  <div className="cd-budget-footer">
                     <div className="bef-grand-total">
                       Grand Total:{" "}
                       <strong>{formatCurrency(budgetData.grandTotal)}</strong>
@@ -655,14 +723,17 @@ const ClientDashboard = () => {
                   (e.currentTarget.style.background = "rgba(255, 60, 60, 0.8)")
                 }
                 onMouseOut={(e) =>
-                  (e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)")
+                  (e.currentTarget.style.background =
+                    "rgba(255, 255, 255, 0.1)")
                 }
                 onClick={() => setSelectedTimelineProject(null)}
               >
                 ✕
               </button>
 
-              <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+              <div
+                style={{ flex: 1, display: "flex", flexDirection: "column" }}
+              >
                 <h3
                   style={{ marginBottom: "10px", color: "#fff", flexShrink: 0 }}
                 >

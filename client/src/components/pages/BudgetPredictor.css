@@ -24,7 +24,6 @@
   animation: bentoFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-
 .predictor-form-bento {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -51,7 +50,7 @@
 }
 
 .bento-box h3 {
-  font-size: 0.9rem;
+  font-size: 1.2rem;
   text-transform: uppercase;
   letter-spacing: 1.5px;
   color: #00c6e6;

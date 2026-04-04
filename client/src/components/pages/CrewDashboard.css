@@ -386,13 +386,14 @@
 }
 
 .crew-modal-header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 30px;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 50px 30px !important;
   background: rgba(255, 255, 255, 0.02);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  min-height: 80px;
+  height: 80px !important;
+  box-sizing: border-box !important;
 }
 
 .crew-modal-header-row h3 {
@@ -400,55 +401,54 @@
   color: #fff;
   font-size: 1.4rem;
   letter-spacing: -0.5px;
+  line-height: 1;
 }
 
 .crew-modal-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-right: 65px; /* Clear the absolute close button */
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  margin-right: 0 !important;
 }
 
-.crew-version-selector {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.crew-version-selector.glass-dropdown-container {
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  height: 40px !important;
 }
 
-.crew-version-selector label {
-  font-size: 0.85rem;
-  color: #a0aec0;
-  font-weight: 600;
+.crew-version-selector .glass-dropdown-trigger {
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 16px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  margin: 0 !important; /* Force absolutely no geometric push */
 }
 
-.crew-version-selector select {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #fff;
-  padding: 8px 14px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.crew-version-selector select:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(251, 146, 60, 0.3);
+.crew-version-selector .trigger-text {
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  line-height: normal !important;
 }
 
 .crew-modal-close {
-  position: absolute;
-  top: 25px;
-  right: 25px;
+  position: relative !important;
   background: none;
   border: none;
   color: #f87171;
   font-size: 2.2rem;
+  line-height: 1 !important;
   cursor: pointer;
   transition: 0.2s;
   padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-left: 10px !important;
 }
 
 .crew-modal-close:hover {
@@ -509,4 +509,69 @@
   .crew-projects-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* ── Budget Modal Expansion ────────────────────────────────────────────────── */
+.crew-budget-footer {
+  margin-top: 20px;
+  padding: 15px 20px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.crew-pdf-btn {
+  height: 40px !important;
+  padding: 0 24px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  background: var(--accent-color, #00c6e6) !important;
+  border: none !important;
+  color: #000 !important;
+  border-radius: 25px !important;
+  box-shadow: 0 0 15px rgba(0, 198, 230, 0.4) !important;
+  cursor: pointer !important;
+  line-height: normal !important;
+  transition: all 0.2s !important;
+}
+
+.crew-version-selector .glass-dropdown-trigger {
+  height: 40px !important;
+  min-height: 40px !important;
+}
+
+.crew-pdf-btn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.crew-phase-row {
+  background: rgba(99, 179, 237, 0.1);
+}
+
+.crew-phase-header-cell {
+  padding: 12px 20px;
+  font-weight: 700;
+  color: #63b3ed;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+}
+
+.crew-phase-subtotal-cell {
+  padding: 12px 20px;
+  text-align: right;
+  font-weight: 700;
+  color: #63b3ed;
 }

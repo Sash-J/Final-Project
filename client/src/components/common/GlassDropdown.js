@@ -22,6 +22,8 @@ const GlassDropdown = ({
   multiple = false,
   placeholder = "Select...",
   className = "",
+  modifiers = "",
+  style = {},
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -65,8 +67,11 @@ const GlassDropdown = ({
     if (selectedOpt) triggerText = selectedOpt.label;
   }
 
+  // Combine standard class with modifiers
+  const containerClass = `glass-dropdown-container ${modifiers} ${className}`.trim();
+
   return (
-    <div className={`glass-dropdown-container ${className}`} ref={dropdownRef}>
+    <div className={containerClass} ref={dropdownRef} style={style}>
       {label && <label className="glass-dropdown-label">{label}</label>}
       
       <div 

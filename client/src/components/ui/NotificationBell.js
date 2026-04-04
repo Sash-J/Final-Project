@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import { createPortal } from "react-dom";
 import "./NotificationBell.css";
 
 import { API } from "../../config";
@@ -98,16 +99,20 @@ const NotificationBell = () => {
 
   return (
     <div className="notification-bell-container" ref={dropdownRef}>
-      <div className="bell-icon" onClick={() => setShowDropdown(!showDropdown)}>
+      <div className={`bell-icon ${showDropdown ? "active" : ""}`} onClick={() => setShowDropdown(!showDropdown)}>
         <BellIcon className={unreadCount > 0 ? "has-unread" : ""} />
         {unreadCount > 0 && <span className="unread-badge">{unreadCount}</span>}
       </div>
 
-      {showDropdown && (
-        <div className="notifications-dropdown glass-panel">
+      {showDropdown && createPortal(
+        <div 
+          className={`notifications-dropdown glass-panel show`}
+          ref={dropdownRef} // Attach ref here for outside click detection since it's portalled
+        >
           <div className="dropdown-header">
             <div className="dropdown-title-wrap">
               <BellIcon className="dropdown-header-icon" />
+              <h3>Notifications</h3>
             </div>
             {unreadCount > 0 && (
               <button className="mark-all-btn" onClick={handleMarkAllRead}>
@@ -131,7 +136,8 @@ const NotificationBell = () => {
               ))
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

@@ -6,6 +6,7 @@ import "../ui/Skeleton.css";
 import { useModal } from "../../contexts/ModalContext";
 import GlassDropdown from "../common/GlassDropdown";
 import ModalPortal from "../common/ModalPortal";
+import Icon from "../common/Icon";
 
 import { API } from "../../config";
 
@@ -24,37 +25,16 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit }) => {
     start_date: "",
     end_date: "",
     location: "",
+    project_image: "",
     client_ids: [],
     crew_ids: [],
   });
+
   const [clients, setClients] = useState([]);
   const [crew, setCrew] = useState([]);
   const [msg, setMsg] = useState("");
-
-  useEffect(() => {
-    const fetchClients = async () => {
-      try {
-        const res = await fetch(`${API}/api/clients`, {
-          credentials: "include",
-        });
-        const data = await res.json();
-        setClients(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error("Failed to fetch clients:", err);
-      }
-    };
-    const fetchCrew = async () => {
-      try {
-        const res = await fetch(`${API}/api/crew`, { credentials: "include" });
-        const data = await res.json();
-        setCrew(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error("Failed to fetch crew:", err);
-      }
-    };
-    fetchClients();
-    fetchCrew();
-  }, []);
+  const [loading, setLoading] = useState(false);
+  const fileInputRef = React.useRef(null);
 
   const formatDateForInput = (dateStr) => {
     if (!dateStr) return "";
@@ -64,6 +44,25 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit }) => {
   };
 
   useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        const res = await fetch(`${API}/api/clients`, { credentials: "include" });
+        const data = await res.json();
+        setClients(Array.isArray(data) ? data : []);
+      } catch (err) { console.error("Failed to fetch clients:", err); }
+    };
+    const fetchCrew = async () => {
+      try {
+        const res = await fetch(`${API}/api/crew`, { credentials: "include" });
+        const data = await res.json();
+        setCrew(Array.isArray(data) ? data : []);
+      } catch (err) { console.error("Failed to fetch crew:", err); }
+    };
+    fetchClients();
+    fetchCrew();
+  }, []);
+
+  useEffect(() => {
     if (editingProject) {
       setFormData({
         project_name: editingProject.project_name || "",
@@ -71,17 +70,12 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit }) => {
         start_date: formatDateForInput(editingProject.start_date),
         end_date: formatDateForInput(editingProject.end_date),
         location: editingProject.location || "",
+        project_image: editingProject.project_image || "",
         client_ids: editingProject.client_ids
-          ? String(editingProject.client_ids)
-              .split(",")
-              .filter(Boolean)
-              .map(Number)
+          ? String(editingProject.client_ids).split(",").filter(Boolean).map(Number)
           : [],
         crew_ids: editingProject.crew_ids
-          ? String(editingProject.crew_ids)
-              .split(",")
-              .filter(Boolean)
-              .map(Number)
+          ? String(editingProject.crew_ids).split(",").filter(Boolean).map(Number)
           : [],
       });
     } else {
@@ -91,6 +85,7 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit }) => {
         start_date: "",
         end_date: "",
         location: "",
+        project_image: "",
         client_ids: [],
         crew_ids: [],
       });
@@ -101,9 +96,33 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit }) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      setMsg("❌ Invalid format. Please upload JPEG, PNG, or WebP.");
+      return;
+    }
+
+    if (file.size > 200 * 1024) {
+      setMsg("❌ File too large. Maximum size is 200KB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFormData((prev) => ({ ...prev, project_image: reader.result }));
+      setMsg(""); // Clear error if successful
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMsg("");
+    setLoading(true);
     const url = editingProject
       ? `${API}/api/projects/${editingProject.id}`
       : `${API}/api/projects`;
@@ -120,121 +139,214 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit }) => {
       if (!res.ok) throw new Error(data.error || "Failed");
 
       setMsg(`✅ Project ${editingProject ? "updated" : "added"} successfully`);
-      if (!editingProject) {
-        setFormData({
-          project_name: "",
-          code_name: "",
-          start_date: "",
-          end_date: "",
-          location: "",
-          client_ids: [],
-          crew_ids: [],
-        });
-      }
       onAdded && onAdded();
-      if (editingProject && onCancelEdit) setTimeout(onCancelEdit, 1500);
     } catch (err) {
       setMsg(`❌ ${err.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <form className="db-form" onSubmit={handleSubmit}>
-      <h3>{editingProject ? "Edit Project" : "Add New Project"}</h3>
-
-      <div className="project-form-group">
-        <label>Project Name</label>
-        <input
-          name="project_name"
-          type="text"
-          className="project-form-input-full"
-          placeholder="e.g. Summer Film 2024"
-          value={formData.project_name}
-          onChange={handleChange}
-          required
-        />
-      </div>
-
-      <div className="project-form-group">
-        <label>Code Name</label>
-        <input
-          name="code_name"
-          type="text"
-          className="project-form-input-full"
-          placeholder="e.g. S-24"
-          value={formData.code_name}
-          onChange={handleChange}
-        />
-      </div>
-
-      <div className="project-form-row">
-        <div className="project-form-col">
-          <label>Start Date</label>
-          <input
-            name="start_date"
-            type="date"
-            className="project-form-input-full"
-            value={formData.start_date}
-            onChange={handleChange}
-          />
+    <div className="project-modal-overlay">
+      <div className="project-modal-glass-card">
+        <div className="modal-header-section">
+          <h2>
+            {editingProject ? "Edit Project Profile" : "Create New Project"}
+          </h2>
+          <p
+            style={{
+              color: "rgba(255,255,255,0.4)",
+              fontSize: "0.9rem",
+              marginTop: "4px",
+            }}
+          >
+            {editingProject
+              ? "Update the core details and visual identity of this production."
+              : "Set up the foundational details for your new production project."}
+          </p>
         </div>
-        <div className="project-form-col">
-          <label>End Date</label>
-          <input
-            name="end_date"
-            type="date"
-            className="project-form-input-full"
-            value={formData.end_date}
-            onChange={handleChange}
-          />
+
+        <div className="modal-split-layout">
+          <div className="modal-side-panel">
+            <div
+              className="project-image-upload-panel"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {formData.project_image ? (
+                <img
+                  src={formData.project_image}
+                  className="project-image-preview"
+                  alt="Project Logo"
+                />
+              ) : (
+                <div className="image-upload-placeholder">
+                  <Icon
+                    name="add_a_photo"
+                    modifiers="md"
+                    style={{ color: "#00c6e6" }}
+                  />
+                  <span>Add Picture</span>
+                </div>
+              )}
+              <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: "none" }}
+                accept=".jpg,.jpeg,.png,.webp"
+                onChange={handleImageChange}
+              />
+            </div>
+            <p
+              style={{
+                color: "rgba(255,255,255,0.3)",
+                fontSize: "0.75rem",
+                textAlign: "center",
+              }}
+            >
+              Max size: 200KB
+              <br />
+              Type: JPG, PNG, WebP
+            </p>
+          </div>
+
+          <div className="modal-main-content">
+            <form
+              onSubmit={handleSubmit}
+              style={{ display: "flex", flexDirection: "column", gap: "24px" }}
+            >
+              <StatusMsg msg={msg} />
+
+              <div className="project-form-row">
+                <div className="project-form-col">
+                  <label>Project Name</label>
+                  <input
+                    name="project_name"
+                    type="text"
+                    className="project-form-input-full"
+                    placeholder="e.g. Summer Film 2024"
+                    value={formData.project_name}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div className="project-form-col">
+                  <label>Code Name</label>
+                  <input
+                    name="code_name"
+                    type="text"
+                    className="project-form-input-full"
+                    placeholder="e.g. S-24"
+                    value={formData.code_name}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+
+              <div className="project-form-row">
+                <div className="project-form-col">
+                  <label>Start Date</label>
+                  <div className="icon-field-wrapper">
+                    <Icon name="calendar_month" modifiers="md" />
+                    <input
+                      name="start_date"
+                      type="date"
+                      className="project-form-input-full"
+                      value={formData.start_date}
+                      onChange={handleChange}
+                      max="9999-12-31"
+                    />
+                  </div>
+                </div>
+                <div className="project-form-col">
+                  <label>End Date</label>
+                  <div className="icon-field-wrapper">
+                    <Icon name="calendar_month" modifiers="md" />
+                    <input
+                      name="end_date"
+                      type="date"
+                      className="project-form-input-full"
+                      value={formData.end_date}
+                      onChange={handleChange}
+                      max="9999-12-31"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="project-form-group location-group">
+                <label>Location</label>
+                <input
+                  name="location"
+                  type="text"
+                  className="project-form-input-full"
+                  placeholder="e.g. London, UK"
+                  value={formData.location}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="project-form-row" style={{ gap: "20px" }}>
+                <div className="project-form-col">
+                  <GlassDropdown
+                    label="Assign Clients"
+                    placeholder="Select Clients..."
+                    options={clients.map((c) => ({
+                      value: c.id,
+                      label: c.username,
+                    }))}
+                    value={formData.client_ids}
+                    onChange={(val) =>
+                      setFormData({ ...formData, client_ids: val })
+                    }
+                    multiple={true}
+                  />
+                </div>
+                <div className="project-form-col">
+                  <GlassDropdown
+                    label="Assign Production Crew"
+                    placeholder="Select Crew members..."
+                    options={crew.map((cr) => ({
+                      value: cr.id,
+                      label: cr.username,
+                    }))}
+                    value={formData.crew_ids}
+                    onChange={(val) =>
+                      setFormData({ ...formData, crew_ids: val })
+                    }
+                    multiple={true}
+                  />
+                </div>
+              </div>
+
+              <div
+                className="project-form-actions"
+                style={{ marginTop: "10px" }}
+              >
+                <button
+                  type="button"
+                  className="btn-cancel"
+                  onClick={onCancelEdit}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn-submit-neo"
+                  disabled={loading}
+                >
+                  {loading
+                    ? "Processing..."
+                    : editingProject
+                      ? "Save Changes"
+                      : "Create Project"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
-
-      <div className="project-form-group location-group">
-        <label>Location</label>
-        <input
-          name="location"
-          type="text"
-          className="project-form-input-full"
-          placeholder="e.g. London, UK"
-          value={formData.location}
-          onChange={handleChange}
-        />
-      </div>
-
-      <GlassDropdown
-        label="Assign Clients"
-        placeholder="Select Clients..."
-        options={clients.map((c) => ({ value: c.id, label: c.username }))}
-        value={formData.client_ids}
-        onChange={(val) => setFormData({ ...formData, client_ids: val })}
-        multiple={true}
-      />
-
-      <GlassDropdown
-        label="Assign Production Crew"
-        placeholder="Select Crew members..."
-        options={crew.map((cr) => ({ value: cr.id, label: cr.username }))}
-        value={formData.crew_ids}
-        onChange={(val) => setFormData({ ...formData, crew_ids: val })}
-        multiple={true}
-      />
-
-      <div className="project-form-actions">
-        <button type="submit" className="btn-submit-flex">
-          {editingProject ? "Update Details" : "Create Project"}
-        </button>
-        {editingProject && (
-          <button type="button" onClick={onCancelEdit} className="btn-cancel">
-            Cancel
-          </button>
-        )}
-      </div>
-
-      <div className="status-msg-container" style={{ minHeight: '32px', marginTop: '1rem' }}>
-        <StatusMsg msg={msg} />
-      </div>
-    </form>
+    </div>
   );
 };
 
@@ -336,8 +448,8 @@ const AdminDashboard = () => {
 
   return (
     <section id="admin-dashboard">
-      <PageHeader 
-        title="Admin Dashboard" 
+      <PageHeader
+        title="Admin Dashboard"
         description="Centralized project management and system configuration."
       >
         <button
@@ -353,139 +465,144 @@ const AdminDashboard = () => {
 
       <div className="admin-content-animated">
         <div className="admin-dashboard-grid single-column">
-        {/* Project List - Now spanning full width */}
-        <div className="grid-window full-width">
-          <h3 className="project-list-header">Existing Projects</h3>
-          <div className="um-table-container">
-            {projectsLoading ? (
-              <div style={{ padding: '10px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                  {[...Array(5)].map((_, i) => (
-                    <div key={i} style={{ display: 'flex', gap: '15px', padding: '15px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                      <div style={{ flex: 2 }}><div className="skeleton-base" style={{ width: '80%', height: '16px' }} /></div>
-                      <div style={{ flex: 1 }}><div className="skeleton-base" style={{ width: '40%', height: '16px' }} /></div>
-                      <div style={{ flex: 2 }}><div className="skeleton-base" style={{ width: '70%', height: '16px' }} /></div>
-                      <div style={{ flex: 3 }}><div className="skeleton-base" style={{ width: '90%', height: '32px', borderRadius: '16px' }} /></div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <table className="um-table">
-                <thead>
-                  <tr>
-                    <th>Project Name</th>
-                    <th>Code</th>
-                    <th>Clients</th>
-                    <th>Crew</th>
-                    <th>Budget Versions</th>
-                    <th>Dates</th>
-                    <th>Location</th>
-                    <th className="project-action-cell">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {projects.map((p) => (
-                    <tr key={p.id}>
-                      <td className="project-name-cell">{p.project_name}</td>
-                      <td>
-                        <code className="project-code-box">
-                          {p.code_name || "-"}
-                        </code>
-                      </td>
-                      <td className="clients-cell">
-                        {p.client_usernames ? (
-                          p.client_usernames
-                        ) : (
-                          <span className="no-clients-tag warning-tag pulse">
-                            ⚠️ Missing Client
-                          </span>
-                        )}
-                      </td>
-                      <td className="clients-cell">
-                        {p.crew_usernames || (
-                          <span className="no-clients-tag">None</span>
-                        )}
-                      </td>
-                      <td className="version-count-cell">
-                        <span className="version-badge">
-                          {p.version_count || 0}
-                        </span>
-                      </td>
-                      <td className="project-dates-cell">
-                        {p.start_date
-                          ? new Date(p.start_date).toLocaleDateString()
-                          : "-"} - {p.end_date
-                          ? new Date(p.end_date).toLocaleDateString()
-                          : "-"}
-                      </td>
-                      <td>{p.location || "-"}</td>
-                      <td className="project-action-cell">
-                        <div className="action-buttons">
-                          <button
-                            onClick={() => setSelectedTimelineProject(p)}
-                            className="approve-btn milestone-btn"
-                          >
-                            Milestones
-                          </button>
-                          <button
-                            onClick={() => {
-                              setEditingProject(p);
-                              setShowProjectModal(true);
-                            }}
-                            className="approve-btn edit-btn"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDelete(p.id)}
-                            className="reject-btn delete-btn"
-                          >
-                            Delete
-                          </button>
+          {/* Project List - Now spanning full width */}
+          <div className="grid-window full-width">
+            <h3 className="project-list-header">Existing Projects</h3>
+            <div className="um-table-container">
+              {projectsLoading ? (
+                <div className="skeleton-container">
+                  <div className="skeleton-list">
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="skeleton-row">
+                        <div className="sk-1">
+                          <div className="skeleton-base w-80 h-16" />
                         </div>
-                      </td>
-                    </tr>
-                  ))}
-                  {projects.length === 0 && (
+                        <div className="sk-2">
+                          <div className="skeleton-base w-40 h-16" />
+                        </div>
+                        <div className="sk-3">
+                          <div className="skeleton-base w-70 h-16" />
+                        </div>
+                        <div className="sk-4">
+                          <div className="skeleton-base w-90 h-32 r-16" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <table className="um-table">
+                  <thead>
                     <tr>
-                      <td colSpan="8" className="no-projects-cell">
-                        No projects found.
-                      </td>
+                      <th>Project Name</th>
+                      <th>Code</th>
+                      <th>Clients</th>
+                      <th>Crew</th>
+                      <th>Budget Versions</th>
+                      <th>Dates</th>
+                      <th>Location</th>
+                      <th className="project-action-cell">Action</th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
-            )}
+                  </thead>
+                  <tbody>
+                    {projects.map((p) => (
+                      <tr key={p.id}>
+                        <td
+                          data-label="Project Name"
+                          className="project-name-cell"
+                        >
+                          <span>{p.project_name}</span>
+                        </td>
+                        <td data-label="Code">
+                          <code className="project-code-box">
+                            {p.code_name || "-"}
+                          </code>
+                        </td>
+                        <td data-label="Clients" className="clients-cell">
+                          {p.client_usernames ? (
+                            p.client_usernames
+                          ) : (
+                            <span className="no-clients-tag warning-tag pulse">
+                              ⚠️ Missing Client
+                            </span>
+                          )}
+                        </td>
+                        <td data-label="Crew" className="clients-cell">
+                          {p.crew_usernames || (
+                            <span className="no-clients-tag">None</span>
+                          )}
+                        </td>
+                        <td
+                          data-label="Budget Versions"
+                          className="version-count-cell"
+                        >
+                          <span className="version-badge">
+                            {p.version_count || 0}
+                          </span>
+                        </td>
+                        <td data-label="Dates" className="project-dates-cell">
+                          {p.start_date
+                            ? new Date(p.start_date).toLocaleDateString()
+                            : "-"}{" "}
+                          -{" "}
+                          {p.end_date
+                            ? new Date(p.end_date).toLocaleDateString()
+                            : "-"}
+                        </td>
+                        <td data-label="Location">{p.location || "-"}</td>
+                        <td data-label="Action" className="project-action-cell">
+                          <div className="action-buttons">
+                            <button
+                              onClick={() => setSelectedTimelineProject(p)}
+                              className="approve-btn milestone-btn"
+                            >
+                              Milestones
+                            </button>
+                            <button
+                              onClick={() => {
+                                setEditingProject(p);
+                                setShowProjectModal(true);
+                              }}
+                              className="approve-btn edit-btn"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDelete(p.id)}
+                              className="reject-btn delete-btn"
+                            >
+                              <Icon name="delete" modifiers="sm" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {projects.length === 0 && (
+                      <tr>
+                        <td colSpan="8" className="no-projects-cell">
+                          No projects found.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
       {/* Project Add/Edit Modal */}
       {showProjectModal && (
         <ModalPortal>
-          <div className="sui-modal-overlay">
-            <div className="sui-modal-content add-edit-modal-content">
-              <button
-                className="modal-close-btn"
-                onClick={() => {
-                  setEditingProject(null);
-                  setShowProjectModal(false);
-                }}
-              >
-                ✕
-              </button>
-              <ProjectForm
-                onAdded={handleAdded}
-                editingProject={editingProject}
-                onCancelEdit={() => {
-                  setEditingProject(null);
-                  setShowProjectModal(false);
-                }}
-              />
-            </div>
-          </div>
+          <ProjectForm
+            onAdded={handleAdded}
+            editingProject={editingProject}
+            onCancelEdit={() => {
+              setEditingProject(null);
+              setShowProjectModal(false);
+            }}
+          />
         </ModalPortal>
       )}
 
@@ -505,43 +622,9 @@ const AdminDashboard = () => {
                 Milestones: {selectedTimelineProject.project_name}
               </h3>
 
-              <div 
-                className="milestone-modal-body"
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  gap: "20px",
-                  flex: 1,
-                  minHeight: 0,
-                  width: "100%",
-                  boxSizing: "border-box"
-                }}
-              >
-                <div 
-                  className="milestone-modal-main"
-                  style={{
-                    flex: 1,
-                    display: "flex",
-                    flexDirection: "column",
-                    minWidth: 0,
-                    height: "100%",
-                    backgroundColor: "rgba(0, 198, 230, 0.05)",
-                    border: "1px solid rgba(0, 198, 230, 0.2)"
-                  }}
-                >
-                  <div 
-                    className="milestone-timeline-wrapper"
-                    style={{
-                      flex: 1,
-                      minHeight: "500px",
-                      background: "rgba(0,0,0,0.5)",
-                      position: "relative",
-                      overflow: "hidden",
-                      width: "100%",
-                      display: "flex",
-                      boxSizing: "border-box"
-                    }}
-                  >
+              <div className="milestone-modal-body">
+                <div className="milestone-modal-main">
+                  <div className="milestone-timeline-wrapper">
                     <SuiTimeline
                       projectId={selectedTimelineProject.id}
                       userRole="admin"
@@ -550,18 +633,7 @@ const AdminDashboard = () => {
                   </div>
                 </div>
 
-                <div 
-                  className="milestone-sidebar"
-                  style={{
-                    width: "400px",
-                    flexShrink: 0,
-                    background: "rgba(255,255,255,0.05)",
-                    padding: "20px",
-                    borderRadius: "12px",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    display: "block"
-                  }}
-                >
+                <div className="milestone-sidebar">
                   <div className="milestone-sidebar-header">
                     <h4>Add Milestone to Timeline</h4>
                   </div>
@@ -582,16 +654,23 @@ const AdminDashboard = () => {
                     </div>
                     <div className="sui-form-group">
                       <label>Target Date</label>
-                      <input
-                        type="date"
-                        className="sui-form-control"
-                        required
-                        value={msForm.target_date}
-                        onChange={(e) =>
-                          setMsForm({ ...msForm, target_date: e.target.value })
-                        }
-                        onFocus={(e) => e.target.select()}
-                      />
+                      <div className="icon-field-wrapper">
+                        <Icon name="calendar_month" modifiers="md" />
+                        <input
+                          type="date"
+                          className="sui-form-control"
+                          required
+                          value={msForm.target_date}
+                          onChange={(e) =>
+                            setMsForm({
+                              ...msForm,
+                              target_date: e.target.value,
+                            })
+                          }
+                          onFocus={(e) => e.target.select()}
+                          max="9999-12-31"
+                        />
+                      </div>
                     </div>
                     <div className="sui-form-group">
                       <label>Assignee</label>
@@ -623,8 +702,21 @@ const AdminDashboard = () => {
                       type="submit"
                       className="sui-btn sui-btn-save milestone-sidebar-submit"
                       disabled={msLoading}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "10px",
+                      }}
                     >
-                      {msLoading ? "Adding..." : "Add Milestone to Timeline"}
+                      {msLoading ? (
+                        "Adding..."
+                      ) : (
+                        <>
+                          <Icon name="add_circle" modifiers="md" />
+                          Add Milestone to Timeline
+                        </>
+                      )}
                     </button>
                   </form>
                 </div>

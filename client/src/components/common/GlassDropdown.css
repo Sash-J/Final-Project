@@ -1,32 +1,70 @@
+:root {
+  --dd-padding: 10px 14px;
+  --dd-radius: 8px;
+  --dd-font-size: 0.95rem;
+  --dd-bg: rgba(255, 255, 255, 0.05);
+  --dd-border: 1px solid rgba(255, 255, 255, 0.1);
+  --dd-width: 100%;
+  --dd-height: inherit;
+}
+
 .glass-dropdown-container {
   position: relative;
-  width: 100%;
+  width: var(--dd-width);
   font-family: inherit;
-  margin-bottom: 0.1rem;
+}
+
+/* ── Modifiers ───────────────────────────────────────────────────────────── */
+
+/* Small variation for tight tables/sidebars */
+.glass-dropdown-container.sm {
+  --dd-padding: 4px 10px;
+  --dd-radius: 8px;
+  --dd-font-size: 0.65rem;
+}
+
+/* Fluid width to fill parent */
+.glass-dropdown-container.fluid {
+  --dd-width: 100%;
+}
+
+/* Fixed width variations */
+.glass-dropdown-container.w-200 {
+  --dd-width: 200px;
+}
+.glass-dropdown-container.w-160 {
+  --dd-width: 160px;
+}
+
+/* Ghost variation - minimal background */
+.glass-dropdown-container.ghost .glass-dropdown-trigger {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.05);
 }
 
 .glass-dropdown-label {
   display: block;
-  font-size: 0.85rem;
+  font-size: 0.65rem;
   color: #60a5fa;
-  margin-bottom: 0.1rem;
   font-weight: 500;
   letter-spacing: 0.5px;
+  margin-bottom: 4px;
 }
 
 .glass-dropdown-trigger {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-sizing: border-box;
+  background: var(--dd-bg);
+  border: var(--dd-border);
   backdrop-filter: blur(12px);
-  padding: 5px 8px;
-  border-radius: 12px;
+  padding: var(--dd-padding);
+  border-radius: var(--dd-radius);
+  height: var(--dd-height);
   display: flex;
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
   color: #fff;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  min-height: 35px;
 }
 
 .glass-dropdown-trigger:hover {
@@ -42,9 +80,8 @@
 }
 
 .trigger-text {
-  font-size: 0.95rem;
+  font-size: var(--dd-font-size);
   font-weight: 500;
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   margin-right: 4px;
@@ -65,8 +102,8 @@
   top: calc(100% + 8px);
   left: 0;
   width: 100%;
-  background: rgba(30, 30, 35, 0.95);
-  backdrop-filter: blur(20px);
+  background: rgba(30, 30, 35, 0.08);
+  backdrop-filter: blur(25px);
   border: 1px solid rgba(0, 198, 230, 0.3);
   border-radius: 16px;
   max-height: 300px;
@@ -93,6 +130,7 @@
   border-radius: 10px;
   display: flex;
   align-items: center;
+  text-align: left;
   cursor: pointer;
   transition: all 0.2s ease;
   color: rgba(255, 255, 255, 0.8);
@@ -148,7 +186,7 @@
 }
 
 .item-label {
-  font-size: 0.95rem;
+  font-size: var(--dd-font-size);
 }
 
 /* Custom Scrollbar for the menu */

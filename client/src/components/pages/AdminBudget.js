@@ -35,7 +35,7 @@ const AddDepartment = ({ phases, onAdded }) => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed");
-      setMsg(`✅ Department "${name}" added`);
+      setMsg(`Department "${name}" added`);
       setName("");
       onAdded && onAdded();
     } catch (err) {
@@ -98,7 +98,7 @@ const AddCategory = ({ departments, onAdded }) => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed");
-      setMsg(`✅ Category "${name}" added`);
+      setMsg(`Category "${name}" added`);
       setName("");
       setDeptId("");
       onAdded && onAdded();
@@ -157,7 +157,7 @@ const AddBudgetItem = ({ categories, onAdded }) => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed");
-      setMsg(`✅ Budget item "${name}" added`);
+      setMsg(`Budget item "${name}" added`);
       setName("");
       setCatId("");
       onAdded && onAdded();
@@ -326,116 +326,114 @@ const AdminBudget = () => {
 
   return (
     <section id="admin-budget">
-      <PageHeader 
-        title="Budget Entry Dashboard" 
+      <PageHeader
+        title="Budget Entry Dashboard"
         description="Consolidated view for managing hierarchy and entering project budgets"
       />
 
       <div className="admin-content-animated">
         <div className="admin-budget-content">
-        {/* ── Left Sidebar: Controls & Management ── */}
-        <div className="admin-sidebar">
-          {/* 1. Project Selection */}
-          <div className="grid-window">
-            <div className="db-form">
-              <h3>Project Selection</h3>
-              <GlassDropdown
-                label="Choose project to manage budgets"
-                placeholder="- Select Project -"
-                options={projects.map((p) => ({
-                  value: p.id,
-                  label: `${p.project_name} ${p.code_name ? `(${p.code_name})` : ""}`,
-                }))}
-                value={projectId}
-                onChange={(val) => handleProjectChange(val)}
-              />
+          {/* ── Left Sidebar: Controls & Management ── */}
+          <div className="admin-sidebar">
+            {/* 1. Project Selection */}
+            <div className="grid-window">
+              <div className="db-form">
+                <h3>Project Selection</h3>
+                <GlassDropdown
+                  label="Choose project to manage budgets"
+                  placeholder="- Select Project -"
+                  options={projects.map((p) => ({
+                    value: p.id,
+                    label: `${p.project_name} ${p.code_name ? `(${p.code_name})` : ""}`,
+                  }))}
+                  value={projectId}
+                  onChange={(val) => handleProjectChange(val)}
+                />
 
-              {projectId && (
-                <div className="version-selection-area">
-                  <label className="version-selection-label">
-                    Select Budget Version
-                  </label>
-                  <div className="version-controls">
-                    <div className="version-select-container">
-                      <GlassDropdown
-                        placeholder="— Select —"
-                        options={versions.map((v) => ({
-                          value: v.id,
-                          label: `Version ${v.version_number}`,
-                        }))}
-                        value={versionId}
-                        onChange={(val) => setVersionId(val)}
-                      />
-                    </div>
+                {projectId && (
+                  <div className="version-selection-area">
+                    <label className="version-selection-label">
+                      Select Budget Version
+                    </label>
+                    <div className="version-controls">
+                      <div className="version-select-container">
+                        <GlassDropdown
+                          placeholder="— Select —"
+                          modifiers="lg fluid"
+                          options={versions.map((v) => ({
+                            value: v.id,
+                            label: `Version ${v.version_number}`,
+                          }))}
+                          value={versionId}
+                          onChange={(val) => setVersionId(val)}
+                        />
+                      </div>
 
-                    <div className="version-actions-row">
-                      <button
-                        type="button"
-                        className="btn-delete-version"
-                        onClick={handleDeleteVersion}
-                        disabled={!versionId}
-                        title="Delete selected version"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
+                      <div className="version-actions-row">
+                        <button
+                          type="button"
+                          className="btn-delete-version"
+                          onClick={handleDeleteVersion}
+                          disabled={!versionId}
+                          title="Delete selected version"
                         >
-                          <polyline points="3 6 5 6 21 6"></polyline>
-                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                          <line x1="10" y1="11" x2="10" y2="17"></line>
-                          <line x1="14" y1="11" x2="14" y2="17"></line>
-                        </svg>
-                      </button>
+                          <span
+                            className="material-symbols-outlined"
+                            style={{ fontSize: "1rem" }}
+                          >
+                            delete
+                          </span>
+                        </button>
 
-                      <button
-                        type="button"
-                        className="btn-new-version"
-                        onClick={handleCreateNewVersion}
-                        title="Clone current version to a new one"
-                      >
-                        + New Version
-                      </button>
+                        <button
+                          type="button"
+                          className="btn-new-version"
+                          onClick={handleCreateNewVersion}
+                          title="Clone current version to a new one"
+                        >
+                          + New Version
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
+            </div>
+
+            <div className="grid-window">
+              <AddDepartment phases={phases} onAdded={handleDataAdded} />
+            </div>
+            <div className="grid-window">
+              <AddCategory
+                departments={departments}
+                onAdded={handleDataAdded}
+              />
+            </div>
+            <div className="grid-window">
+              <AddBudgetItem
+                categories={categories}
+                onAdded={handleDataAdded}
+              />
             </div>
           </div>
 
-          <div className="grid-window">
-            <AddDepartment phases={phases} onAdded={handleDataAdded} />
+          {/* ── Right Main: Budget Entry Form ── */}
+          <div className="admin-main">
+            <div className="grid-window full-height">
+              <BudgetEntryForm
+                embedded={true}
+                externalProjectId={projectId}
+                versionId={versionId}
+                projectName={
+                  projects.find((p) => p.id === projectId)?.project_name || ""
+                }
+                versionName={
+                  versions.find((v) => v.id === versionId)?.version_number || ""
+                }
+                refreshKey={refreshKey}
+              />
+            </div>
           </div>
-          <div className="grid-window">
-            <AddCategory departments={departments} onAdded={handleDataAdded} />
-          </div>
-          <div className="grid-window">
-            <AddBudgetItem categories={categories} onAdded={handleDataAdded} />
-          </div>
-        </div>
-
-        {/* ── Right Main: Budget Entry Form ── */}
-        <div className="admin-main">
-          <div className="grid-window full-height">
-            <BudgetEntryForm
-              embedded={true}
-              externalProjectId={projectId}
-              versionId={versionId}
-              projectName={
-                projects.find((p) => p.id === projectId)?.project_name || ""
-              }
-              versionName={
-                versions.find((v) => v.id === versionId)?.version_number || ""
-              }
-            />
-          </div>
-        </div>
         </div>
       </div>
     </section>

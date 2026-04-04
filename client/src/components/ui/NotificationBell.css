@@ -26,8 +26,13 @@
   transform: scale(1.1);
 }
 
+.bell-icon.active svg {
+  color: #fff;
+  transform: scale(1.1);
+}
+
 .bell-icon .has-unread {
-  color: var(--accent-color) !important;
+  color: #a78bfa !important; /* Specific accent color for bell to match dropdown */
   animation: svg-bell-pulse 2s infinite ease-in-out;
 }
 
@@ -68,32 +73,39 @@
 }
 
 .notifications-dropdown {
-  position: absolute;
-  top: calc(100% + 15px);
-  right: 0;
-  width: 320px;
-  max-height: 450px;
-  background: rgba(13, 14, 21, 0.85);
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 15px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-  z-index: 1000;
+  position: fixed;
+  top: 85px; /* Positioned below fixed navbar */
+  right: 50px; /* Align with navbar padding */
+  width: 350px;
+  max-height: 500px;
+  background: rgba(10, 12, 18, 0.05);
+  backdrop-filter: blur(60px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
+  z-index: 10001; /* Higher than navbar */
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  animation: slideDown 0.3s ease-out;
+
+  /* Force hardware acceleration */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+
+  /* Transition state */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-20px) scale(0.98);
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  pointer-events: none;
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.notifications-dropdown.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1) translateZ(0); /* Maintain Z-layer */
+  pointer-events: auto;
 }
 
 .dropdown-header {
@@ -190,4 +202,27 @@
   padding: 10px;
   text-align: center;
   background: rgba(0, 0, 0, 0.2);
+}
+
+/* 📱 Mobile Responsiveness */
+@media (max-width: 768px) {
+  .notifications-dropdown {
+    width: calc(100% - 30px);
+    right: 15px;
+    top: 75px;
+    max-height: 65vh;
+    border-radius: 12px;
+  }
+
+  .dropdown-header {
+    padding: 12px;
+  }
+
+  .notification-item {
+    padding: 10px 12px;
+  }
+
+  .notification-message {
+    font-size: 0.8rem;
+  }
 }

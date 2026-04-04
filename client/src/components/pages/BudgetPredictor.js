@@ -68,8 +68,8 @@ const BudgetPredictor = () => {
 
   return (
     <div className="predictor-container">
-      <PageHeader 
-        title="Budget Predictor" 
+      <PageHeader
+        title="Budget Predictor"
         description="Estimate project's total budget using our Model."
       />
 
@@ -77,9 +77,7 @@ const BudgetPredictor = () => {
         <form onSubmit={handlePredict} className="predictor-form-bento">
           {/* Box 1: Scale & Logistics */}
           <div className="bento-box box-logistics">
-            <h3>
-              <span className="material-symbols-outlined">local_shipping</span> Logistics & Scale
-            </h3>
+            <h3>Logistics & Scale</h3>
             <div className="input-field">
               <label>Shooting Days</label>
               <input
@@ -139,9 +137,7 @@ const BudgetPredictor = () => {
 
           {/* Box 2: Financial Breakdown */}
           <div className="bento-box box-finance">
-            <h3>
-              <span className="material-symbols-outlined">account_balance_wallet</span> Dept. Estimates (Rs.)
-            </h3>
+            <h3>Dept. Estimates (Rs.)</h3>
             <div className="finance-grid">
               <div className="input-field">
                 <label>Crew Budget</label>
@@ -208,9 +204,7 @@ const BudgetPredictor = () => {
 
           {/* Box 3: Quality Factors */}
           <div className="bento-box box-quality">
-            <h3>
-              <span className="material-symbols-outlined">star</span> Production Value
-            </h3>
+            <h3>Production Value</h3>
             <div className="input-field">
               <label>Artist Popularity (1-5)</label>
               <div className="range-container">
@@ -245,9 +239,7 @@ const BudgetPredictor = () => {
 
           {/* Box 4: User Consideration Notes */}
           <div className="bento-box box-notes">
-            <h3>
-              <span className="material-symbols-outlined">info</span> User Considerations
-            </h3>
+            <h3>User Considerations</h3>
             <p className="notes-text">
               This model is optimized for projects with a total budget{" "}
               <strong>under 2 Million LKR</strong>. Estimates for larger

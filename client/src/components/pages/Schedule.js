@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import PageHeader from "../common/PageHeader";
 import "./Schedule.css";
 import ModalPortal from "../common/ModalPortal";
+import Icon from "../common/Icon";
 import html2pdf from "html2pdf.js";
 
 // Sri Lankan Public Holidays 2026 (Hardcoded for simplicity)
@@ -413,7 +414,12 @@ const Schedule = () => {
               Today
             </button>
             {(user?.role === "admin" || user?.role === "manager") && (
-              <button onClick={handleDownloadPDF} className="download-pdf-btn">
+              <button
+                onClick={handleDownloadPDF}
+                className="download-pdf-btn"
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <Icon name="download" modifiers="sm" />
                 Download PDF
               </button>
             )}

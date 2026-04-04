@@ -4,8 +4,14 @@
 }
 
 @keyframes adminFadeIn {
-  from { opacity: 0; transform: translateY(15px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .admin-dashboard-grid {
   display: grid;
@@ -25,20 +31,24 @@
 
 /* ── Form Enhancements ─────────────────────────────────────────────────────── */
 .project-form-group,
-label {
-  width: 100%;
-  margin-bottom: 15px;
-  text-align: left;
+.icon-field-wrapper {
+  margin-bottom: 18px; /* Consistent spacing for all form segments */
 }
 
 .project-form-group label,
 .project-form-col label {
+  display: block;
   text-align: left;
   margin-left: 10px;
+  margin-bottom: 8px; /* Restored label spacing */
 }
 
 .project-form-group.location-group {
   margin-bottom: 20px;
+}
+
+.project-form-input-full {
+  margin: 0; /* Removed internal margin to fix icon alignment */
 }
 
 /* ── Multi-Select Dropdown ────────────────────────────────────────────────── */
@@ -48,7 +58,7 @@ label {
 }
 
 .multi-select-trigger {
-  width: 93%;
+  width: 100%;
   padding: 10px 14px;
   background: rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -154,13 +164,68 @@ label {
   align-content: left;
 }
 
+.icon-field-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.icon-field-wrapper .icon-root {
+  position: absolute;
+  right: 12px;
+  top: 50%; /* Restored centering logic */
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.3);
+  pointer-events: none;
+}
+
+.icon-field-wrapper input {
+  display: block;
+  flex-grow: 1;
+  width: 100% !important;
+  padding-right: 38px !important;
+  box-sizing: border-box;
+}
+
+.icon-field-wrapper input::-webkit-calendar-picker-indicator {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  background: transparent;
+  color: transparent;
+}
+
 .project-form-col {
   flex: 1;
   box-sizing: border-box;
 }
 
-.project-form-row input {
-  width: 80%;
+.project-form-row input,
+.project-form-input-full,
+.sui-form-control {
+  width: 100%;
+  padding: 10px 14px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.project-form-input-full:focus,
+.sui-form-control:focus {
+  border-color: #00c6e6;
+  background: rgba(0, 198, 230, 0.05);
+  outline: none;
 }
 
 .project-form-actions {
@@ -169,28 +234,232 @@ label {
   width: 100%;
 }
 
+/* ── Glassmorphism Form Card ───────────────────────────────────────────────── */
+.project-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Modal starts from top to allow scrolling */
+  z-index: 10000;
+  padding: 60px 20px; /* Space for page-level scrolling */
+  overflow-y: auto; /* Enable page-level scrolling for the modal */
+  animation: modalOverlayFade 0.4s ease;
+}
+
+@keyframes modalOverlayFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.project-modal-glass-card {
+  width: 100%;
+  max-width: 900px;
+  background: rgba(13, 15, 23, 0.45);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 32px;
+  padding: 50px;
+  box-shadow:
+    0 40px 100px rgba(0, 0, 0, 0.8),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  transform: translateZ(0);
+  transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+  animation: modalSlideUp 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+  position: relative;
+  /* Removed internal scroll to allow external scrolling */
+}
+
+.modal-split-layout {
+  display: flex;
+  gap: 60px;
+  align-items: flex-start;
+}
+
+.modal-side-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 200px;
+}
+
+.modal-main-content {
+  flex: 1;
+}
+
+/* ── Mobile Responsiveness ────────────────────────────────────────────────── */
+@media screen and (max-width: 850px) {
+  .project-modal-overlay {
+    padding: 30px 15px;
+  }
+
+  .project-modal-glass-card {
+    padding: 30px 20px;
+    border-radius: 20px;
+  }
+
+  .modal-split-layout {
+    flex-direction: column;
+    gap: 30px;
+    align-items: center;
+  }
+
+  .modal-side-panel {
+    width: 100%;
+  }
+
+  .project-form-row {
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .project-form-col {
+    width: 100%;
+  }
+
+  .modal-header-section h2 {
+    font-size: 1.5rem;
+  }
+
+  .project-form-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .btn-submit-neo {
+    order: -1;
+    width: 100%;
+  }
+
+  .btn-cancel {
+    width: 100%;
+  }
+}
+
+.project-modal-glass-card:hover {
+  transform: translateY(-5px) scale(1.005);
+  border-color: rgba(0, 198, 230, 0.3);
+  box-shadow:
+    0 50px 120px rgba(0, 0, 0, 0.9),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2);
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-header-section {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 30px;
+}
+
+.project-image-upload-panel {
+  width: 180px;
+  height: 180px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px dashed rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 25px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  backdrop-filter: blur(10px);
+}
+
+.project-image-upload-panel:hover {
+  transform: translateY(-10px) rotate(2deg) scale(1.05);
+  border-color: #00c6e6;
+  background: rgba(0, 198, 230, 0.05);
+  box-shadow: 0 20px 40px rgba(0, 198, 230, 0.2);
+}
+
+.project-image-upload-panel:hover .icon-root {
+  transform: scale(1.1);
+  color: #00e0ff !important;
+}
+
+.project-image-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.image-upload-placeholder span {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 500;
+}
+
+.modal-header-section h2 {
+  font-size: 1.6rem;
+  margin: 0;
+  color: #fff;
+}
+
 .btn-cancel {
   flex: 1;
   background: rgba(255, 255, 255, 0.05) !important;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  color: rgba(255, 255, 255, 0.7) !important;
-  border-radius: 50px !important;
-  padding: 10px 20px !important;
-  font-weight: 600 !important;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+  border-radius: 14px !important;
+  padding: 12px 24px !important;
+  font-weight: 500 !important;
   transition: all 0.3s ease;
 }
 
 .btn-cancel:hover {
-  background: rgba(255, 255, 255, 0.1) !important;
-  color: #fff !important;
-  border-color: rgba(255, 255, 255, 0.4) !important;
+  background: rgba(255, 77, 79, 0.1) !important;
+  color: #ff4d4f !important;
+  border-color: rgba(255, 77, 79, 0.2) !important;
 }
 
-.btn-submit-flex {
+.btn-submit-neo {
   flex: 2;
+  background: #00c6e6 !important;
+  box-shadow: 0 5px 25px rgba(0, 198, 230, 0.3) !important;
+  border: none !important;
+  color: #000 !important;
+  border-radius: 14px !important;
+  padding: 12px 24px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease;
+}
+
+.btn-submit-neo:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 10px rgba(0, 198, 230, 0.3) !important;
+  background: #00e0ff !important;
 }
 
 /* ── Table Styling ──────────────────────────────────────────────────────────── */
@@ -472,4 +741,283 @@ label {
   background: rgba(0, 198, 230, 0.2);
   border-color: rgba(0, 198, 230, 0.5);
   transform: translateY(-1px);
+}
+
+/* ── Skeleton Loading Styles ──────────────────────────────────────────────── */
+.skeleton-container {
+  padding: 10px;
+}
+.skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.skeleton-row {
+  display: flex;
+  gap: 15px;
+  padding: 15px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.sk-1 {
+  flex: 2;
+}
+.sk-2 {
+  flex: 1;
+}
+.sk-3 {
+  flex: 2;
+}
+.sk-4 {
+  flex: 3;
+}
+
+.w-80 {
+  width: 80%;
+}
+.w-70 {
+  width: 70%;
+}
+.w-40 {
+  width: 40%;
+}
+.w-90 {
+  width: 90%;
+}
+.h-16 {
+  height: 16px;
+}
+.h-32 {
+  height: 32px;
+}
+.r-16 {
+  border-radius: 16px;
+}
+
+/* ── Milestone Modal Base Styles (Replacing Inline) ────────────────────────── */
+.milestone-modal-body {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.milestone-modal-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+  background-color: rgba(0, 198, 230, 0.05);
+  border: 1px solid rgba(0, 198, 230, 0.2);
+}
+
+.milestone-timeline-wrapper {
+  flex: 1;
+  min-height: 500px;
+  background: rgba(0, 0, 0, 0.5);
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  display: flex;
+  box-sizing: border-box;
+}
+
+.milestone-sidebar {
+  width: 400px;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: block;
+}
+
+/* 📱 Mobile Responsiveness */
+@media (max-width: 1200px) {
+  .milestone-sidebar {
+    width: 320px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .admin-dashboard-grid {
+    grid-template-columns: 1fr;
+    padding: 0 5px;
+  }
+
+  .milestone-modal-body {
+    flex-direction: column;
+  }
+
+  .milestone-sidebar {
+    width: 100%;
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-content-animated {
+    padding-top: 10px;
+  }
+
+  .admin-dashboard-grid {
+    gap: 16px;
+  }
+
+  /* 🗃️ Glass Card Table Transformation */
+  .um-table-container {
+    background: transparent;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .um-table,
+  .um-table thead,
+  .um-table tbody,
+  .um-table th,
+  .um-table td,
+  .um-table tr {
+    display: block;
+  }
+
+  /* Hide table headers */
+  .um-table thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  .um-table tr {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    margin-bottom: 25px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Form Stacking */
+  .project-form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .project-form-group label,
+  .project-form-col label {
+    margin-left: 5px;
+    font-size: 0.9rem;
+  }
+
+  .project-form-row input,
+  .multi-select-trigger {
+    width: 93% !important;
+  }
+
+  .btn-submit-flex {
+    margin-top: 10px;
+  }
+
+  .um-table td {
+    border: none;
+    position: relative;
+    padding: 12px 0 12px 50%;
+    text-align: right;
+    min-height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .um-table td:last-child {
+    border-bottom: none;
+    margin-top: 10px;
+  }
+
+  .um-table td::before {
+    /* Pull label from data-label attribute */
+    content: attr(data-label);
+    position: absolute;
+    left: 0;
+    width: 45%;
+    padding-right: 10px;
+    white-space: nowrap;
+    text-align: left;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* Specific Card Adjustments */
+  .project-name-cell {
+    font-size: 1.2rem;
+    color: var(--accent-color) !important;
+    padding-bottom: 20px !important;
+    margin-bottom: 10px;
+    border-bottom: 2px solid rgba(0, 198, 230, 0.2) !important;
+  }
+
+  .project-name-cell::before {
+    display: none; /* Hide 'Project Name' label as it's obvious */
+  }
+
+  .um-table td.project-name-cell {
+    padding-left: 0;
+    text-align: left;
+    justify-content: flex-start;
+  }
+
+  .clients-cell,
+  .project-dates-cell {
+    font-size: 0.95rem;
+  }
+
+  /* Action Buttons in Card */
+  .project-action-cell {
+    padding-left: 0 !important;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .project-action-cell::before {
+    position: relative;
+    width: 100%;
+    margin-bottom: 15px;
+    display: block;
+    text-align: center;
+  }
+
+  .action-buttons {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .milestone-btn,
+  .edit-btn,
+  .delete-btn {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 14px !important;
+    border-radius: 12px !important;
+    font-size: 0.9rem !important;
+  }
+
+  .new-project-btn {
+    width: 100%;
+    padding: 18px !important;
+    margin-bottom: 20px;
+  }
+
+  .skeleton-row {
+    flex-direction: column;
+    gap: 15px;
+  }
 }

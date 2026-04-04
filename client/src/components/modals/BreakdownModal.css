@@ -1,0 +1,314 @@
+.bdm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(25px) saturate(180%);
+  -webkit-backdrop-filter: blur(25px) saturate(180%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+}
+
+.bdm-content {
+  background: rgba(10, 12, 18, 0.06);
+  backdrop-filter: blur(25px) saturate(180%);
+  -webkit-backdrop-filter: blur(25px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 40px 100px -12px rgba(0, 0, 0, 0.8);
+  border-radius: 24px;
+  width: 100%;
+  max-width: 1100px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: #fff;
+  font-family: inherit;
+}
+
+.bdm-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 24px 32px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.bdm-header-left h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--accent-color, #00c6e6);
+  letter-spacing: -0.5px;
+}
+
+.bdm-header-left p {
+  margin: 8px 0 0;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.bdm-header-left p strong {
+  color: #eee;
+  padding-left: 4px;
+}
+
+.bdm-close {
+  background: transparent;
+  border: none;
+  color: #666;
+  font-size: 1.75rem;
+  padding: 0;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.bdm-close:hover {
+  color: #fff;
+}
+
+.bdm-body {
+  padding: 32px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.bdm-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 24px;
+  table-layout: fixed;
+}
+
+.bdm-table th {
+  text-align: left;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+  padding: 0 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-weight: 700;
+  letter-spacing: 0.8px;
+}
+
+.bdm-row td {
+  padding: 8px 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  vertical-align: middle;
+}
+
+.bdm-row input,
+.bdm-select {
+  width: 100%;
+  height: 28px; /* Standardize height for alignment */
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  color: #ddd;
+  padding: 0 8px; /* Remove vertical padding, allow height/line-height to align */
+  font-size: 0.8rem;
+  outline: none;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+  display: block;
+}
+
+.bdm-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 24px;
+  cursor: pointer;
+}
+
+.bdm-select option {
+  background: #1a1a20;
+  color: #ddd;
+}
+
+.bdm-row input:hover,
+.bdm-select:hover {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.bdm-row input:focus,
+.bdm-select:focus {
+  background: rgba(0, 198, 230, 0.05);
+  border-color: rgba(0, 198, 230, 0.3);
+  color: #fff;
+}
+
+/* Chrome-style number input hides arrows by default for minimal look */
+.bdm-row input[type="number"]::-webkit-inner-spin-button,
+.bdm-row input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.bdm-readonly {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.3);
+  text-align: right;
+  font-weight: 500;
+  padding-right: 8px !important;
+  line-height: 28px;
+}
+
+.bdm-total-cell {
+  font-size: 0.8rem;
+  color: var(--accent-color, #00c6e6);
+  text-align: right;
+  font-weight: 700;
+  padding-right: 8px !important;
+  line-height: 28px;
+}
+
+.bdm-remove-btn {
+  background: transparent;
+  border: none;
+  color: #ff4d4f; /* Vibrant Studio Red */
+  opacity: 0.8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  width: 100%;
+}
+
+.bdm-remove-btn svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  transition: all 0.2s;
+}
+
+.bdm-remove-btn:hover {
+  opacity: 1;
+  color: #ff6e71;
+  transform: scale(1.15);
+}
+
+.bdm-add-row {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  color: #aaa;
+  width: 100%;
+  padding: 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.bdm-add-row .material-symbols-outlined {
+  font-size: 1.1rem;
+}
+
+.bdm-add-row:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #fff;
+}
+
+.bdm-footer {
+  padding: 24px 32px;
+  background: rgba(255, 255, 255, 0.02);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.bdm-grand-total {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bdm-grand-total span {
+  font-size: 0.75rem;
+  color: #888;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.bdm-grand-total strong {
+  font-size: 1.25rem;
+  color: #fff;
+  font-weight: 700;
+}
+
+.bdm-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.bdm-cancel-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: #aaa;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.bdm-cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.bdm-save-btn {
+  padding: 10px 24px;
+  border-radius: 8px;
+  border: none;
+  background: var(--accent-color, #00c6e6);
+  color: #000;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 198, 230, 0.3);
+  transition: all 0.2s;
+}
+
+.bdm-save-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 198, 230, 0.4);
+  filter: brightness(1.1);
+}
+
+.fade-in {
+  animation: modalFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}

@@ -421,13 +421,14 @@
 }
 
 .cd-modal-header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 30px; /* Slightly reduced padding */
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 50px 30px !important;
   background: rgba(255, 255, 255, 0.02);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  min-height: 80px; /* Ensure a consistent height for centering */
+  height: 80px !important;
+  box-sizing: border-box !important;
 }
 
 .cd-modal-header-row h3 {
@@ -435,75 +436,55 @@
   color: #fff;
   font-size: 1.4rem;
   letter-spacing: -0.5px;
-  line-height: 1.2;
+  line-height: 1; /* Reset to 1 to ensure exact vertical centering with other objects */
 }
 
 .cd-modal-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-right: 60px; /* Space to avoid the absolute close button */
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  margin-right: 0 !important;
 }
 
-.cd-version-selector {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  height: 100%;
+.cd-version-selector.glass-dropdown-container {
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  height: 40px !important;
 }
 
-.cd-version-selector label {
-  font-size: 0.85rem;
-  color: #a0aec0;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin: 0;
-  display: flex;
-  align-items: center;
+.cd-version-selector .glass-dropdown-trigger {
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 16px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  white-space: nowrap !important;
+  margin: 0 !important; /* Force absolutely no geometric push */
 }
 
-.cd-version-selector select {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #fff;
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  outline: none;
-  cursor: pointer;
-  transition: all 0.2s;
-  height: 38px;
-  line-height: normal;
-  display: inline-block;
-  vertical-align: middle;
-}
-
-.cd-version-selector select:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(167, 139, 250, 0.3);
-}
-
-.cd-version-selector select:focus {
-  border-color: #a78bfa;
-  box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.2);
+.cd-version-selector .trigger-text {
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  line-height: normal !important;
 }
 
 .cd-modal-close {
-  position: absolute;
-  top: 40px;
-  right: 30px;
+  position: relative !important;
   background: none;
   border: none;
   color: #f90000a5;
   font-size: 2.2rem;
-  line-height: 1;
+  line-height: 1 !important;
   cursor: pointer;
   transition: 0.2s;
   padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-left: 10px !important;
 }
 .cd-modal-close:hover {
   color: #fff;
@@ -513,6 +494,7 @@
 .cd-table-container {
   overflow-y: auto;
   padding: 0;
+  flex: 1;
 }
 
 .cd-budget-table {
@@ -532,7 +514,7 @@
   color: #a0aec0;
   font-weight: 600;
   text-transform: uppercase;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   letter-spacing: 1px;
   background: rgba(255, 255, 255, 0.01);
   position: sticky;
@@ -558,7 +540,7 @@
 }
 
 .cd-rate-type {
-  font-size: 0.7rem;
+  font-size: 0.6rem;
   color: #718096;
   text-transform: uppercase;
   margin-left: 4px;
@@ -585,7 +567,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
-  font-size: 0.75rem;
+  font-size: 0.6rem;
   color: #a0aec0;
   font-weight: 600;
   text-transform: uppercase;
@@ -641,4 +623,64 @@
 
 .cd-view-budget-btn:active {
   transform: translateY(0);
+}
+
+/* ── Budget Modal Expansion ────────────────────────────────────────────────── */
+.cd-budget-footer {
+  margin-top: 20px;
+  padding: 15px 20px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.cd-pdf-btn {
+  height: 40px !important;
+  padding: 0 24px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  background: var(--accent-color, #00c6e6) !important;
+  border: none !important;
+  color: #000 !important;
+  border-radius: 25px !important;
+  box-shadow: 0 0 15px rgba(0, 198, 230, 0.4) !important;
+  cursor: pointer !important;
+  line-height: normal !important;
+  transition: all 0.2s !important;
+}
+
+.cd-pdf-btn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.cd-phase-row {
+  background: rgba(99, 179, 237, 0.1);
+}
+
+.cd-phase-header-cell {
+  padding: 12px 20px;
+  font-weight: 700;
+  color: #63b3ed;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+}
+
+.cd-phase-subtotal-cell {
+  padding: 12px 20px;
+  text-align: right;
+  font-weight: 700;
+  color: #63b3ed;
 }

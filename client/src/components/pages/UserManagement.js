@@ -192,6 +192,7 @@ const UserManagement = () => {
                                             <td>
                                                 <GlassDropdown
                                                     className="um-role-dropdown"
+                                                    modifiers="sm fluid"
                                                     options={[
                                                         { value: 'client', label: 'CLIENT' },
                                                         { value: 'manager', label: 'MANAGER' },
@@ -242,6 +243,7 @@ const UserManagement = () => {
                                             ) : (
                                                 <GlassDropdown
                                                     className="um-role-dropdown"
+                                                    modifiers="sm fluid"
                                                     options={[
                                                         { value: 'client', label: 'CLIENT' },
                                                         { value: 'manager', label: 'MANAGER' },
@@ -259,7 +261,11 @@ const UserManagement = () => {
                                         </td>
                                         <td>
                                             {u.role !== 'admin' && (
-                                                <button className="reject-btn delete-acc-btn" onClick={() => deleteUser(u.id, u.username)}>Delete</button>
+                                                <button className="reject-btn delete-acc-btn" onClick={() => deleteUser(u.id, u.username)}>
+                                                    <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>
+                                                        delete
+                                                    </span>
+                                                </button>
                                             )}
                                         </td>
                                     </tr>

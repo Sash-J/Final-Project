@@ -3,14 +3,19 @@
   color: #eee;
 }
 
-
 .admin-content-animated {
   animation: adminFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes adminFadeIn {
-  from { opacity: 0; transform: translateY(15px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .admin-header h2 {
@@ -19,20 +24,20 @@
   margin-bottom: 8px;
 }
 
-
 /* Admin Budget Grid */
 .admin-budget-content {
   display: grid;
-  grid-template-columns: 310px 1fr; /* User Requested flexibility */
-  gap: 20px;
-  max-width: 1750px;
+  grid-template-columns: 280px 1fr;
+  gap: 25px;
+  max-width: 1900px;
   margin: 0 auto;
+  padding: 0;
 }
 
 .admin-main {
   display: flex;
   flex-direction: column;
-  min-width: 0; /* Critical for grid item shrinkage */
+  min-width: 0;
 }
 
 /* Legacy Admin Panel Grid */

@@ -1,0 +1,45 @@
+.icon-root {
+  font-family: 'Material Symbols Outlined' !important;
+  font-size: inherit; /* Default to inherit from surrounding text */
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  vertical-align: middle;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* ── Modifiers ───────────────────────────────────────────────────────────── */
+
+/* Sizes (Overrides inherit if specific scale is needed) */
+.icon-root.sm { font-size: 0.85rem; }
+.icon-root.md { font-size: 1.25rem; }
+.icon-root.lg { font-size: 2rem; }
+.icon-root.xl { font-size: 3rem; }
+
+/* Weights */
+.icon-root.bold { font-variation-settings: 'wght' 700; }
+.icon-root.light { font-variation-settings: 'wght' 200; }
+
+/* Filling */
+.icon-root.filled { font-variation-settings: 'FILL' 1; }
+
+/* Animations */
+.icon-root.spin {
+  animation: icon-spin 2s linear infinite;
+}
+
+@keyframes icon-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Ghost / Subtle */
+.icon-root.subtle {
+  opacity: 0.6;
+}
