@@ -549,7 +549,7 @@ const AdminDashboard = () => {
 
     // Immediate attempt + series of follow-ups to handle dynamic SVG height calculation
     scrollToBottom();
-  }, [selectedTimelineProject?.id, selectedTimelineProject?._t]);
+  }, [selectedTimelineProject, selectedTimelineProject?._t]);
 
   const handleAddMilestone = async (e) => {
     e.preventDefault();

@@ -35,11 +35,6 @@ const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-    validateField(name, value);
-  };
 
   const validateField = (name, value, currentPassword = formData.password) => {
     let error = "";
@@ -148,7 +143,7 @@ const RegisterPage = () => {
 
   const nextStep = () => {
     if (step === 1) {
-      const { username, password, confirmPassword } = formData;
+      const { username, password } = formData;
       if (!username || !password) {
         setError("Username and password are required.");
         return;
