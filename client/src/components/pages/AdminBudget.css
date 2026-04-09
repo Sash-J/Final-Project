@@ -4,18 +4,7 @@
 }
 
 .admin-content-animated {
-  animation: adminFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes adminFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(15px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  opacity: 1;
 }
 
 .admin-header h2 {
@@ -64,13 +53,6 @@
 
 /* Glassmorphism Windows */
 .grid-window {
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: var(--glass-border);
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: var(--glass-shadow);
   display: flex;
   flex-direction: column;
 }
@@ -81,6 +63,20 @@
 
 .grid-window.full-width {
   grid-column: 1 / -1;
+}
+
+/*dropdowns overlap issue fixed */
+.admin-sidebar .grid-window:nth-child(1) {
+  z-index: 40;
+}
+.admin-sidebar .grid-window:nth-child(2) {
+  z-index: 30;
+}
+.admin-sidebar .grid-window:nth-child(3) {
+  z-index: 20;
+}
+.admin-sidebar .grid-window:nth-child(4) {
+  z-index: 10;
 }
 
 /* Database Entry Forms */

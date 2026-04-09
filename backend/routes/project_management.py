@@ -30,11 +30,24 @@ def projects_post():
     start_date = data.get("start_date") or None
     end_date = data.get("end_date") or None
     location = data.get("location", "").strip() or None
+    color = data.get("color", "#00c6e6")
+    project_image_base64 = data.get("project_image")
 
     if not project_name:
         return jsonify({"error": "project_name is required"}), 400
+        
+    # Check for color uniqueness
+    existing_project = db.check_color_exists(color)
+    if existing_project:
+        return jsonify({"error": f"Color already assigned to project: {existing_project}"}), 400
 
-    new_id = db.insert_project(project_name, code_name, start_date, end_date, location)
+    # 1. Store Base64 Image directly
+    project_image_url = project_image_base64 if project_image_base64 else None
+
+    # 2. Insert Project
+    new_id = db.insert_project(
+        project_name, code_name, start_date, end_date, location, color, project_image_url
+    )
 
     # Handle client assignments
     client_ids = data.get("client_ids", [])
@@ -84,12 +97,25 @@ def projects_put(project_id):
         start_date = data.get("start_date") or None
         end_date = data.get("end_date") or None
         location = data.get("location", "").strip() or None
+        color = data.get("color", "#00c6e6")
+        project_image_base64 = data.get("project_image")
 
         if not project_name:
             return jsonify({"error": "project_name is required"}), 400
+            
+        # Check for color uniqueness
+        existing_project = db.check_color_exists(color, exclude_project_id=project_id)
+        if existing_project:
+            return jsonify({"error": f"Color already assigned to project: {existing_project}"}), 400
 
+        # 1. Store Base64 Image directly (if provided)
+        project_image_url = data.get("project_image_url") # keep old one by default
+        if project_image_base64 and project_image_base64.startswith("data:image"):
+            project_image_url = project_image_base64
+
+        # 2. Update DB
         db.update_project(
-            project_id, project_name, code_name, start_date, end_date, location
+            project_id, project_name, code_name, start_date, end_date, location, color, project_image_url
         )
 
         # Sync client assignments

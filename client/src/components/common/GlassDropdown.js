@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import "./GlassDropdown.css";
 
 /**
@@ -27,17 +28,46 @@ const GlassDropdown = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const menuRef = useRef(null);
+  const [dropdownStyle, setDropdownStyle] = useState({});
+
+  const updatePosition = () => {
+    if (dropdownRef.current) {
+      const rect = dropdownRef.current.getBoundingClientRect();
+      setDropdownStyle({
+        position: 'fixed',
+        top: rect.bottom + 2,
+        left: rect.left,
+        width: rect.width,
+        zIndex: 10001,
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      updatePosition();
+      window.addEventListener('scroll', updatePosition, true);
+      window.addEventListener('resize', updatePosition);
+    }
+    return () => {
+      window.removeEventListener('scroll', updatePosition, true);
+      window.removeEventListener('resize', updatePosition);
+    };
+  }, [isOpen]);
 
   // Close when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
+      if (dropdownRef.current && dropdownRef.current.contains(event.target)) return;
+      if (menuRef.current && menuRef.current.contains(event.target)) return;
+      setIsOpen(false);
     };
-    document.addEventListener("mousedown", handleClickOutside);
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [isOpen]);
 
   const handleToggle = () => setIsOpen(!isOpen);
 
@@ -82,8 +112,8 @@ const GlassDropdown = ({
         <span className={`trigger-arrow ${isOpen ? "up" : ""}`}>▼</span>
       </div>
 
-      {isOpen && (
-        <div className="glass-dropdown-menu sui-fade-in">
+      {isOpen && createPortal(
+        <div className="glass-dropdown-menu sui-fade-in" style={dropdownStyle} ref={menuRef}>
           {options.length === 0 ? (
             <div className="glass-dropdown-no-options">No options available</div>
           ) : (
@@ -108,7 +138,8 @@ const GlassDropdown = ({
               );
             })
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

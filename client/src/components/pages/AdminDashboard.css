@@ -1,17 +1,39 @@
 /* ── Admin Dashboard Layout ───────────────────────────────────────────────── */
 .admin-content-animated {
-  animation: adminFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  /* Animation removed to prevent opacity-based stacking context isolating backdrop-filter */
+  opacity: 1;
 }
 
-@keyframes adminFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(15px);
+@keyframes shake {
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
   }
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+  40%,
+  60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
+
+.identity-sphere:hover {
+  transform: scale(1.1) rotate(5deg);
+  filter: brightness(1.2);
+  box-shadow:
+    0 0 50px currentColor,
+    inset 0 0 30px rgba(255, 255, 255, 0.5) !important;
+}
+
+.identity-sphere:active {
+  transform: scale(0.95);
 }
 .admin-dashboard-grid {
   display: grid;
@@ -464,7 +486,8 @@
 
 /* ── Table Styling ──────────────────────────────────────────────────────────── */
 .project-list-header {
-  margin-bottom: 20px;
+  margin-top: 10px;
+  margin-bottom: 30px;
   font-size: 1.2rem;
   color: #fff;
 }
@@ -590,94 +613,6 @@
 
 .add-edit-modal-content {
   max-width: 500px;
-}
-
-.modal-close-btn {
-  position: absolute;
-  top: 10px;
-  right: 15px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
-  font-size: 1.2rem;
-  cursor: pointer;
-  z-index: 9999;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.modal-close-btn:hover {
-  background: rgba(255, 60, 60, 0.8) !important;
-  transform: rotate(90deg);
-}
-
-/* ── Milestone Timeline Modal ──────────────────────────────────────────────── */
-
-.milestone-modal-body {
-  display: flex;
-  flex-direction: row;
-  gap: 20px;
-  flex: 1;
-  min-height: 0;
-}
-
-.milestone-modal-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.milestone-modal-title {
-  margin: 0 0 15px 0;
-  padding-bottom: 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  font-size: 1.8rem;
-  letter-spacing: 0.5px;
-  flex-shrink: 0;
-  width: 100%;
-}
-
-.milestone-timeline-wrapper {
-  background: rgba(0, 0, 0, 0.2);
-  padding: 0;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  flex: 1;
-  position: relative;
-}
-
-.milestone-sidebar {
-  width: 400px;
-  flex: 0 0 400px;
-  background: rgba(255, 255, 255, 0.03);
-  padding: 24px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  align-self: flex-start;
-}
-
-.milestone-sidebar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  margin-top: 0;
-}
-
-.milestone-sidebar-header h4 {
-  margin: 0;
-  color: #fff;
-  font-size: 1.2rem;
-}
-
-.milestone-sidebar-submit {
-  width: 100%;
 }
 
 /* Modal form fixes */

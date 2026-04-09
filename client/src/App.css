@@ -11,7 +11,7 @@ textarea {
 
 /* ── Material Symbols Global Setup ───────────────────────────────────────── */
 .material-symbols-outlined {
-  font-family: 'Material Symbols Outlined' !important;
+  font-family: "Material Symbols Outlined" !important;
   font-weight: normal;
   font-style: normal;
   font-size: 24px;
@@ -28,7 +28,7 @@ textarea {
 
 .App {
   text-align: center;
-  background: rgba(0, 0, 0, 0.332); /* Darker glass background */
+  background: transparent;
 }
 
 /* Sections */
@@ -44,22 +44,21 @@ h2 {
   letter-spacing: 2px;
 }
 
-
 /* Main Content Wrapper */
 .main-content {
   padding-top: 80px;
   min-height: calc(100vh - 80px);
-  animation: pageFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  background: transparent !important;
+  /* Entrance animation deactivated - Blocks backdrop-filter sampling */
+  /* animation: pageFadeIn 0.5s ease-out forwards; */
 }
 
 @keyframes pageFadeIn {
-  from {
+  0% {
     opacity: 0;
-    transform: translateY(5px);
   }
-  to {
+  100% {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
@@ -280,97 +279,32 @@ footer {
   margin-top: 60px;
 }
 
-/*fixing navbar overlapping issue*/
-.sui-modal-overlay {
-  z-index: 99999 !important;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(12px);
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  animation: fadeIn 0.3s ease forwards;
-}
-
-.sui-modal-content {
-  z-index: 100000 !important;
+/* ── Global Glass Window (Strict DOM Matching) ───────────────────────── */
+.grid-window {
   position: relative;
-  max-width: 450px;
-  width: 90%;
-  background: rgba(20, 20, 30, 0.95);
-  backdrop-filter: blur(30px);
-  border: 1px solid rgba(0, 198, 230, 0.2);
+  background: rgba(10, 12, 18, 0.2) !important;
+  backdrop-filter: blur(10px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
   border-radius: 20px;
-  padding: 40px;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
-  animation: modalScaleIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8) !important;
+  padding: 32px;
+  margin-bottom: 30px;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 @keyframes modalScaleIn {
   from {
     opacity: 0;
-    transform: scale(0.9) translateY(20px);
+    transform: scale(0.95);
   }
   to {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: scale(1);
   }
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.modal-close-btn {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #fff;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 1.2rem;
-  transition: all 0.2s;
-  z-index: 100010;
-}
-
-.modal-close-btn:hover {
-  background: #ef4444;
-  border-color: #ef4444;
-  transform: rotate(90deg) scale(1.1);
-}
-
-/* ── Milestone Timeline Modal (Global Wide Layout) ────────────────────────── */
-.milestone-modal-content-wide {
-  max-width: 1800px !important;
-  width: 98% !important;
-  height: 92vh;
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 20px;
-  position: relative;
-  padding: 40px !important;
-  background: rgba(20, 20, 30, 0.95) !important;
-  backdrop-filter: blur(30px) !important;
-  border: 1px solid rgba(0, 198, 230, 0.2) !important;
-  border-radius: 20px !important;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6) !important;
-}
 /* ── Global Custom Scrollbar (Sandblasted Glass) ────────────────────────── */
 ::-webkit-scrollbar {
   width: 10px;
@@ -383,7 +317,8 @@ footer {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(
+  background:
+    linear-gradient(
       135deg,
       rgba(255, 255, 255, 0.15),
       rgba(255, 255, 255, 0.05)
@@ -400,7 +335,7 @@ footer {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
   border-color: rgba(255, 255, 255, 0.3);
-  box-shadow: 
+  box-shadow:
     0 0 15px rgba(255, 255, 255, 0.1),
     inset 0 1px 2px rgba(255, 255, 255, 0.2);
 }

@@ -14,12 +14,14 @@ const SuiTimeline = ({
   updateTrigger = 0,
   onMilestonesChange,
   onClick,
+  scrollProgress = 0,
 }) => {
   const [milestones, setMilestones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedMilestone, setSelectedMilestone] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   // Form state
   const [status, setStatus] = useState("pending");
@@ -58,20 +60,21 @@ const SuiTimeline = ({
   useEffect(() => {
     const updateDims = () => {
       if (containerRef.current) {
-        let { clientWidth, clientHeight } = containerRef.current;
-        // If clientHeight is 0 (parent has flex:1 but no set height),
-        // fallback to a reasonable percentage of viewport or fixed value
-        if (clientHeight < 100) clientHeight = window.innerHeight * 0.6;
+        let { clientWidth } = containerRef.current;
         if (clientWidth < 100) clientWidth = 800;
 
+        // Proportional height calculation: 3 milestones per 540px viewport (~180px per milestone)
+        // This ensures the timeline always has vertical "room" to scroll
+        const itemHeight = 180;
+        const totalHeight = Math.max(540, milestones.length * itemHeight);
+
         console.log(
-          `DEBUG: Dimensions updated to ${clientWidth}x${clientHeight}`,
+          `DEBUG: Proportional Dimensions updated to ${clientWidth}x${totalHeight} (${milestones.length} nodes)`,
         );
-        setDimensions({ width: clientWidth, height: clientHeight });
+        setDimensions({ width: clientWidth, height: totalHeight });
       }
     };
     updateDims();
-    // Use a small delay to ensure flex layout has settled
     const timer = setTimeout(updateDims, 300);
     window.addEventListener("resize", updateDims);
     return () => {
@@ -126,6 +129,7 @@ const SuiTimeline = ({
       return;
     }
     try {
+      setSaving(true);
       let finalNote = clientNote || "";
       if (finalNote.trim()) {
         let originalNote = selectedMilestone.client_note || "";
@@ -135,12 +139,10 @@ const SuiTimeline = ({
         );
         if (origMatch) origStripped = origMatch[2];
 
-        // If the user actually changed the text, aggressively stamp it with their role tag
         if (finalNote !== origStripped) {
           const roleTag = userRole === "client" ? "Client" : "VisionDivision";
           finalNote = `[${roleTag}] ${finalNote}`;
         } else {
-          // Otherwise securely preserve the original author tag intact during a generic status save
           finalNote = originalNote;
         }
       }
@@ -163,6 +165,8 @@ const SuiTimeline = ({
       if (onMilestonesChange) onMilestonesChange();
     } catch (err) {
       alert("Failed to save. Please try again.");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -172,6 +176,7 @@ const SuiTimeline = ({
 
   const confirmDelete = async () => {
     try {
+      setSaving(true);
       await axios.delete(`${API}/api/milestones/${selectedMilestone.id}`, {
         withCredentials: true,
       });
@@ -182,6 +187,8 @@ const SuiTimeline = ({
     } catch (err) {
       console.error(err);
       alert("Failed to delete. Please try again.");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -199,7 +206,13 @@ const SuiTimeline = ({
     count > 1 ? (dimensions.width - 120) / (count - 1) : dimensions.width;
   const previewTextScale = Math.min(1, hSpacePerNode / 120);
 
-  const points = milestones.map((m, i) => {
+  // Sort milestones chronologically (Oldest first) to ensure consistent Story flow
+  const sortedMilestones = [...milestones].sort((a, b) => {
+    const dateA = new Date(a.target_date || 0);
+    const dateB = new Date(b.target_date || 0);
+    return dateA - dateB;
+  });
+  const points = sortedMilestones.map((m, i) => {
     if (preview) {
       const startX = 60;
       const endX = dimensions.width - 60;
@@ -211,12 +224,15 @@ const SuiTimeline = ({
       return { x, y, isTop: i % 2 === 0, ...m };
     }
 
+    // Correct vertical mapping for Bottom-to-Top Story flow:
+    // i=0 (First Milestone) maps to endY (Bottom)
+    // i=N-1 (Last Milestone) maps to startY (Top)
     const y =
       count === 1
         ? (startY + endY) / 2
-        : startY + (i / (count - 1)) * (endY - startY);
+        : endY - (i / (count - 1)) * (endY - startY);
 
-    const xOffset = 80; // The curve amplitude
+    const xOffset = 120; // Increased curve amplitude for a more dramatic Story flow
     const isLeft = i % 2 === 0;
     const x = isLeft
       ? dimensions.width * 0.5 - xOffset
@@ -236,22 +252,22 @@ const SuiTimeline = ({
     });
   };
 
-  const renderPaths = () => {
-    if (points.length === 0) return null;
+  // Prepare Master Path and Gradient data for the SVG
+  const generateMasterPath = () => {
+    if (points.length === 0)
+      return { dPath: "", gradientStops: [], gradientId: "" };
 
-    const totalDuration = 8; // 12s slower sweep animation
-
-    // Generate continuous D string and percentage stops for the linear gradient
     let dPath = "";
+    let glowDPath = "";
     const gradientStops = [];
     const gradientId = preview
       ? `timeline-gradient-hz-${projectId}`
       : `timeline-gradient-vt-${projectId}`;
 
     const getColor = (status) => {
-      if (status === "completed") return "#00c6e6"; // Blue accent for completed
-      if (status === "in_progress") return "#60a5fa"; // Brighter blue for in-progress
-      return "transparent";
+      if (status === "completed") return "#00c6e6";
+      if (status === "in_progress") return "#60a5fa";
+      return "rgba(96, 165, 250, 0.4)";
     };
 
     if (preview) {
@@ -277,30 +293,39 @@ const SuiTimeline = ({
         prevX = p.x;
         prevY = p.y;
       });
-
-      // Tail
       dPath += ` L ${dimensions.width} ${prevY}`;
-      const tailColor = getColor("pending");
       gradientStops.push(
         <stop
           key={`start-tail`}
           offset={`${(prevX / dimensions.width) * 100}%`}
-          stopColor={tailColor}
+          stopColor={getColor("pending")}
         />,
       );
       gradientStops.push(
-        <stop key={`end-tail`} offset={`100%`} stopColor={tailColor} />,
+        <stop
+          key={`end-tail`}
+          offset={`100%`}
+          stopColor={getColor("pending")}
+        />,
       );
     } else {
       let prevX = dimensions.width * 0.5;
-      let prevY = 0;
+      let prevY = dimensions.height;
       dPath += `M ${prevX} ${prevY}`;
 
       points.forEach((p, i) => {
         const midY = (prevY + p.y) / 2;
-        dPath += ` C ${prevX} ${midY}, ${p.x} ${midY}, ${p.x} ${p.y}`;
-        const startPercent = (prevY / dimensions.height) * 100;
-        const endPercent = (p.y / dimensions.height) * 100;
+        const segment = ` C ${prevX} ${midY}, ${p.x} ${midY}, ${p.x} ${p.y}`;
+        dPath += segment;
+
+        // Only add to the glowing path if it's not a future/pending milestone
+        // We allow the glow to reach the latest active milestone
+        if (p.status === "completed" || p.status === "in_progress") {
+          glowDPath = dPath;
+        }
+
+        const startPercent = 100 - (prevY / dimensions.height) * 100;
+        const endPercent = 100 - (p.y / dimensions.height) * 100;
         const color = getColor(p.status);
         gradientStops.push(
           <stop
@@ -316,13 +341,15 @@ const SuiTimeline = ({
         prevY = p.y;
       });
 
-      // Tail
-      dPath += ` C ${prevX} ${prevY + 50}, ${dimensions.width * 0.5} ${prevY + 50}, ${dimensions.width * 0.5} ${dimensions.height}`;
+      // Tail (pointing to the future/top) - Extends the path toward infinity
+      const futureExtend = -300;
+      dPath += ` C ${prevX} ${prevY - 100}, ${dimensions.width * 0.5} ${prevY - 100}, ${dimensions.width * 0.5} ${futureExtend}`;
+
       const tailColor = getColor("pending");
       gradientStops.push(
         <stop
           key={`start-tail`}
-          offset={`${(prevY / dimensions.height) * 100}%`}
+          offset={`${100 - (prevY / dimensions.height) * 100}%`}
           stopColor={tailColor}
         />,
       );
@@ -330,91 +357,27 @@ const SuiTimeline = ({
         <stop key={`end-tail`} offset={`100%`} stopColor={tailColor} />,
       );
     }
-
-    return (
-      <>
-        <defs>
-          <linearGradient
-            id={gradientId}
-            gradientUnits="userSpaceOnUse"
-            x1="0"
-            y1="0"
-            x2={preview ? dimensions.width : 0}
-            y2={preview ? 0 : dimensions.height}
-          >
-            {gradientStops}
-          </linearGradient>
-        </defs>
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `
-          @keyframes drawMasterPath_${projectId} {
-            0% { stroke-dashoffset: 100; opacity: 0; }
-            1% { opacity: 1; }
-            90% { stroke-dashoffset: 0; opacity: 1; }
-            100% { stroke-dashoffset: 0; opacity: 0; }
-          }
-          .sui-svg-container path {
-            vector-effect: non-scaling-stroke;
-          }
-        `,
-          }}
-        />
-        {/* Faint center guideline / base track */}
-        <path
-          className="sui-path-base"
-          d={dPath}
-          style={{
-            fill: "none",
-            stroke: "rgba(255, 255, 255, 0.15)",
-            strokeWidth: "4px",
-            strokeLinecap: "round",
-          }}
-        />
-
-        {/* Sweeping Colorful Overlay - The glowing lightcycle tracing the road */}
-        <path
-          className="sui-path-master-glow"
-          d={dPath}
-          pathLength="100"
-          style={{
-            fill: "none",
-            stroke: `url(#${gradientId})`,
-            strokeWidth: "6px",
-            strokeLinecap: "round",
-            strokeDasharray: "100",
-            strokeDashoffset: "100",
-            filter: "drop-shadow(0 0 10px currentColor)",
-            animation: `drawMasterPath_${projectId} ${totalDuration}s infinite linear`,
-          }}
-        />
-      </>
-    );
+    return { dPath, glowDPath, gradientStops, gradientId };
   };
 
-  if (loading)
+  const { dPath, glowDPath, gradientStops, gradientId } = generateMasterPath();
+  const totalDuration = 4.5;
+
+  if (loading) {
     return (
-      <div style={{ color: "#fff", textAlign: "center", padding: "20px" }}>
-        Mapping Timeline...
+      <div className="sui-timeline-skeleton">
+        <div className="sui-skeleton-path"></div>
+        <span className="sui-skeleton-text">Mapping Production History...</span>
       </div>
     );
-  if (milestones.length === 0)
-    return (
-      <div style={{ color: "#a0aec0", textAlign: "center", padding: "20px" }}>
-        No milestones mapped.
-      </div>
-    );
+  }
 
   return (
     <div
       className={`sui-timeline-wrapper sui-fade-in ${preview ? "sui-preview-mode sui-preview-clickable" : ""}`}
       ref={containerRef}
       style={{
-        height: "100%",
-        minHeight: preview ? "250px" : "600px",
-        width: "100%",
-        position: "relative",
-        background: "rgba(0,0,0,0.1)", // Slight bg to see the area
+        height: preview ? "100%" : `${dimensions.height}px`,
       }}
       onClick={preview && onClick ? onClick : undefined}
     >
@@ -426,23 +389,64 @@ const SuiTimeline = ({
       <svg
         className="sui-svg-container"
         viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
-        preserveAspectRatio="none"
       >
         <defs>
-          <linearGradient id="glowGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#ff7b00" />
-            <stop offset="50%" stopColor="#ffb347" />
-            <stop offset="100%" stopColor="#ff7b00" />
-          </linearGradient>
+          <filter id="glow-effect" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+
+          {gradientId && (
+            <linearGradient
+              id={gradientId}
+              gradientUnits="userSpaceOnUse"
+              x1="0"
+              y1={preview ? 0 : dimensions.height}
+              x2={preview ? dimensions.width : 0}
+              y2={0}
+            >
+              {gradientStops}
+            </linearGradient>
+          )}
         </defs>
-        {renderPaths()}
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
+          @keyframes drawMasterPath_${projectId} {
+            0% { stroke-dashoffset: 100; opacity: 0; }
+            5% { opacity: 1; }
+            95% { opacity: 1; }
+            100% { stroke-dashoffset: 0; opacity: 0; }
+          }
+          .sui-svg-container path {
+            vector-effect: none;
+          }
+        `,
+          }}
+        />
+        <path className="sui-path-base" d={dPath} />
+
+        {glowDPath && (
+          <path
+            className="sui-path-master-glow"
+            d={glowDPath}
+            pathLength="100"
+            style={{
+              stroke: `url(#${gradientId})`,
+              animation: `drawMasterPath_${projectId} ${totalDuration}s infinite ease-in-out`,
+            }}
+          />
+        )}
       </svg>
 
       <div className="sui-milestones-absolute">
         {points.map((p, i) => {
           const isLeft = p.isLeft;
           // Calculate exact pixel boundaries to ensure it never overflows the container
-          // increased padding from 40 to 80 to ensure text sits further inside the window margin
           const availableWidth = isLeft
             ? p.x - 100
             : dimensions.width - p.x - 100;
@@ -460,30 +464,21 @@ const SuiTimeline = ({
                     : p.status === "in_progress"
                       ? "#60a5fa"
                       : "#fff",
-                cursor: "pointer",
               }}
               onClick={() => openModal(p)}
             >
-              <div
-                className="sui-exact-dot"
-                style={preview ? { width: "12px", height: "12px" } : {}}
-              ></div>
+              <div className="sui-exact-dot"></div>
               {preview && (
                 <div
+                  className="sui-preview-connector"
                   style={{
-                    position: "absolute",
-                    left: "50%",
-                    width: "2px",
                     background:
                       p.status === "completed"
                         ? "#00c6e6"
                         : p.status === "in_progress"
                           ? "#60a5fa"
                           : "rgba(255,255,255,0.4)",
-                    height: "35px",
                     [p.isTop ? "bottom" : "top"]: "10px",
-                    transform: "translateX(-50%)",
-                    opacity: 0.8,
                   }}
                 ></div>
               )}
@@ -492,25 +487,15 @@ const SuiTimeline = ({
                 style={
                   preview
                     ? {
-                        position: "absolute",
-                        maxWidth: "150px",
-                        whiteSpace: "normal",
-                        wordWrap: "break-word",
-                        left: "50%",
                         top: p.isTop ? "auto" : "50px",
                         bottom: p.isTop ? "50px" : "auto",
                         transform: `translateX(-50%) scale(${previewTextScale * 0.85})`,
                         transformOrigin: p.isTop
                           ? "bottom center"
                           : "top center",
-                        textAlign: "center",
-                        pointerEvents: "none",
                       }
                     : {
                         maxWidth: `${availableWidth / textScale}px`,
-                        whiteSpace: "normal",
-                        wordWrap: "break-word",
-                        overflowWrap: "break-word",
                         transform: `translateY(-50%) scale(${textScale})`,
                         transformOrigin: p.isLeft
                           ? "right center"
@@ -554,9 +539,7 @@ const SuiTimeline = ({
                                 {roleTag}
                               </span>
                             )}
-                            <span className="sui-note-text">
-                              {text}
-                            </span>
+                            <span className="sui-note-text">{text}</span>
                           </div>
                         );
                       })()}
@@ -601,7 +584,7 @@ const SuiTimeline = ({
                       placeholder="Enter milestone details..."
                     ></textarea>
                   </div>
-                  
+
                   <div className="sui-form-row">
                     <div className="sui-form-col">
                       <div className="sui-form-group">
@@ -651,9 +634,7 @@ const SuiTimeline = ({
                   <strong className="sui-milestone-readonly-title">
                     {title}
                   </strong>
-                  <p className="sui-milestone-readonly-desc">
-                    {description}
-                  </p>
+                  <p className="sui-milestone-readonly-desc">{description}</p>
                   <div className="sui-milestone-readonly-status">
                     Status:{" "}
                     <strong>{status.replace("_", " ").toUpperCase()}</strong>
@@ -673,9 +654,7 @@ const SuiTimeline = ({
                   <strong className="sui-milestone-readonly-title">
                     {title}
                   </strong>
-                  <p className="sui-milestone-readonly-desc">
-                    {description}
-                  </p>
+                  <p className="sui-milestone-readonly-desc">{description}</p>
                   <div className="sui-milestone-readonly-status">
                     Status:{" "}
                     <strong>{status.replace("_", " ").toUpperCase()}</strong>
@@ -702,11 +681,12 @@ const SuiTimeline = ({
                         return (
                           <span
                             className="sui-client-badge sui-client-badge--no-margin"
-                            style={{ 
-                              background: roleTag === "Client" ? "#2dd4bf" : "#6366f1",
+                            style={{
+                              background:
+                                roleTag === "Client" ? "#2dd4bf" : "#6366f1",
                               color: "#fff",
                               padding: "2px 10px",
-                              borderRadius: "4px"
+                              borderRadius: "4px",
                             }}
                           >
                             PROVENANCE: {roleTag}
@@ -730,16 +710,25 @@ const SuiTimeline = ({
                   <button
                     className="sui-btn sui-btn-delete"
                     onClick={handleDelete}
+                    disabled={saving}
                   >
                     Delete
                   </button>
                 )}
-                <button className="sui-btn sui-btn-cancel" onClick={closeModal}>
+                <button
+                  className="sui-btn sui-btn-cancel"
+                  onClick={closeModal}
+                  disabled={saving}
+                >
                   {userRole === "production_crew" ? "Close" : "Cancel"}
                 </button>
                 {userRole !== "production_crew" && (
-                  <button className="sui-btn sui-btn-save" onClick={handleSave}>
-                    Save Changes
+                  <button
+                    className="sui-btn sui-btn-save"
+                    onClick={handleSave}
+                    disabled={saving}
+                  >
+                    {saving ? "Saving Changes..." : "Save Changes"}
                   </button>
                 )}
               </div>

@@ -2,10 +2,9 @@
 .um-root {
   padding: 0 0 60px;
   font-family: "Funnel Sans", sans-serif;
-  background-color: #0d0d0d;
+  background-color: transparent;
   color: #eee;
   min-height: 100vh;
-  border-radius: 0.8em;
 }
 
 /* ── Header ─────────────────────────────────────────────────────────────────── */
@@ -34,14 +33,6 @@
   margin: 0 32px;
 }
 
-.grid-window {
-  background: #161616;
-  border: 1px solid #242424;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-}
-
 .grid-window h3 {
   color: #fff;
   border-bottom: 2px solid #2a2a2a;
@@ -63,15 +54,15 @@
 }
 
 .um-table thead th {
-  background: #242424;
-  color: #aaa;
+  background: rgba(255, 255, 255, 0.03) !important; /* Perfect glass match */
+  color: #fff !important;
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 16px;
+  letter-spacing: 1px;
+  padding: 20px 16px;
   text-align: center;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 .um-table tbody td {

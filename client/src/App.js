@@ -1,5 +1,10 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { 
+  createBrowserRouter, 
+  RouterProvider, 
+  Outlet, 
+  useLocation 
+} from "react-router-dom";
 import "./App.css";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ModalProvider } from "./contexts/ModalContext";
@@ -18,12 +23,15 @@ import Schedule from "./components/pages/Schedule";
 import FinancialDashboard from "./components/pages/FinancialDashboard";
 import BudgetPredictor from "./components/pages/BudgetPredictor";
 import Footer from "./components/ui/Footer";
-
 import Starfield from "./components/ui/Starfield";
-
 import { useAuth } from "./contexts/AuthContext";
 
-function AppContent() {
+/**
+ * RootLayout handles the persistent UI elements and layout
+ * shared across all routes in the application.
+ * Note: It must be a child of AppProviders to access Auth/Modal context.
+ */
+function RootLayout() {
   const location = useLocation();
   const { isTransiting } = useAuth();
   const hideFooter = ["/login", "/register"].includes(location.pathname);
@@ -33,96 +41,108 @@ function AppContent() {
       <div className={`transition-overlay ${isTransiting ? "active" : ""}`} />
       <Navbar />
       <div className={`main-content ${isTransiting ? "fading-out" : ""}`}>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute roles={["client"]}>
-                <ClientDashboard />
-              </ProtectedRoute>
-            }
-          />
-
-
-          <Route
-            path="/crew-dashboard"
-            element={
-              <ProtectedRoute roles={["production_crew"]}>
-                <CrewDashboard />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/admin-budget"
-            element={
-              <ProtectedRoute roles={["admin", "manager"]}>
-                <AdminBudget />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute roles={["admin", "manager"]}>
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/users"
-            element={
-              <ProtectedRoute roles={["admin"]}>
-                <UserManagement />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/schedule"
-            element={
-              <ProtectedRoute roles={["admin", "manager", "production_crew", "client"]}>
-                <Schedule />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/finance"
-            element={
-              <ProtectedRoute roles={["admin", "manager"]}>
-                <FinancialDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/budget-predictor"
-            element={
-              <ProtectedRoute roles={["admin", "manager"]}>
-                <BudgetPredictor />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
+        {/* Outlet renders the matched child routes */}
+        <Outlet />
       </div>
       {!hideFooter && <Footer />}
     </div>
   );
 }
 
-function App() {
+/**
+ * AppProviders correctly nests our contexts inside the Data Router context.
+ * This allows hooks like useNavigate (used in AuthProvider) to work correctly.
+ */
+function AppProviders() {
   return (
-    <Router>
-      <AuthProvider>
-        <ModalProvider>
-          <Starfield />
-          <AppContent />
-        </ModalProvider>
-      </AuthProvider>
-    </Router>
+    <AuthProvider>
+      <ModalProvider>
+        <Starfield />
+        <RootLayout />
+      </ModalProvider>
+    </AuthProvider>
   );
+}
+
+// Define the application router configuration with AppProviders at the root
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <AppProviders />,
+    children: [
+      { path: "", element: <Home /> },
+      { path: "login", element: <LoginPage /> },
+      { path: "register", element: <RegisterPage /> },
+      {
+        path: "dashboard",
+        element: (
+          <ProtectedRoute roles={["client"]}>
+            <ClientDashboard />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "crew-dashboard",
+        element: (
+          <ProtectedRoute roles={["production_crew"]}>
+            <CrewDashboard />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "admin-budget",
+        element: (
+          <ProtectedRoute roles={["admin", "manager"]}>
+            <AdminBudget />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "admin",
+        element: (
+          <ProtectedRoute roles={["admin", "manager"]}>
+            <AdminDashboard />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "users",
+        element: (
+          <ProtectedRoute roles={["admin"]}>
+            <UserManagement />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "schedule",
+        element: (
+          <ProtectedRoute roles={["admin", "manager", "production_crew", "client"]}>
+            <Schedule />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "finance",
+        element: (
+          <ProtectedRoute roles={["admin", "manager"]}>
+            <FinancialDashboard />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "budget-predictor",
+        element: (
+          <ProtectedRoute roles={["admin", "manager"]}>
+            <BudgetPredictor />
+          </ProtectedRoute>
+        ),
+      },
+    ],
+  },
+]);
+
+function App() {
+  return <RouterProvider router={router} />;
 }
 
 export default App;

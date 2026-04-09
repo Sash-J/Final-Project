@@ -54,14 +54,14 @@ def get_projects():
 
 
 def insert_project(
-    project_name, code_name=None, start_date=None, end_date=None, location=None
+    project_name, code_name=None, start_date=None, end_date=None, location=None, color='#00c6e6', project_image=None
 ):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
-        """INSERT INTO projects (project_name, code_name, start_date, end_date, location) 
-           VALUES (%s, %s, %s, %s, %s)""",
-        (project_name, code_name, start_date, end_date, location),
+        """INSERT INTO projects (project_name, code_name, start_date, end_date, location, color, project_image) 
+           VALUES (%s, %s, %s, %s, %s, %s, %s)""",
+        (project_name, code_name, start_date, end_date, location, color, project_image),
     )
     conn.commit()
     new_id = cursor.lastrowid
@@ -77,15 +77,25 @@ def update_project(
     start_date=None,
     end_date=None,
     location=None,
+    color='#00c6e6',
+    project_image=None
 ):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
         """UPDATE projects 
-           SET project_name = %s, code_name = %s, start_date = %s, end_date = %s, location = %s 
+           SET project_name = %s, code_name = %s, start_date = %s, end_date = %s, location = %s, color = %s, project_image = %s 
            WHERE id = %s""",
-        (project_name, code_name, start_date, end_date, location, project_id),
+        (project_name, code_name, start_date, end_date, location, color, project_image, project_id),
     )
+    
+    # Sync the color across all schedule tasks associated with this project
+    if color:
+        cursor.execute(
+            """UPDATE schedule_tasks SET task_color = %s WHERE project_id = %s""",
+            (color, project_id)
+        )
+        
     conn.commit()
     cursor.close()
     conn.close()
@@ -123,6 +133,18 @@ def get_project_name(project_id):
     cursor.close()
     conn.close()
     return result[0] if result else "Unknown Project"
+
+def check_color_exists(color, exclude_project_id=None):
+    conn = get_connection()
+    cursor = conn.cursor()
+    if exclude_project_id:
+        cursor.execute("SELECT project_name FROM projects WHERE color = %s AND id != %s", (color, exclude_project_id))
+    else:
+        cursor.execute("SELECT project_name FROM projects WHERE color = %s", (color,))
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return result[0] if result else None
 
 
 # ── Departments ───────────────────────────────────────────────────────────────

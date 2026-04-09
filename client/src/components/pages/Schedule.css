@@ -7,10 +7,15 @@
 }
 
 @keyframes scheduleFadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-
 
 .schedule-header p {
   color: #00c6e6;
@@ -428,7 +433,7 @@
 
 .schedule-sidebar {
   flex: 0 0 300px;
-  max-height: 850px;
+  max-height: 825px;
   display: flex;
   flex-direction: column;
   padding: 25px;
@@ -483,9 +488,10 @@
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 14px;
-  padding: 15px;
+  padding: 12px;
   cursor: pointer;
-  display: flex;
+  display: grid;
+  grid-template-columns: 54px 1fr 10px;
   align-items: center;
   gap: 15px;
   transition: all 0.2s ease;
@@ -495,13 +501,11 @@
 .sidebar-task-card:hover {
   background: rgba(0, 198, 230, 0.08);
   border-color: rgba(0, 198, 230, 0.3);
-  transform: translateX(5px);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .sidebar-task-date {
   background: rgba(0, 198, 230, 0.15);
-  color: #00c6e6;
   width: 54px;
   height: 54px;
   min-width: 54px;
@@ -513,18 +517,17 @@
   font-weight: 700;
   font-size: 0.95rem;
   line-height: 1.2;
-  border: 1px solid rgba(0, 198, 230, 0.2);
 }
 
 .sidebar-task-info {
-  flex: 1;
+  text-align: center;
   min-width: 0;
 }
 
 .sidebar-task-title {
   font-weight: 600;
   font-size: 1rem;
-  margin-bottom: 4px;
+  margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -544,8 +547,10 @@
 }
 
 .sidebar-project-tag {
+  display: block;
   font-size: 0.8rem;
   font-weight: 600;
+  text-align: center;
 }
 
 /* ── UI Refinement: Glass Dropdown & Color Palette ── */
@@ -625,7 +630,85 @@
   }
 }
 
-/* ── Modal Fixes ───────────────────────────────────────────────────────────── */
+.unsaved-changes-bar {
+  position: sticky;
+  top: 100px;
+  background: rgba(239, 68, 68, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 12px 25px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 100;
+  animation: slideInDown 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes slideInDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.unsaved-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #fca5a5;
+  font-weight: 500;
+}
+
+.unsaved-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.unsaved-actions .sui-btn {
+  padding: 8px 18px;
+  font-size: 0.85rem;
+  border-radius: 8px;
+}
+
+.discard-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.discard-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.save-all-btn {
+  background: #00c6e6;
+  color: #000;
+  border: none;
+  font-weight: 700;
+  box-shadow: 0 0 20px rgba(0, 198, 230, 0.4);
+}
+
+.save-all-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 30px rgba(0, 198, 230, 0.6);
+}
+
+.save-all-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Modal Fixes for Schedule ────────────────────────────────────────────── */
 .sui-modal-overlay {
   z-index: 2000 !important;
 }
@@ -669,4 +752,27 @@
   color: #cbd5e1;
   font-size: 0.95rem;
   line-height: 1.6;
+}
+
+.task-item.is-unsaved {
+  border-left-style: dashed !important;
+  animation: pulseBorder 2s infinite;
+}
+
+@keyframes pulseBorder {
+  0% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.7;
+  }
+}
+
+.sidebar-task-card.is-unsaved {
+  background: rgba(0, 198, 230, 0.05);
+  border-style: dashed;
+  border-color: rgba(255, 255, 255, 0.2);
 }

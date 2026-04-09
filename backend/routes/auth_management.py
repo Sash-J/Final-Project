@@ -10,52 +10,64 @@ from core.session_handler import (
     get_current_user_data,
 )
 
-auth_bp = Blueprint('auth_management', __name__)
+auth_bp = Blueprint("auth_management", __name__)
 
 # Bcrypt instance injected by app.py via init_auth(bcrypt)
 _bcrypt = None
+
 
 def init_auth(bcrypt_instance):
     global _bcrypt
     _bcrypt = bcrypt_instance
 
+
 def validate_register_data(username, password, role, full_name, telephone, address):
     """Deep validation of registration data before database insertion."""
-    
+
     # 1. Username Validation: A-Z, a-z, _ only
     if not re.match(r"^[a-zA-Z_]+$", username):
         return "Username can only contain letters and underscores."
 
     # 2. Password Validation
+    if " " in password:
+        return "Password cannot contain spaces."
     if len(password) < 8 or len(password) > 20:
         return "Password must be between 8 and 20 characters."
     if not any(c.isupper() for c in password) or not any(c.islower() for c in password):
         return "Password must contain both uppercase and lowercase letters."
-    
+
     num_count = len(re.findall(r"\d", password))
     if num_count > 4:
         return "Password can contain at most 4 numbers."
-    
+
     special_count = len(re.findall(r"[^a-zA-Z0-9\s]", password))
-    if special_count > 1:
-        return "Password can contain at most 1 special character."
+    if special_count != 1:
+        return "Password must contain exactly one special character."
 
     # 3. Role Guard: Public registration can only be 'client' or 'production_crew'
     allowed_roles = ["client", "production_crew"]
     if role not in allowed_roles:
         return "Forbidden role selection."
 
-    # 4. Metadata Length Constraints
+    # 4. Metadata Validation
     if len(full_name) > 100:
         return "Full Name is too long (max 100 characters)."
-    if len(telephone) > 20:
-        return "Telephone is too long (max 20 characters)."
-    if len(address) > 500:
-        return "Address is too long (max 500 characters)."
+    if not re.match(r"^[a-zA-Z\s]+$", full_name):
+        return "Full Name can only contain letters and spaces."
+    # 5. Telephone Validation
+    clean_phone = re.sub(r"[\s\-()]+", "", telephone)
+    if not re.match(r"^\+?\d{10,15}$", clean_phone):
+        return "Please enter a valid telephone number (10-15 digits)."
+
+    # 6. Address Validation (Security)
+    if any(char in address for char in "<>{}[]"):
+        return "Address contains prohibited special characters."
 
     return None
 
+
 # ── Auth Routes ───────────────────────────────────────────────────────────────
+
 
 @auth_bp.route("/api/login", methods=["POST"])
 def login():
@@ -130,18 +142,34 @@ def init_admin():
             is_approved=1,
             full_name="Default Admin",
             address="",
-            telephone=""
+            telephone="",
         )
         return jsonify({"message": "Admin user created: admin / admin123"}), 201
     except Exception as e:
-        return jsonify({"error": str(e), "context": "Error during admin user initialization. Your database might be refusing specific values or the 'users' table is missing columns."}), 500
+        return (
+            jsonify(
+                {
+                    "error": str(e),
+                    "context": "Error during admin user initialization. Your database might be refusing specific values or the 'users' table is missing columns.",
+                }
+            ),
+            500,
+        )
 
 
 @auth_bp.route("/api/check-connection", methods=["GET"])
 def check_connection():
     try:
         auth.get_user_by_username("ping")
-        return jsonify({"status": "Database connection OK", "message": "Backend is online and communicating with MySQL."}), 200
+        return (
+            jsonify(
+                {
+                    "status": "Database connection OK",
+                    "message": "Backend is online and communicating with MySQL.",
+                }
+            ),
+            200,
+        )
     except Exception as e:
         return jsonify({"status": "Database connection FAILED", "error": str(e)}), 500
 
@@ -160,7 +188,9 @@ def register():
         return jsonify({"error": "Username and password are required"}), 400
 
     # Backend Security Parity Check
-    validation_error = validate_register_data(username, password, role, full_name, address, telephone)
+    validation_error = validate_register_data(
+        username, password, role, full_name, telephone, address
+    )
     if validation_error:
         return jsonify({"error": validation_error}), 400
 
@@ -180,6 +210,11 @@ def register():
     )
     notify_all_admins(f"New user registered: {username}. Awaiting approval.", "info")
     return (
-        jsonify({"message": "Registration successful. Pending admin approval.", "id": new_user_id}),
+        jsonify(
+            {
+                "message": "Registration successful. Pending admin approval.",
+                "id": new_user_id,
+            }
+        ),
         201,
     )

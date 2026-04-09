@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { useBlocker } from "react-router-dom";
 import PageHeader from "../common/PageHeader";
 import "./Schedule.css";
 import ModalPortal from "../common/ModalPortal";
@@ -7,52 +8,43 @@ import html2pdf from "html2pdf.js";
 
 // Sri Lankan Public Holidays 2026 (Hardcoded for simplicity)
 const SRI_LANKA_HOLIDAYS_2026 = [
-  { date: "2026-01-03", name: "Duruthu Full Moon Poya Day" },
-  { date: "2026-01-15", name: "Tamil Thai Pongal Day" },
-  { date: "2026-02-01", name: "Navam Full Moon Poya Day" },
-  { date: "2026-02-04", name: "Independence Day" },
-  { date: "2026-02-15", name: "Mahasivarathri Day" },
-  { date: "2026-03-02", name: "Medin Full Moon Poya Day" },
+  { date: "2026-01-03", name: "Duruthu Full Moon Poya Day (M)" },
+  { date: "2026-01-15", name: "Tamil Thai Pongal Day (M)" },
+  { date: "2026-02-01", name: "Navam Full Moon Poya Day (M)" },
+  { date: "2026-02-04", name: "Independence Day (M)" },
+  { date: "2026-02-15", name: "Mahasivarathri Day (Bank Holiday)" },
+  { date: "2026-03-02", name: "Medin Full Moon Poya Day (M)" },
   { date: "2026-03-21", name: "Id-Ul-Fitr (Ramazan)" },
-  { date: "2026-04-01", name: "Bak Full Moon Poya Day" },
-  { date: "2026-04-03", name: "Good Friday" },
-  { date: "2026-04-13", name: "Day prior to Sinhala & Tamil New Year" },
-  { date: "2026-04-14", name: "Sinhala & Tamil New Year Day" },
-  { date: "2026-05-01", name: "Vesak Full Moon Poya Day" },
-  { date: "2026-05-02", name: "Day following Vesak Poya" },
+  { date: "2026-04-01", name: "Bak Full Moon Poya Day (M)" },
+  { date: "2026-04-03", name: "Good Friday (Bank Holiday)" },
+  { date: "2026-04-13", name: "Day prior to Sinhala & Tamil New Year (M)" },
+  { date: "2026-04-14", name: "Sinhala & Tamil New Year Day (M)" },
+  { date: "2026-05-01", name: "May Day / Vesak Full Moon Poya Day (M)" },
+  { date: "2026-05-02", name: "Day following Vesak Poya (M)" },
   { date: "2026-05-29", name: "Id-Ul-Allah (Hadji)" },
-  { date: "2026-05-30", name: "Adhi Poson Full Moon Poya Day" },
-  { date: "2026-06-29", name: "Poson Full Moon Poya Day" },
-  { date: "2026-07-29", name: "Esala Full Moon Poya Day" },
-  { date: "2026-08-26", name: "Milad-un-Nabi (Holy Prophet's Birthday)" },
-  { date: "2026-09-26", name: "Nikini Full Moon Poya Day" },
-  { date: "2026-10-25", name: "Binara Full Moon Poya Day" },
-  { date: "2026-10-26", name: "Vap Full Moon Poya Day" },
-  { date: "2026-11-13", name: "Deepawali Festival Day" },
-  { date: "2026-11-24", name: "Ill Full Moon Poya Day" },
-  { date: "2026-12-24", name: "Unduwap Full Moon Poya Day" },
-  { date: "2026-12-25", name: "Christmas Day" },
+  { date: "2026-05-30", name: "Adhi Poson Full Moon Poya Day (M)" },
+  { date: "2026-06-29", name: "Poson Full Moon Poya Day (M)" },
+  { date: "2026-07-29", name: "Esala Full Moon Poya Day (M)" },
+  { date: "2026-08-26", name: "Milad-un-Nabi (Holy Prophet's Birthday) (M)" },
+  { date: "2026-08-27", name: "Nikini Full Moon Poya Day (M)" },
+  { date: "2026-09-26", name: "Binara Full Moon Poya Day (M)" },
+  { date: "2026-10-25", name: "Vap Full Moon Poya Day (M)" },
+  { date: "2026-11-08", name: "Deepavali Festival Day (M)" },
+  { date: "2026-11-24", name: "Ill Full Moon Poya Day (M)" },
+  { date: "2026-12-23", name: "Unduwap Full Moon Poya Day (M)" },
+  { date: "2026-12-25", name: "Christmas Day (M)" },
 ];
 
-const PREDEFINED_COLORS = [
-  "#00c6e6", // Blue
-  "#60a5fa", // Sky Blue
-  "#2dd4bf", // Teal
-  "#4ade80", // Green
-  "#fbbf24", // Amber
-  "#a855f7", // Purple (replaced rose/red)
-  "#f472b6", // Pink
-  "#818cf8", // Indigo
-  "#c084fc", // Violet
-  "#a78bfa", // Lavender
-];
+const DEFAULT_TASK_COLOR = "#a78bfa";
 
 const Schedule = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [tasks, setTasks] = useState([]);
+  const [originalTasks, setOriginalTasks] = useState([]);
   const [user, setUser] = useState(null);
   const [projects, setProjects] = useState([]);
   const [submitting, setSubmitting] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // Modals
   const [showTaskModal, setShowTaskModal] = useState(false);
@@ -69,7 +61,7 @@ const Schedule = () => {
     title: "",
     description: "",
     project_id: "",
-    task_color: "#00c6e6",
+    task_color: DEFAULT_TASK_COLOR,
   });
   const [noteText, setNoteText] = useState("");
 
@@ -86,6 +78,35 @@ const Schedule = () => {
     fetchProjects();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewMonth, viewYear]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [hasUnsavedChanges]);
+
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      hasUnsavedChanges && currentLocation.pathname !== nextLocation.pathname
+  );
+
+  useEffect(() => {
+    if (blocker.state === "blocked") {
+      const proceed = window.confirm(
+        "You have unsaved schedule edits. Are you sure you want to leave and discard changes?"
+      );
+      if (proceed) {
+        blocker.proceed();
+      } else {
+        blocker.reset();
+      }
+    }
+  }, [blocker]);
 
   const fetchUser = async () => {
     try {
@@ -105,7 +126,10 @@ const Schedule = () => {
         `/api/schedule/tasks?year=${viewYear}&month=${viewMonth + 1}`,
       );
       const data = await res.json();
-      setTasks(Array.isArray(data) ? data : []);
+      const taskArray = Array.isArray(data) ? data : [];
+      setTasks(taskArray);
+      setOriginalTasks(taskArray);
+      setHasUnsavedChanges(false);
     } catch (err) {
       console.error("Error fetching tasks:", err);
     }
@@ -131,56 +155,89 @@ const Schedule = () => {
     }
   };
 
-  const handleSubmitTask = async (e) => {
+  const handleSubmitTask = (e) => {
     e.preventDefault();
-    setSubmitting(true);
     const isEditing = !!taskForm.id;
-    const url = isEditing
-      ? `/api/schedule/tasks/${taskForm.id}`
-      : "/api/schedule/tasks";
-    const method = isEditing ? "PUT" : "POST";
+    
+    let updatedTasks;
+    if (isEditing) {
+      updatedTasks = tasks.map((t) =>
+        t.id === taskForm.id ? { ...t, ...taskForm, task_date: selectedDate } : t
+      );
+    } else {
+      const newTask = {
+        ...taskForm,
+        id: `temp-${Date.now()}`,
+        task_date: selectedDate,
+        creator_name: user?.username || "You",
+        project_name: projects.find(p => String(p.id) === String(taskForm.project_id))?.project_name || ""
+      };
+      updatedTasks = [...tasks, newTask];
+    }
 
+    setTasks(updatedTasks);
+    setHasUnsavedChanges(true);
+    setTaskForm({
+      id: null,
+      title: "",
+      description: "",
+      project_id: "",
+      task_color: DEFAULT_TASK_COLOR,
+    });
+    setShowTaskModal(false);
+  };
+
+  const handleDeleteTask = (taskId) => {
+    if (!window.confirm("Remove this task from local schedule?")) return;
+    const updatedTasks = tasks.filter((t) => t.id !== taskId);
+    setTasks(updatedTasks);
+    setHasUnsavedChanges(true);
+    if (selectedTask && selectedTask.id === taskId) {
+      setShowNotesModal(false);
+    }
+  };
+
+  const handleMasterSave = async () => {
+    setSubmitting(true);
     try {
-      const response = await fetch(url, {
-        method: method,
+      // Sanitize task_date to YYYY-MM-DD for all tasks before saving
+      const sanitizedTasks = tasks.map(t => {
+        const d = new Date(t.task_date);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return { 
+          ...t, 
+          task_date: `${y}-${m}-${day}` 
+        };
+      });
+
+      const response = await fetch("/api/schedule/bulk-save", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...taskForm,
-          task_date: selectedDate,
+          year: viewYear,
+          month: viewMonth + 1,
+          tasks: sanitizedTasks,
         }),
       });
       if (response.ok) {
-        setTaskForm({
-          id: null,
-          title: "",
-          description: "",
-          project_id: "",
-          task_color: "#00c6e6",
-        });
-        setShowTaskModal(false);
         fetchTasks();
+      } else {
+        const data = await response.json();
+        alert(`Error saving: ${data.error}`);
       }
     } catch (err) {
-      console.error("Error adding task:", err);
+      console.error("Master save error:", err);
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleDeleteTask = async (taskId) => {
-    if (!window.confirm("Are you sure you want to delete this task?")) return;
-    try {
-      const res = await fetch(`/api/schedule/tasks/${taskId}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        if (selectedTask && selectedTask.id === taskId) {
-          setShowNotesModal(false);
-        }
-        fetchTasks();
-      }
-    } catch (err) {
-      console.error("Error deleting task:", err);
+  const handleDiscardChanges = () => {
+    if (window.confirm("Discard all unsaved edits for this month?")) {
+      setTasks(originalTasks);
+      setHasUnsavedChanges(false);
     }
   };
 
@@ -222,13 +279,17 @@ const Schedule = () => {
         title: "",
         description: "",
         project_id: "",
-        task_color: "#00c6e6",
+        task_color: DEFAULT_TASK_COLOR,
       });
     }
     setShowTaskModal(true);
   };
 
   const openNotesModal = (task) => {
+    if (String(task.id).startsWith("temp")) {
+      alert("Please save the schedule before viewing or adding notes to new tasks.");
+      return;
+    }
     setSelectedTask(task);
     fetchNotes(task.id);
     setShowNotesModal(true);
@@ -270,6 +331,23 @@ const Schedule = () => {
   const handleNextMonth = () => {
     setCurrentDate(new Date(viewYear, viewMonth + 1, 1));
   };
+
+  const isTaskUnsaved = useCallback((task) => {
+    // Check if task is new (temp ID)
+    if (String(task.id).startsWith("temp")) return true;
+    
+    // Check if task was modified (different from its version in originalTasks)
+    const original = originalTasks.find(o => o.id === task.id);
+    if (!original) return false;
+
+    return (
+      task.title !== original.title ||
+      task.description !== (original.description || "") ||
+      task.project_id !== original.project_id ||
+      task.task_color !== original.task_color ||
+      task.task_date !== original.task_date
+    );
+  }, [originalTasks]);
 
   const handleGoToToday = () => {
     setCurrentDate(new Date());
@@ -372,7 +450,7 @@ const Schedule = () => {
             {dayTasks.map((task) => (
               <div
                 key={task.id}
-                className="task-item"
+                className={`task-item ${isTaskUnsaved(task) ? "is-unsaved" : ""}`}
                 style={{
                   borderLeftColor: task.task_color || "#a78bfa",
                   backgroundColor: `${task.task_color || "#a78bfa"}33`,
@@ -396,6 +474,23 @@ const Schedule = () => {
   return (
     <div className="schedule-container">
       <PageHeader title="Production Schedule" />
+
+      {hasUnsavedChanges && (
+        <div className="unsaved-changes-bar">
+          <div className="unsaved-info">
+            <Icon name="warning" modifiers="sm" />
+            <span>You have unsaved schedule edits for this month.</span>
+          </div>
+          <div className="unsaved-actions">
+            <button className="sui-btn discard-btn" onClick={handleDiscardChanges}>
+              Discard Changes
+            </button>
+            <button className="sui-btn save-all-btn" onClick={handleMasterSave} disabled={submitting}>
+              {submitting ? "Saving..." : "Save All Updates"}
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="schedule-content-animated">
         <div className="schedule-main-content">
@@ -449,7 +544,7 @@ const Schedule = () => {
                 const date = new Date(task.task_date);
                 return (
                   <div
-                    className="sidebar-task-card"
+                    className={`sidebar-task-card ${isTaskUnsaved(task) ? "is-unsaved" : ""}`}
                     key={task.id}
                     onClick={() => openNotesModal(task)}
                     style={{
@@ -459,7 +554,8 @@ const Schedule = () => {
                     <div
                       className="sidebar-task-date"
                       style={{
-                        backgroundColor: `${task.task_color || "#a78bfa"}22`,
+                        backgroundColor: `${task.task_color || DEFAULT_TASK_COLOR}22`,
+                        color: task.task_color || DEFAULT_TASK_COLOR
                       }}
                     >
                       <span className="day">{date.getDate()}</span>
@@ -560,16 +656,22 @@ const Schedule = () => {
                 </div>
 
                 <div className="sui-form-group">
-                  <label>Project (Optional)</label>
+                  <label>Assign to Project (Color identity inherited)</label>
                   <div className="glass-select-wrapper">
                     <select
                       className="sui-form-control glass-dropdown"
                       value={taskForm.project_id}
-                      onChange={(e) =>
-                        setTaskForm({ ...taskForm, project_id: e.target.value })
-                      }
+                      onChange={(e) => {
+                        const pid = e.target.value;
+                        const selectedProject = projects.find((p) => String(p.id) === String(pid));
+                        setTaskForm({ 
+                          ...taskForm, 
+                          project_id: pid,
+                          task_color: selectedProject?.color || DEFAULT_TASK_COLOR 
+                        });
+                      }}
                     >
-                      <option value="">No Project</option>
+                      <option value="">No Project (General)</option>
                       {projects.map((p) => (
                         <option key={p.id} value={p.id}>
                           {p.project_name}
@@ -579,22 +681,20 @@ const Schedule = () => {
                   </div>
                 </div>
 
-                <div className="sui-form-group">
-                  <label>Task Highlight Color</label>
-                  <div className="color-palette">
-                    {PREDEFINED_COLORS.map((color) => (
-                      <div
-                        key={color}
-                        className={`color-swatch ${taskForm.task_color === color ? "active" : ""}`}
-                        style={{ backgroundColor: color }}
-                        onClick={() =>
-                          setTaskForm({ ...taskForm, task_color: color })
-                        }
-                        title={color}
-                      />
-                    ))}
-                  </div>
-                </div>
+                {/* Identity Preview Strip */}
+                <div 
+                  className="identity-preview-strip" 
+                  style={{
+                    height: "8px",
+                    width: "100%",
+                    backgroundColor: taskForm.task_color,
+                    borderRadius: "4px",
+                    marginBottom: "24px",
+                    boxShadow: `0 0 15px ${taskForm.task_color}44`,
+                    transition: "all 0.4s ease"
+                  }}
+                />
+
                 <button
                   type="submit"
                   className="sui-btn sui-btn-save"

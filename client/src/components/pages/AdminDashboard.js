@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import PageHeader from "../common/PageHeader";
 import "./AdminDashboard.css";
 import SuiTimeline from "./SuiTimeline";
@@ -18,7 +18,7 @@ const StatusMsg = ({ msg }) => {
 };
 
 // ── Project Management (Add/Edit) ──────────────────────────────────────────
-const ProjectForm = ({ onAdded, editingProject, onCancelEdit }) => {
+const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
   const [formData, setFormData] = useState({
     project_name: "",
     code_name: "",
@@ -28,6 +28,7 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit }) => {
     project_image: "",
     client_ids: [],
     crew_ids: [],
+    color: "#00c6e6",
   });
 
   const [clients, setClients] = useState([]);
@@ -35,6 +36,7 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit }) => {
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
   const fileInputRef = React.useRef(null);
+  const colorInputRef = React.useRef(null);
 
   const formatDateForInput = (dateStr) => {
     if (!dateStr) return "";
@@ -46,17 +48,23 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit }) => {
   useEffect(() => {
     const fetchClients = async () => {
       try {
-        const res = await fetch(`${API}/api/clients`, { credentials: "include" });
+        const res = await fetch(`${API}/api/clients`, {
+          credentials: "include",
+        });
         const data = await res.json();
         setClients(Array.isArray(data) ? data : []);
-      } catch (err) { console.error("Failed to fetch clients:", err); }
+      } catch (err) {
+        console.error("Failed to fetch clients:", err);
+      }
     };
     const fetchCrew = async () => {
       try {
         const res = await fetch(`${API}/api/crew`, { credentials: "include" });
         const data = await res.json();
         setCrew(Array.isArray(data) ? data : []);
-      } catch (err) { console.error("Failed to fetch crew:", err); }
+      } catch (err) {
+        console.error("Failed to fetch crew:", err);
+      }
     };
     fetchClients();
     fetchCrew();
@@ -72,11 +80,18 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit }) => {
         location: editingProject.location || "",
         project_image: editingProject.project_image || "",
         client_ids: editingProject.client_ids
-          ? String(editingProject.client_ids).split(",").filter(Boolean).map(Number)
+          ? String(editingProject.client_ids)
+              .split(",")
+              .filter(Boolean)
+              .map(Number)
           : [],
         crew_ids: editingProject.crew_ids
-          ? String(editingProject.crew_ids).split(",").filter(Boolean).map(Number)
+          ? String(editingProject.crew_ids)
+              .split(",")
+              .filter(Boolean)
+              .map(Number)
           : [],
+        color: editingProject.color || "#00c6e6",
       });
     } else {
       setFormData({
@@ -88,6 +103,7 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit }) => {
         project_image: "",
         client_ids: [],
         crew_ids: [],
+        color: "#00c6e6",
       });
     }
   }, [editingProject]);
@@ -167,6 +183,43 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit }) => {
           </p>
         </div>
 
+        {/* Real-time Color Conflict Warning */}
+        {(() => {
+          const conflictingProject = projects?.find(
+            (p) =>
+              p.color?.toLowerCase() === formData.color?.toLowerCase() &&
+              (!editingProject || p.id !== editingProject.id),
+          );
+          if (conflictingProject) {
+            return (
+              <div
+                className="color-conflict-warning"
+                style={{
+                  background: "rgba(239, 68, 68, 0.15)",
+                  border: "1px solid rgba(239, 68, 68, 0.3)",
+                  color: "#fca5a5",
+                  padding: "10px 15px",
+                  borderRadius: "12px",
+                  marginBottom: "20px",
+                  fontSize: "0.85rem",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  animation: "shake 0.5s cubic-bezier(.36,.07,.19,.97) both",
+                }}
+              >
+                <Icon name="warning" modifiers="sm" />
+                <span>
+                  <strong>Conflict:</strong> This color is already assigned to{" "}
+                  <strong>{conflictingProject.project_name}</strong>. Each
+                  production must have a unique identity.
+                </span>
+              </div>
+            );
+          }
+          return null;
+        })()}
+
         <div className="modal-split-layout">
           <div className="modal-side-panel">
             <div
@@ -202,12 +255,94 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit }) => {
                 color: "rgba(255,255,255,0.3)",
                 fontSize: "0.75rem",
                 textAlign: "center",
+                marginBottom: "20px",
               }}
             >
               Max size: 200KB
               <br />
               Type: JPG, PNG, WebP
             </p>
+
+            <div className="project-color-section" style={{ width: "100%" }}>
+              <label
+                style={{
+                  display: "block",
+                  color: "rgba(255,255,255,0.5)",
+                  fontSize: "0.8rem",
+                  marginBottom: "12px",
+                  textAlign: "center",
+                }}
+              >
+                Project Identity Sphere
+              </label>
+
+              {/* Identity Sphere Picker */}
+              <div
+                className="identity-sphere-wrapper"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "10px",
+                }}
+              >
+                <div
+                  className="identity-sphere"
+                  onClick={() => colorInputRef.current?.click()}
+                  style={{
+                    width: "80px",
+                    height: "80px",
+                    borderRadius: "50%",
+                    backgroundColor: formData.color,
+                    cursor: "pointer",
+                    boxShadow: `0 0 30px ${formData.color}66, inset 0 0 20px rgba(255,255,255,0.3)`,
+                    border: "4px solid rgba(255,255,255,0.1)",
+                    transition:
+                      "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                    position: "relative",
+                    overflow: "hidden",
+                  }}
+                >
+                  <div
+                    className="sphere-glint"
+                    style={{
+                      position: "absolute",
+                      top: "10%",
+                      left: "15%",
+                      width: "30%",
+                      height: "30%",
+                      background:
+                        "radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 80%)",
+                      borderRadius: "50%",
+                    }}
+                  />
+                </div>
+                <input
+                  type="color"
+                  ref={colorInputRef}
+                  value={formData.color}
+                  onChange={(e) =>
+                    setFormData({ ...formData, color: e.target.value })
+                  }
+                  style={{
+                    opacity: 0,
+                    width: 0,
+                    height: 0,
+                    position: "absolute",
+                  }}
+                />
+                <span
+                  style={{
+                    color: "rgba(255,255,255,0.4)",
+                    fontSize: "0.75rem",
+                    fontFamily: "monospace",
+                    letterSpacing: "1px",
+                  }}
+                >
+                  {formData.color.toUpperCase()}
+                </span>
+              </div>
+            </div>
           </div>
 
           <div className="modal-main-content">
@@ -333,7 +468,15 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit }) => {
                 <button
                   type="submit"
                   className="btn-submit-neo"
-                  disabled={loading}
+                  disabled={
+                    loading ||
+                    projects?.some(
+                      (p) =>
+                        p.color?.toLowerCase() ===
+                          formData.color?.toLowerCase() &&
+                        (!editingProject || p.id !== editingProject.id),
+                    )
+                  }
                 >
                   {loading
                     ? "Processing..."
@@ -356,7 +499,10 @@ const AdminDashboard = () => {
   const [editingProject, setEditingProject] = useState(null);
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [selectedTimelineProject, setSelectedTimelineProject] = useState(null);
+  const [showScrollHint, setShowScrollHint] = useState(true);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
+  const milestoneScrollRef = useRef(null);
   const { showConfirm } = useModal();
 
   // Milestone Add Form
@@ -367,6 +513,43 @@ const AdminDashboard = () => {
     is_visiondivision: 1,
   });
   const [msLoading, setMsLoading] = useState(false);
+
+  const handleTimelineScroll = (e) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.target;
+    const isAtTop = scrollTop <= 10;
+    if (isAtTop && showScrollHint) {
+      setShowScrollHint(false);
+    } else if (!isAtTop && !showScrollHint) {
+      setShowScrollHint(true);
+    }
+
+    // Calculate progress (0 at bottom, 1 at top)
+    const maxScroll = Math.max(1, scrollHeight - clientHeight);
+    const progress = 1 - scrollTop / maxScroll;
+    setScrollProgress(progress);
+  };
+
+  useEffect(() => {
+    if (!selectedTimelineProject) return;
+    setShowScrollHint(true);
+
+    let scrollAttempts = 0;
+    const scrollToBottom = () => {
+      if (milestoneScrollRef.current) {
+        const { scrollHeight, clientHeight } = milestoneScrollRef.current;
+        milestoneScrollRef.current.scrollTop = scrollHeight - clientHeight;
+
+        // Intensified polling to ensure we settle at the very bottom even as images/SVG finish rendering
+        if (scrollAttempts < 5) {
+          scrollAttempts++;
+          setTimeout(scrollToBottom, 150);
+        }
+      }
+    };
+
+    // Immediate attempt + series of follow-ups to handle dynamic SVG height calculation
+    scrollToBottom();
+  }, [selectedTimelineProject?.id, selectedTimelineProject?._t]);
 
   const handleAddMilestone = async (e) => {
     e.preventDefault();
@@ -465,31 +648,44 @@ const AdminDashboard = () => {
 
       <div className="admin-content-animated">
         <div className="admin-dashboard-grid single-column">
-          {/* Project List - Now spanning full width */}
           <div className="grid-window full-width">
             <h3 className="project-list-header">Existing Projects</h3>
             <div className="um-table-container">
               {projectsLoading ? (
-                <div className="skeleton-container">
-                  <div className="skeleton-list">
+                <table className="um-table skeleton-table">
+                  <thead>
+                    <tr>
+                      <th>Project Name</th>
+                      <th>Code</th>
+                      <th>Clients</th>
+                      <th>Crew</th>
+                      <th>Budget Versions</th>
+                      <th>Dates</th>
+                      <th>Location</th>
+                      <th className="project-action-cell">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
                     {[...Array(5)].map((_, i) => (
-                      <div key={i} className="skeleton-row">
-                        <div className="sk-1">
-                          <div className="skeleton-base w-80 h-16" />
-                        </div>
-                        <div className="sk-2">
-                          <div className="skeleton-base w-40 h-16" />
-                        </div>
-                        <div className="sk-3">
-                          <div className="skeleton-base w-70 h-16" />
-                        </div>
-                        <div className="sk-4">
-                          <div className="skeleton-base w-90 h-32 r-16" />
-                        </div>
-                      </div>
+                      <tr key={i}>
+                        <td><div className="skeleton-base w-80 h-16" /></td>
+                        <td><div className="skeleton-base w-50 h-16 r-8" /></td>
+                        <td><div className="skeleton-base w-60 h-16" /></td>
+                        <td><div className="skeleton-base w-60 h-16" /></td>
+                        <td><div className="skeleton-base w-40 h-24 r-12" /></td>
+                        <td><div className="skeleton-base w-70 h-16" /></td>
+                        <td><div className="skeleton-base w-50 h-16" /></td>
+                        <td className="project-action-cell">
+                          <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+                            <div className="skeleton-base w-90 h-32 r-8" />
+                            <div className="skeleton-base w-50 h-32 r-8" />
+                            <div className="skeleton-base w-40 h-32 r-8" />
+                          </div>
+                        </td>
+                      </tr>
                     ))}
-                  </div>
-                </div>
+                  </tbody>
+                </table>
               ) : (
                 <table className="um-table">
                   <thead>
@@ -598,6 +794,7 @@ const AdminDashboard = () => {
           <ProjectForm
             onAdded={handleAdded}
             editingProject={editingProject}
+            projects={projects}
             onCancelEdit={() => {
               setEditingProject(null);
               setShowProjectModal(false);
@@ -625,11 +822,24 @@ const AdminDashboard = () => {
               <div className="milestone-modal-body">
                 <div className="milestone-modal-main">
                   <div className="milestone-timeline-wrapper">
-                    <SuiTimeline
-                      projectId={selectedTimelineProject.id}
-                      userRole="admin"
-                      key={selectedTimelineProject._t || "1"}
-                    />
+                    <div
+                      className="milestone-scroll-container"
+                      ref={milestoneScrollRef}
+                      onScroll={handleTimelineScroll}
+                    >
+                      <SuiTimeline
+                        projectId={selectedTimelineProject.id}
+                        userRole="admin"
+                        key={selectedTimelineProject._t || "1"}
+                        scrollProgress={scrollProgress}
+                      />
+                    </div>
+                    <div
+                      className={`milestone-scroll-hint ${showScrollHint ? "" : "fade-out"}`}
+                    >
+                      <Icon name="arrow_upward" modifiers="sm" />
+                      <span>Scroll Ahead</span>
+                    </div>
                   </div>
                 </div>
 

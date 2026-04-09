@@ -55,7 +55,7 @@
   box-sizing: border-box;
   background: var(--dd-bg);
   border: var(--dd-border);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(25px);
   padding: var(--dd-padding);
   border-radius: var(--dd-radius);
   height: var(--dd-height);
@@ -99,17 +99,24 @@
 
 .glass-dropdown-menu {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 2px);
   left: 0;
   width: 100%;
-  background: rgba(30, 30, 35, 0.08);
-  backdrop-filter: blur(25px);
-  border: 1px solid rgba(0, 198, 230, 0.3);
-  border-radius: 16px;
-  max-height: 300px;
+  box-sizing: border-box;
+  background: rgba(
+    20,
+    25,
+    35,
+    0.25
+  ) !important; /* Lighter tint to reveal blur */
+  backdrop-filter: blur(30px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(200%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 12px;
+  max-height: 250px;
   overflow-y: auto;
   z-index: 1000;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5) !important;
   padding: 10px;
   animation: slideInDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -123,6 +130,12 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.glass-dropdown-menu.show-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
 }
 
 .glass-dropdown-item {
@@ -154,6 +167,7 @@
 }
 
 .glass-dropdown-no-options {
+  top: calc(100% + 2px);
   padding: 16px;
   text-align: center;
   color: rgba(255, 255, 255, 0.4);

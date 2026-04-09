@@ -7,6 +7,23 @@ from routes.notifications_management import notify_project_stakeholders
 schedule_bp = Blueprint('schedule_management', __name__)
 
 # ── Schedule DB Operations ──────────────────────────────────────────────────
+from datetime import datetime, date
+
+def parse_date(date_str):
+    if not date_str or date_str == '0000-00-00':
+        return None
+    if isinstance(date_str, (datetime, date)):
+        return date_str.strftime('%Y-%m-%d')
+        return date_str.strftime('%Y-%m-%d')
+    # Try different formats commonly sent by JS or DB
+    for fmt in ('%Y-%m-%d', '%a, %d %b %Y %H:%M:%S GMT', '%Y-%m-%dT%H:%M:%S.%fZ', '%Y-%m-%d %H:%M:%S'):
+        try:
+            # Remove timezone strings like " (Sri Lanka Standard Time)" if present
+            clean_str = str(date_str).split(' (')[0]
+            return datetime.strptime(clean_str, fmt).strftime('%Y-%m-%d')
+        except (ValueError, TypeError):
+            continue
+    return date_str # Fallback in case it's already YYYY-MM-DD or other valid MySQL string
 
 def get_schedule_tasks(year, month):
     conn = get_connection()
@@ -16,8 +33,8 @@ def get_schedule_tasks(year, month):
         FROM schedule_tasks t
         JOIN users u ON t.created_by = u.id
         LEFT JOIN projects p ON t.project_id = p.id
-        WHERE YEAR(t.task_date) = %s AND MONTH(t.task_date) = %s
-        ORDER BY t.task_date ASC, t.id ASC
+        WHERE YEAR(task_date) = %s AND MONTH(task_date) = %s
+        ORDER BY task_date ASC, id ASC
     """
     cursor.execute(query, (year, month))
     result = cursor.fetchall()
@@ -26,6 +43,7 @@ def get_schedule_tasks(year, month):
     return result
 
 def insert_schedule_task(title, description, task_date, created_by, is_visiondivision=1, project_id=None, task_color='#a78bfa'):
+    task_date = parse_date(task_date)
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
@@ -39,7 +57,9 @@ def insert_schedule_task(title, description, task_date, created_by, is_visiondiv
     conn.close()
     return new_id
 
-def update_schedule_task(task_id, title, description, project_id=None, task_color='#a78bfa'):
+def update_schedule_task(task_id, title, description, project_id=None, task_color='#a78bfa', task_date=None):
+    if task_date:
+        task_date = parse_date(task_date)
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
@@ -60,6 +80,61 @@ def delete_schedule_task(task_id):
     conn.commit()
     cursor.close()
     conn.close()
+    return True
+
+def bulk_save_schedule_tasks(year, month, tasks, user_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    try:
+        # Get existing task IDs for the month to identify deletions
+        cursor.execute(
+            "SELECT id FROM schedule_tasks WHERE YEAR(task_date) = %s AND MONTH(task_date) = %s",
+            (year, month)
+        )
+        db_task_ids = {row['id'] for row in cursor.fetchall()}
+        
+        input_task_ids = {int(t['id']) for t in tasks if t.get('id') and not str(t['id']).startswith('temp')}
+        
+        # Deletions: in DB but not in input
+        tasks_to_delete = db_task_ids - input_task_ids
+        for tid in tasks_to_delete:
+            cursor.execute("DELETE FROM schedule_tasks WHERE id = %s", (tid,))
+            
+        for task in tasks:
+            tid = task.get('id')
+            title = task.get('title', '').strip()
+            description = task.get('description', '').strip()
+            task_date = parse_date(task.get('task_date'))
+            project_id = task.get('project_id') or None
+            task_color = task.get('task_color', '#a78bfa')
+            
+            if not task_date:
+                continue # Safety
+                
+            if not tid or str(tid).startswith('temp'):
+                # Insertion
+                cursor.execute(
+                    """INSERT INTO schedule_tasks (title, description, task_date, created_by, is_visiondivision, project_id, task_color) 
+                       VALUES (%s, %s, %s, %s, %s, %s, %s)""",
+                    (title, description, task_date, user_id, 1, project_id, task_color)
+                )
+            else:
+                # Update
+                cursor.execute(
+                    """UPDATE schedule_tasks 
+                       SET title = %s, description = %s, task_date = %s, project_id = %s, task_color = %s 
+                       WHERE id = %s""",
+                    (title, description, task_date, project_id, task_color, tid)
+                )
+        
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        cursor.close()
+        conn.close()
     return True
 
 def get_task_notes(task_id):
@@ -227,5 +302,23 @@ def task_notes_post(task_id):
             jsonify({"message": "Note added successfully", "id": new_id}),
             201,
         )
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@schedule_bp.route("/api/schedule/bulk-save", methods=["POST"])
+@roles_required("admin", "manager")
+def schedule_bulk_save_post():
+    data = request.get_json()
+    year = data.get("year")
+    month = data.get("month")
+    tasks = data.get("tasks", [])
+    
+    if not year or not month:
+        return jsonify({"error": "year and month are required"}), 400
+        
+    user_id = get_current_user_id()
+    try:
+        bulk_save_schedule_tasks(year, month, tasks, user_id)
+        return jsonify({"message": "Schedule updated successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

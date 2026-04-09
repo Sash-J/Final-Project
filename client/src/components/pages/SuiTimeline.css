@@ -4,7 +4,7 @@
   height: 100%;
   margin: 0;
   display: flex;
-  overflow: hidden;
+  overflow: visible;
   background: transparent;
 }
 
@@ -16,6 +16,7 @@
   height: 100%;
   z-index: 0;
   pointer-events: none;
+  overflow: visible;
 }
 
 .sui-path-segment {
@@ -55,20 +56,42 @@
   z-index: 1;
 }
 
+.sui-path-base {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 3px;
+  stroke-linecap: round;
+}
+
+.sui-path-master-glow {
+  fill: none;
+  stroke-width: 6px;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  filter: url(#glow-effect);
+}
+
 .sui-absolute-item {
   position: absolute;
   transform: translate(-50%, -50%);
   display: flex;
   cursor: pointer;
-  transition:
-    transform 0.3s,
-    filter 0.3s;
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 1;
 }
 
 .sui-absolute-item:hover {
   transform: translate(-50%, -50%) scale(1.1);
   filter: brightness(1.2);
-  z-index: 10;
+  z-index: 100;
+}
+
+.sui-absolute-item:hover .sui-exact-dot {
+  box-shadow:
+    0 0 15px var(--dot-shadow),
+    0 0 30px var(--dot-shadow);
+  transform: translate(-50%, -50%) scale(1.22);
 }
 
 .sui-exact-dot {
@@ -86,12 +109,42 @@
   z-index: 2;
 }
 
+.sui-preview-mode .sui-exact-dot {
+  width: 12px;
+  height: 12px;
+}
+
+.sui-preview-connector {
+  position: absolute;
+  left: 50%;
+  width: 2px;
+  height: 35px;
+  transform: translateX(-50%);
+  opacity: 0.8;
+}
+
 .sui-exact-content {
   position: absolute;
   top: 50%;
-  transform: translateY(-50%);
   width: max-content;
   max-width: 35vw;
+  opacity: 0.6;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sui-preview-mode .sui-exact-content {
+  position: absolute;
+  max-width: 150px;
+  left: 50%;
+  text-align: center;
+  pointer-events: none;
+}
+
+.sui-absolute-item:hover .sui-exact-content {
+  opacity: 1;
 }
 
 .sui-exact-content.align-right {
@@ -183,7 +236,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.5); /* Let the backdrop-filter do the work */
   backdrop-filter: blur(8px);
   z-index: 9999;
   display: flex;
@@ -192,12 +245,27 @@
 }
 
 .sui-modal-content {
-  background: #1e1e2f;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 15px 22px; /* Reduced padding from 30px */
-  border-radius: 16px;
-  width: 90%;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  background: rgba(10, 12, 18, 0.05) !important; /* Perfect notification panel match */
+  backdrop-filter: blur(60px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(60px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 16px !important;
+  padding: 24px 28px !important;
+  width: 95% !important;
+  position: relative !important;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8) !important;
+  animation: modalEntrance 0.4s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
+}
+
+@keyframes modalEntrance {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .sui-modal-small {
@@ -305,17 +373,64 @@
   opacity: 0.8;
 }
 
+.sui-fade-in {
+  animation: suiFadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
 @keyframes suiFadeIn {
   from {
     opacity: 0;
+    transform: scale(0.98) translateY(10px);
   }
   to {
     opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 
-.sui-fade-in {
-  animation: suiFadeIn 0.2s ease-in forwards;
+/* ── Loading Skeleton ── */
+.sui-timeline-skeleton {
+  width: 100%;
+  height: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  margin: 20px 0;
+}
+
+.sui-skeleton-path {
+  width: 4px;
+  height: 70%;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(0, 198, 230, 0.2),
+    transparent
+  );
+  border-radius: 2px;
+  animation: skeletonPulse 2s infinite ease-in-out;
+}
+
+.sui-skeleton-text {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+@keyframes skeletonPulse {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 
 /* ── Compact Layout Helpers ── */
@@ -430,4 +545,192 @@
   border: 1px solid rgba(0, 198, 230, 0.4);
   border-radius: 8px;
   box-shadow: 0 4px 15px rgba(0, 198, 230, 0.2);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────── */
+/* ── Global Milestone Modal (Broad Layout) ─────────────────────────────────── */
+/* ──────────────────────────────────────────────────────────────────────────── */
+
+.milestone-modal-content-wide {
+  max-width: 1200px !important; /* Non-maximized width */
+  width: 95% !important;
+  max-height: 90vh;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 20px;
+  position: relative;
+  padding: 40px !important;
+  background: rgba(
+    10,
+    12,
+    18,
+    0.05
+  ) !important; /* Matches notification panel perfectly */
+  backdrop-filter: blur(60px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(60px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8) !important;
+  overflow-y: auto;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+  z-index: 9999;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.modal-close-btn:hover {
+  background: rgba(255, 60, 60, 0.8) !important;
+  transform: rotate(90deg);
+}
+
+.milestone-modal-body {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  flex: 1;
+  min-height: 0;
+}
+
+.milestone-modal-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.milestone-modal-title {
+  margin: 0 0 15px 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 1.8rem;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.milestone-timeline-wrapper {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  flex: 1;
+  position: relative;
+  display: flex;
+  border-radius: 12px;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.milestone-scroll-container {
+  flex: 1;
+  max-height: 520px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px 0;
+  border-radius: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+.milestone-scroll-container::-webkit-scrollbar {
+  width: 5px;
+}
+
+.milestone-scroll-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.milestone-scroll-hint {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(13, 15, 23, 0.65);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 8px 18px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  pointer-events: none;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  z-index: 10;
+  opacity: 1;
+  transition:
+    opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.milestone-scroll-hint.fade-out {
+  opacity: 0;
+  transform: translate(-50%, -20px);
+}
+
+@keyframes hintFadeInTop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes hintBounce {
+  0%,
+  100% {
+    transform: translate(-50%, 0);
+  }
+  50% {
+    transform: translate(-50%, -6px);
+  }
+}
+
+.milestone-sidebar {
+  width: 320px;
+  flex: 0 0 320px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  align-self: flex-start;
+}
+
+.milestone-sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  margin-top: 0;
+}
+
+.milestone-sidebar-header h4 {
+  margin: 0;
+  color: #fff;
+  font-size: 1.2rem;
+}
+
+.milestone-sidebar-submit {
+  width: 100%;
 }
