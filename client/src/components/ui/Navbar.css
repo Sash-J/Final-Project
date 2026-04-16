@@ -100,9 +100,12 @@
   text-decoration: none;
   color: #ffffff;
   font-weight: 500;
-  transition: color 0.3s;
+  transition: all 0.3s ease;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .nav-links a:hover, .nav-link-right:hover {
@@ -226,29 +229,30 @@
   }
 
   .nav-links {
-    position: fixed;
-    top: 70px; /* Below Navbar */
+    position: absolute;
+    top: 100%; /* Directly below the navbar */
     left: 0;
     width: 100%;
-    height: 0;
-    background: rgba(10, 10, 20, 0.95);
+    max-height: 0;
+    background: rgba(13, 15, 23, 0.98);
     backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     flex-direction: column;
-    align-items: center;
+    align-items: stretch; /* Full width items */
     justify-content: flex-start;
-    padding-top: 0;
+    padding: 0;
     overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1000;
     margin: 0;
     gap: 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    display: flex; /* Keep flex in mobile menu overlay */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   }
 
   .nav-links.mobile-open {
-    height: auto;
-    padding-bottom: 40px;
+    max-height: 80vh; /* Adjust for expected content height */
+    padding-bottom: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
   }
 
   .nav-links li {
@@ -262,13 +266,26 @@
   .nav-links.mobile-open li {
     opacity: 1;
     transform: translateY(0);
-    padding: 15px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  }
+
+  .nav-links.mobile-open li:last-child {
+    border-bottom: none;
   }
 
   .nav-links a {
-    font-size: 1.1rem;
-    display: block;
+    font-size: 1rem;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
     width: 100%;
+    padding: 18px 30px;
+    gap: 15px; /* Icon-Text gap */
+    transition: background 0.3s ease;
+  }
+
+  .nav-links a:active {
+    background: rgba(255, 255, 255, 0.05);
   }
 
   /* Logo adjustment for mobile */

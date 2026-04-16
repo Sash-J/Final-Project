@@ -71,9 +71,9 @@ code {
   align-items: center;
   justify-content: center;
   padding: 12px 28px;
-  background: rgba(255, 255, 255, 0.03) !important;
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   border-radius: 50px !important;
   color: #ffffff !important;

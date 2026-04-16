@@ -10,28 +10,32 @@ const ConfirmationModal = ({
   onCancel,
   confirmLabel = "Yes, Proceed",
   cancelLabel = "Cancel",
+  confirmVariant = "danger", // 'danger' | 'accent' | 'glass'
+  cancelVariant = "glass",   // 'danger' | 'accent' | 'glass'
 }) => {
   if (!isOpen) return null;
 
   return (
-    <ModalPortal>
-      <div className="modal-backdrop" onClick={onCancel}>
-        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-          <div className="modal-header">
-            <h3>{title}</h3>
-          </div>
-          <div className="modal-body">
-            <p>{message}</p>
-          </div>
-          <div className="modal-footer">
-            <button className="btn-modal-cancel" onClick={onCancel}>
-              {cancelLabel}
-            </button>
-            <button className="btn-modal-confirm" onClick={onConfirm}>
-              {confirmLabel}
-            </button>
-          </div>
-        </div>
+    <ModalPortal onClose={onCancel} size="small" showClose={false} className="confirmation-modal-glass">
+      <div className="modal-header">
+        <h3>{title}</h3>
+      </div>
+      <div className="modal-body">
+        <p>{message}</p>
+      </div>
+      <div className="modal-footer">
+        <button 
+          className={`btn-modal-cancel variant-${cancelVariant}`} 
+          onClick={onCancel}
+        >
+          {cancelLabel}
+        </button>
+        <button 
+          className={`btn-modal-confirm variant-${confirmVariant}`} 
+          onClick={onConfirm}
+        >
+          {confirmLabel}
+        </button>
       </div>
     </ModalPortal>
   );

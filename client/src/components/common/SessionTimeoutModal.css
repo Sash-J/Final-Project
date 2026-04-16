@@ -1,0 +1,51 @@
+.session-timeout-modal-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px auto 15px auto;
+  text-align: center;
+}
+
+.session-timeout-modal-icon span {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  color: #f59e0b;
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.session-timeout-modal-icon .icon-root {
+  color: #f59e0b !important; /* Ensure warning color is applied to the icon */
+  font-weight: 500 !important;
+}
+
+.session-timeout-modal-text {
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.5;
+  margin-bottom: 30px;
+  text-align: center;
+  font-weight: 200;
+}
+
+.session-timeout-modal-btn {
+  padding: 12px 16px;
+  color: #00c6e6;
+  border: 1px solid rgba(0, 198, 230, 0.3);
+  border-radius: 12px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  margin: 0 auto;
+  width: 60%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(0, 198, 230, 0.1);
+}
+
+.session-timeout-modal-btn:hover {
+  box-shadow: 0 4px 15px rgba(0, 198, 230, 0.2);
+}

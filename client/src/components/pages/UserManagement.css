@@ -7,30 +7,12 @@
   min-height: 100vh;
 }
 
-/* ── Header ─────────────────────────────────────────────────────────────────── */
-.um-header {
-  text-align: center;
-  padding: 48px 24px 28px;
-}
-
-.um-header h2 {
-  font-size: 2rem;
-  color: #fff;
-  margin-bottom: 6px;
-  font-weight: 700;
-}
-
-.um-header p {
-  color: #888;
-  font-size: 0.95rem;
-}
 
 /* ── Content Layout ─────────────────────────────────────────────────────────── */
-.um-content {
+.admin-content-animated {
   display: flex;
   flex-direction: column;
   gap: 32px;
-  margin: 0 32px;
 }
 
 .grid-window h3 {

@@ -9,8 +9,10 @@ import GlassDropdown from "../common/GlassDropdown";
 import Icon from "../common/Icon";
 import html2pdf from "html2pdf.js";
 import Skeleton from "../ui/Skeleton";
+import PageHeader from "../common/PageHeader";
 
 import { API } from "../../config";
+import { formatCurrency } from "../../utils/currencyUtils";
 
 const TimelinePreview = ({ startDate, endDate, projectStatus }) => {
   if (!startDate || !endDate) return null;
@@ -228,13 +230,6 @@ const CrewDashboard = () => {
     setBudgetData(null);
   };
 
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(value);
-  };
-
   const handleDownloadPDF = () => {
     const element = document.getElementById("crew-budget-pdf-content");
     if (!element) return;
@@ -301,10 +296,10 @@ const CrewDashboard = () => {
 
   return (
     <div className="crew-root">
-      <div className="crew-header">
-        <h2>Welcome, {user.username}</h2>
-        <p>Production Crew Dashboard</p>
-      </div>
+      <PageHeader
+        title={`Welcome, ${user.username}`}
+        description="Production Crew Dashboard"
+      />
 
       {projects.length === 0 ? (
         <div className="crew-empty">No projects assigned to you yet.</div>

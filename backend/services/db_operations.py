@@ -127,7 +127,7 @@ def delete_project(project_id):
 
 def get_project_name(project_id):
     conn = get_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(buffered=True)
     cursor.execute("SELECT project_name FROM projects WHERE id = %s", (project_id,))
     result = cursor.fetchone()
     cursor.close()
@@ -136,7 +136,7 @@ def get_project_name(project_id):
 
 def check_color_exists(color, exclude_project_id=None):
     conn = get_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(buffered=True)
     if exclude_project_id:
         cursor.execute("SELECT project_name FROM projects WHERE color = %s AND id != %s", (color, exclude_project_id))
     else:
@@ -145,6 +145,43 @@ def check_color_exists(color, exclude_project_id=None):
     cursor.close()
     conn.close()
     return result[0] if result else None
+
+
+def get_project_by_id(project_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True, buffered=True)
+    # Get project with team and financial summary
+    query = """
+        SELECT p.*, 
+               GROUP_CONCAT(DISTINCT u_client.username SEPARATOR ', ') as client_usernames,
+               GROUP_CONCAT(DISTINCT u_client.id SEPARATOR ',') as client_ids,
+               GROUP_CONCAT(DISTINCT u_crew.username SEPARATOR ', ') as crew_usernames,
+               GROUP_CONCAT(DISTINCT u_crew.id SEPARATOR ',') as crew_ids,
+               (SELECT COUNT(*) FROM budget_versions bv WHERE bv.project_id = p.id) as version_count,
+               (SELECT COALESCE(SUM(total), 0) FROM project_budget_values pbv 
+                WHERE pbv.version_id = (SELECT id FROM budget_versions WHERE project_id = p.id ORDER BY version_number DESC LIMIT 1)
+               ) as latest_budget_total,
+               (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE project_id = p.id) as total_paid
+        FROM projects p
+        LEFT JOIN client_projects cp ON p.id = cp.project_id
+        LEFT JOIN users u_client ON cp.user_id = u_client.id
+        LEFT JOIN crew_projects crp ON p.id = crp.project_id
+        LEFT JOIN users u_crew ON crp.user_id = u_crew.id
+        WHERE p.id = %s
+        GROUP BY p.id
+    """
+    cursor.execute(query, (project_id,))
+    result = cursor.fetchone()
+    
+    if result:
+        result["latest_budget_total"] = float(result["latest_budget_total"] or 0)
+        result["total_paid"] = float(result["total_paid"] or 0)
+        result["balance"] = result["latest_budget_total"] - result["total_paid"]
+
+    cursor.close()
+    conn.close()
+    return result
+
 
 
 # ── Departments ───────────────────────────────────────────────────────────────
@@ -198,7 +235,7 @@ def get_categories():
 
 def insert_category(category_name, department_id):
     conn = get_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(buffered=True)
     # Get max sort_order for this department
     cursor.execute(
         "SELECT COALESCE(MAX(sort_order), 0) FROM categories WHERE department_id = %s",
@@ -352,66 +389,87 @@ def insert_budget_value(
 
 def get_hierarchy():
     """
-    Returns the hierarchy grouped by phase:
-    [
-      {
-        "phase_id": 1,
-        "phase_name": "Pre-Production",
-        "departments": [
-          {
-            "id": 1,
-            "department_name": "Camera",
-            "categories": [ ... ]
-          }
-        ]
-      }
-    ]
+    Returns the hierarchy grouped by phase using a single optimized JOIN query.
     """
     conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(dictionary=True, buffered=True)
 
-    # 1. Fetch Phases
-    cursor.execute("SELECT * FROM budget_phases ORDER BY sort_order ASC")
-    phases = cursor.fetchall()
-
-    # 2. Fetch Departments with Phase ID
-    cursor.execute("SELECT * FROM departments")
-    departments = cursor.fetchall()
-
-    # 3. Fetch Categories
-    cursor.execute("SELECT * FROM categories ORDER BY sort_order ASC")
-    categories = cursor.fetchall()
-
-    # 4. Fetch Budget Items
-    cursor.execute("SELECT * FROM budget_items ORDER BY sort_order ASC")
-    items = cursor.fetchall()
-
+    # Combined query to reduce network round-trips
+    query = """
+        SELECT 
+            p.id as phase_id, p.phase_name,
+            d.id as dept_id, d.department_name,
+            c.id as cat_id, c.category_name,
+            i.id as item_id, i.item_name
+        FROM budget_phases p
+        LEFT JOIN departments d ON p.id = d.phase_id
+        LEFT JOIN categories c ON d.id = c.department_id
+        LEFT JOIN budget_items i ON c.id = i.category_id
+        ORDER BY p.sort_order, d.id, c.sort_order, i.sort_order
+    """
+    cursor.execute(query)
+    rows = cursor.fetchall()
     cursor.close()
     conn.close()
 
-    # Nesting Logic
-    # Group items into categories
-    for cat in categories:
-        cat["items"] = [i for i in items if i["category_id"] == cat["id"]]
+    # Reconstruct nested structure while preserving SQL sort order
+    phases = []
+    phase_map = {}
     
-    # Group categories into departments
-    for dept in departments:
-        dept["categories"] = [c for c in categories if c["department_id"] == dept["id"]]
-
-    # Group departments into phases
-    hierarchy = []
-    for phase in phases:
-        phase_depts = [d for d in departments if d["phase_id"] == phase["id"]]
-        # We include the phase even if empty to show the accordion on UI
-        hierarchy.append(
-            {
-                "phase_id": phase["id"],
-                "phase_name": phase["phase_name"],
-                "departments": phase_depts,
+    for row in rows:
+        p_id = row['phase_id']
+        if p_id not in phase_map:
+            phase = {
+                "phase_id": p_id, 
+                "phase_name": row['phase_name'], 
+                "departments": [], 
+                "_dept_map": {}
             }
-        )
+            phases.append(phase)
+            phase_map[p_id] = phase
+        
+        phase = phase_map[p_id]
+        d_id = row['dept_id']
+        
+        if d_id and d_id not in phase["_dept_map"]:
+            dept = {
+                "id": d_id, 
+                "department_name": row['department_name'], 
+                "categories": [], 
+                "_cat_map": {}
+            }
+            phase["departments"].append(dept)
+            phase["_dept_map"][d_id] = dept
+            
+        if d_id:
+            dept = phase["_dept_map"][d_id]
+            c_id = row['cat_id']
+            if c_id and c_id not in dept["_cat_map"]:
+                cat = {
+                    "id": c_id, 
+                    "category_name": row['category_name'], 
+                    "items": []
+                }
+                dept["categories"].append(cat)
+                dept["_cat_map"][c_id] = cat
+            
+            if c_id:
+                cat = dept["_cat_map"][c_id]
+                i_id = row['item_id']
+                if i_id:
+                    cat["items"].append({
+                        "id": i_id, 
+                        "item_name": row['item_name'], 
+                        "category_id": c_id
+                    })
 
-    return hierarchy
+    # Remove temporary maps
+    for p in phases:
+        p.pop("_dept_map")
+        for d in p["departments"]:
+            d.pop("_cat_map")
+
+    return phases
 
 
 # ── Budget values for a specific project (for pre-fill) ───────────────────────
@@ -419,7 +477,7 @@ def get_hierarchy():
 
 def get_budget_values_for_project(project_id, version_id=None):
     conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(dictionary=True, buffered=True)
 
     if version_id:
         query = """
@@ -521,7 +579,7 @@ def get_budget_versions(project_id):
 
 def create_budget_version(project_id, source_version_id=None):
     conn = get_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(buffered=True)
     try:
         # Get next version number
         cursor.execute(
@@ -583,7 +641,7 @@ def create_budget_version(project_id, source_version_id=None):
 
 def delete_budget_version(version_id):
     conn = get_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(buffered=True)
     try:
         # Get project_id before deleting
         cursor.execute(

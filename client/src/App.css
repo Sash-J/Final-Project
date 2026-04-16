@@ -41,14 +41,16 @@ h2 {
   margin-bottom: 40px;
   color: var(--accent-color);
   text-transform: uppercase;
+  line-height: 1.1;
   letter-spacing: 2px;
 }
 
 /* Main Content Wrapper */
 .main-content {
-  padding-top: 80px;
+  padding-top: 30px;
   min-height: calc(100vh - 80px);
   background: transparent !important;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
   /* Entrance animation deactivated - Blocks backdrop-filter sampling */
   /* animation: pageFadeIn 0.5s ease-out forwards; */
 }

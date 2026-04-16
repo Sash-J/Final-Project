@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import "./BreakdownModal.css";
+import { formatCurrency } from "../../utils/currencyUtils";
 
 const BreakdownModal = ({
   isOpen,
@@ -206,9 +207,7 @@ const BreakdownModal = ({
                     />
                   </td>
                   <td className="bdm-readonly">
-                    {item.gross_revenue.toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                    })}
+                    {formatCurrency(item.gross_revenue, false)}
                   </td>
                   <td>
                     <input
@@ -221,9 +220,7 @@ const BreakdownModal = ({
                     />
                   </td>
                   <td className="bdm-total-cell">
-                    {item.total.toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                    })}
+                    {formatCurrency(item.total, false)}
                   </td>
                   <td>
                     <button
@@ -259,10 +256,7 @@ const BreakdownModal = ({
           <div className="bdm-grand-total">
             <span>Aggregated Total:</span>
             <strong>
-              Rs.{" "}
-              {grandTotal.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-              })}
+              {formatCurrency(grandTotal)}
             </strong>
           </div>
           <div className="bdm-actions">

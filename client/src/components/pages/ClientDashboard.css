@@ -4,29 +4,6 @@
   color: #eee;
 }
 
-.cd-header {
-  margin-bottom: 50px;
-  text-align: center;
-}
-
-.cd-header h2 {
-  font-size: 2.8rem;
-  font-weight: 800;
-  margin-bottom: 12px;
-  letter-spacing: -1px;
-  background: linear-gradient(to right, #fff, #a78bfa, #4facfe);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 10px rgba(167, 139, 250, 0.3));
-}
-
-.cd-header p {
-  color: #a0aec0;
-  font-size: 1.1rem;
-  max-width: 600px;
-  margin: 0 auto;
-}
 
 .cd-loading,
 .cd-error,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import "./BudgetEntryForm.css";
@@ -7,142 +7,294 @@ import BreakdownModal from "../modals/BreakdownModal";
 import ConfirmationModal from "../common/ConfirmationModal";
 import Icon from "../common/Icon";
 import { API } from "../../config";
+import { formatCurrency, getCurrencySymbol } from "../../utils/currencyUtils";
+import { useProjects } from "../../contexts/ProjectContext";
 
-// ── Shared Table Components ──────────────────────────────────────────────────
-const BudgetColGroup = () => (
-  <colgroup>
-    <col style={{ width: "40px" }} />
-    <col style={{ width: "30%" }} />
-    <col style={{ width: "7%" }} />
-    <col style={{ width: "14%" }} />
-    <col style={{ width: "11%" }} />
-    <col style={{ width: "11%" }} />
-    <col style={{ width: "11%" }} />
-    <col style={{ width: "16%" }} />
-  </colgroup>
-);
+import {
+  BudgetColGroup,
+  BudgetTableHeader,
+  SkeletonBox,
+  SkeletonRow,
+  SkeletonPhase,
+  SkeletonTable,
+  BudgetFormatEmpty,
+} from "./BudgetEntrySkeleton";
 
-const BudgetTableHeader = () => (
-  <thead>
-    <tr>
-      <th className="col-drag"></th>
-      <th className="col-item-name">Item Name</th>
-      <th className="col-units">Units</th>
-      <th className="col-rate-type">Type</th>
-      <th className="col-rate">Rate</th>
-      <th className="col-gross">Gross (Rs.)</th>
-      <th className="col-add">Additional</th>
-      <th className="col-total">Total (Rs.)</th>
-    </tr>
-  </thead>
-);
+// ── Item Row Component ──────────────────────────────────────────────────────
+const BudgetRow = ({
+  item,
+  index,
+  getVal,
+  handleChange,
+  handleToggleItemize,
+  setActiveBreakdownId,
+  setActiveBreakdownItem,
+  commentAnchorRect,
+  setCommentAnchorRect,
+  activeComment,
+  setActiveComment,
+  showVersionWarning,
+  grossDisplay,
+  totalDisplay,
+  isFilled,
+  focusedInput,
+  setFocusedInput,
+}) => {
+  const v = getVal(item.id, "all") || {}; // Helper to get all row values
+  const rateType = getVal(item.id, "rate_type");
 
-// ── Skeletal Loading Component ──────────────────────────────────────────────
-const SkeletonTable = () => (
-  <div className="bef-sheet skeleton-sheet">
-    <table className="bef-table">
-      <BudgetColGroup />
-      <BudgetTableHeader />
-    </table>
-
-    {/* Mock Phase 1 */}
-    <div className="skeleton-phase-header">
-      <div
-        className="skeleton-box"
-        style={{ width: "150px", height: "18px" }}
-      ></div>
-    </div>
-    <div className="skeleton-dept-header"></div>
-    <table className="bef-table">
-      <BudgetColGroup />
-      <tbody>
-        {[1, 2, 3].map((i) => (
-          <tr key={i} className="skeleton-row">
-            <td className="col-drag">
+  return (
+    <Draggable draggableId={String(item.id)} index={index}>
+      {(providedRow, snapshotRow) => (
+        <tr
+          ref={providedRow.innerRef}
+          {...providedRow.draggableProps}
+          className={`bef-row ${isFilled ? "filled" : ""} ${snapshotRow.isDragging ? "dragging" : ""}`}
+        >
+          <td className="col-drag" {...providedRow.dragHandleProps}>
+            <span className="material-symbols-outlined drag-handle-icon">
+              drag_indicator
+            </span>
+          </td>
+          <td className="col-item-name">
+            <div className="item-name-cell-wrapper">
+              <button
+                className={`item-itemize-toggle ${v.is_itemized ? "active" : ""}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleToggleItemize(item.id, item.item_name);
+                }}
+                title={v.is_itemized ? "Disable Breakdown" : "Enable Breakdown"}
+              >
+                <i
+                  className={`fas ${v.is_itemized ? "fa-list-ul" : "fa-list"}`}
+                ></i>
+              </button>
+              <span className="item-name-text">{item.item_name}</span>
+              {v.is_itemized && (
+                <span
+                  className="breakdown-badge"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveBreakdownId(item.id);
+                    setActiveBreakdownItem(item.item_name);
+                  }}
+                >
+                  Itemized
+                </span>
+              )}
+            </div>
+          </td>
+          <td className="col-units">
+            <input
+              type="number"
+              min="0"
+              step="any"
+              placeholder={v.is_itemized ? "—" : "0"}
+              value={v.is_itemized ? "" : getVal(item.id, "qty")}
+              onChange={(e) => {
+                if (showVersionWarning) return;
+                const val = e.target.value;
+                if (val.length <= 3) {
+                  handleChange(item.id, "qty", val);
+                }
+              }}
+              disabled={showVersionWarning || v.is_itemized}
+            />
+          </td>
+          <td className="col-rate-type">
+            <div
+              className={`rate-type-column-content ${v.is_itemized ? "disabled" : ""}`}
+            >
+              <input
+                type="number"
+                min="0"
+                step="any"
+                className="multiplier-input"
+                placeholder="1"
+                value={getVal(item.id, "multiplier")}
+                onChange={(e) => {
+                  if (showVersionWarning) return;
+                  const val = e.target.value;
+                  if (val.length <= 3) {
+                    handleChange(item.id, "multiplier", val);
+                  }
+                }}
+                disabled={showVersionWarning || v.is_itemized}
+              />
               <div
-                className="skeleton-box"
-                style={{ width: "16px", height: "16px", margin: "0 auto" }}
-              ></div>
-            </td>
-            <td className="col-item-name">
+                className={`rate-type-toggle ${v.is_itemized ? "disabled" : ""}`}
+              >
+                <label
+                  className={`rt-option ${rateType === "day" ? "active" : ""}`}
+                >
+                  <input
+                    type="radio"
+                    name={`rate_type-${item.id}`}
+                    value="day"
+                    checked={rateType === "day"}
+                    onChange={() =>
+                      !v.is_itemized &&
+                      handleChange(item.id, "rate_type", "day")
+                    }
+                    disabled={v.is_itemized || showVersionWarning}
+                  />
+                  Day
+                </label>
+                <label
+                  className={`rt-option ${rateType === "cs" ? "active" : ""}`}
+                >
+                  <input
+                    type="radio"
+                    name={`rate_type-${item.id}`}
+                    value="cs"
+                    checked={rateType === "cs"}
+                    onChange={() =>
+                      !v.is_itemized && handleChange(item.id, "rate_type", "cs")
+                    }
+                    disabled={v.is_itemized || showVersionWarning}
+                  />
+                  CS
+                </label>
+              </div>
+            </div>
+          </td>
+          <td className="col-rate">
+            {focusedInput?.itemId === item.id &&
+            focusedInput?.field === "rate" ? (
+              <input
+                type="number"
+                min="0"
+                step="any"
+                autoFocus
+                placeholder={v.is_itemized ? "—" : "0.00"}
+                value={v.is_itemized ? "" : getVal(item.id, "rate")}
+                onBlur={() => setFocusedInput(null)}
+                onChange={(e) => {
+                  if (showVersionWarning) return;
+                  handleChange(item.id, "rate", e.target.value);
+                }}
+                disabled={showVersionWarning || v.is_itemized}
+              />
+            ) : (
               <div
-                className="skeleton-box"
-                style={{ width: "70%", height: "14px" }}
-              ></div>
-            </td>
-            <td className="col-units">
-              <div
-                className="skeleton-box"
-                style={{ width: "40px", height: "14px", marginLeft: "auto" }}
-              ></div>
-            </td>
-            <td className="col-rate-type">
-              <div
-                className="skeleton-box"
-                style={{ width: "65px", height: "22px", margin: "0 auto" }}
-              ></div>
-            </td>
-            <td className="col-rate">
-              <div
-                className="skeleton-box"
-                style={{ width: "60px", height: "14px", marginLeft: "auto" }}
-              ></div>
-            </td>
-            <td className="col-gross">
-              <div
-                className="skeleton-box"
-                style={{ width: "60px", height: "14px", marginLeft: "auto" }}
-              ></div>
-            </td>
-            <td className="col-add">
-              <div
-                className="skeleton-box"
-                style={{ width: "60px", height: "14px", marginLeft: "auto" }}
-              ></div>
-            </td>
-            <td className="col-total">
-              <div
-                className="skeleton-box"
-                style={{ width: "80px", height: "14px", marginLeft: "auto" }}
-              ></div>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-
-    {/* Mock Phase 2 */}
-    <div className="skeleton-phase-header" style={{ marginTop: "20px" }}>
-      <div
-        className="skeleton-box"
-        style={{ width: "180px", height: "18px" }}
-      ></div>
-    </div>
-    <div className="skeleton-dept-header"></div>
-    <table className="bef-table">
-      <BudgetColGroup />
-      <tbody>
-        {[1, 2, 3, 4, 5].map((i) => (
-          <tr key={`p2-${i}`} className="skeleton-row">
-            <td className="col-drag">
-              <div
-                className="skeleton-box"
-                style={{ width: "16px", height: "16px", margin: "0 auto" }}
-              ></div>
-            </td>
-            <td className="col-item-name">
-              <div
-                className="skeleton-box"
-                style={{ width: "65%", height: "14px" }}
-              ></div>
-            </td>
-            <td colSpan="6"></td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-);
+                className="readability-input-proxy"
+                onClick={() =>
+                  !v.is_itemized &&
+                  !showVersionWarning &&
+                  setFocusedInput({ itemId: item.id, field: "rate" })
+                }
+              >
+                {v.is_itemized
+                  ? "—"
+                  : formatCurrency(getVal(item.id, "rate") || 0, false)}
+              </div>
+            )}
+          </td>
+          <td className={`col-gross gross-cell ${isFilled ? "has-value" : ""}`}>
+            {v.is_itemized ? "—" : grossDisplay(item.id)}
+          </td>
+          <td className="col-add bef-relative">
+            <div className="add-input-group">
+              {focusedInput?.itemId === item.id &&
+              focusedInput?.field === "add1" ? (
+                <input
+                  type="number"
+                  min="0"
+                  step="any"
+                  autoFocus
+                  placeholder="0.00"
+                  value={getVal(item.id, "add1")}
+                  onBlur={() => setFocusedInput(null)}
+                  onChange={(e) => {
+                    if (showVersionWarning) return;
+                    handleChange(item.id, "add1", e.target.value);
+                  }}
+                  disabled={showVersionWarning}
+                />
+              ) : (
+                <div
+                  className="readability-input-proxy"
+                  onClick={() =>
+                    !showVersionWarning &&
+                    setFocusedInput({ itemId: item.id, field: "add1" })
+                  }
+                >
+                  {formatCurrency(getVal(item.id, "add1") || 0, false)}
+                </div>
+              )}
+              <button
+                className={`bef-comment-btn ${getVal(item.id, "c1") ? "has-comment" : ""}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCommentAnchorRect(e.currentTarget.getBoundingClientRect());
+                  setActiveComment({ itemId: item.id, field: "c1" });
+                }}
+              >
+                <svg
+                  className="comment-icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" />
+                </svg>
+                {getVal(item.id, "c1") && (
+                  <div className="bef-comment-preview">
+                    {getVal(item.id, "c1")}
+                  </div>
+                )}
+              </button>
+              {activeComment?.itemId === item.id &&
+                activeComment?.field === "c1" &&
+                ReactDOM.createPortal(
+                  <div
+                    className="bef-comment-popover glass-sandblasted animated-popover"
+                    style={{
+                      top: commentAnchorRect
+                        ? commentAnchorRect.bottom + 10
+                        : 0,
+                      left: commentAnchorRect
+                        ? commentAnchorRect.right - 220
+                        : 0,
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <textarea
+                      placeholder="Add a detailed note for this row..."
+                      value={getVal(item.id, "c1")}
+                      onChange={(e) =>
+                        handleChange(item.id, "c1", e.target.value)
+                      }
+                      autoFocus
+                    />
+                    <div className="popover-footer">
+                      <button
+                        className="popover-done-btn"
+                        onClick={() => setActiveComment(null)}
+                      >
+                        Done
+                      </button>
+                    </div>
+                  </div>,
+                  document.body,
+                )}
+            </div>
+          </td>
+          <td className={`col-total total-cell ${isFilled ? "has-value" : ""}`}>
+            {totalDisplay(item.id)}
+          </td>
+        </tr>
+      )}
+    </Draggable>
+  );
+};
 
 const BudgetEntryForm = ({
   embedded = false,
@@ -151,6 +303,7 @@ const BudgetEntryForm = ({
   projectName = "",
   versionName = "",
   refreshKey = 0,
+  onDirtyChange = () => {},
 }) => {
   const [hierarchy, setHierarchy] = useState([]); // phases → departments → categories → items
   const [expandedPhases, setExpandedPhases] = useState(new Set([2])); // Default: Production (id=2) open
@@ -165,6 +318,17 @@ const BudgetEntryForm = ({
   const [showDisableConfirm, setShowDisableConfirm] = useState(false);
   const [pendingDisableId, setPendingDisableId] = useState(null);
   const [commentAnchorRect, setCommentAnchorRect] = useState(null);
+  const [focusedInput, setFocusedInput] = useState(null); // { itemId, field }
+
+  const {
+    getBudgetData,
+    budgetCache,
+    budgetLoading,
+    invalidateCache,
+    hierarchyCache,
+    getBudgetMetadata,
+  } = useProjects();
+  const initialDataRef = useRef(null);
 
   const togglePhase = (phaseId) => {
     const next = new Set(expandedPhases);
@@ -173,55 +337,47 @@ const BudgetEntryForm = ({
     setExpandedPhases(next);
   };
 
-  // ── Load hierarchy once ───────────────────────────────────────────────────
+  // ── Unified Data Loading (Hierarchy + Values + Breakdowns) ─────────────────
   useEffect(() => {
-    const fetchOptions = { credentials: "include" };
-    fetch(`${API}/api/hierarchy`, fetchOptions)
-      .then((r) => r.json())
-      .then((h) => {
-        if (Array.isArray(h)) setHierarchy(h);
-      })
-      .catch((err) => {
-        console.error("Error loading hierarchy:", err);
-        setStatus({
-          type: "error",
-          text: "Error loading hierarchy data.",
-        });
-      });
-  }, [refreshKey]);
+    // Reset dirty tracking immediately on project/version switch
+    initialDataRef.current = null;
+    onDirtyChange(false);
 
-  // ── Load existing values when externalProjectId changes ───────────────────
-  useEffect(() => {
     if (!externalProjectId || !versionId) {
+      setHierarchy([]);
       setValues({});
+      setBreakdownData({});
       setStatus(null);
       return;
     }
-    const loadValues = async () => {
+
+    const loadBudget = async () => {
       setLoading(true);
       setStatus(null);
+
+      // If hierarchy is already in context cache, set it immediately for selective rendering
+      if (hierarchyCache) {
+        setHierarchy(hierarchyCache);
+      } else {
+        // Otherwise, ensure we fetch it along with data
+        getBudgetMetadata();
+      }
+
       try {
-        const fetchOptions = { credentials: "include" };
-        const url = versionId
-          ? `${API}/api/budget-values/project/${externalProjectId}?version_id=${versionId}`
-          : `${API}/api/budget-values/project/${externalProjectId}`;
+        const data = await getBudgetData(
+          externalProjectId,
+          versionId,
+          refreshKey > 0,
+        );
 
-        const res = await fetch(url, fetchOptions);
-        const vText = await res.text();
-        let data = {};
-        try {
-          data = JSON.parse(vText);
-          if (data.error) throw new Error(data.error);
-        } catch (e) {
-          if (!res.ok) throw new Error("Unauthorized or Session Expired");
-        }
-        // Backend returns a dict keyed by budget_item_id
+        if (data.hierarchy) setHierarchy(data.hierarchy);
+
+        const serverValues = data.values || {};
         const initialValues = {};
-        const itemsWithBreakdowns = [];
 
-        Object.keys(data).forEach((itemId) => {
+        Object.keys(serverValues).forEach((itemId) => {
           const idNum = parseInt(itemId);
-          const rowData = data[itemId];
+          const rowData = serverValues[itemId];
           initialValues[idNum] = {
             qty: String(parseFloat(rowData.quantity) || ""),
             rate: String(parseFloat(rowData.rate) || ""),
@@ -235,68 +391,46 @@ const BudgetEntryForm = ({
             is_itemized: !!rowData.is_itemized,
             total: String(parseFloat(rowData.total) || "0"),
           };
-          if (rowData.is_itemized) {
-            itemsWithBreakdowns.push(idNum);
-          }
         });
 
-        console.log(
-          `[BudgetLoader] Loaded ${Object.keys(initialValues).length} rows. Itemized IDs:`,
-          itemsWithBreakdowns,
-        );
         setValues(initialValues);
+        setBreakdownData(data.breakdowns || {});
 
-        // Fetch breakdowns for itemized rows
-        if (itemsWithBreakdowns.length > 0) {
-          const bdData = {};
-          await Promise.all(
-            itemsWithBreakdowns.map(async (idNum) => {
-              try {
-                const res = await fetch(
-                  `${API}/api/budget-values/breakdown?project_id=${externalProjectId}&version_id=${versionId}&item_id=${idNum}`,
-                  fetchOptions,
-                );
-                if (res.ok) {
-                  const bds = await res.json();
-                  bdData[idNum] = bds;
-                  if (bds && bds.length > 0) {
-                    const subTotal = bds.reduce(
-                      (sum, bitm) => sum + (parseFloat(bitm.total) || 0),
-                      0,
-                    );
-                    // Single source of truth update
-                    initialValues[idNum].total = String(subTotal);
-                    initialValues[idNum].is_itemized = true;
-                    console.log(
-                      `[BudgetLoader] Item ${idNum} auto-corrected: total ${subTotal}`,
-                    );
-                  }
-                }
-              } catch (e) {
-                console.error(`[BudgetLoader] Failed for item ${idNum}:`, e);
-              }
-            }),
-          );
-          setBreakdownData(bdData);
-          setValues({ ...initialValues });
-        } else {
-          setBreakdownData({});
-        }
+        // Initial snapshot for dirty tracking
+        initialDataRef.current = {
+          values: JSON.stringify(initialValues),
+          breakdowns: JSON.stringify(data.breakdowns || {}),
+        };
+        onDirtyChange(false);
       } catch (err) {
-        console.error("Error loading project values:", err);
+        console.error("BudgetEntryForm: Failed to load budget data", err);
         setStatus({
           type: "error",
-          text: "Failed to load project values.",
+          text: "Failed to load budget data from cache.",
         });
       } finally {
         setLoading(false);
       }
     };
-    loadValues();
-  }, [externalProjectId, versionId]);
+
+    loadBudget();
+  }, [externalProjectId, versionId, getBudgetData, refreshKey, onDirtyChange]);
+
+  // Dirty detection Effect
+  useEffect(() => {
+    if (!initialDataRef.current) return;
+
+    const isValuesDirty =
+      initialDataRef.current.values !== JSON.stringify(values);
+    const isBreakdownsDirty =
+      initialDataRef.current.breakdowns !== JSON.stringify(breakdownData);
+
+    onDirtyChange(isValuesDirty || isBreakdownsDirty);
+  }, [values, breakdownData, onDirtyChange]);
 
   // ── Row value helpers ─────────────────────────────────────────────────────
   const getVal = (itemId, field) => {
+    if (field === "all") return values[itemId] || {};
     if (field === "rate_type") return values[itemId]?.rate_type || "day";
     return values[itemId]?.[field] || "";
   };
@@ -351,6 +485,10 @@ const BudgetEntryForm = ({
     const itemId = pendingDisableId;
     if (!itemId) return;
 
+    // Close modal immediately for snappy UX
+    setShowDisableConfirm(false);
+    setPendingDisableId(null);
+
     setValues((prev) => ({
       ...prev,
       [itemId]: {
@@ -378,11 +516,10 @@ const BudgetEntryForm = ({
           breakdown_items: [],
         }),
       });
+      // Invalidate cache after backend check
+      invalidateCache(externalProjectId);
     } catch (e) {
       console.error(e);
-    } finally {
-      setShowDisableConfirm(false);
-      setPendingDisableId(null);
     }
   };
 
@@ -421,7 +558,12 @@ const BudgetEntryForm = ({
         item_id: parseInt(itemId),
         breakdown_items: validItems,
       }),
-    }).catch((err) => console.error("Failed to save breakdown:", err));
+    })
+      .then(() => {
+        // Invalidate cache after successful save
+        invalidateCache(externalProjectId);
+      })
+      .catch((err) => console.error("Failed to save breakdown:", err));
   };
 
   const calcGross = (itemValues) => {
@@ -454,13 +596,6 @@ const BudgetEntryForm = ({
       (sum, item) => sum + totalRaw(item.id),
       0,
     );
-  };
-
-  const formatCurrency = (val) => {
-    return (val || 0).toLocaleString("en-GB", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
   };
 
   const grossDisplay = (itemId) => formatCurrency(grossRaw(itemId));
@@ -542,6 +677,17 @@ const BudgetEntryForm = ({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed");
+
+      // Invalidate the budget cache for this project so changes are picked up everywhere
+      invalidateCache(externalProjectId);
+
+      // Update snapshot so form is no longer dirty after save
+      initialDataRef.current = {
+        values: JSON.stringify(values),
+        breakdowns: JSON.stringify(breakdownData),
+      };
+      onDirtyChange(false);
+
       setStatus({
         type: "success",
         text: `✅ ${data.message} saved successfully.`,
@@ -701,16 +847,13 @@ const BudgetEntryForm = ({
           </div>
         )}
 
-        {showVersionWarning && (
-          <div className="bef-version-warning">
-            <span className="warning-icon">⚠️</span>
-            Please select the budget version before proceeding
-          </div>
-        )}
-
+        {/* Show active skeleton only when truly loading a version */}
         {loading && <SkeletonTable />}
 
-        {!loading && hierarchy.length > 0 && (
+        {/* Show static empty format when no version is selected and not loading */}
+        {!loading && (!externalProjectId || !versionId) && <BudgetFormatEmpty />}
+
+        {!loading && externalProjectId && versionId && hierarchy.length > 0 && (
           <div
             id="admin-budget-pdf-content"
             className="fade-in-section"
@@ -749,7 +892,7 @@ const BudgetEntryForm = ({
                         <div className="phase-header-right">
                           <span className="phase-total-label">Subtotal: </span>
                           <span className="phase-total-value">
-                            Rs. {formatCurrency(phaseTotal)}
+                            {formatCurrency(phaseTotal)}
                           </span>
                         </div>
                       </div>
@@ -842,420 +985,78 @@ const BudgetEntryForm = ({
                                                   </td>
                                                 </tr>
 
-                                                {cat.items.map(
-                                                  (item, index) => {
-                                                    const v =
-                                                      values[item.id] || {};
-                                                    const isFilled =
-                                                      (parseFloat(v.qty) || 0) >
-                                                        0 ||
-                                                      (parseFloat(v.rate) ||
-                                                        0) > 0 ||
-                                                      (parseFloat(v.add1) ||
-                                                        0) > 0;
+                                                {loading &&
+                                                (!values ||
+                                                  Object.keys(values).length ===
+                                                    0) ? (
+                                                  <>
+                                                    <SkeletonRow />
+                                                    <SkeletonRow />
+                                                    <SkeletonRow />
+                                                  </>
+                                                ) : (
+                                                  cat.items.map(
+                                                    (item, index) => {
+                                                      const v =
+                                                        values[item.id] || {};
+                                                      const isFilled =
+                                                        (parseFloat(v.qty) ||
+                                                          0) > 0 ||
+                                                        (parseFloat(v.rate) ||
+                                                          0) > 0 ||
+                                                        (parseFloat(v.add1) ||
+                                                          0) > 0;
 
-                                                    return (
-                                                      <Draggable
-                                                        key={item.id}
-                                                        draggableId={String(
-                                                          item.id,
-                                                        )}
-                                                        index={index}
-                                                      >
-                                                        {(
-                                                          providedRow,
-                                                          snapshotRow,
-                                                        ) => (
-                                                          <tr
-                                                            ref={
-                                                              providedRow.innerRef
-                                                            }
-                                                            {...providedRow.draggableProps}
-                                                            className={`bef-row ${isFilled ? "filled" : ""} ${snapshotRow.isDragging ? "dragging" : ""}`}
-                                                          >
-                                                            <td
-                                                              className="col-drag"
-                                                              {...providedRow.dragHandleProps}
-                                                            >
-                                                              <span className="material-symbols-outlined drag-handle-icon">
-                                                                drag_indicator
-                                                              </span>
-                                                            </td>
-                                                            <td className="col-item-name">
-                                                              <div className="item-name-cell-wrapper">
-                                                                <button
-                                                                  className={`item-itemize-toggle ${v.is_itemized ? "active" : ""}`}
-                                                                  onClick={(
-                                                                    e,
-                                                                  ) => {
-                                                                    e.stopPropagation();
-                                                                    handleToggleItemize(
-                                                                      item.id,
-                                                                      item.item_name,
-                                                                    );
-                                                                  }}
-                                                                  title={
-                                                                    v.is_itemized
-                                                                      ? "Disable Breakdown"
-                                                                      : "Enable Breakdown"
-                                                                  }
-                                                                >
-                                                                  <i
-                                                                    className={`fas ${v.is_itemized ? "fa-list-ul" : "fa-list"}`}
-                                                                  ></i>
-                                                                </button>
-                                                                <span className="item-name-text">
-                                                                  {
-                                                                    item.item_name
-                                                                  }
-                                                                </span>
-                                                                {v.is_itemized && (
-                                                                  <span
-                                                                    className="breakdown-badge"
-                                                                    onClick={(
-                                                                      e,
-                                                                    ) => {
-                                                                      e.stopPropagation();
-                                                                      setActiveBreakdownId(
-                                                                        item.id,
-                                                                      );
-                                                                      setActiveBreakdownItem(
-                                                                        item.item_name,
-                                                                      );
-                                                                    }}
-                                                                  >
-                                                                    Itemized
-                                                                  </span>
-                                                                )}
-                                                              </div>
-                                                            </td>
-                                                            <td className="col-units">
-                                                              <input
-                                                                type="number"
-                                                                min="0"
-                                                                step="any"
-                                                                placeholder={
-                                                                  v.is_itemized
-                                                                    ? "—"
-                                                                    : "0"
-                                                                }
-                                                                value={
-                                                                  v.is_itemized
-                                                                    ? ""
-                                                                    : getVal(
-                                                                        item.id,
-                                                                        "qty",
-                                                                      )
-                                                                }
-                                                                onChange={(
-                                                                  e,
-                                                                ) => {
-                                                                  if (
-                                                                    showVersionWarning
-                                                                  )
-                                                                    return;
-                                                                  handleChange(
-                                                                    item.id,
-                                                                    "qty",
-                                                                    e.target
-                                                                      .value,
-                                                                  );
-                                                                }}
-                                                                disabled={
-                                                                  showVersionWarning ||
-                                                                  v.is_itemized
-                                                                }
-                                                              />
-                                                            </td>
-                                                            <td className="col-rate-type">
-                                                              <div
-                                                                className={`rate-type-column-content ${v.is_itemized ? "disabled" : ""}`}
-                                                              >
-                                                                <input
-                                                                  type="number"
-                                                                  min="0"
-                                                                  step="any"
-                                                                  className="multiplier-input"
-                                                                  placeholder="1"
-                                                                  value={getVal(
-                                                                    item.id,
-                                                                    "multiplier",
-                                                                  )}
-                                                                  onChange={(
-                                                                    e,
-                                                                  ) => {
-                                                                    if (
-                                                                      showVersionWarning
-                                                                    )
-                                                                      return;
-                                                                    handleChange(
-                                                                      item.id,
-                                                                      "multiplier",
-                                                                      e.target
-                                                                        .value,
-                                                                    );
-                                                                  }}
-                                                                  disabled={
-                                                                    showVersionWarning ||
-                                                                    v.is_itemized
-                                                                  }
-                                                                />
-                                                                <div
-                                                                  className={`rate-type-toggle ${v.is_itemized ? "disabled" : ""}`}
-                                                                >
-                                                                  <label
-                                                                    className={`rt-option ${getVal(item.id, "rate_type") === "day" ? "active" : ""}`}
-                                                                  >
-                                                                    <input
-                                                                      type="radio"
-                                                                      name={`rate_type-${item.id}`}
-                                                                      value="day"
-                                                                      checked={
-                                                                        getVal(
-                                                                          item.id,
-                                                                          "rate_type",
-                                                                        ) ===
-                                                                        "day"
-                                                                      }
-                                                                      onChange={() =>
-                                                                        !v.is_itemized &&
-                                                                        handleChange(
-                                                                          item.id,
-                                                                          "rate_type",
-                                                                          "day",
-                                                                        )
-                                                                      }
-                                                                      disabled={
-                                                                        v.is_itemized ||
-                                                                        showVersionWarning
-                                                                      }
-                                                                    />
-                                                                    Day
-                                                                  </label>
-                                                                  <label
-                                                                    className={`rt-option ${getVal(item.id, "rate_type") === "cs" ? "active" : ""}`}
-                                                                  >
-                                                                    <input
-                                                                      type="radio"
-                                                                      name={`rate_type-${item.id}`}
-                                                                      value="cs"
-                                                                      checked={
-                                                                        getVal(
-                                                                          item.id,
-                                                                          "rate_type",
-                                                                        ) ===
-                                                                        "cs"
-                                                                      }
-                                                                      onChange={() =>
-                                                                        !v.is_itemized &&
-                                                                        handleChange(
-                                                                          item.id,
-                                                                          "rate_type",
-                                                                          "cs",
-                                                                        )
-                                                                      }
-                                                                      disabled={
-                                                                        v.is_itemized ||
-                                                                        showVersionWarning
-                                                                      }
-                                                                    />
-                                                                    CS
-                                                                  </label>
-                                                                </div>
-                                                              </div>
-                                                            </td>
-                                                            <td className="col-rate">
-                                                              <input
-                                                                type="number"
-                                                                min="0"
-                                                                step="any"
-                                                                placeholder={
-                                                                  v.is_itemized
-                                                                    ? "—"
-                                                                    : "0.00"
-                                                                }
-                                                                value={
-                                                                  v.is_itemized
-                                                                    ? ""
-                                                                    : getVal(
-                                                                        item.id,
-                                                                        "rate",
-                                                                      )
-                                                                }
-                                                                onChange={(
-                                                                  e,
-                                                                ) => {
-                                                                  if (
-                                                                    showVersionWarning
-                                                                  )
-                                                                    return;
-                                                                  handleChange(
-                                                                    item.id,
-                                                                    "rate",
-                                                                    e.target
-                                                                      .value,
-                                                                  );
-                                                                }}
-                                                                disabled={
-                                                                  showVersionWarning ||
-                                                                  v.is_itemized
-                                                                }
-                                                              />
-                                                            </td>
-                                                            <td
-                                                              className={`col-gross gross-cell ${isFilled ? "has-value" : ""}`}
-                                                            >
-                                                              {v.is_itemized
-                                                                ? "—"
-                                                                : grossDisplay(
-                                                                    item.id,
-                                                                  )}
-                                                            </td>
-                                                            <td className="col-add bef-relative">
-                                                              <div className="add-input-group">
-                                                                <input
-                                                                  type="number"
-                                                                  min="0"
-                                                                  step="any"
-                                                                  placeholder="0.00"
-                                                                  value={getVal(
-                                                                    item.id,
-                                                                    "add1",
-                                                                  )}
-                                                                  onChange={(
-                                                                    e,
-                                                                  ) => {
-                                                                    if (
-                                                                      showVersionWarning
-                                                                    )
-                                                                      return;
-                                                                    handleChange(
-                                                                      item.id,
-                                                                      "add1",
-                                                                      e.target
-                                                                        .value,
-                                                                    );
-                                                                  }}
-                                                                  disabled={
-                                                                    showVersionWarning
-                                                                  }
-                                                                />
-                                                                <button
-                                                                  className={`bef-comment-btn ${getVal(item.id, "c1") ? "has-comment" : ""}`}
-                                                                  onClick={(
-                                                                    e,
-                                                                  ) => {
-                                                                    e.stopPropagation();
-                                                                    setCommentAnchorRect(
-                                                                      e.currentTarget.getBoundingClientRect(),
-                                                                    );
-                                                                    setActiveComment(
-                                                                      {
-                                                                        itemId:
-                                                                          item.id,
-                                                                        field:
-                                                                          "c1",
-                                                                      },
-                                                                    );
-                                                                  }}
-                                                                >
-                                                                  <svg
-                                                                    className="comment-icon"
-                                                                    xmlns="http://www.w3.org/2000/svg"
-                                                                    viewBox="0 0 24 24"
-                                                                    width="16"
-                                                                    height="16"
-                                                                    fill="none"
-                                                                    stroke="currentColor"
-                                                                    strokeWidth="2"
-                                                                    strokeLinecap="round"
-                                                                    strokeLinejoin="round"
-                                                                  >
-                                                                    <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" />
-                                                                  </svg>
-                                                                  {getVal(
-                                                                    item.id,
-                                                                    "c1",
-                                                                  ) && (
-                                                                    <div className="bef-comment-preview">
-                                                                      {getVal(
-                                                                        item.id,
-                                                                        "c1",
-                                                                      )}
-                                                                    </div>
-                                                                  )}
-                                                                </button>
-                                                                {activeComment?.itemId ===
-                                                                  item.id &&
-                                                                  activeComment?.field ===
-                                                                    "c1" &&
-                                                                  ReactDOM.createPortal(
-                                                                    <div
-                                                                      className="bef-comment-popover glass-sandblasted animated-popover"
-                                                                      style={{
-                                                                        top: commentAnchorRect
-                                                                          ? commentAnchorRect.bottom +
-                                                                            10
-                                                                          : 0,
-                                                                        left: commentAnchorRect
-                                                                          ? commentAnchorRect.right -
-                                                                            220
-                                                                          : 0,
-                                                                      }}
-                                                                      onClick={(
-                                                                        e,
-                                                                      ) =>
-                                                                        e.stopPropagation()
-                                                                      }
-                                                                    >
-                                                                      <textarea
-                                                                        placeholder="Add a detailed note for this row..."
-                                                                        value={getVal(
-                                                                          item.id,
-                                                                          "c1",
-                                                                        )}
-                                                                        onChange={(
-                                                                          e,
-                                                                        ) =>
-                                                                          handleChange(
-                                                                            item.id,
-                                                                            "c1",
-                                                                            e
-                                                                              .target
-                                                                              .value,
-                                                                          )
-                                                                        }
-                                                                        autoFocus
-                                                                      />
-                                                                      <div className="popover-footer">
-                                                                        <button
-                                                                          className="popover-done-btn"
-                                                                          onClick={() =>
-                                                                            setActiveComment(
-                                                                              null,
-                                                                            )
-                                                                          }
-                                                                        >
-                                                                          Done
-                                                                        </button>
-                                                                      </div>
-                                                                    </div>,
-                                                                    document.body,
-                                                                  )}
-                                                              </div>
-                                                            </td>
-                                                            <td
-                                                              className={`col-total total-cell ${isFilled ? "has-value" : ""}`}
-                                                            >
-                                                              {totalDisplay(
-                                                                item.id,
-                                                              )}
-                                                            </td>
-                                                          </tr>
-                                                        )}
-                                                      </Draggable>
-                                                    );
-                                                  },
+                                                      return (
+                                                        <BudgetRow
+                                                          key={item.id}
+                                                          item={item}
+                                                          index={index}
+                                                          getVal={getVal}
+                                                          handleChange={
+                                                            handleChange
+                                                          }
+                                                          handleToggleItemize={
+                                                            handleToggleItemize
+                                                          }
+                                                          setActiveBreakdownId={
+                                                            setActiveBreakdownId
+                                                          }
+                                                          setActiveBreakdownItem={
+                                                            setActiveBreakdownItem
+                                                          }
+                                                          commentAnchorRect={
+                                                            commentAnchorRect
+                                                          }
+                                                          setCommentAnchorRect={
+                                                            setCommentAnchorRect
+                                                          }
+                                                          activeComment={
+                                                            activeComment
+                                                          }
+                                                          setActiveComment={
+                                                            setActiveComment
+                                                          }
+                                                          showVersionWarning={
+                                                            showVersionWarning
+                                                          }
+                                                          grossDisplay={
+                                                            grossDisplay
+                                                          }
+                                                          totalDisplay={
+                                                            totalDisplay
+                                                          }
+                                                          isFilled={isFilled}
+                                                          focusedInput={
+                                                            focusedInput
+                                                          }
+                                                          setFocusedInput={
+                                                            setFocusedInput
+                                                          }
+                                                        />
+                                                      );
+                                                    },
+                                                  )
                                                 )}
                                                 {providedItem.placeholder}
                                               </tbody>
@@ -1280,30 +1081,29 @@ const BudgetEntryForm = ({
             <div className="bef-footer">
               <div className="bef-grand-total">
                 Grand Total:&nbsp;
-                <strong>Rs.{formatCurrency(grandTotal)}</strong>
+                <strong>{formatCurrency(grandTotal)}</strong>
               </div>
             </div>
           </div>
         )}
 
-        {/* Footer actions bar (outside PDF) */}
         {!loading && hierarchy.length > 0 && (
           <div className="bef-footer bef-actions-only-footer">
             <div className="bef-actions" style={{ marginLeft: "auto" }}>
-                <button
-                  className="bef-btn-submit"
-                  onClick={handleDownloadPDF}
-                  style={{
-                    background: "#4bc0c0",
-                    marginRight: "10px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                  }}
-                >
-                  <Icon name="download" modifiers="sm" />
-                  Download PDF
-                </button>
+              <button
+                className="bef-btn-submit"
+                onClick={handleDownloadPDF}
+                style={{
+                  background: "#4bc0c0",
+                  marginRight: "10px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                <Icon name="download" modifiers="sm" />
+                Download PDF
+              </button>
               <button
                 className="bef-btn-clear"
                 onClick={handleClear}
@@ -1312,6 +1112,7 @@ const BudgetEntryForm = ({
                 Clear All
               </button>
               <button
+                id="bef-save-button"
                 className="bef-btn-submit"
                 onClick={handleSubmit}
                 disabled={submitting || !externalProjectId}

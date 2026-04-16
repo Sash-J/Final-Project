@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { useBlocker } from "react-router-dom";
 import { useModal } from "../../contexts/ModalContext";
+import { useProjects } from "../../contexts/ProjectContext";
 import BudgetEntryForm from "./BudgetEntryForm";
 import GlassDropdown from "../common/GlassDropdown";
 import PageHeader from "../common/PageHeader";
+import ConfirmationModal from "../common/ConfirmationModal";
 import "./AdminBudget.css";
 
 import { API } from "../../config";
@@ -200,60 +203,129 @@ const AddBudgetItem = ({ categories, onAdded }) => {
 
 // ── Main AdminBudget Component ────────────────────────────────────────────────
 const AdminBudget = () => {
-  const [phases, setPhases] = useState([]);
-  const [departments, setDepartments] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [projects, setProjects] = useState([]);
+  const {
+    projects,
+    refreshProjects,
+    phasesCache,
+    deptsCache,
+    catsCache,
+    getBudgetMetadata,
+    versionsCache,
+    getBudgetVersions,
+    invalidateCache,
+  } = useProjects();
+
   const [projectId, setProjectId] = useState("");
-  const [versions, setVersions] = useState([]);
   const [versionId, setVersionId] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
+
+  // Unsaved changes protection state
+  const [budgetIsDirty, setBudgetIsDirty] = useState(false);
+  const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+  const [pendingNav, setPendingNav] = useState(null); // { type, value }
+
+  // Router-level navigation blocker (for Navbar, browser back, links)
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      budgetIsDirty && currentLocation.pathname !== nextLocation.pathname,
+  );
+
   const { showConfirm } = useModal();
 
-  const fetchMetadata = async () => {
-    try {
-      const options = { credentials: "include" };
-      const [ph, d, c, p] = await Promise.all([
-        fetch(`${API}/api/phases`, options).then((r) => r.json()),
-        fetch(`${API}/api/departments`, options).then((r) => r.json()),
-        fetch(`${API}/api/categories`, options).then((r) => r.json()),
-        fetch(`${API}/api/projects`, options).then((r) => r.json()),
-      ]);
-      setPhases(Array.isArray(ph) ? ph : []);
-      setDepartments(Array.isArray(d) ? d : []);
-      setCategories(Array.isArray(c) ? c : []);
-      setProjects(Array.isArray(p) ? p : []);
-    } catch (err) {
-      console.error("Failed to fetch metadata:", err);
-    }
-  };
+  const handleDirtyChange = useCallback((isDirty) => {
+    setBudgetIsDirty(isDirty);
+  }, []);
 
   useEffect(() => {
-    fetchMetadata();
-  }, [refreshKey]);
+    refreshProjects();
+    getBudgetMetadata();
+  }, [refreshKey, refreshProjects, getBudgetMetadata]);
+
+  // Browser-level unsaved changes warning
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (budgetIsDirty) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [budgetIsDirty]);
 
   const handleProjectChange = async (id) => {
+    if (budgetIsDirty) {
+      setPendingNav({ type: "project", value: id });
+      setShowUnsavedModal(true);
+      return;
+    }
+    proceedWithProjectChange(id);
+  };
+
+  const proceedWithProjectChange = async (id) => {
     setProjectId(id);
     setVersionId("");
     if (id) {
-      try {
-        const res = await fetch(`${API}/api/projects/${id}/budget-versions`, {
-          credentials: "include",
-        });
-        const vData = await res.json();
-        if (Array.isArray(vData) && vData.length > 0) {
-          setVersions(vData);
-        } else {
-          setVersions([]);
-        }
-      } catch (err) {
-        console.error("Error fetching versions:", err);
-      }
+      await getBudgetVersions(id);
+    }
+  };
+
+  const handleVersionChange = (val) => {
+    if (budgetIsDirty && String(val) !== String(versionId)) {
+      setPendingNav({ type: "version", value: val });
+      setShowUnsavedModal(true);
+      return;
+    }
+    setVersionId(val);
+  };
+
+  const handleDiscard = () => {
+    setBudgetIsDirty(false);
+    setShowUnsavedModal(false);
+
+    // If blocked by router
+    if (blocker.state === "blocked") {
+      blocker.proceed();
+      return;
+    }
+
+    // If blocked by internal project/version switch
+    if (!pendingNav) return;
+    if (pendingNav.type === "project") {
+      proceedWithProjectChange(pendingNav.value);
+    } else if (pendingNav.type === "version") {
+      setVersionId(pendingNav.value);
+    }
+    setPendingNav(null);
+  };
+
+  const handleStayAndSave = () => {
+    setShowUnsavedModal(false);
+    setPendingNav(null);
+
+    // If blocked by router, reset it
+    if (blocker.state === "blocked") {
+      blocker.reset();
+    }
+
+    // Highlight the save button at the bottom
+    const saveBtn = document.getElementById("bef-save-button");
+    if (saveBtn) {
+      saveBtn.scrollIntoView({ behavior: "smooth", block: "center" });
+      saveBtn.classList.add("highlight-pulse");
+      setTimeout(() => saveBtn.classList.remove("highlight-pulse"), 3000);
     }
   };
 
   const handleCreateNewVersion = async () => {
     if (!projectId) return;
+
+    if (budgetIsDirty) {
+      const ok = await showConfirm(
+        "You have unsaved changes. These will not be included in the new cloned version unless you save first. Proceed anyway?",
+      );
+      if (!ok) return;
+    }
 
     const ok = await showConfirm(
       "Do you want to clone the current budget version?",
@@ -272,13 +344,8 @@ const AdminBudget = () => {
       );
       const data = await res.json();
       if (res.ok) {
-        // Refresh versions list and select the new one
-        const vRes = await fetch(
-          `${API}/api/projects/${projectId}/budget-versions`,
-          { credentials: "include" },
-        );
-        const vData = await vRes.json();
-        setVersions(vData);
+        // Force refresh versions list in context and select the new one
+        await getBudgetVersions(projectId, true);
         setVersionId(data.id);
       } else {
         alert("Error creating version: " + (data.error || "Unknown error"));
@@ -310,13 +377,8 @@ const AdminBudget = () => {
           throw new Error(errorData.error || "Failed to delete version");
         }
         setVersionId("");
-        // Refresh versions list
-        const vRes = await fetch(
-          `${API}/api/projects/${projectId}/budget-versions`,
-          { credentials: "include" },
-        );
-        const vData = await vRes.json();
-        setVersions(Array.isArray(vData) ? vData : []);
+        // Force refresh versions list in context
+        await getBudgetVersions(projectId, true);
       } catch (err) {
         console.error("Error deleting version:", err);
         alert("Failed to delete version: " + err.message);
@@ -327,8 +389,8 @@ const AdminBudget = () => {
   return (
     <section id="admin-budget">
       <PageHeader
-        title="Budget Entry Dashboard"
-        description="Consolidated view for managing hierarchy and entering project budgets"
+        title="Budget Entry"
+        description="Enhanced view for managing hierarchy and budget entry"
       />
 
       <div className="admin-content-animated">
@@ -360,12 +422,14 @@ const AdminBudget = () => {
                         <GlassDropdown
                           placeholder="— Select —"
                           modifiers="lg fluid"
-                          options={versions.map((v) => ({
-                            value: v.id,
-                            label: `Version ${v.version_number}`,
-                          }))}
+                          options={(versionsCache[projectId] || []).map(
+                            (v) => ({
+                              value: v.id,
+                              label: `Version ${v.version_number}`,
+                            }),
+                          )}
                           value={versionId}
-                          onChange={(val) => setVersionId(val)}
+                          onChange={(val) => handleVersionChange(val)}
                         />
                       </div>
 
@@ -401,17 +465,20 @@ const AdminBudget = () => {
             </div>
 
             <div className="grid-window">
-              <AddDepartment phases={phases} onAdded={handleDataAdded} />
+              <AddDepartment
+                phases={phasesCache || []}
+                onAdded={handleDataAdded}
+              />
             </div>
             <div className="grid-window">
               <AddCategory
-                departments={departments}
+                departments={deptsCache || []}
                 onAdded={handleDataAdded}
               />
             </div>
             <div className="grid-window">
               <AddBudgetItem
-                categories={categories}
+                categories={catsCache || []}
                 onAdded={handleDataAdded}
               />
             </div>
@@ -428,14 +495,29 @@ const AdminBudget = () => {
                   projects.find((p) => p.id === projectId)?.project_name || ""
                 }
                 versionName={
-                  versions.find((v) => v.id === versionId)?.version_number || ""
+                  (versionsCache[projectId] || []).find(
+                    (v) => v.id === versionId,
+                  )?.version_number || ""
                 }
                 refreshKey={refreshKey}
+                onDirtyChange={handleDirtyChange}
               />
             </div>
           </div>
         </div>
       </div>
+
+      <ConfirmationModal
+        isOpen={showUnsavedModal || blocker.state === "blocked"}
+        title="Unsaved Changes"
+        message="You have unsaved modifications in your budget. If you leave now, these changes will be permanently lost."
+        onConfirm={handleStayAndSave}
+        onCancel={handleDiscard}
+        confirmLabel="Go to Save"
+        cancelLabel="Discard & Leave"
+        confirmVariant="accent"
+        cancelVariant="danger"
+      />
     </section>
   );
 };

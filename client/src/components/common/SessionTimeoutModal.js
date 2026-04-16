@@ -1,31 +1,37 @@
-import React from 'react';
-import ModalPortal from './ModalPortal';
-import './ConfirmationModal.css'; // Reuse confirmation styles for consistency
+import React from "react";
+import ModalPortal from "./ModalPortal";
+import "./SessionTimeoutModal.css";
+import Icon from "../common/Icon";
 
 const SessionTimeoutModal = ({ onLogin }) => {
-    return (
-        <ModalPortal>
-            <div className="sui-modal-overlay">
-                <div className="sui-modal-content sui-modal-small modal-animate-in">
-                    <div className="modal-icon-container warning">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                    </div>
-                    <h3>Session Expired</h3>
-                    <p>Your session has timed out due to inactivity. Please log in again to continue working.</p>
-                    
-                    <div className="sui-modal-actions">
-                        <button 
-                            className="sui-btn sui-btn-save" 
-                            style={{ width: '100%', marginTop: '10px' }}
-                            onClick={onLogin}
-                        >
-                            Return to Login
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </ModalPortal>
-    );
+  return (
+    <ModalPortal size="small" showClose={false}>
+      <div className="modal-header-section">
+        <div className="modal-icon-container warning session-timeout-modal-icon">
+          <span>
+            <Icon name="person_alert" modifiers="lg" />
+            Session Expired!
+          </span>
+        </div>
+      </div>
+
+      <div className="modal-body">
+        <p className="session-timeout-modal-text">
+          Your session has timed out due to inactivity. Please log in again to
+          continue working.
+        </p>
+      </div>
+
+      <div className="modal-footer">
+        <button
+          className="sui-btn sui-btn-save session-timeout-modal-btn"
+          onClick={onLogin}
+        >
+          Return to Login
+        </button>
+      </div>
+    </ModalPortal>
+  );
 };
 
 export default SessionTimeoutModal;

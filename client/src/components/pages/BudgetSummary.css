@@ -1,0 +1,124 @@
+.budget-summary-root {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.budget-summary-header {
+  display: flex;
+  justify-content: flex-start;
+  gap: 20px;
+}
+
+.grand-total-display {
+  padding: 20px 40px;
+  background: rgba(255, 255, 255, 0.04);
+  border: none !important;
+}
+
+.grand-total-display label {
+  font-size: 0.8rem;
+  color: #00c6e6;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.grand-total-display h2 {
+  font-size: 2rem;
+  font-weight: 500;
+  margin: 0;
+  padding: 0 10px;
+  text-transform: none;
+  letter-spacing: -0.5px;
+}
+
+.summary-table-container {
+  overflow: hidden;
+}
+
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.summary-table th {
+  text-align: left;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 600;
+  text-transform: capitalize;
+  letter-spacing: 0.5px;
+}
+
+.summary-table th:last-child,
+.summary-table td:last-child {
+  text-align: right;
+}
+
+.summary-table td {
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.phase-row {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.phase-row td {
+  color: #00c6e6;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.phase-indicator,
+.dept-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-transform: capitalize;
+}
+
+.dept-row {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.dept-row td {
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: #fff;
+}
+
+.cat-row td {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.padding-left-lg {
+  padding-left: 45px !important;
+}
+.padding-left-xl {
+  padding-left: 80px !important;
+}
+
+.summary-disclaimer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.8rem;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.text-right {
+  text-align: right;
+}
+.font-bold {
+  font-weight: 800;
+}
+.opacity-80 {
+  opacity: 0.8;
+}

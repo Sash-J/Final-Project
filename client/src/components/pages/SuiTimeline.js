@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import "./SuiTimeline.css";
+import Icon from "../common/Icon";
 import GlassDropdown from "../common/GlassDropdown";
 import ModalPortal from "../common/ModalPortal";
 import ConfirmationModal from "../common/ConfirmationModal";
 
 import { API } from "../../config";
+import { useProjects } from "../../contexts/ProjectContext";
 
 const SuiTimeline = ({
   projectId,
@@ -16,7 +18,8 @@ const SuiTimeline = ({
   onClick,
   scrollProgress = 0,
 }) => {
-  const [milestones, setMilestones] = useState([]);
+  const { getProjectMilestones, milestonesCache } = useProjects();
+  const milestones = milestonesCache[projectId] || [];
   const [loading, setLoading] = useState(true);
   const [selectedMilestone, setSelectedMilestone] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -34,25 +37,18 @@ const SuiTimeline = ({
   const containerRef = useRef(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
 
-  const fetchMilestones = async () => {
-    try {
-      setLoading(true);
-      const res = await axios.get(
-        `${API}/api/projects/${projectId}/milestones`,
-        { withCredentials: true },
-      );
-      setMilestones(res.data);
-    } catch (err) {
-      console.error("Error fetching milestones", err);
-    } finally {
-      setLoading(false);
-    }
+  const fetchMilestones = async (force = false) => {
+    setLoading(true);
+    await getProjectMilestones(projectId, force);
+    setLoading(false);
   };
 
   useEffect(() => {
     if (projectId) {
       console.log("DEBUG: SuiTimeline initialized for project", projectId);
-      fetchMilestones();
+      // Only force fetch if updateTrigger is > 0 (meaning something external triggered an update)
+      // Otherwise rely on the context's internal caching logic via getProjectMilestones(projectId, false)
+      fetchMilestones(updateTrigger > 0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId, updateTrigger]);
@@ -63,6 +59,7 @@ const SuiTimeline = ({
         let { clientWidth } = containerRef.current;
         if (clientWidth < 100) clientWidth = 800;
 
+        // Sourced from openAI
         // Proportional height calculation: 3 milestones per 540px viewport (~180px per milestone)
         // This ensures the timeline always has vertical "room" to scroll
         const itemHeight = 180;
@@ -82,6 +79,20 @@ const SuiTimeline = ({
       clearTimeout(timer);
     };
   }, [milestones]);
+
+  // Auto-scroll to bottom (inception point) on load
+  useEffect(() => {
+    if (!loading && containerRef.current && !preview) {
+      // Small delay to ensure browser layout is stable
+      const timer = setTimeout(() => {
+        const parent = containerRef.current.parentElement;
+        if (parent) {
+          parent.scrollTop = parent.scrollHeight;
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [loading, preview]);
 
   const openModal = (m) => {
     let formattedDate = "";
@@ -161,7 +172,7 @@ const SuiTimeline = ({
         { withCredentials: true },
       );
       closeModal();
-      fetchMilestones();
+      fetchMilestones(true); // Force re-fetch on save
       if (onMilestonesChange) onMilestonesChange();
     } catch (err) {
       alert("Failed to save. Please try again.");
@@ -182,7 +193,7 @@ const SuiTimeline = ({
       });
       setShowDeleteConfirm(false);
       closeModal();
-      fetchMilestones();
+      fetchMilestones(true); // Force re-fetch on delete
       if (onMilestonesChange) onMilestonesChange();
     } catch (err) {
       console.error(err);
@@ -372,6 +383,33 @@ const SuiTimeline = ({
     );
   }
 
+  if (!loading && milestones.length === 0) {
+    return (
+      <div
+        className="sui-timeline-empty"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "20px",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100%",
+          minHeight: "200px",
+          color: "rgba(255, 255, 255, 0.2)",
+          fontSize: "0.9rem",
+          fontWeight: "400",
+          width: "100%",
+          cursor: "default",
+        }}
+      >
+        <Icon name="add_box" modifiers="lg" />
+        <span>
+          Your timeline is empty. Create a timeline by adding milestones
+        </span>
+      </div>
+    );
+  }
+
   return (
     <div
       className={`sui-timeline-wrapper sui-fade-in ${preview ? "sui-preview-mode sui-preview-clickable" : ""}`}
@@ -503,7 +541,7 @@ const SuiTimeline = ({
                       }
                 }
               >
-                <div className="sui-date">[{formatDt(p.target_date)}]</div>
+                <div className="sui-date">{formatDt(p.target_date)}</div>
                 <div className="sui-title">
                   {p.title}
                   <span className="sui-vd-badge">
@@ -552,187 +590,181 @@ const SuiTimeline = ({
       </div>
 
       {!preview && isModalOpen && selectedMilestone && (
-        <ModalPortal>
-          <div className="sui-modal-overlay">
-            <div className="sui-modal-content sui-modal-small">
-              <h3>
-                {userRole === "admin" || userRole === "manager"
-                  ? "Edit Milestone"
-                  : "Milestone Details"}
-              </h3>
+        <ModalPortal onClose={closeModal}>
+          <div className="modal-header-section">
+            <h3>
+              {userRole === "admin" || userRole === "manager"
+                ? "Edit Milestone"
+                : "Milestone Details"}
+            </h3>
+          </div>
 
-              {userRole !== "client" ? (
-                <>
+          {userRole !== "client" ? (
+            <>
+              <div className="sui-form-group">
+                <label>Title</label>
+                <input
+                  type="text"
+                  className="sui-form-control"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  onFocus={(e) => e.target.select()}
+                  required
+                />
+              </div>
+              <div className="sui-form-group">
+                <label>Description (Optional)</label>
+                <textarea
+                  className="sui-form-control"
+                  rows="2"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Enter milestone details..."
+                ></textarea>
+              </div>
+
+              <div className="sui-form-row">
+                <div className="sui-form-col">
                   <div className="sui-form-group">
-                    <label>Title</label>
+                    <label>Target Date</label>
                     <input
-                      type="text"
+                      type="date"
                       className="sui-form-control"
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
+                      value={targetDate}
+                      onChange={(e) => setTargetDate(e.target.value)}
                       onFocus={(e) => e.target.select()}
                       required
                     />
                   </div>
+                </div>
+                <div className="sui-form-col">
                   <div className="sui-form-group">
-                    <label>Description (Optional)</label>
-                    <textarea
-                      className="sui-form-control"
-                      rows="2"
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      placeholder="Enter milestone details..."
-                    ></textarea>
-                  </div>
-
-                  <div className="sui-form-row">
-                    <div className="sui-form-col">
-                      <div className="sui-form-group">
-                        <label>Target Date</label>
-                        <input
-                          type="date"
-                          className="sui-form-control"
-                          value={targetDate}
-                          onChange={(e) => setTargetDate(e.target.value)}
-                          onFocus={(e) => e.target.select()}
-                          required
-                        />
-                      </div>
-                    </div>
-                    <div className="sui-form-col">
-                      <div className="sui-form-group">
-                        <label>Assignee</label>
-                        <GlassDropdown
-                          options={[
-                            { value: 1, label: "VisionDivision" },
-                            { value: 0, label: "Client" },
-                          ]}
-                          value={isVisionDivision}
-                          onChange={(val) => setIsVisionDivision(val)}
-                          placeholder="Select..."
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="sui-form-group">
-                    <label>Status</label>
+                    <label>Assignee</label>
                     <GlassDropdown
                       options={[
-                        { value: "pending", label: "Pending" },
-                        { value: "in_progress", label: "In Progress" },
-                        { value: "completed", label: "Completed" },
+                        { value: 1, label: "VisionDivision" },
+                        { value: 0, label: "Client" },
                       ]}
-                      value={status}
-                      onChange={(val) => setStatus(val)}
-                      placeholder="Select Status..."
+                      value={isVisionDivision}
+                      onChange={(val) => setIsVisionDivision(val)}
+                      placeholder="Select..."
                     />
                   </div>
-                </>
-              ) : userRole === "production_crew" ? (
-                <div className="sui-milestone-readonly">
-                  <strong className="sui-milestone-readonly-title">
-                    {title}
-                  </strong>
-                  <p className="sui-milestone-readonly-desc">{description}</p>
-                  <div className="sui-milestone-readonly-status">
-                    Status:{" "}
-                    <strong>{status.replace("_", " ").toUpperCase()}</strong>
-                  </div>
-                  <div className="sui-milestone-readonly-date">
-                    Target Date: <strong>{targetDate}</strong>
-                  </div>
-                  {clientNote && (
-                    <div className="sui-milestone-readonly-notes">
-                      <span className="sui-milestone-notes-label">Notes: </span>
-                      {clientNote}
-                    </div>
-                  )}
                 </div>
-              ) : (
-                <div className="sui-milestone-readonly">
-                  <strong className="sui-milestone-readonly-title">
-                    {title}
-                  </strong>
-                  <p className="sui-milestone-readonly-desc">{description}</p>
-                  <div className="sui-milestone-readonly-status">
-                    Status:{" "}
-                    <strong>{status.replace("_", " ").toUpperCase()}</strong>
-                  </div>
-                </div>
-              )}
-              {userRole !== "production_crew" && (
-                <div className="sui-form-group">
-                  <label className="sui-label-flex">
-                    Timeline Notes (Optional)
-                    {(() => {
-                      const noteContent = selectedMilestone?.client_note || "";
-                      const origMatch = noteContent.match(
-                        /^\[(Admin|Manager|Client|VisionDivision)\]/i,
-                      );
-                      if (origMatch) {
-                        const rawTag = origMatch[1];
-                        const roleTag =
-                          rawTag.toLowerCase() === "admin" ||
-                          rawTag.toLowerCase() === "manager" ||
-                          rawTag.toLowerCase() === "visiondivision"
-                            ? "VisionDivision"
-                            : "Client";
-                        return (
-                          <span
-                            className="sui-client-badge sui-client-badge--no-margin"
-                            style={{
-                              background:
-                                roleTag === "Client" ? "#2dd4bf" : "#6366f1",
-                              color: "#fff",
-                              padding: "2px 10px",
-                              borderRadius: "4px",
-                            }}
-                          >
-                            PROVENANCE: {roleTag}
-                          </span>
-                        );
-                      }
-                      return null;
-                    })()}
-                  </label>
-                  <textarea
-                    className="sui-form-control"
-                    rows="3"
-                    value={clientNote}
-                    onChange={(e) => setClientNote(e.target.value)}
-                    placeholder="Add latest update or feedback here..."
-                  ></textarea>
+              </div>
+
+              <div className="sui-form-group">
+                <label>Status</label>
+                <GlassDropdown
+                  options={[
+                    { value: "pending", label: "Pending" },
+                    { value: "in_progress", label: "In Progress" },
+                    { value: "completed", label: "Completed" },
+                  ]}
+                  value={status}
+                  onChange={(val) => setStatus(val)}
+                  placeholder="Select Status..."
+                />
+              </div>
+            </>
+          ) : userRole === "production_crew" ? (
+            <div className="sui-milestone-readonly">
+              <strong className="sui-milestone-readonly-title">{title}</strong>
+              <p className="sui-milestone-readonly-desc">{description}</p>
+              <div className="sui-milestone-readonly-status">
+                Status:{" "}
+                <strong>{status.replace("_", " ").toUpperCase()}</strong>
+              </div>
+              <div className="sui-milestone-readonly-date">
+                Target Date: <strong>{targetDate}</strong>
+              </div>
+              {clientNote && (
+                <div className="sui-milestone-readonly-notes">
+                  <span className="sui-milestone-notes-label">Notes: </span>
+                  {clientNote}
                 </div>
               )}
-              <div className="sui-modal-actions">
-                {userRole !== "client" && userRole !== "production_crew" && (
-                  <button
-                    className="sui-btn sui-btn-delete"
-                    onClick={handleDelete}
-                    disabled={saving}
-                  >
-                    Delete
-                  </button>
-                )}
-                <button
-                  className="sui-btn sui-btn-cancel"
-                  onClick={closeModal}
-                  disabled={saving}
-                >
-                  {userRole === "production_crew" ? "Close" : "Cancel"}
-                </button>
-                {userRole !== "production_crew" && (
-                  <button
-                    className="sui-btn sui-btn-save"
-                    onClick={handleSave}
-                    disabled={saving}
-                  >
-                    {saving ? "Saving Changes..." : "Save Changes"}
-                  </button>
-                )}
+            </div>
+          ) : (
+            <div className="sui-milestone-readonly">
+              <strong className="sui-milestone-readonly-title">{title}</strong>
+              <p className="sui-milestone-readonly-desc">{description}</p>
+              <div className="sui-milestone-readonly-status">
+                Status:{" "}
+                <strong>{status.replace("_", " ").toUpperCase()}</strong>
               </div>
             </div>
+          )}
+          {userRole !== "production_crew" && (
+            <div className="sui-form-group">
+              <label className="sui-label-flex">
+                Timeline Notes (Optional)
+                {(() => {
+                  const noteContent = selectedMilestone?.client_note || "";
+                  const origMatch = noteContent.match(
+                    /^\[(Admin|Manager|Client|VisionDivision)\]/i,
+                  );
+                  if (origMatch) {
+                    const rawTag = origMatch[1];
+                    const roleTag =
+                      rawTag.toLowerCase() === "admin" ||
+                      rawTag.toLowerCase() === "manager" ||
+                      rawTag.toLowerCase() === "visiondivision"
+                        ? "VisionDivision"
+                        : "Client";
+                    return (
+                      <span
+                        className="sui-client-badge sui-client-badge--no-margin"
+                        style={{
+                          background:
+                            roleTag === "Client" ? "#2dd4bf" : "#6366f1",
+                          color: "#fff",
+                          padding: "2px 10px",
+                          borderRadius: "4px",
+                        }}
+                      >
+                        PROVENANCE: {roleTag}
+                      </span>
+                    );
+                  }
+                  return null;
+                })()}
+              </label>
+              <textarea
+                className="sui-form-control"
+                rows="3"
+                value={clientNote}
+                onChange={(e) => setClientNote(e.target.value)}
+                placeholder="Add latest update or feedback here..."
+              ></textarea>
+            </div>
+          )}
+          <div className="sui-modal-actions">
+            {userRole !== "client" && userRole !== "production_crew" && (
+              <button
+                className="sui-btn sui-btn-delete"
+                onClick={handleDelete}
+                disabled={saving}
+              >
+                Delete
+              </button>
+            )}
+            <button
+              className="sui-btn sui-btn-cancel"
+              onClick={closeModal}
+              disabled={saving}
+            >
+              {userRole === "production_crew" ? "Close" : "Cancel"}
+            </button>
+            {userRole !== "production_crew" && (
+              <button
+                className="sui-btn sui-btn-save"
+                onClick={handleSave}
+                disabled={saving}
+              >
+                {saving ? "Saving Changes..." : "Save Changes"}
+              </button>
+            )}
           </div>
         </ModalPortal>
       )}

@@ -3,6 +3,7 @@ import PageHeader from "../common/PageHeader";
 import "./BudgetPredictor.css";
 
 import { API } from "../../config";
+import { formatCurrency, getCurrencySymbol } from "../../utils/currencyUtils";
 
 const BudgetPredictor = () => {
   const [formData, setFormData] = useState({
@@ -56,14 +57,6 @@ const BudgetPredictor = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const formatCurrency = (val) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "LKR",
-      minimumFractionDigits: 3,
-    }).format(val);
   };
 
   return (
@@ -137,7 +130,7 @@ const BudgetPredictor = () => {
 
           {/* Box 2: Financial Breakdown */}
           <div className="bento-box box-finance">
-            <h3>Dept. Estimates (Rs.)</h3>
+            <h3>Dept. Estimates ({getCurrencySymbol()})</h3>
             <div className="finance-grid">
               <div className="input-field">
                 <label>Crew Budget</label>

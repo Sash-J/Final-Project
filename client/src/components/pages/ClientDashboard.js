@@ -9,8 +9,10 @@ import GlassDropdown from "../common/GlassDropdown";
 import Icon from "../common/Icon";
 import html2pdf from "html2pdf.js";
 import Skeleton from "../ui/Skeleton";
+import PageHeader from "../common/PageHeader";
 
 import { API } from "../../config";
+import { formatCurrency } from "../../utils/currencyUtils";
 
 const TimelinePreview = ({ startDate, endDate, projectStatus }) => {
   if (!startDate || !endDate) return null;
@@ -253,13 +255,6 @@ const ClientDashboard = () => {
     setBudgetData(null);
   };
 
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(value);
-  };
-
   const handleDownloadPDF = () => {
     const element = document.getElementById("client-budget-pdf-content");
     if (!element) return;
@@ -326,10 +321,10 @@ const ClientDashboard = () => {
 
   return (
     <div className="cd-root">
-      <div className="cd-header">
-        <h2>Welcome, {user.username}</h2>
-        <p>Your Production Dashboard</p>
-      </div>
+      <PageHeader
+        title={`Welcome, ${user.username}`}
+        description="Your Production Dashboard"
+      />
 
       {projects.length === 0 ? (
         <div className="cd-empty">No projects assigned to you yet.</div>

@@ -4,6 +4,7 @@ import PageHeader from "../common/PageHeader";
 import "./FinancialDashboard.css";
 
 import { API } from "../../config";
+import { formatCurrency, getCurrencySymbol } from "../../utils/currencyUtils";
 
 const FinancialDashboard = () => {
   const [summary, setSummary] = useState(null);
@@ -30,13 +31,6 @@ const FinancialDashboard = () => {
     };
     fetchData();
   }, []);
-
-  const formatCurrency = (val) => {
-    return new Intl.NumberFormat("en-GB", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(val || 0);
-  };
 
   if (loading) {
     return (
@@ -65,29 +59,29 @@ const FinancialDashboard = () => {
           <div className="fd-stat-card" style={{"--accent-rgb": "0, 198, 230"}}>
             <h3>Gross Revenue</h3>
             <div className="fd-stat-value">
-              <span className="fd-stat-currency">Rs.</span>
-              {formatCurrency(summary?.gross_revenue)}
+              <span className="fd-stat-currency">{getCurrencySymbol()}</span>
+              {formatCurrency(summary?.gross_revenue, false)}
             </div>
           </div>
           <div className="fd-stat-card" style={{"--accent-rgb": "139, 92, 246"}}>
             <h3>Gross Profit</h3>
             <div className="fd-stat-value">
-              <span className="fd-stat-currency">Rs.</span>
-              {formatCurrency(summary?.gross_profit)}
+              <span className="fd-stat-currency">{getCurrencySymbol()}</span>
+              {formatCurrency(summary?.gross_profit, false)}
             </div>
           </div>
           <div className="fd-stat-card" style={{"--accent-rgb": "52, 211, 153"}}>
             <h3>Total Received</h3>
             <div className="fd-stat-value">
-              <span className="fd-stat-currency">Rs.</span>
-              {formatCurrency(summary?.total_received)}
+              <span className="fd-stat-currency">{getCurrencySymbol()}</span>
+              {formatCurrency(summary?.total_received, false)}
             </div>
           </div>
           <div className="fd-stat-card" style={{"--accent-rgb": "251, 113, 133"}}>
             <h3>Outstanding Balance</h3>
             <div className="fd-stat-value">
-              <span className="fd-stat-currency">Rs.</span>
-              {formatCurrency(summary?.pending_balance)}
+              <span className="fd-stat-currency">{getCurrencySymbol()}</span>
+              {formatCurrency(summary?.pending_balance, false)}
             </div>
           </div>
         </div>
@@ -120,9 +114,9 @@ const FinancialDashboard = () => {
                         <span className="fd-project-code">{p.code_name}</span>
                       </div>
                     </td>
-                    <td className="fd-amount-pos">Rs.{formatCurrency(p.latest_gross_total)}</td>
-                    <td className="fd-amount-pos">Rs.{formatCurrency(p.latest_budget_total)}</td>
-                    <td className="fd-amount-paid">Rs.{formatCurrency(p.total_paid)}</td>
+                    <td className="fd-amount-pos">{formatCurrency(p.latest_gross_total)}</td>
+                    <td className="fd-amount-pos">{formatCurrency(p.latest_budget_total)}</td>
+                    <td className="fd-amount-paid">{formatCurrency(p.total_paid)}</td>
                     <td>
                       <div className="fd-progress-cell">
                         <div className="fd-progress-bar">
@@ -132,7 +126,7 @@ const FinancialDashboard = () => {
                       </div>
                     </td>
                     <td className={p.balance > 0 ? "fd-amount-neg" : "fd-amount-paid"}>
-                      Rs.{formatCurrency(p.balance)}
+                      {formatCurrency(p.balance)}
                     </td>
                   </tr>
                 );

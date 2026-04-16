@@ -633,9 +633,9 @@
 .unsaved-changes-bar {
   position: sticky;
   top: 100px;
-  background: rgba(239, 68, 68, 0.1);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(239, 68, 68, 0.15);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(239, 68, 68, 0.3);
   padding: 12px 25px;
   border-radius: 12px;
@@ -717,9 +717,9 @@
   max-width: 450px !important;
   position: relative;
   z-index: 2001;
-  background: rgba(20, 20, 30, 0.9) !important;
-  backdrop-filter: blur(25px) !important;
-  -webkit-backdrop-filter: blur(25px) !important;
+  background: rgba(20, 20, 30, 0.95) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
   border: 1px solid rgba(167, 139, 250, 0.2) !important;
 }
 

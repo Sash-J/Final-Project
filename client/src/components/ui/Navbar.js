@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import NotificationBell from "./NotificationBell";
 import UserProfile from "./UserProfile";
+import Icon from "../common/Icon";
 import "./Navbar.css";
 
 const Navbar = () => {
@@ -35,53 +36,83 @@ const Navbar = () => {
         </div>
       </Link>
 
-
       <ul className={`nav-links ${isMobileMenuOpen ? "mobile-open" : ""}`}>
-
         {user && user.role === "client" && (
           <li>
-            <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>Dashboard</Link>
+            <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
+              <Icon name="dashboard" modifiers="sm" />
+              <span>Dashboard</span>
+            </Link>
           </li>
         )}
 
         {user && user.role === "production_crew" && (
           <li>
-            <Link to="/crew-dashboard" onClick={() => setIsMobileMenuOpen(false)}>Dashboard</Link>
+            <Link
+              to="/crew-dashboard"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <Icon name="dashboard" modifiers="sm" />
+              <span>Dashboard</span>
+            </Link>
           </li>
         )}
 
         {user && (user.role === "admin" || user.role === "manager") && (
           <>
             <li>
-              <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)}>Dashboard</Link>
+              <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)}>
+                <Icon name="dashboard" modifiers="md" />
+                <span>Dashboard</span>
+              </Link>
             </li>
             <li>
-              <Link to="/admin-budget" onClick={() => setIsMobileMenuOpen(false)}>Budget</Link>
+              <Link
+                to="/admin-budget"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <Icon name="payments" modifiers="md" />
+                <span>Budget</span>
+              </Link>
             </li>
             <li>
-              <Link to="/budget-predictor" onClick={() => setIsMobileMenuOpen(false)}>Predictor</Link>
+              <Link
+                to="/budget-predictor"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <Icon name="auto_graph" modifiers="md" />
+                <span>Predictor</span>
+              </Link>
             </li>
           </>
         )}
 
         {user && user.role === "admin" && (
           <li>
-            <Link to="/users" onClick={() => setIsMobileMenuOpen(false)}>Users</Link>
+            <Link to="/users" onClick={() => setIsMobileMenuOpen(false)}>
+              <Icon name="groups" modifiers="md" />
+              <span>Users</span>
+            </Link>
           </li>
         )}
 
         {user && (user.role === "admin" || user.role === "manager") && (
           <li>
-            <Link to="/finance" onClick={() => setIsMobileMenuOpen(false)}>Finance</Link>
+            <Link to="/finance" onClick={() => setIsMobileMenuOpen(false)}>
+              <Icon name="assessment" modifiers="md" />
+              <span>Finance</span>
+            </Link>
           </li>
         )}
 
         {user && (
           <li>
-            <Link to="/schedule" onClick={() => setIsMobileMenuOpen(false)}>Schedule</Link>
+            <Link to="/schedule" onClick={() => setIsMobileMenuOpen(false)}>
+              <Icon name="calendar_month" modifiers="md" />
+              <span>Schedule</span>
+            </Link>
           </li>
         )}
-
       </ul>
 
       <div className="navbar-controls">
@@ -93,14 +124,18 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <Link to="/" className="nav-link-right desktop-only">Home</Link>
-              <Link to="/login" className="login-link">Login</Link>
+              <Link to="/" className="nav-link-right desktop-only">
+                Home
+              </Link>
+              <Link to="/login" className="login-link">
+                Login
+              </Link>
             </>
           )}
         </div>
 
-        <button 
-          className={`hamburger ${isMobileMenuOpen ? "active" : ""}`} 
+        <button
+          className={`hamburger ${isMobileMenuOpen ? "active" : ""}`}
           onClick={toggleMobileMenu}
           aria-label="Toggle Menu"
         >

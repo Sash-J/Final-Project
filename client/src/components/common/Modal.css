@@ -1,0 +1,106 @@
+/* ── Global Modal System ─────────────────────────────────────────────────── */
+
+.modal-portal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(4, 9, 17, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  z-index: 10000;
+  padding: 60px 20px;
+  overflow-y: auto;
+  animation: modalOverlayFade 0.4s ease;
+}
+
+@keyframes modalOverlayFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-glass-container {
+  width: 100%;
+  max-width: 900px;
+  background: rgba(13, 15, 23, 0.4);
+  backdrop-filter: blur(8px) saturate(180%);
+  -webkit-backdrop-filter: blur(8px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 32px;
+  padding: 50px;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
+  position: relative;
+  transform: translateZ(0);
+  animation: modalSlideUp 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.modal-glass-container.modal-small {
+  max-width: 500px;
+  padding: 40px;
+  align-self: center;
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ── Global Standardized Close Button ────────────────────────────────────── */
+.modal-close-btn {
+  position: absolute;
+  top: 25px;
+  right: 25px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-close-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ff9898;
+  border-color: rgba(239, 68, 68, 0.3);
+  transform: rotate(90deg);
+}
+
+.modal-close-btn .icon-root {
+  font-size: 20px;
+}
+
+/* ── Standard Modal Layout Helpers ───────────────────────────────────────── */
+.modal-header-section {
+  margin-bottom: 30px;
+}
+
+.modal-header-section h2, 
+.modal-header-section h3 {
+  font-size: 1.6rem;
+  margin: 0;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: -0.3px;
+}
+
+.modal-header-section p {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.9rem;
+  margin-top: 5px;
+}

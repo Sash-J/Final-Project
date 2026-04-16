@@ -7,43 +7,64 @@ export default function Starfield() {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
 
+    let dpr = window.devicePixelRatio || 1;
     let width = window.innerWidth;
     let height = window.innerHeight;
     let isVisible = true;
     let lastSpawn = Date.now();
+    let animationFrameId;
 
-    if (!isVisible) {
-      lastSpawn = Date.now(); // reset timer when hidden
-    }
-
-    document.addEventListener("visibilitychange", () => {
+    const handleVisibilityChange = () => {
       isVisible = !document.hidden;
-    });
+      if (isVisible) {
+        lastSpawn = Date.now();
+        animate(); // Restart animation when visible
+      } else {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
 
-    canvas.width = width;
-    canvas.height = height;
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
-    // ⭐ Star layers for parallax
+    const resize = () => {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      dpr = window.devicePixelRatio || 1;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.scale(dpr, dpr);
+      initStars();
+    };
+
+    // ⭐ Adaptive Star Density for Mobile
+    const isMobile = width < 768;
+    const densityMultiplier = isMobile ? 0.4 : 1;
+
     const layers = [
-      { count: 80, speed: 0.05, size: 1 },
-      { count: 50, speed: 0.1, size: 1.5 },
-      { count: 30, speed: 0.2, size: 2 },
+      { count: Math.floor(80 * densityMultiplier), speed: 0.05, size: 0.8 },
+      { count: Math.floor(50 * densityMultiplier), speed: 0.1, size: 1.2 },
+      { count: Math.floor(30 * densityMultiplier), speed: 0.2, size: 1.6 },
     ];
 
     let stars = [];
 
-    layers.forEach((layer) => {
-      for (let i = 0; i < layer.count; i++) {
-        stars.push({
-          cx: width / 2,
-          cy: height / 2,
-          radius: (Math.random() * Math.max(width, height)) / 2,
-          angle: Math.random() * Math.PI * 2,
-          speed: layer.speed * 0.0015, // slower rotation
-          size: layer.size,
-        });
-      }
-    });
+    function initStars() {
+      stars = [];
+      layers.forEach((layer) => {
+        for (let i = 0; i < layer.count; i++) {
+          stars.push({
+            cx: width / 2,
+            cy: height / 2,
+            radius: (Math.random() * Math.max(width, height)) / 2,
+            angle: Math.random() * Math.PI * 2,
+            speed: layer.speed * 0.0015,
+            size: layer.size,
+          });
+        }
+      });
+    }
+
+    resize();
 
     // 🌠 Shooting stars
     let shootingStars = [];
@@ -94,37 +115,36 @@ export default function Starfield() {
         s.y += s.speed;
         s.life++;
 
-        // 👇 Fade calculation
         const opacity = Math.pow(1 - s.life / s.maxLife, 3);
-
         ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
-        ctx.lineWidth = 1;
+        ctx.lineWidth = isMobile ? 0.8 : 1;
 
         ctx.beginPath();
         ctx.moveTo(s.x, s.y);
         ctx.lineTo(s.x - s.length, s.y - s.length);
-        ctx.shadowBlur = 10;
+        ctx.shadowBlur = isMobile ? 4 : 10;
         ctx.shadowColor = "white";
         ctx.stroke();
 
-        // Remove when faded out
         if (s.life >= s.maxLife) {
           shootingStars.splice(index, 1);
         }
       });
 
-      requestAnimationFrame(animate);
+      if (isVisible) {
+        animationFrameId = requestAnimationFrame(animate);
+      }
     }
 
     animate();
 
-    // Resize handling
-    window.addEventListener("resize", () => {
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas.width = width;
-      canvas.height = height;
-    });
+    window.addEventListener("resize", resize);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("resize", resize);
+      cancelAnimationFrame(animationFrameId);
+    };
   }, []);
 
   return (

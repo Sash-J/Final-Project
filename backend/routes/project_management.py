@@ -21,6 +21,16 @@ def projects_get():
     return jsonify(db.get_projects()), 200
 
 
+@project_bp.route("/api/projects/<int:project_id>", methods=["GET"])
+@login_required
+def project_detail_get(project_id):
+    project = db.get_project_by_id(project_id)
+    if not project:
+        return jsonify({"error": "Project not found"}), 404
+    return jsonify(project), 200
+
+
+
 @project_bp.route("/api/projects", methods=["POST"])
 @roles_required("admin", "manager")
 def projects_post():
@@ -151,5 +161,35 @@ def projects_delete(project_id):
     try:
         db.delete_project(project_id)
         return jsonify({"message": "Project deleted successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# ── Payment Routes ────────────────────────────────────────────────────────────
+
+@project_bp.route("/api/projects/<int:project_id>/payments", methods=["GET"])
+@login_required
+def get_project_payments(project_id):
+    try:
+        payments = db.get_payments_for_project(project_id)
+        return jsonify(payments), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@project_bp.route("/api/projects/<int:project_id>/payments", methods=["POST"])
+@roles_required("admin", "manager")
+def post_project_payment(project_id):
+    try:
+        data = request.get_json()
+        amount = data.get("amount")
+        payment_date = data.get("payment_date")
+        notes = data.get("notes", "")
+
+        if not amount or not payment_date:
+            return jsonify({"error": "Amount and Payment Date are required"}), 400
+
+        new_id = db.insert_payment(project_id, amount, payment_date, notes)
+        return jsonify({"message": "Payment recorded successfully", "id": new_id}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500

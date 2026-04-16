@@ -1,0 +1,295 @@
+/* ── Project Card Grid ─────────────────────────────────────────────────────── */
+.project-tiles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 30px;
+  padding: 20px 0;
+}
+
+/* ── Project Card Component ────────────────────────────────────────────────── */
+.project-card-container {
+  position: relative;
+  height: 100%;
+  aspect-ratio: 3 / 4.2; /* Taller portrait aspect ratio */
+  box-sizing: border-box;
+}
+
+.project-card-container *,
+.project-card-container *::before,
+.project-card-container *::after {
+  box-sizing: border-box;
+}
+
+.project-card-glass {
+  background: #12141c;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px; /* Smooth, heavy rounding */
+  overflow: hidden;
+  height: 100%;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+.project-card-glass:hover {
+  transform: translateY(-10px) scale(1.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+}
+
+/* ── Archival States ── */
+.project-card-container.archived .project-card-glass {
+  opacity: 0.6;
+  filter: grayscale(0.9);
+}
+
+.project-card-container.archived:hover .project-card-glass {
+  opacity: 0.95;
+  filter: grayscale(0.2);
+}
+
+/* ── Background Layer ── */
+.project-card-image-wrap {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.project-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1.2s ease;
+}
+
+.project-card-glass:hover .project-card-img {
+  transform: scale(1.1);
+}
+
+.project-card-img-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.project-card-overlay-gradient {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* ── Identity Badge (Floating) ── */
+.project-identity-badge {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 4px 14px;
+  border-radius: 50px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #000;
+  z-index: 10;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Foreground Content ── */
+.project-card-content {
+  position: relative;
+  z-index: 5;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; /* Align content to bottom */
+  padding: 30px;
+  text-align: center; /* Center text as per reference */
+}
+
+/* Ensure absolute overlay for standard portrait view */
+.project-card-container:not(.compact) .project-card-content {
+  position: absolute;
+  inset: 0;
+}
+
+.project-card-header {
+  margin-bottom: 8px;
+}
+
+.project-card-title {
+  margin: 0;
+  font-size: 1.6rem;
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.verified-badge {
+  color: #fff;
+  background: #3b82f6;
+  border-radius: 50%;
+  padding: 2px;
+  font-size: 0.65rem !important;
+}
+
+.project-card-client {
+  margin: 0;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.project-card-location {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.8rem;
+  font-weight: 200;
+  margin-top: 4px;
+  margin-bottom: 30px;
+  line-height: 1.4;
+}
+
+/* ── Footer Elements ── */
+.project-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.project-card-stats {
+  display: flex;
+  gap: 15px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.stat-item .icon-root {
+  padding-top: 5px;
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* ── Pill Button ── */
+.pill-toggle-btn {
+  background: rgba(255, 255, 255, 0.95);
+  color: #12141c;
+  border: 1px solid transparent; /* Match hover border width to prevent jumping */
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.pill-toggle-btn:hover {
+  background: transparent;
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.pill-toggle-btn.archived {
+  background: rgba(239, 68, 68, 0.9) !important;
+  color: #fff;
+}
+
+.pill-toggle-btn.archived:hover {
+  background: rgba(239, 68, 68, 0.9) !important;
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #fff !important;
+}
+
+/* ── Compact Variant Overrides ── */
+.project-card-container.compact {
+  aspect-ratio: auto; /* Reset aspect ratio for compact list */
+}
+
+.project-card-container.compact .project-card-glass {
+  background: rgba(20, 22, 33, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 12px 20px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.project-card-container.compact .project-card-image-wrap {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.project-card-container.compact .project-card-content {
+  padding: 5px 0 0 15px;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+  font-size: 0.8rem;
+  font-weight: 200;
+}
+
+.project-card-container.compact .project-card-title {
+  font-size: 1.1rem;
+  justify-content: flex-start;
+  margin-bottom: 4px;
+}
+
+.project-card-container.compact .project-card-title .icon {
+  font-weight: 200;
+}
+
+.project-card-container.compact .project-card-desc {
+  display: none; /* Hide description in compact mode */
+}
+
+.project-card-container.compact .pill-toggle-btn {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* 📱 Mobile Adjustments */
+@media (max-width: 768px) {
+  .project-tiles-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .project-card-container {
+    aspect-ratio: 3 / 3.8;
+  }
+
+  .project-card-title {
+    font-size: 1.4rem;
+  }
+}

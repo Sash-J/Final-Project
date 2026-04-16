@@ -1,18 +1,14 @@
 @keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 .skeleton-base {
   background: linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0.05) 25%,
+    rgba(255, 255, 255, 0.04) 25%,
     rgba(255, 255, 255, 0.1) 37%,
-    rgba(255, 255, 255, 0.05) 63%
+    rgba(255, 255, 255, 0.04) 63%
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite linear;
@@ -22,17 +18,105 @@
   display: inline-block;
 }
 
-.skeleton-text {
-  height: 1rem;
-  width: 100%;
-  margin-bottom: 0.5rem;
+.skeleton-text  { height: 1rem; width: 100%; margin-bottom: 0.5rem; }
+.skeleton-circle { border-radius: 50%; }
+.skeleton-rect  { width: 100%; height: 100%; }
+
+/* ── Project Card Skeleton ─────────────────────────────────────────────────── */
+.project-card-skeleton {
+  background: rgba(18, 20, 28, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 24px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
-.skeleton-circle {
-  border-radius: 50%;
+/* Image placeholder */
+.pcs-image-wrap {
+  position: relative;
+  width: 100%;
+  height: 180px;
 }
 
-.skeleton-rect {
-  width: 100%;
-  height: 100%;
+.pcs-image {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 0 !important;
+  display: block !important;
 }
+
+/* Code badge top-right */
+.pcs-badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 56px;
+  height: 24px;
+  border-radius: 50px !important;
+}
+
+/* Content section */
+.pcs-content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Title bar */
+.pcs-title {
+  width: 70%;
+  height: 22px;
+  border-radius: 6px !important;
+  display: block !important;
+}
+
+/* Meta rows */
+.pcs-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pcs-meta-item {
+  width: 55%;
+  height: 13px;
+  border-radius: 4px !important;
+  display: block !important;
+}
+
+.pcs-meta-item.short {
+  width: 40%;
+}
+
+/* Team + version strip */
+.pcs-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  margin-top: 4px;
+}
+
+.pcs-team-chip {
+  width: 90px;
+  height: 20px;
+  border-radius: 6px !important;
+  display: block !important;
+}
+
+.pcs-version-chip {
+  width: 44px;
+  height: 20px;
+  border-radius: 6px !important;
+  display: block !important;
+}
+
+/* Staggered shimmer delay for each card */
+.project-card-skeleton:nth-child(2) .skeleton-base { animation-delay: 0.15s; }
+.project-card-skeleton:nth-child(3) .skeleton-base { animation-delay: 0.3s; }
+.project-card-skeleton:nth-child(4) .skeleton-base { animation-delay: 0.45s; }
+.project-card-skeleton:nth-child(5) .skeleton-base { animation-delay: 0.6s; }
+.project-card-skeleton:nth-child(6) .skeleton-base { animation-delay: 0.75s; }

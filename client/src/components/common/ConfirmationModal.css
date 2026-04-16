@@ -1,30 +1,21 @@
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.05); /* Frosted tint */
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  animation: modalFadeIn 0.3s ease-out;
+/* ConfirmationModal.css - Component Specific Styles */
+
+.confirmation-modal-glass {
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 40px 40px !important;
+  width: 400px !important;
+  max-width: 90% !important;
+  height: auto !important;
 }
 
-.modal-content {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  width: 90%;
-  max-width: 400px;
-  padding: 30px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  animation: modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+@media (max-width: 768px) {
+  .confirmation-modal-glass {
+    aspect-ratio: auto;
+    width: 95% !important;
+    padding: 25px !important;
+    max-width: none !important;
+  }
 }
 
 .modal-header {
@@ -36,57 +27,81 @@
 
 .modal-header h3 {
   margin: 0;
-  align-items: center;
-  font-size: 1.3rem;
+  font-size: 1.4rem;
+  font-weight: 700;
   color: #fff;
+  text-transform: capitalize;
+  letter-spacing: -0.3px;
+  padding-bottom: 15px;
   border: none;
-  padding: 0;
 }
 
 .modal-body p {
-  color: #bbb;
-  line-height: 1.6;
-  margin-bottom: 32px;
-  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.5;
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 400;
 }
 
 .modal-footer {
   display: flex;
-  justify-content: flex-end;
   gap: 12px;
+  margin-top: 30px;
 }
 
-/* ── Common Button Base ── */
 .btn-modal-cancel,
 .btn-modal-confirm {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  color: #eee !important;
-  padding: 10px 24px !important;
-  border-radius: 10px !important;
-  font-weight: 500 !important;
-  cursor: pointer !important;
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.95rem;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  font-size: 0.9rem !important;
-  box-shadow: none !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* ── Cancel Hover (Subtle Red) ── */
-.btn-modal-cancel:hover {
-  background: rgba(248, 113, 113, 0.1) !important;
-  border-color: rgba(248, 113, 113, 0.4) !important;
-  color: #f87171 !important;
+/* ── Variants ── */
+.variant-danger {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.variant-danger:hover {
+  background: rgb(255, 98, 98);
+  color: #ffffff;
   transform: translateY(-1px);
 }
 
-/* ── Confirm Hover (Cyan Accent) ── */
-.btn-modal-confirm:hover {
-  background: linear-gradient(135deg, var(--accent-color), #00c6e6) !important;
-  border-color: rgba(255, 255, 255, 0.3) !important;
-  color: #00c6e6 !important;
-  box-shadow: 0 4px 20px rgba(0, 198, 230, 0.4) !important;
+.variant-accent {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.variant-accent:hover {
+  background: #00c6e6;
   transform: translateY(-1px);
-  font-weight: 700 !important;
+}
+
+.variant-glass {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.variant-glass:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
 }
 
 @keyframes modalSlideUp {

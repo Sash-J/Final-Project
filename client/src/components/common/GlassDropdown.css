@@ -1,7 +1,7 @@
 :root {
   --dd-padding: 10px 14px;
   --dd-radius: 8px;
-  --dd-font-size: 0.95rem;
+  --dd-font-size: 0.9rem;
   --dd-bg: rgba(255, 255, 255, 0.05);
   --dd-border: 1px solid rgba(255, 255, 255, 0.1);
   --dd-width: 100%;
@@ -42,15 +42,6 @@
   border-color: rgba(255, 255, 255, 0.05);
 }
 
-.glass-dropdown-label {
-  display: block;
-  font-size: 0.65rem;
-  color: #60a5fa;
-  font-weight: 500;
-  letter-spacing: 0.5px;
-  margin-bottom: 4px;
-}
-
 .glass-dropdown-trigger {
   box-sizing: border-box;
   background: var(--dd-bg);
@@ -81,7 +72,7 @@
 
 .trigger-text {
   font-size: var(--dd-font-size);
-  font-weight: 500;
+  font-weight: 400;
   overflow: hidden;
   text-overflow: ellipsis;
   margin-right: 4px;
@@ -148,6 +139,10 @@
   transition: all 0.2s ease;
   color: rgba(255, 255, 255, 0.8);
   margin-bottom: 2px;
+  font-size: 0.7rem !important;
+  font-weight: 200;
+  letter-spacing: 0.2px;
+  line-height: 1.2;
 }
 
 .glass-dropdown-item:last-child {
@@ -171,8 +166,7 @@
   padding: 16px;
   text-align: center;
   color: rgba(255, 255, 255, 0.4);
-  font-size: 0.9rem;
-  font-style: italic;
+  font-size: 0.8rem;
 }
 
 .glass-checkbox {

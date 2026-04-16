@@ -8,12 +8,14 @@ import {
 import "./App.css";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ModalProvider } from "./contexts/ModalContext";
+import { ProjectProvider } from "./contexts/ProjectContext";
 import ProtectedRoute from "./components/ui/ProtectedRoute";
 
 import Navbar from "./components/ui/Navbar";
 import Home from "./components/pages/Home";
 import AdminBudget from "./components/pages/AdminBudget";
 import AdminDashboard from "./components/pages/AdminDashboard";
+import ProjectDetailDashboard from "./components/pages/ProjectDetailDashboard";
 import LoginPage from "./components/pages/LoginPage";
 import RegisterPage from "./components/pages/RegisterPage";
 import UserManagement from "./components/pages/UserManagement";
@@ -57,8 +59,11 @@ function AppProviders() {
   return (
     <AuthProvider>
       <ModalProvider>
-        <Starfield />
-        <RootLayout />
+        {/* ProjectProvider is placed here to store the persistent project list for caching */}
+        <ProjectProvider>
+          <Starfield />
+          <RootLayout />
+        </ProjectProvider>
       </ModalProvider>
     </AuthProvider>
   );
@@ -102,6 +107,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute roles={["admin", "manager"]}>
             <AdminDashboard />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "admin/projects/:projectId",
+        element: (
+          <ProtectedRoute roles={["admin", "manager"]}>
+            <ProjectDetailDashboard />
           </ProtectedRoute>
         ),
       },

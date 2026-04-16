@@ -4,29 +4,6 @@
   color: #eee;
 }
 
-.crew-header {
-  margin-bottom: 50px;
-  text-align: center;
-}
-
-.crew-header h2 {
-  font-size: 2.8rem;
-  font-weight: 800;
-  margin-bottom: 12px;
-  letter-spacing: -1px;
-  background: linear-gradient(to right, #fff, #fb923c, #ea580c);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 10px rgba(251, 146, 60, 0.3));
-}
-
-.crew-header p {
-  color: #a0aec0;
-  font-size: 1.1rem;
-  max-width: 600px;
-  margin: 0 auto;
-}
 
 .crew-loading,
 .crew-error,
