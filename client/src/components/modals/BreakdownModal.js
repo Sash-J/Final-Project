@@ -84,7 +84,6 @@ const BreakdownModal = ({
     if (items.length > 1) {
       setItems((prev) => prev.filter((item) => item.id !== id));
     } else {
-      // Clear the only row instead of removing it
       setItems([
         {
           id: Math.random().toString(36).substr(2, 9),
@@ -107,7 +106,6 @@ const BreakdownModal = ({
   );
 
   const handleSave = () => {
-    // Filter out empty rows
     const validItems = items.filter(
       (i) => i.description.trim() !== "" || parseFloat(i.total) > 0,
     );
@@ -255,9 +253,7 @@ const BreakdownModal = ({
         <div className="bdm-footer">
           <div className="bdm-grand-total">
             <span>Aggregated Total:</span>
-            <strong>
-              {formatCurrency(grandTotal)}
-            </strong>
+            <strong>{formatCurrency(grandTotal)}</strong>
           </div>
           <div className="bdm-actions">
             <button className="bdm-cancel-btn" onClick={onClose}>

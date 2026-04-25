@@ -5,6 +5,7 @@ import Icon from "../common/Icon";
 import "./ClientPayments.css";
 import { formatCurrency, getCurrencySymbol } from "../../utils/currencyUtils";
 
+/*Help from OpenAI*/
 const ClientPayments = ({ projectId }) => {
   const { user } = useAuth();
   const {
@@ -48,7 +49,6 @@ const ClientPayments = ({ projectId }) => {
       setMsg({ type: "success", text: "Payment recorded successfully!" });
       setAmount("");
       setNotes("");
-      // Reset date to today
       setDate(new Date().toISOString().split("T")[0]);
     } else {
       setMsg({
@@ -66,7 +66,6 @@ const ClientPayments = ({ projectId }) => {
 
   return (
     <div className="client-payments-root">
-      {/* Financial Overview Cards */}
       <div className="payments-overview-grid">
         <div className="payment-stat-card glass-card">
           <div className="stat-icon-wrap received">
@@ -93,7 +92,6 @@ const ClientPayments = ({ projectId }) => {
       </div>
 
       <div className="payments-main-layout">
-        {/* Payment History List */}
         <div className="payment-history-panel glass-card">
           <div className="panel-header">
             <h3>Payment History</h3>
@@ -147,7 +145,6 @@ const ClientPayments = ({ projectId }) => {
           )}
         </div>
 
-        {/* Record Payment Form (Admin Only) */}
         {isAdmin && (
           <div className="record-payment-panel glass-card">
             <h3>Record New Payment</h3>

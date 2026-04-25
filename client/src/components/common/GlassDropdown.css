@@ -14,21 +14,16 @@
   font-family: inherit;
 }
 
-/* ── Modifiers ───────────────────────────────────────────────────────────── */
-
-/* Small variation for tight tables/sidebars */
 .glass-dropdown-container.sm {
   --dd-padding: 4px 10px;
   --dd-radius: 8px;
   --dd-font-size: 0.65rem;
 }
 
-/* Fluid width to fill parent */
 .glass-dropdown-container.fluid {
   --dd-width: 100%;
 }
 
-/* Fixed width variations */
 .glass-dropdown-container.w-200 {
   --dd-width: 200px;
 }
@@ -36,7 +31,6 @@
   --dd-width: 160px;
 }
 
-/* Ghost variation - minimal background */
 .glass-dropdown-container.ghost .glass-dropdown-trigger {
   background: transparent;
   border-color: rgba(255, 255, 255, 0.05);
@@ -94,12 +88,7 @@
   left: 0;
   width: 100%;
   box-sizing: border-box;
-  background: rgba(
-    20,
-    25,
-    35,
-    0.25
-  ) !important; /* Lighter tint to reveal blur */
+  background: rgba(20, 25, 35, 0.25) !important;
   backdrop-filter: blur(30px) saturate(200%) !important;
   -webkit-backdrop-filter: blur(30px) saturate(200%) !important;
   border: 1px solid rgba(255, 255, 255, 0.15) !important;
@@ -197,7 +186,6 @@
   font-size: var(--dd-font-size);
 }
 
-/* Custom Scrollbar for the menu */
 .glass-dropdown-menu::-webkit-scrollbar {
   width: 6px;
 }

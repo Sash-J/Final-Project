@@ -13,7 +13,6 @@ import ProjectForm from "./ProjectForm";
 import ModalPortal from "../common/ModalPortal";
 
 const AdminDashboard = () => {
-  // Use the global projects context instead of local state for caching
   const {
     projects,
     loading: projectsLoading,
@@ -27,7 +26,6 @@ const AdminDashboard = () => {
   const { showConfirm } = useModal();
 
   // Load projects from context on mount.
-  // refreshProjects() will check if data is already cached before fetching.
   useEffect(() => {
     refreshProjects();
   }, [refreshProjects]);
@@ -35,7 +33,7 @@ const AdminDashboard = () => {
   const handleAdded = () => {
     // Invalidate the cache if a new project is created, forcing a fresh fetch
     invalidateCache();
-    refreshProjects(true); // Force a refresh to show the new project immediately
+    refreshProjects(true);
     setEditingProject(null);
     setShowProjectModal(false);
   };
@@ -55,10 +53,10 @@ const AdminDashboard = () => {
         refreshProjects(true);
       } else {
         const data = await res.json();
-        alert(`❌ ${data.error || "Failed to delete"}`);
+        alert(`${data.error || "Failed to delete"}`);
       }
     } catch (err) {
-      alert(`❌ ${err.message}`);
+      alert(`${err.message}`);
     }
   };
 
@@ -77,14 +75,14 @@ const AdminDashboard = () => {
         refreshProjects(true);
       } else {
         const data = await res.json();
-        alert(`❌ ${data.error || "Failed to update status"}`);
+        alert(`${data.error || "Failed to update status"}`);
       }
     } catch (err) {
-      alert(`❌ ${err.message}`);
+      alert(`${err.message}`);
     }
   };
 
-  // Split projects into ongoing and archived
+  //archived project filtering
   const ongoingProjects = projects.filter((p) => p.status !== "completed");
   const archivedProjects = projects.filter((p) => p.status === "completed");
 

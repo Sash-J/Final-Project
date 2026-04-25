@@ -1,14 +1,11 @@
-/* ── Budget Entry Skeleton Styles ─────────────────────────────────────────── */
-
 :root {
   --bef-skeleton-row-height: 25px;
-  --skel-radius: 8px; /* Smoother corner like the reference */
-  --skel-shimmer-color: rgba(255, 255, 255, 0.03); /* Extremely subtle */
-  --skel-shimmer-highlight: rgba(255, 255, 255, 0.08); /* Soft highlight */
-  --skel-bg-color: rgba(255, 255, 255, 0.04); /* Base bar color */
+  --skel-radius: 8px;
+  --skel-shimmer-color: rgba(255, 255, 255, 0.03);
+  --skel-shimmer-highlight: rgba(255, 255, 255, 0.08);
+  --skel-bg-color: rgba(255, 255, 255, 0.04);
 }
 
-/* Shimmer Override for High-Fidelity abstract effect */
 .skeleton-base {
   background: linear-gradient(
     110deg,
@@ -19,7 +16,7 @@
   background-size: 200% 100%;
   animation: skel-shimmer 3s ease-in-out infinite;
   border-radius: var(--skel-radius);
-  border: 1px solid rgba(255, 255, 255, 0.03); /* Faint definition */
+  border: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 @keyframes skel-shimmer {
@@ -31,7 +28,6 @@
   }
 }
 
-/* Base Table Stability */
 .skeleton-sheet table {
   width: 100% !important;
   table-layout: fixed !important;
@@ -39,7 +35,6 @@
   background: transparent;
 }
 
-/* Structural Column Widths - Synchronized Table Grid */
 .bef-skeleton-colgroup col:nth-child(1),
 .skeleton-sheet .col-drag {
   width: 44px !important;
@@ -73,12 +68,11 @@
   width: 15% !important;
 }
 
-/* Row alignment - Minimalist Rhythmic Spacing */
 .skeleton-row td {
   height: var(--bef-skeleton-row-height);
   padding: 0;
   vertical-align: middle;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03); /* Very faint grid line */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 .skeleton-row .item-name-cell-wrapper,
@@ -87,7 +81,7 @@
   height: var(--bef-skeleton-row-height);
   display: flex !important;
   align-items: center;
-  padding: 0 16px !important; /* Slightly more air */
+  padding: 0 16px !important;
   box-sizing: border-box;
   overflow: hidden;
 }
@@ -101,7 +95,6 @@
   justify-content: flex-end;
 }
 
-/* Abstract Reference-Style Semantic Sizes */
 .skel-header-bar {
   width: 50%;
   height: 5px;
@@ -148,7 +141,6 @@
   height: 8px;
 }
 
-/* Section Refinements */
 .skel-phase-title-bar {
   width: 200px;
   height: 20px;
@@ -178,7 +170,6 @@
   margin-bottom: 0;
 }
 
-/* Empty Format Placeholder Styles */
 .empty-format-sheet {
   opacity: 0.5;
 }

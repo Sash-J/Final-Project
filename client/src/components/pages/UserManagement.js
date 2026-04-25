@@ -10,7 +10,7 @@ import { API } from "../../config";
 
 const StatusMsg = ({ msg }) => {
   if (!msg) return null;
-  const isError = msg.startsWith("Error") || msg.startsWith("❌");
+  const isError = msg.startsWith("Error") || msg.startsWith("Error");
   return <p className={`status-msg ${isError ? "error" : "success"}`}>{msg}</p>;
 };
 
@@ -21,7 +21,6 @@ const UserManagement = () => {
   const [loading, setLoading] = useState(false);
   const [pendingRoles, setPendingRoles] = useState({});
 
-  // Confirmation modal state
   const [confirmModal, setConfirmModal] = useState({
     isOpen: false,
     message: "",
@@ -47,7 +46,7 @@ const UserManagement = () => {
       if (Array.isArray(a)) setAllUsers(a);
     } catch (err) {
       console.error("Failed to fetch users:", err);
-      setMsg("❌ Error loading users.");
+      setMsg("Error loading users.");
     } finally {
       setLoading(false);
     }
@@ -72,16 +71,14 @@ const UserManagement = () => {
         body: JSON.stringify({ user_id: userId, role: selectedRole }),
       });
       if (res.ok) {
-        setMsg(
-          `✅ Approved user: ${username} as ${selectedRole.toUpperCase()}`,
-        );
+        setMsg(`Approved user: ${username} as ${selectedRole.toUpperCase()}`);
         fetchData();
       } else {
         const data = await res.json();
         throw new Error(data.error || "Failed to approve");
       }
     } catch (err) {
-      setMsg(`❌ ${err.message}`);
+      setMsg(`${err.message}`);
     }
   };
   const rejectUser = (userId, username) => {
@@ -106,7 +103,7 @@ const UserManagement = () => {
             throw new Error(data.error || "Failed to reject");
           }
         } catch (err) {
-          setMsg(`❌ ${err.message}`);
+          setMsg(`${err.message}`);
         }
       },
     });
@@ -126,16 +123,14 @@ const UserManagement = () => {
             body: JSON.stringify({ user_id: userId, role: newRole }),
           });
           if (res.ok) {
-            setMsg(
-              `✅ Updated role for ${username} to ${newRole.toUpperCase()}`,
-            );
+            setMsg(`Updated role for ${username} to ${newRole.toUpperCase()}`);
             fetchData();
           } else {
             const data = await res.json();
             throw new Error(data.error || "Failed to update role");
           }
         } catch (err) {
-          setMsg(`❌ ${err.message}`);
+          setMsg(`${err.message}`);
         }
       },
     });
@@ -163,7 +158,7 @@ const UserManagement = () => {
             throw new Error(data.error || "Failed to delete user");
           }
         } catch (err) {
-          setMsg(`❌ ${err.message}`);
+          setMsg(`${err.message}`);
         }
       },
     });
@@ -177,7 +172,6 @@ const UserManagement = () => {
       />
 
       <div className="admin-content-animated">
-        {/* ── Pending Approvals ── */}
         <div className="grid-window um-pending-section">
           <h3>Pending Approvals</h3>
           <StatusMsg msg={msg} />
@@ -239,7 +233,6 @@ const UserManagement = () => {
           )}
         </div>
 
-        {/* ── User Dashboard (All Users) ── */}
         <div className="grid-window um-dashboard-section">
           <h3>User Dashboard</h3>
           <div className="um-table-container">

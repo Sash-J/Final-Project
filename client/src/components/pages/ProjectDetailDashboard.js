@@ -14,7 +14,6 @@ import "./ProjectDetailDashboard.css";
 import { useProjects } from "../../contexts/ProjectContext";
 import { formatCurrency } from "../../utils/currencyUtils";
 
-// ── Skeleton Loader Component ──────────────────────────────────────────────
 const ProjectDetailSkeleton = () => (
   <div className="project-detail-skeleton">
     <div className="skeleton-header-wrap">
@@ -73,13 +72,14 @@ const ProjectDetailDashboard = () => {
     getBudgetData,
     budgetCache,
     budgetLoading,
-  } = useProjects(); // Global project list and detail context
+  } = useProjects();
 
-  const [activeTab, setActiveTab] = useState("overview"); // overview, timeline, budget, team
+  const [activeTab, setActiveTab] = useState("overview");
   const [showEditModal, setShowEditModal] = useState(false);
   const { showConfirm } = useModal();
 
   // Local UI state for add milestone panel
+  // coding help from Open AI
   const [showAddMilestone, setShowAddMilestone] = useState(false);
   const [milestoneTitle, setMilestoneTitle] = useState("");
   const [milestoneDate, setMilestoneDate] = useState("");
@@ -90,20 +90,16 @@ const ProjectDetailDashboard = () => {
   const [timelineTrigger, setTimelineTrigger] = useState(0);
   const [showPayments, setShowPayments] = useState(false);
 
-  // Reference to the project data in the global cache
   const project = detailsCache[projectId];
 
-  // Budget version selector state
   const [budgetVersions, setBudgetVersions] = useState([]);
   const [selectedVersionId, setSelectedVersionId] = useState("");
 
-  // Triggering the global metadata fetch on mount or project switch
   useEffect(() => {
     if (!projectId) return;
     getProjectDetails(projectId);
   }, [projectId, getProjectDetails]);
 
-  // Fetch budget versions whenever the Finance tab is activated
   useEffect(() => {
     if (activeTab !== "budget" || !projectId) return;
     fetch(`${API}/api/projects/${projectId}/budget-versions`, {
@@ -113,7 +109,6 @@ const ProjectDetailDashboard = () => {
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
           setBudgetVersions(data);
-          // Default to latest version if not already selected
           setSelectedVersionId(
             (prev) => prev || String(data[data.length - 1].id),
           );
@@ -122,7 +117,6 @@ const ProjectDetailDashboard = () => {
       .catch(console.error);
   }, [activeTab, projectId]);
 
-  // Triggering the global budget fetch when version changes
   useEffect(() => {
     if (activeTab === "budget" && selectedVersionId && projectId) {
       getBudgetData(projectId, selectedVersionId);
@@ -140,22 +134,19 @@ const ProjectDetailDashboard = () => {
         credentials: "include",
       });
       if (res.ok) {
-        // Invalidate the projects list cache before returning to /admin
         invalidateCache();
         navigate("/admin");
       } else {
         const data = await res.json();
-        alert(`❌ ${data.error || "Failed to delete"}`);
+        alert(`${data.error || "Failed to delete"}`);
       }
     } catch (err) {
-      alert(`❌ ${err.message}`);
+      alert(`${err.message}`);
     }
   };
 
   const handleProjectUpdated = () => {
-    // Invalidate the cache of the full project list since the profile was updated
     invalidateCache();
-    // Force a re-fetch of the specific project details to update the UI
     getProjectDetails(projectId, true);
     setShowEditModal(false);
   };
@@ -179,7 +170,6 @@ const ProjectDetailDashboard = () => {
           status: milestoneStatus,
         }),
       });
-      // Reset form and refresh timeline
       setMilestoneTitle("");
       setMilestoneDate("");
       setMilestoneDesc("");
@@ -194,7 +184,6 @@ const ProjectDetailDashboard = () => {
     }
   };
 
-  // Use the global detailsLoading state for the skeleton loader
   if (detailsLoading && !project) return <ProjectDetailSkeleton />;
   if (!project) return null;
 
@@ -260,7 +249,6 @@ const ProjectDetailDashboard = () => {
       </div>
 
       <div className="dashboard-content-grid">
-        {/* Navigation Sidebar */}
         <div className="dashboard-nav-card glass-card">
           <nav className="dashboard-sidebar-nav">
             <button
@@ -294,7 +282,6 @@ const ProjectDetailDashboard = () => {
           </nav>
         </div>
 
-        {/* Main Dynamic Area */}
         <>
           {activeTab === "overview" && (
             <div className="bento-layout fade-in">
@@ -470,7 +457,6 @@ const ProjectDetailDashboard = () => {
 
           {activeTab === "budget" && (
             <div className="integrated-budget-section fade-in">
-              {/* Sub-tab navigation for Finance */}
               <div className="finance-sub-nav">
                 <button
                   className={`sub-nav-btn ${!showPayments ? "active" : ""}`}
@@ -490,7 +476,7 @@ const ProjectDetailDashboard = () => {
 
               {!showPayments ? (
                 <>
-                  {/* Version selector bar */}
+                  {" "}
                   {budgetVersions.length > 0 && (
                     <div className="budget-version-bar">
                       <span className="bvb-label">

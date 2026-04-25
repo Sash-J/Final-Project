@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 
+//Generated with ChatGPT
 export default function Starfield() {
   const canvasRef = useRef(null);
 
@@ -18,7 +19,7 @@ export default function Starfield() {
       isVisible = !document.hidden;
       if (isVisible) {
         lastSpawn = Date.now();
-        animate(); // Restart animation when visible
+        animate();
       } else {
         cancelAnimationFrame(animationFrameId);
       }
@@ -36,7 +37,6 @@ export default function Starfield() {
       initStars();
     };
 
-    // ⭐ Adaptive Star Density for Mobile
     const isMobile = width < 768;
     const densityMultiplier = isMobile ? 0.4 : 1;
 
@@ -66,7 +66,6 @@ export default function Starfield() {
 
     resize();
 
-    // 🌠 Shooting stars
     let shootingStars = [];
 
     function createShootingStar() {
@@ -76,14 +75,13 @@ export default function Starfield() {
         length: Math.random() * 50 + 30,
         speed: Math.random() * 1 + 2,
         life: 0,
-        maxLife: 160, // total lifetime
+        maxLife: 160,
       });
     }
 
     function animate() {
       ctx.clearRect(0, 0, width, height);
 
-      // ⭐ Draw stars
       stars.forEach((star) => {
         star.angle += star.speed;
 
@@ -109,7 +107,6 @@ export default function Starfield() {
         lastSpawn = now;
       }
 
-      // 🌠 Draw shooting stars
       shootingStars.forEach((s, index) => {
         s.x += s.speed;
         s.y += s.speed;

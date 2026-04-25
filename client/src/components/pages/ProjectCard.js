@@ -32,7 +32,6 @@ const ProjectCard = ({
       className={`project-card-container fade-in ${isCompleted ? "archived" : ""} ${isCompact ? "compact" : ""}`}
     >
       <div className="project-card-glass" onClick={handleCardClick}>
-        {/* Background Image Layer */}
         <div className="project-card-image-wrap">
           {project.project_image ? (
             <img
@@ -65,7 +64,6 @@ const ProjectCard = ({
           )}
         </div>
 
-        {/* Foreground Content Content Layer */}
         <div className="project-card-content">
           <div className="project-card-main-info">
             <div className="project-card-header">

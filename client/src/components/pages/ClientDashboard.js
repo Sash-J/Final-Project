@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "../../contexts/AuthContext";
 import "./ClientDashboard.css";
-import "./BudgetEntryForm.css"; // Reuse the admin sheet styles
+import "./BudgetEntryForm.css";
 import SuiTimeline from "./SuiTimeline";
 import ModalPortal from "../common/ModalPortal";
 import GlassDropdown from "../common/GlassDropdown";
@@ -68,16 +68,14 @@ const ClientDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Modal state for Budget Sheet
+  //Modal state for Budget / help from OpenAi
   const [selectedProject, setSelectedProject] = useState(null);
   const [budgetData, setBudgetData] = useState(null);
   const [budgetLoading, setBudgetLoading] = useState(false);
   const [versions, setVersions] = useState([]);
   const [currentVersionId, setCurrentVersionId] = useState(null);
 
-  // Timeline state
   const [selectedTimelineProject, setSelectedTimelineProject] = useState(null);
-
   const [milestoneUpdateTrigger, setMilestoneUpdateTrigger] = useState(0);
 
   useEffect(() => {
@@ -107,7 +105,7 @@ const ClientDashboard = () => {
         { status: newStatus },
         { withCredentials: true },
       );
-      // Optimistically update UI
+
       setProjects(
         projects.map((p) =>
           p.id === project.id ? { ...p, status: newStatus } : p,
@@ -122,7 +120,7 @@ const ClientDashboard = () => {
     setSelectedProject(project);
     setBudgetLoading(true);
     try {
-      // 1. Fetch all versions for this project
+      //all versions get
       const vRes = await axios.get(
         `${API}/api/projects/${project.id}/budget-versions`,
         { withCredentials: true },
@@ -130,7 +128,6 @@ const ClientDashboard = () => {
       const vData = Array.isArray(vRes.data) ? vRes.data : [];
       setVersions(vData);
 
-      // 2. Default to the latest version
       let versionToFetch = null;
       if (vData.length > 0) {
         const latest = vData[vData.length - 1];
@@ -138,7 +135,7 @@ const ClientDashboard = () => {
         setCurrentVersionId(latest.id);
       }
 
-      // 3. Fetch budget data for that version
+      //budget data for that version
       await fetchBudgetData(project.id, versionToFetch);
     } catch (err) {
       console.error("Error opening budget modal:", err);
@@ -229,8 +226,6 @@ const ClientDashboard = () => {
             });
           }
 
-          // Always show the phase if it has departments (from hierarchy) OR if it was filled
-          // This keeps the structure consistent (Pre, Prod, Post)
           newPhase.phaseTotal = phaseTotal;
           filledPhases.push(newPhase);
           grandTotal += phaseTotal;
@@ -255,6 +250,7 @@ const ClientDashboard = () => {
     setBudgetData(null);
   };
 
+  //pdf download
   const handleDownloadPDF = () => {
     const element = document.getElementById("client-budget-pdf-content");
     if (!element) return;
@@ -279,7 +275,7 @@ const ClientDashboard = () => {
         useCORS: true,
         letterRendering: true,
         backgroundColor: "#0d0e15",
-        windowWidth: 1200, // Specify the width of the canvas to include all columns
+        windowWidth: 1200,
       },
       jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
     };
@@ -488,7 +484,6 @@ const ClientDashboard = () => {
         </div>
       )}
 
-      {/* Budget Sheet Modal */}
       {selectedProject && (
         <ModalPortal>
           <div className="cd-modal-overlay" onClick={closeBudgetModal}>
@@ -560,7 +555,7 @@ const ClientDashboard = () => {
                     style={{
                       margin: 0,
                       overflowY: "auto",
-                      maxHeight: "none", // Avoid scrolling for PDF output
+                      maxHeight: "none",
                       borderRadius: "12px",
                     }}
                   >
@@ -689,7 +684,6 @@ const ClientDashboard = () => {
         </ModalPortal>
       )}
 
-      {/* TIMELINE MODAL WITH ADD PERSONAL MILESTONE */}
       {selectedTimelineProject && (
         <ModalPortal>
           <div className="sui-modal-overlay">
@@ -756,7 +750,6 @@ const ClientDashboard = () => {
                   />
                 </div>
               </div>
-              {/* Client role is restricted to viewing and noting milestones only. */}
             </div>
           </div>
         </ModalPortal>

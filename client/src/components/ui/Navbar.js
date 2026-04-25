@@ -14,7 +14,7 @@ const Navbar = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setUseImageLogo((prev) => !prev);
-    }, 300000); // 5 minutes
+    }, 300000);
     return () => clearInterval(interval);
   }, []);
 

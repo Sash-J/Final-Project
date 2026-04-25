@@ -8,11 +8,16 @@
 }
 
 @keyframes fd-fade-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* ── Summary Stats ── */
 .fd-stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -45,7 +50,11 @@
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(var(--accent-rgb), 0.1) 0%, transparent 60%);
+  background: radial-gradient(
+    circle,
+    rgba(var(--accent-rgb), 0.1) 0%,
+    transparent 60%
+  );
   opacity: 0.5;
   pointer-events: none;
 }
@@ -74,12 +83,10 @@
   font-weight: 600;
 }
 
-/* ── Project Table ── */
 .fd-section-header {
   text-align: center;
   margin-bottom: 40px;
 }
-
 
 .fd-table-container {
   background: var(--glass-bg);
@@ -130,11 +137,17 @@
   font-family: "JetBrains Mono", monospace;
 }
 
-.fd-amount-pos { color: #fff; font-weight: 600; }
-.fd-amount-neg { color: #fb7185; } /* Rose 400 for balance */
-.fd-amount-paid { color: #34d399; } /* Emerald 400 */
+.fd-amount-pos {
+  color: #fff;
+  font-weight: 600;
+}
+.fd-amount-neg {
+  color: #fb7185;
+}
+.fd-amount-paid {
+  color: #34d399;
+}
 
-/* ── Progress Ring ── */
 .fd-progress-cell {
   display: flex;
   align-items: center;
@@ -164,7 +177,6 @@
   min-width: 35px;
 }
 
-/* ── Actions ── */
 .fd-btn-view {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -181,16 +193,18 @@
   border-color: var(--accent-color);
 }
 
-/* ── Empty State ── */
 .fd-empty {
   padding: 60px;
   text-align: center;
   color: #666;
 }
 
-/* ── Responsive ── */
 @media (max-width: 900px) {
-  .fd-root { padding: 20px; }
+  .fd-root {
+    padding: 20px;
+  }
   .fd-table th:nth-child(4),
-  .fd-table td:nth-child(4) { display: none; }
+  .fd-table td:nth-child(4) {
+    display: none;
+  }
 }

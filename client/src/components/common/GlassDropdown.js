@@ -3,17 +3,17 @@ import { createPortal } from "react-dom";
 import "./GlassDropdown.css";
 
 /**
- * Reusable glassmorphism-styled dropdown component.
- * Supports single and multi-select.
- *
+ *Reusable glassmorphism-styled dropdown component.
+ *Supports single and multi-select.
+ *help from chatGPT
  * @param {Object} props
- * @param {string} props.label - Optional label above the dropdown
- * @param {Array} props.options - Array of { value, label }
- * @param {any} props.value - Selected value(s)
- * @param {Function} props.onChange - Selection callback
- * @param {boolean} props.multiple - Enable multi-select
- * @param {string} props.placeholder - Default trigger text
- * @param {string} props.className - Custom outer class
+ * @param {string} props.label
+ * @param {Array} props.options
+ * @param {any} props.value
+ * @param {Function} props.onChange
+ * @param {boolean} props.multiple
+ * @param {string} props.placeholder
+ * @param {string} props.className
  */
 const GlassDropdown = ({
   label,
@@ -35,7 +35,7 @@ const GlassDropdown = ({
     if (dropdownRef.current) {
       const rect = dropdownRef.current.getBoundingClientRect();
       setDropdownStyle({
-        position: 'fixed',
+        position: "fixed",
         top: rect.bottom + 2,
         left: rect.left,
         width: rect.width,
@@ -47,19 +47,19 @@ const GlassDropdown = ({
   useEffect(() => {
     if (isOpen) {
       updatePosition();
-      window.addEventListener('scroll', updatePosition, true);
-      window.addEventListener('resize', updatePosition);
+      window.addEventListener("scroll", updatePosition, true);
+      window.addEventListener("resize", updatePosition);
     }
     return () => {
-      window.removeEventListener('scroll', updatePosition, true);
-      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+      window.removeEventListener("resize", updatePosition);
     };
   }, [isOpen]);
 
-  // Close when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && dropdownRef.current.contains(event.target)) return;
+      if (dropdownRef.current && dropdownRef.current.contains(event.target))
+        return;
       if (menuRef.current && menuRef.current.contains(event.target)) return;
       setIsOpen(false);
     };
@@ -85,7 +85,6 @@ const GlassDropdown = ({
     }
   };
 
-  // Determine trigger text
   let triggerText = placeholder;
   if (multiple) {
     const count = Array.isArray(value) ? value.length : 0;
@@ -97,50 +96,59 @@ const GlassDropdown = ({
     if (selectedOpt) triggerText = selectedOpt.label;
   }
 
-  // Combine standard class with modifiers
-  const containerClass = `glass-dropdown-container ${modifiers} ${className}`.trim();
+  const containerClass =
+    `glass-dropdown-container ${modifiers} ${className}`.trim();
 
   return (
     <div className={containerClass} ref={dropdownRef} style={style}>
       {label && <label className="glass-dropdown-label">{label}</label>}
-      
-      <div 
-        className={`glass-dropdown-trigger ${isOpen ? "active" : ""}`} 
+
+      <div
+        className={`glass-dropdown-trigger ${isOpen ? "active" : ""}`}
         onClick={handleToggle}
       >
         <span className="trigger-text">{triggerText}</span>
         <span className={`trigger-arrow ${isOpen ? "up" : ""}`}>▼</span>
       </div>
 
-      {isOpen && createPortal(
-        <div className="glass-dropdown-menu sui-fade-in" style={dropdownStyle} ref={menuRef}>
-          {options.length === 0 ? (
-            <div className="glass-dropdown-no-options">No options available</div>
-          ) : (
-            options.map((opt) => {
-              const isSelected = multiple
-                ? (Array.isArray(value) && value.includes(opt.value))
-                : String(value) === String(opt.value);
+      {isOpen &&
+        createPortal(
+          <div
+            className="glass-dropdown-menu sui-fade-in"
+            style={dropdownStyle}
+            ref={menuRef}
+          >
+            {options.length === 0 ? (
+              <div className="glass-dropdown-no-options">
+                No options available
+              </div>
+            ) : (
+              options.map((opt) => {
+                const isSelected = multiple
+                  ? Array.isArray(value) && value.includes(opt.value)
+                  : String(value) === String(opt.value);
 
-              return (
-                <div
-                  key={opt.value}
-                  className={`glass-dropdown-item ${isSelected ? "selected" : ""}`}
-                  onClick={() => handleOptionClick(opt.value)}
-                >
-                  {multiple && (
-                    <div className={`glass-checkbox ${isSelected ? "checked" : ""}`}>
-                      {isSelected && <span className="check-mark">✓</span>}
-                    </div>
-                  )}
-                  <span className="item-label">{opt.label}</span>
-                </div>
-              );
-            })
-          )}
-        </div>,
-        document.body
-      )}
+                return (
+                  <div
+                    key={opt.value}
+                    className={`glass-dropdown-item ${isSelected ? "selected" : ""}`}
+                    onClick={() => handleOptionClick(opt.value)}
+                  >
+                    {multiple && (
+                      <div
+                        className={`glass-checkbox ${isSelected ? "checked" : ""}`}
+                      >
+                        {isSelected && <span className="check-mark">✓</span>}
+                      </div>
+                    )}
+                    <span className="item-label">{opt.label}</span>
+                  </div>
+                );
+              })
+            )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 };

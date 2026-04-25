@@ -35,7 +35,6 @@ const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-
   const validateField = (name, value, currentPassword = formData.password) => {
     let error = "";
     switch (name) {
@@ -66,26 +65,28 @@ const RegisterPage = () => {
   const getPasswordError = (value) => {
     if (!value) return "";
     if (value.includes(" ")) return "Password cannot contain spaces.";
-    if (value.length < 8 || value.length > 20) return "Must be between 8 and 20 characters.";
-    if (!/[A-Z]/.test(value) || !/[a-z]/.test(value)) return "Must contain both uppercase and lowercase letters.";
+    if (value.length < 8 || value.length > 20)
+      return "Must be between 8 and 20 characters.";
+    if (!/[A-Z]/.test(value) || !/[a-z]/.test(value))
+      return "Must contain both uppercase and lowercase letters.";
     const specialCount = (value.match(/[^a-zA-Z0-9]/g) || []).length;
-    if (specialCount !== 1) return "Must contain exactly one special character.";
+    if (specialCount !== 1)
+      return "Must contain exactly one special character.";
     return "";
   };
 
   const handleUsernameChange = (e) => {
-    const value = e.target.value.replace(/[^a-zA-Z_]/g, ""); // Filter spaces/special chars
+    const value = e.target.value.replace(/[^a-zA-Z_]/g, "");
     setFormData({ ...formData, username: value });
     setFieldErrors((prev) => ({ ...prev, username: "" }));
   };
 
   const handlePasswordChange = (e) => {
-    const value = e.target.value.replace(/\s/g, ""); // Strictly no spaces
+    const value = e.target.value.replace(/\s/g, "");
     const passError = getPasswordError(value);
-    
+
     setFormData((prev) => {
       const newData = { ...prev, password: value };
-      // If password becomes empty or invalid, clear confirmPassword
       if (!value || passError) {
         newData.confirmPassword = "";
       }
@@ -94,11 +95,9 @@ const RegisterPage = () => {
 
     validateField("password", value);
 
-    // If password becomes invalid, also clear any confirmPassword error
     if (!value || passError) {
       setFieldErrors((prev) => ({ ...prev, confirmPassword: "" }));
     } else if (formData.confirmPassword) {
-      // If it stays valid/becomes valid, re-check confirm match
       validateField("confirmPassword", formData.confirmPassword, value);
     }
   };
@@ -110,19 +109,17 @@ const RegisterPage = () => {
   };
 
   const handleAddressChange = (e) => {
-    const value = e.target.value.replace(/[<>{}[\]]/g, ""); // XSS protection: strip HTML-like tags
+    const value = e.target.value.replace(/[<>{}[\]]/g, "");
     setFormData({ ...formData, address: value });
     setFieldErrors((prev) => ({ ...prev, address: "" }));
   };
 
   const handlePhoneChange = (e) => {
     const value = e.target.value;
-    // Allow only numbers and leading plus
     const filteredValue = value.replace(/(?!^\+)\D/g, "");
 
     setFormData({ ...formData, telephone: filteredValue });
 
-    // Real-time validation message in unified fieldErrors
     let phoneError = "";
     const cleanDigits = filteredValue.replace(/\D/g, "");
     if (
@@ -136,7 +133,6 @@ const RegisterPage = () => {
 
   const handleNameChange = (e) => {
     const value = e.target.value;
-    // Allow only letters and spaces
     const filteredValue = value.replace(/[^a-zA-Z\s]/g, "");
     setFormData({ ...formData, full_name: filteredValue });
   };

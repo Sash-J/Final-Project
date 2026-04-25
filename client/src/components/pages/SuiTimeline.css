@@ -205,11 +205,11 @@
   display: inline-block;
   font-size: 0.65rem;
   font-weight: 700;
-  background: #2dd4bf; /* Solid background for more punch */
-  color: #1a1a2e; /* Darker text for contrast */
+  background: #2dd4bf;
+  color: #1a1a2e;
   font-style: normal;
   padding: 2px 8px;
-  border-radius: 4px; /* More blocky/industrial look for Admin views */
+  border-radius: 4px;
   margin-left: 10px;
   vertical-align: middle;
   text-transform: uppercase;
@@ -217,7 +217,6 @@
   border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-/* LEFT SIDE (timeline left → text on right side of screen) */
 .sui-exact-content.align-left .sui-title {
   align-items: flex-start;
   text-align: left;
@@ -227,7 +226,6 @@
   align-self: flex-start;
 }
 
-/* RIGHT SIDE (timeline right → text on left side of screen) */
 .sui-exact-content.align-right .sui-title {
   align-items: flex-end;
   text-align: right;
@@ -237,7 +235,6 @@
   align-self: flex-end;
 }
 
-/* Status variants */
 .sui-status-completed .sui-exact-dot {
   background: #00c6e6;
 }
@@ -255,14 +252,13 @@
   align-items: flex-start;
 }
 
-/* Modal styles */
 .sui-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.5); /* Let the backdrop-filter do the work */
+  background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(8px);
   z-index: 9999;
   display: flex;
@@ -304,13 +300,13 @@
 
 .sui-modal-content h3 {
   color: #fff;
-  font-size: 1.25rem; /* Slightly smaller title */
+  font-size: 1.25rem;
   padding-top: 0;
-  margin-bottom: 12px; /* Reduced from 20px */
+  margin-bottom: 12px;
 }
 
 .sui-form-group {
-  margin-bottom: 12px; /* Reduced from 20px */
+  margin-bottom: 12px;
 }
 
 .sui-form-group label {
@@ -346,7 +342,7 @@
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  margin-top: 15px; /* Reduced from 30px */
+  margin-top: 15px;
 }
 
 .sui-btn {
@@ -418,7 +414,6 @@
   }
 }
 
-/* ── Loading Skeleton ── */
 .sui-timeline-skeleton {
   width: 100%;
   height: 600px;
@@ -462,19 +457,16 @@
   }
 }
 
-/* ── Compact Layout Helpers ── */
 .sui-form-row {
   display: flex;
   gap: 15px;
-  margin-bottom: 0; /* Let children handle spacing */
+  margin-bottom: 0;
 }
 
 .sui-form-col {
   flex: 1;
   min-width: 0;
 }
-
-/* ── Note inline elements ──────────────────────────────────────────────────── */
 
 .sui-client-badge--note {
   margin-right: 8px;
@@ -493,15 +485,11 @@
   margin-top: 2px;
 }
 
-/* ── Form label flex ───────────────────────────────────────────────────────── */
-
 .sui-label-flex {
   display: flex;
   align-items: center;
   gap: 10px;
 }
-
-/* ── Milestone read-only view (production_crew / client) ───────────────────── */
 
 .sui-milestone-readonly {
   margin-bottom: 20px;
@@ -541,8 +529,6 @@
   color: #718096;
 }
 
-/* ── Preview Interaction ───────────────────────────────────────────────────── */
-
 .sui-preview-clickable {
   cursor: pointer;
 }
@@ -576,12 +562,8 @@
   box-shadow: 0 4px 15px rgba(0, 198, 230, 0.2);
 }
 
-/* ──────────────────────────────────────────────────────────────────────────── */
-/* ── Global Milestone Modal (Broad Layout) ─────────────────────────────────── */
-/* ──────────────────────────────────────────────────────────────────────────── */
-
 .milestone-modal-content-wide {
-  max-width: 1200px !important; /* Non-maximized width */
+  max-width: 1200px !important;
   width: 95% !important;
   max-height: 90vh;
   display: flex !important;

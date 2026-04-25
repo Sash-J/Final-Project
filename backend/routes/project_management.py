@@ -5,9 +5,8 @@ import services.db_operations as db
 import services.auth_operations as auth
 from core.session_handler import login_required, roles_required
 
-project_bp = Blueprint('project_management', __name__)
+project_bp = Blueprint("project_management", __name__)
 
-# ── Project Routes ────────────────────────────────────────────────────────────
 
 @project_bp.route("/getTable", methods=["GET"])
 @login_required
@@ -30,7 +29,6 @@ def project_detail_get(project_id):
     return jsonify(project), 200
 
 
-
 @project_bp.route("/api/projects", methods=["POST"])
 @roles_required("admin", "manager")
 def projects_post():
@@ -45,21 +43,28 @@ def projects_post():
 
     if not project_name:
         return jsonify({"error": "project_name is required"}), 400
-        
-    # Check for color uniqueness
+
     existing_project = db.check_color_exists(color)
     if existing_project:
-        return jsonify({"error": f"Color already assigned to project: {existing_project}"}), 400
+        return (
+            jsonify(
+                {"error": f"Color already assigned to project: {existing_project}"}
+            ),
+            400,
+        )
 
-    # 1. Store Base64 Image directly
     project_image_url = project_image_base64 if project_image_base64 else None
 
-    # 2. Insert Project
     new_id = db.insert_project(
-        project_name, code_name, start_date, end_date, location, color, project_image_url
+        project_name,
+        code_name,
+        start_date,
+        end_date,
+        location,
+        color,
+        project_image_url,
     )
 
-    # Handle client assignments
     client_ids = data.get("client_ids", [])
     if isinstance(client_ids, list):
         for c_id in client_ids:
@@ -68,7 +73,6 @@ def projects_post():
             except:
                 pass
 
-    # Handle crew assignments
     crew_ids = data.get("crew_ids", [])
     if isinstance(crew_ids, list):
         for cr_id in crew_ids:
@@ -112,23 +116,29 @@ def projects_put(project_id):
 
         if not project_name:
             return jsonify({"error": "project_name is required"}), 400
-            
-        # Check for color uniqueness
+
         existing_project = db.check_color_exists(color, exclude_project_id=project_id)
         if existing_project:
-            return jsonify({"error": f"Color already assigned to project: {existing_project}"}), 400
-
-        # 1. Store Base64 Image directly (if provided)
-        project_image_url = data.get("project_image_url") # keep old one by default
+            return (
+                jsonify(
+                    {"error": f"Color already assigned to project: {existing_project}"}
+                ),
+                400,
+            )
+        project_image_url = data.get("project_image_url")
         if project_image_base64 and project_image_base64.startswith("data:image"):
             project_image_url = project_image_base64
-
-        # 2. Update DB
         db.update_project(
-            project_id, project_name, code_name, start_date, end_date, location, color, project_image_url
+            project_id,
+            project_name,
+            code_name,
+            start_date,
+            end_date,
+            location,
+            color,
+            project_image_url,
         )
 
-        # Sync client assignments
         client_ids = data.get("client_ids", [])
         if isinstance(client_ids, list):
             auth.clear_project_clients(project_id)
@@ -138,7 +148,7 @@ def projects_put(project_id):
                 except:
                     pass
 
-        # Sync crew assignments
+        # assign crew
         crew_ids = data.get("crew_ids", [])
         if isinstance(crew_ids, list):
             auth.clear_project_crew(project_id)
@@ -151,6 +161,7 @@ def projects_put(project_id):
         return jsonify({"message": "Project updated successfully"}), 200
     except Exception as e:
         import traceback
+
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
@@ -165,8 +176,7 @@ def projects_delete(project_id):
         return jsonify({"error": str(e)}), 500
 
 
-# ── Payment Routes ────────────────────────────────────────────────────────────
-
+# Payments
 @project_bp.route("/api/projects/<int:project_id>/payments", methods=["GET"])
 @login_required
 def get_project_payments(project_id):

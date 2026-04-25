@@ -1,4 +1,3 @@
-/* ── Root & Layout ─────────────────────────────────────────────────────────── */
 .bef-root {
   width: 100%;
   height: 100%;
@@ -8,7 +7,6 @@
   flex-direction: column;
 }
 
-/* ── Main Content ───────────────────────────────────────────────────────────── */
 .bef-main-content {
   flex: 1;
   display: flex;
@@ -19,7 +17,6 @@
   background: transparent;
 }
 
-/* ── Header ─────────────────────────────────────────────────────────────────── */
 .bef-header {
   text-align: center;
   padding: 0 0 24px 0;
@@ -45,11 +42,9 @@
 }
 
 .bef-header p {
-  color: #888; /* Dimmer text */
+  color: #888;
   font-size: 0.95rem;
 }
-
-/* ── Removed Old Project Bar ── */
 
 .bef-project-bar label {
   padding: 20px;
@@ -102,9 +97,6 @@
   font-size: 0.8rem;
   font-weight: 600;
 }
-
-/* ── Client Selection UX ── */
-/* (Moved to global sidebar) */
 
 .bef-client-label {
   display: flex !important;
@@ -159,7 +151,6 @@
   font-weight: 500;
 }
 
-/* ── Loading ────────────────────────────────────────────────────────────────── */
 .bef-loading {
   text-align: center;
   color: #666;
@@ -167,11 +158,10 @@
   font-size: 0.9rem;
 }
 
-/* ── Spreadsheet ────────────────────────────────────────────────────────────── */
 .bef-sheet {
-  margin: 0 12px 20px; /* Reduced margins */
+  margin: 0 12px 20px;
   border-radius: 12px;
-  overflow-x: auto; /* Enable scroll if window is too narrow */
+  overflow-x: auto;
   background: var(--glass-bg);
   max-width: 100%;
   backdrop-filter: var(--glass-blur);
@@ -204,24 +194,24 @@
   border-collapse: collapse;
   font-size: 0.9rem;
   color: #eee;
-  table-layout: fixed; /* Forced fixed layout for absolute cross-phase alignment */
+  table-layout: fixed;
   border-radius: 1em;
 }
 
 .bef-table thead th {
   background: rgba(255, 255, 255, 0.05);
   color: #e0e0e08e;
-  font-size: 0.7rem; /* Smaller headers */
+  font-size: 0.7rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  padding: 6px 6px; /* Compact padding */
+  padding: 6px 6px;
   text-align: center;
   border-bottom: var(--glass-border);
   cursor: default;
 }
 
-/* Column Alignment & Specifics */
+/*Column Alignment & Specifics*/
 .col-drag {
   width: 44px;
   text-align: center;
@@ -292,7 +282,7 @@
   padding: 1px;
   gap: 0;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  width: 65px; /* Extremely compact */
+  width: 65px;
   height: 22px;
   overflow: hidden;
   user-select: none;
@@ -310,9 +300,9 @@
   align-items: center;
   justify-content: center;
   font-size: 0.65rem;
-  height: 100%; /* Fill parent height */
+  height: 100%;
   cursor: pointer;
-  border-radius: 12px; /* Smooth rounded corners for inner pill */
+  border-radius: 12px;
   transition: all 0.2s;
   color: #888;
   font-weight: 400;
@@ -326,8 +316,9 @@
   box-shadow: 0 0 15px rgba(0, 198, 230, 0.4) !important;
 }
 
+/*Hides the radio button*/
 .rt-option input {
-  display: none; /* Hides the radio button for pill button*/
+  display: none;
 }
 
 .rate-type-column-content.disabled {
@@ -362,7 +353,7 @@
   outline: none !important;
 }
 
-/* Hide number spinner arrows to maximise available input space globally in Budget Entry */
+/*Hide spinner arrows*/
 .bef-root input[type="number"]::-webkit-outer-spin-button,
 .bef-root input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -378,13 +369,13 @@
   text-align: center;
   vertical-align: middle !important;
   padding: 0 !important;
-  color: rgba(255, 255, 255, 0.207) !important; /* Subtle grey */
+  color: rgba(255, 255, 255, 0.207) !important;
   cursor: grab;
 }
 
 .drag-handle-icon {
   font-family: "Material Symbols Outlined" !important;
-  font-size: 1rem !important; /* Professional, compact size */
+  font-size: 1rem !important;
   user-select: none;
   transition: color 0.2s;
   display: block;
@@ -417,7 +408,6 @@
   border-left: 1px solid #555;
 }
 
-/* Department row (Main Header) */
 .bef-dept-row td {
   background: rgba(255, 255, 255, 0.1);
   color: #fff;
@@ -434,7 +424,6 @@
   font-weight: 500;
 }
 
-/* Category row (Sub Header) */
 .bef-cat-row td {
   background: rgba(255, 255, 255, 0.03);
   color: #ccc;
@@ -455,7 +444,7 @@
 
 .cat-id {
   margin-right: 16px;
-  border-left: 15px solid transparent; /* Offset to align with item names */
+  border-left: 15px solid transparent;
 }
 
 .cat-subtotal {
@@ -466,7 +455,7 @@
   letter-spacing: 0.5px;
 }
 
-/* Item rows */
+/*Item rows, heling from OpneAI*/
 .bef-row {
   transition: background 0.2s;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
@@ -791,7 +780,6 @@
   transform: translateY(-1px);
 }
 
-/* ── Footer bar ─────────────────────────────────────────────────────────────── */
 .bef-footer {
   display: flex;
   align-items: center;
@@ -874,7 +862,6 @@
   cursor: not-allowed;
 }
 
-/* ── Status ─────────────────────────────────────────────────────────────────── */
 .bef-status {
   margin: 0 32px;
   padding: 14px 18px;
@@ -895,7 +882,7 @@
   border: 1px solid rgba(248, 113, 113, 0.25);
 }
 
-/* ── Responsive ─────────────────────────────────────────────────────────────── */
+/*Responsive*/
 @media (max-width: 1000px) {
   .bef-layout-container {
     flex-direction: column;
@@ -927,7 +914,6 @@
   }
 }
 
-/* ── Version Warning ── */
 .bef-version-warning {
   background: rgba(251, 191, 36, 0.1);
   border: 1px solid rgba(251, 191, 36, 0.2);
@@ -946,26 +932,6 @@
   font-size: 1.2rem;
 }
 
-/* ── Skeletal Loading ── */
-.skeleton-sheet {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.02);
-  pointer-events: none;
-}
-
-.skeleton-row td {
-  padding: 14px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-}
-
-.skeleton-box {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
-  padding: 1.5rem 0.5rem;
-  overflow-x: hidden;
-}
-
-/* Phase Sections */
 .phase-section {
   margin-bottom: 25px;
   background: rgba(255, 255, 255, 0.02);
@@ -1036,47 +1002,25 @@
   padding: 20px;
 }
 
-.skeleton-box::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.08),
-    transparent
-  );
-  animation: shimmer-effect 1.6s infinite linear;
-}
-
-@keyframes shimmer-effect {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 /* ── Skeleton Loader ────────────────────────────────────────────────────────── */
+.skeleton-sheet {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.02);
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.skeleton-row td {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
 .skeleton-box {
   background: rgba(255, 255, 255, 0.05);
   border-radius: 4px;
   position: relative;
   overflow: hidden;
+  padding: 1.5rem 0.5rem;
 }
 
 .skeleton-box::after {
@@ -1103,14 +1047,15 @@
   }
 }
 
-.skeleton-sheet {
-  pointer-events: none;
-  opacity: 0.7;
-}
-
-.skeleton-row td {
-  padding: 12px 6px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .skeleton-phase-header {

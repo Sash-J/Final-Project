@@ -13,12 +13,11 @@ const NotificationBell = () => {
 
   useEffect(() => {
     fetchUnreadCount();
-    const interval = setInterval(fetchUnreadCount, 60000); // Poll every minute
+    const interval = setInterval(fetchUnreadCount, 60000);
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
-    // Handle outside clicks to close dropdown
     const handleOutsideClick = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setShowDropdown(false);
@@ -56,7 +55,11 @@ const NotificationBell = () => {
   const handleMarkAsRead = async (id, isRead) => {
     if (isRead) return;
     try {
-      await axios.put(`${API}/api/notifications/${id}/read`, {}, { withCredentials: true });
+      await axios.put(
+        `${API}/api/notifications/${id}/read`,
+        {},
+        { withCredentials: true },
+      );
       fetchUnreadCount();
       fetchNotifications();
     } catch (err) {
@@ -66,7 +69,11 @@ const NotificationBell = () => {
 
   const handleMarkAllRead = async () => {
     try {
-      await axios.put(`${API}/api/notifications/read-all`, {}, { withCredentials: true });
+      await axios.put(
+        `${API}/api/notifications/read-all`,
+        {},
+        { withCredentials: true },
+      );
       fetchUnreadCount();
       fetchNotifications();
     } catch (err) {
@@ -76,20 +83,24 @@ const NotificationBell = () => {
 
   const formatTime = (timestamp) => {
     const date = new Date(timestamp);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' });
+    return date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      month: "short",
+      day: "numeric",
+    });
   };
 
-  // Bell SVG Component for reliability
   const BellIcon = ({ className }) => (
-    <svg 
-      viewBox="0 0 24 24" 
-      width="24" 
-      height="24" 
+    <svg
+      viewBox="0 0 24 24"
+      width="24"
+      height="24"
       className={className}
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
       strokeLinejoin="round"
     >
       <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
@@ -99,46 +110,54 @@ const NotificationBell = () => {
 
   return (
     <div className="notification-bell-container" ref={dropdownRef}>
-      <div className={`bell-icon ${showDropdown ? "active" : ""}`} onClick={() => setShowDropdown(!showDropdown)}>
+      <div
+        className={`bell-icon ${showDropdown ? "active" : ""}`}
+        onClick={() => setShowDropdown(!showDropdown)}
+      >
         <BellIcon className={unreadCount > 0 ? "has-unread" : ""} />
         {unreadCount > 0 && <span className="unread-badge">{unreadCount}</span>}
       </div>
 
-      {showDropdown && createPortal(
-        <div 
-          className={`notifications-dropdown glass-panel show`}
-          ref={dropdownRef} // Attach ref here for outside click detection since it's portalled
-        >
-          <div className="dropdown-header">
-            <div className="dropdown-title-wrap">
-              <BellIcon className="dropdown-header-icon" />
-              <h3>Notifications</h3>
+      {showDropdown &&
+        createPortal(
+          <div
+            className={`notifications-dropdown glass-panel show`}
+            ref={dropdownRef}
+          >
+            <div className="dropdown-header">
+              <div className="dropdown-title-wrap">
+                <BellIcon className="dropdown-header-icon" />
+                <h3>Notifications</h3>
+              </div>
+              {unreadCount > 0 && (
+                <button className="mark-all-btn" onClick={handleMarkAllRead}>
+                  Mark all as read
+                </button>
+              )}
             </div>
-            {unreadCount > 0 && (
-              <button className="mark-all-btn" onClick={handleMarkAllRead}>
-                Mark all as read
-              </button>
-            )}
-          </div>
-          <div className="notifications-list">
-            {notifications.length === 0 ? (
-              <div className="empty-notifications">No notifications found</div>
-            ) : (
-              notifications.map((note) => (
-                <div
-                  key={note.id}
-                  className={`notification-item ${!note.is_read ? "unread" : ""}`}
-                  onClick={() => handleMarkAsRead(note.id, note.is_read)}
-                >
-                  <span className="notification-message">{note.message}</span>
-                  <span className="notification-time">{formatTime(note.created_at)}</span>
+            <div className="notifications-list">
+              {notifications.length === 0 ? (
+                <div className="empty-notifications">
+                  No notifications found
                 </div>
-              ))
-            )}
-          </div>
-        </div>,
-        document.body
-      )}
+              ) : (
+                notifications.map((note) => (
+                  <div
+                    key={note.id}
+                    className={`notification-item ${!note.is_read ? "unread" : ""}`}
+                    onClick={() => handleMarkAsRead(note.id, note.is_read)}
+                  >
+                    <span className="notification-message">{note.message}</span>
+                    <span className="notification-time">
+                      {formatTime(note.created_at)}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 };

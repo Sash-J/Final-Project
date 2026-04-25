@@ -33,7 +33,6 @@
   backface-visibility: hidden;
 }
 
-/* Progress Bar */
 .progress-bar-container {
   position: absolute;
   top: 0;
@@ -102,8 +101,14 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-3px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .form-group input,
@@ -239,7 +244,6 @@
   font-weight: 800;
 }
 
-/* ── Password Visibility Toggle Styling ── */
 .password-input-wrapper {
   position: relative;
   display: flex;

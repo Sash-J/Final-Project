@@ -12,23 +12,22 @@ from core.session_handler import (
 
 auth_bp = Blueprint("auth_management", __name__)
 
+# help from ChatGPT
 # Bcrypt instance injected by app.py via init_auth(bcrypt)
 _bcrypt = None
-
 
 def init_auth(bcrypt_instance):
     global _bcrypt
     _bcrypt = bcrypt_instance
 
-
 def validate_register_data(username, password, role, full_name, telephone, address):
     """Deep validation of registration data before database insertion."""
 
-    # 1. Username Validation: A-Z, a-z, _ only
+    # Username Validation
     if not re.match(r"^[a-zA-Z_]+$", username):
         return "Username can only contain letters and underscores."
 
-    # 2. Password Validation
+    # Pass Validation
     if " " in password:
         return "Password cannot contain spaces."
     if len(password) < 8 or len(password) > 20:
@@ -44,31 +43,30 @@ def validate_register_data(username, password, role, full_name, telephone, addre
     if special_count != 1:
         return "Password must contain exactly one special character."
 
-    # 3. Role Guard: Public registration can only be 'client' or 'production_crew'
+    # Role Guard
     allowed_roles = ["client", "production_crew"]
     if role not in allowed_roles:
         return "Forbidden role selection."
 
-    # 4. Metadata Validation
+    # Metadata Validation
     if len(full_name) > 100:
         return "Full Name is too long (max 100 characters)."
     if not re.match(r"^[a-zA-Z\s]+$", full_name):
         return "Full Name can only contain letters and spaces."
-    # 5. Telephone Validation
+
+    # Telephone Validation
     clean_phone = re.sub(r"[\s\-()]+", "", telephone)
     if not re.match(r"^\+?\d{10,15}$", clean_phone):
         return "Please enter a valid telephone number (10-15 digits)."
 
-    # 6. Address Validation (Security)
+    # Address Validation
     if any(char in address for char in "<>{}[]"):
         return "Address contains prohibited special characters."
 
     return None
 
 
-# ── Auth Routes ───────────────────────────────────────────────────────────────
-
-
+# Auth Routes
 @auth_bp.route("/api/login", methods=["POST"])
 def login():
     data = request.get_json()
@@ -93,8 +91,6 @@ def login():
             ),
             200,
         )
-
-    # Brute Force Mitigation: Subtle delay on failed login
     time.sleep(1)
     return jsonify({"error": "Invalid credentials"}), 401
 
@@ -124,16 +120,16 @@ def get_me():
 @auth_bp.route("/api/init-admin", methods=["GET"])
 def init_admin():
     try:
-        # 1. Check if user already exists
+        # Check user already exists
         existing = auth.get_user_by_username("admin")
         if existing:
             return jsonify({"message": "Admin already exists"}), 200
 
-        # 2. Safety check for bcrypt
+        # Safety check for bcrypt
         if not _bcrypt:
             return jsonify({"error": "Bcrypt not initialized. Check app.py."}), 500
 
-        # 3. Create admin with empty strings for metadata (prevent NULL crashes)
+        # Create admin with empty strings for metadata
         hashed = _bcrypt.generate_password_hash("admin123").decode("utf-8")
         auth.create_user(
             username="admin",
@@ -187,7 +183,7 @@ def register():
     if not username or not password:
         return jsonify({"error": "Username and password are required"}), 400
 
-    # Backend Security Parity Check
+    # security check, help from ChatGPT
     validation_error = validate_register_data(
         username, password, role, full_name, telephone, address
     )

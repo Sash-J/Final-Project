@@ -29,7 +29,6 @@
   min-width: 0;
 }
 
-/* Legacy Admin Panel Grid */
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
@@ -49,9 +48,6 @@
   flex-direction: column;
 }
 
-/* ── Shared UI Components ─────────────────────────────────────────────────── */
-
-/* Glassmorphism Windows */
 .grid-window {
   display: flex;
   flex-direction: column;
@@ -141,7 +137,6 @@
 }
 
 .db-form button {
-  /* Neo Button Refactoring: Frosted Noise Glass */
   background: rgba(0, 198, 230, 0.1) !important;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -214,7 +209,7 @@
   font-size: 0.9rem;
 }
 
-/* ── Lifted Selection Tags ── */
+/*Lifted Selection Tags*/
 .selected-clients-tags {
   margin-top: 12px;
 }
@@ -228,7 +223,7 @@
   border-color: rgba(0, 198, 230, 0.4) !important;
 }
 
-/* ── Status Messages ────────────────────────────────────────────────────────── */
+/*Status Messages*/
 .status-msg {
   padding: 12px 16px;
   border-radius: 8px;
@@ -244,7 +239,7 @@
   color: #f87171;
 }
 
-/* ── Responsive ───────────────────────────────────────────────────────────── */
+/*Responsive*/
 @media (max-width: 1100px) {
   .admin-budget-content {
     grid-template-columns: 1fr;
@@ -263,7 +258,6 @@
   }
 }
 
-/* ── Project & Version Selection ── */
 .project-select {
   width: 100%;
   margin-bottom: 15px;
@@ -287,7 +281,7 @@
 
 .version-controls {
   display: flex;
-  flex-direction: column; /* Stack dropdown and buttons vertically */
+  flex-direction: column;
   gap: 12px;
   align-items: stretch;
   margin-bottom: 20px;
@@ -369,7 +363,6 @@
   transform: translateY(0);
 }
 
-/* ── Save Button Highlight Animation ── */
 @keyframes highlight-pulse-animation {
   0% {
     box-shadow: 0 0 0 0 rgba(0, 198, 230, 0.7);

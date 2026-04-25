@@ -40,7 +40,7 @@ const BudgetRow = ({
   focusedInput,
   setFocusedInput,
 }) => {
-  const v = getVal(item.id, "all") || {}; // Helper to get all row values
+  const v = getVal(item.id, "all") || {};
   const rateType = getVal(item.id, "rate_type");
 
   return (
@@ -305,20 +305,20 @@ const BudgetEntryForm = ({
   refreshKey = 0,
   onDirtyChange = () => {},
 }) => {
-  const [hierarchy, setHierarchy] = useState([]); // phases → departments → categories → items
-  const [expandedPhases, setExpandedPhases] = useState(new Set([2])); // Default: Production (id=2) open
-  const [values, setValues] = useState({}); // { budget_item_id: { qty, rate, add1, c1 } }
-  const [activeComment, setActiveComment] = useState(null); // { itemId, field }
+  const [hierarchy, setHierarchy] = useState([]);
+  const [expandedPhases, setExpandedPhases] = useState(new Set([2]));
+  const [values, setValues] = useState({});
+  const [activeComment, setActiveComment] = useState(null);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [status, setStatus] = useState(null); // { type: 'success'|'error', text }
-  const [breakdownData, setBreakdownData] = useState({}); // { itemId: [sub-items] }
+  const [status, setStatus] = useState(null);
+  const [breakdownData, setBreakdownData] = useState({});
   const [activeBreakdownId, setActiveBreakdownId] = useState(null);
   const [activeBreakdownItem, setActiveBreakdownItem] = useState(null);
   const [showDisableConfirm, setShowDisableConfirm] = useState(false);
   const [pendingDisableId, setPendingDisableId] = useState(null);
   const [commentAnchorRect, setCommentAnchorRect] = useState(null);
-  const [focusedInput, setFocusedInput] = useState(null); // { itemId, field }
+  const [focusedInput, setFocusedInput] = useState(null);
 
   const {
     getBudgetData,
@@ -336,10 +336,9 @@ const BudgetEntryForm = ({
     else next.add(phaseId);
     setExpandedPhases(next);
   };
-
-  // ── Unified Data Loading (Hierarchy + Values + Breakdowns) ─────────────────
   useEffect(() => {
-    // Reset dirty tracking immediately on project/version switch
+    //Reset unsaved changes tracking immediately on project/version switch
+    //help gained from OpenAIChat
     initialDataRef.current = null;
     onDirtyChange(false);
 
@@ -354,12 +353,9 @@ const BudgetEntryForm = ({
     const loadBudget = async () => {
       setLoading(true);
       setStatus(null);
-
-      // If hierarchy is already in context cache, set it immediately for selective rendering
       if (hierarchyCache) {
         setHierarchy(hierarchyCache);
       } else {
-        // Otherwise, ensure we fetch it along with data
         getBudgetMetadata();
       }
 
@@ -396,7 +392,6 @@ const BudgetEntryForm = ({
         setValues(initialValues);
         setBreakdownData(data.breakdowns || {});
 
-        // Initial snapshot for dirty tracking
         initialDataRef.current = {
           values: JSON.stringify(initialValues),
           breakdowns: JSON.stringify(data.breakdowns || {}),
@@ -416,7 +411,7 @@ const BudgetEntryForm = ({
     loadBudget();
   }, [externalProjectId, versionId, getBudgetData, refreshKey, onDirtyChange]);
 
-  // Dirty detection Effect
+  //Budget unsaved changes tracking -help gained from OpenAI
   useEffect(() => {
     if (!initialDataRef.current) return;
 
@@ -428,7 +423,6 @@ const BudgetEntryForm = ({
     onDirtyChange(isValuesDirty || isBreakdownsDirty);
   }, [values, breakdownData, onDirtyChange]);
 
-  // ── Row value helpers ─────────────────────────────────────────────────────
   const getVal = (itemId, field) => {
     if (field === "all") return values[itemId] || {};
     if (field === "rate_type") return values[itemId]?.rate_type || "day";
@@ -459,8 +453,8 @@ const BudgetEntryForm = ({
     const currentIsItemized = values[itemId]?.is_itemized || false;
     const nextIsItemized = !currentIsItemized;
 
+    //Clear manual values
     if (nextIsItemized) {
-      // Clear manual values as requested
       setValues((prev) => ({
         ...prev,
         [itemId]: {
@@ -471,11 +465,11 @@ const BudgetEntryForm = ({
           is_itemized: true,
         },
       }));
-      // Open modal automatically when first toggled on
+
+      //Open modal when toggled on
       setActiveBreakdownId(itemId);
       setActiveBreakdownItem(itemName);
     } else {
-      // Set state for custom confirmation modal
       setPendingDisableId(itemId);
       setShowDisableConfirm(true);
     }
@@ -485,7 +479,6 @@ const BudgetEntryForm = ({
     const itemId = pendingDisableId;
     if (!itemId) return;
 
-    // Close modal immediately for snappy UX
     setShowDisableConfirm(false);
     setPendingDisableId(null);
 
@@ -494,7 +487,7 @@ const BudgetEntryForm = ({
       [itemId]: {
         ...(prev[itemId] || {}),
         is_itemized: false,
-        total: 0, // Reset total since breakdown is gone
+        total: 0,
       },
     }));
     setBreakdownData((prev) => {
@@ -503,7 +496,6 @@ const BudgetEntryForm = ({
       return next;
     });
 
-    // Delete from backend immediately
     try {
       await fetch(`${API}/api/budget-values/breakdown`, {
         method: "POST",
@@ -516,7 +508,7 @@ const BudgetEntryForm = ({
           breakdown_items: [],
         }),
       });
-      // Invalidate cache after backend check
+      // Invalidate cacheing - help from OpenAI
       invalidateCache(externalProjectId);
     } catch (e) {
       console.error(e);
@@ -531,13 +523,11 @@ const BudgetEntryForm = ({
   const handleBreakdownSave = (validItems, grandTotal) => {
     const itemId = activeBreakdownId;
 
-    // Save to state
     setBreakdownData((prev) => ({
       ...prev,
       [itemId]: validItems,
     }));
 
-    // Update parent row total in values
     setValues((prev) => ({
       ...prev,
       [itemId]: {
@@ -547,7 +537,6 @@ const BudgetEntryForm = ({
       },
     }));
 
-    // Save to backend immediately
     fetch(`${API}/api/budget-values/breakdown`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -560,7 +549,7 @@ const BudgetEntryForm = ({
       }),
     })
       .then(() => {
-        // Invalidate cache after successful save
+        // Invalidate cache - help from OpenAI
         invalidateCache(externalProjectId);
       })
       .catch((err) => console.error("Failed to save breakdown:", err));
@@ -584,9 +573,9 @@ const BudgetEntryForm = ({
     return calcGross(itemValues);
   };
 
+  //If itemized take itemaized total
   const totalRaw = (itemId) => {
     const itemValues = values[itemId] || {};
-    // If itemized, return the stored total which is derived from breakdown
     if (itemValues.is_itemized) return parseFloat(itemValues.total) || 0;
     return calcItemTotal(itemValues);
   };
@@ -678,10 +667,8 @@ const BudgetEntryForm = ({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed");
 
-      // Invalidate the budget cache for this project so changes are picked up everywhere
       invalidateCache(externalProjectId);
 
-      // Update snapshot so form is no longer dirty after save
       initialDataRef.current = {
         values: JSON.stringify(values),
         breakdowns: JSON.stringify(breakdownData),
@@ -690,10 +677,10 @@ const BudgetEntryForm = ({
 
       setStatus({
         type: "success",
-        text: `✅ ${data.message} saved successfully.`,
+        text: `${data.message} saved successfully.`,
       });
     } catch (err) {
-      setStatus({ type: "error", text: `❌ ${err.message}` });
+      setStatus({ type: "error", text: `${err.message}` });
     } finally {
       setSubmitting(false);
     }
@@ -733,10 +720,10 @@ const BudgetEntryForm = ({
     )
       return;
 
-    const newHierarchy = JSON.parse(JSON.stringify(hierarchy)); // Deep clone for 4-level nest
+    const newHierarchy = JSON.parse(JSON.stringify(hierarchy));
 
+    //Category drag
     if (type === "CATEGORY") {
-      // Find which phase and dept this belongs to
       let foundPhaseIdx = -1;
       let foundDeptIdx = -1;
       for (let p = 0; p < newHierarchy.length; p++) {
@@ -775,7 +762,7 @@ const BudgetEntryForm = ({
       return;
     }
 
-    // Item dragging
+    //Item dragging
     let phaseIdx = -1;
     let deptIdx = -1;
     let catIdx = -1;
@@ -849,9 +836,9 @@ const BudgetEntryForm = ({
 
         {/* Show active skeleton only when truly loading a version */}
         {loading && <SkeletonTable />}
-
-        {/* Show static empty format when no version is selected and not loading */}
-        {!loading && (!externalProjectId || !versionId) && <BudgetFormatEmpty />}
+        {!loading && (!externalProjectId || !versionId) && (
+          <BudgetFormatEmpty />
+        )}
 
         {!loading && externalProjectId && versionId && hierarchy.length > 0 && (
           <div

@@ -1,38 +1,35 @@
 import React from "react";
-import { 
-  createBrowserRouter, 
-  RouterProvider, 
-  Outlet, 
-  useLocation 
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Outlet,
+  useLocation,
 } from "react-router-dom";
-import "./App.css";
-import { AuthProvider } from "./contexts/AuthContext";
-import { ModalProvider } from "./contexts/ModalContext";
-import { ProjectProvider } from "./contexts/ProjectContext";
-import ProtectedRoute from "./components/ui/ProtectedRoute";
+import "../App.css";
+import { AuthProvider } from "../contexts/AuthContext";
+import { ModalProvider } from "../contexts/ModalContext";
+import { ProjectProvider } from "../contexts/ProjectContext";
+import ProtectedRoute from "../components/ui/ProtectedRoute";
 
-import Navbar from "./components/ui/Navbar";
-import Home from "./components/pages/Home";
-import AdminBudget from "./components/pages/AdminBudget";
-import AdminDashboard from "./components/pages/AdminDashboard";
-import ProjectDetailDashboard from "./components/pages/ProjectDetailDashboard";
-import LoginPage from "./components/pages/LoginPage";
-import RegisterPage from "./components/pages/RegisterPage";
-import UserManagement from "./components/pages/UserManagement";
-import ClientDashboard from "./components/pages/ClientDashboard";
-import CrewDashboard from "./components/pages/CrewDashboard";
-import Schedule from "./components/pages/Schedule";
-import FinancialDashboard from "./components/pages/FinancialDashboard";
-import BudgetPredictor from "./components/pages/BudgetPredictor";
-import Footer from "./components/ui/Footer";
-import Starfield from "./components/ui/Starfield";
-import { useAuth } from "./contexts/AuthContext";
+import Navbar from "../components/ui/Navbar";
+import Home from "../components/pages/Home";
+import AdminBudget from "../components/pages/AdminBudget";
+import AdminDashboard from "../components/pages/AdminDashboard";
+import ProjectDetailDashboard from "../components/pages/ProjectDetailDashboard";
+import LoginPage from "../components/pages/LoginPage";
+import RegisterPage from "../components/pages/RegisterPage";
+import UserManagement from "../components/pages/UserManagement";
+import ClientDashboard from "../components/pages/ClientDashboard";
+import CrewDashboard from "../components/pages/CrewDashboard";
+import Schedule from "../components/pages/Schedule";
+import FinancialDashboard from "../components/pages/FinancialDashboard";
+import BudgetPredictor from "../components/pages/BudgetPredictor";
+import Footer from "../components/ui/Footer";
+import Starfield from "../components/ui/Starfield";
+import { useAuth } from "../contexts/AuthContext";
 
-/**
- * RootLayout handles the persistent UI elements and layout
- * shared across all routes in the application.
- * Note: It must be a child of AppProviders to access Auth/Modal context.
- */
+//RootLayout handles the persistent UI elements and layout
+//Code helping from OpenAI and Google
 function RootLayout() {
   const location = useLocation();
   const { isTransiting } = useAuth();
@@ -43,7 +40,6 @@ function RootLayout() {
       <div className={`transition-overlay ${isTransiting ? "active" : ""}`} />
       <Navbar />
       <div className={`main-content ${isTransiting ? "fading-out" : ""}`}>
-        {/* Outlet renders the matched child routes */}
         <Outlet />
       </div>
       {!hideFooter && <Footer />}
@@ -51,15 +47,12 @@ function RootLayout() {
   );
 }
 
-/**
- * AppProviders correctly nests our contexts inside the Data Router context.
- * This allows hooks like useNavigate (used in AuthProvider) to work correctly.
- */
+//Code helping from OpenAI and Google
+
 function AppProviders() {
   return (
     <AuthProvider>
       <ModalProvider>
-        {/* ProjectProvider is placed here to store the persistent project list for caching */}
         <ProjectProvider>
           <Starfield />
           <RootLayout />
@@ -69,7 +62,6 @@ function AppProviders() {
   );
 }
 
-// Define the application router configuration with AppProviders at the root
 const router = createBrowserRouter([
   {
     path: "/",
@@ -129,7 +121,9 @@ const router = createBrowserRouter([
       {
         path: "schedule",
         element: (
-          <ProtectedRoute roles={["admin", "manager", "production_crew", "client"]}>
+          <ProtectedRoute
+            roles={["admin", "manager", "production_crew", "client"]}
+          >
             <Schedule />
           </ProtectedRoute>
         ),

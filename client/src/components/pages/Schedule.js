@@ -5,6 +5,7 @@ import "./Schedule.css";
 import ModalPortal from "../common/ModalPortal";
 import Icon from "../common/Icon";
 import html2pdf from "html2pdf.js";
+import { API } from "../../config";
 
 // Sri Lankan Public Holidays 2026 (Hardcoded for simplicity)
 const SRI_LANKA_HOLIDAYS_2026 = [
@@ -110,7 +111,7 @@ const Schedule = () => {
 
   const fetchUser = async () => {
     try {
-      const res = await fetch("/api/me");
+      const res = await fetch(`${API}/api/me`, { credentials: "include" });
       const data = await res.json();
       if (data.logged_in) {
         setUser(data.user);
@@ -123,7 +124,8 @@ const Schedule = () => {
   const fetchTasks = async () => {
     try {
       const res = await fetch(
-        `/api/schedule/tasks?year=${viewYear}&month=${viewMonth + 1}`,
+        `${API}/api/schedule/tasks?year=${viewYear}&month=${viewMonth + 1}`,
+        { credentials: "include" }
       );
       const data = await res.json();
       const taskArray = Array.isArray(data) ? data : [];
@@ -137,7 +139,7 @@ const Schedule = () => {
 
   const fetchProjects = async () => {
     try {
-      const response = await fetch("/api/projects");
+      const response = await fetch(`${API}/api/projects`, { credentials: "include" });
       const data = await response.json();
       setProjects(data);
     } catch (error) {
@@ -147,7 +149,7 @@ const Schedule = () => {
 
   const fetchNotes = async (taskId) => {
     try {
-      const res = await fetch(`/api/schedule/tasks/${taskId}/notes`);
+      const res = await fetch(`${API}/api/schedule/tasks/${taskId}/notes`, { credentials: "include" });
       const data = await res.json();
       setNotes(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -212,9 +214,10 @@ const Schedule = () => {
         };
       });
 
-      const response = await fetch("/api/schedule/bulk-save", {
+      const response = await fetch(`${API}/api/schedule/bulk-save`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           year: viewYear,
           month: viewMonth + 1,
@@ -246,9 +249,10 @@ const Schedule = () => {
     if (!noteText.trim()) return;
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/schedule/tasks/${selectedTask.id}/notes`, {
+      const res = await fetch(`${API}/api/schedule/tasks/${selectedTask.id}/notes`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ note_text: noteText }),
       });
       if (res.ok) {

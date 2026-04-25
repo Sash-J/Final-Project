@@ -212,7 +212,6 @@ const AdminBudget = () => {
     getBudgetMetadata,
     versionsCache,
     getBudgetVersions,
-    invalidateCache,
   } = useProjects();
 
   const [projectId, setProjectId] = useState("");
@@ -351,7 +350,7 @@ const AdminBudget = () => {
         alert("Error creating version: " + (data.error || "Unknown error"));
       }
     } catch (err) {
-      console.error("Failed to create version:", err);
+      alert("Failed to create version.");
     }
   };
 
@@ -380,7 +379,6 @@ const AdminBudget = () => {
         // Force refresh versions list in context
         await getBudgetVersions(projectId, true);
       } catch (err) {
-        console.error("Error deleting version:", err);
         alert("Failed to delete version: " + err.message);
       }
     }

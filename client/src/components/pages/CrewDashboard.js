@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "../../contexts/AuthContext";
 import "./CrewDashboard.css";
-import "./BudgetEntryForm.css"; // Reuse the admin sheet styles
+import "./BudgetEntryForm.css";
 import SuiTimeline from "./SuiTimeline";
 import ModalPortal from "../common/ModalPortal";
 import GlassDropdown from "../common/GlassDropdown";
@@ -205,7 +205,6 @@ const CrewDashboard = () => {
             });
           }
 
-          // Always show the phase to maintain consistency (Pre, Prod, Post)
           newPhase.phaseTotal = phaseTotal;
           filledPhases.push(newPhase);
           grandTotal += phaseTotal;
@@ -254,7 +253,7 @@ const CrewDashboard = () => {
         useCORS: true,
         letterRendering: true,
         backgroundColor: "#0d0e15",
-        windowWidth: 1200, // Specify the width of the canvas to include all columns
+        windowWidth: 1200,
       },
       jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
     };
@@ -447,7 +446,6 @@ const CrewDashboard = () => {
         </div>
       )}
 
-      {/* Budget Sheet Modal */}
       {selectedProject && (
         <ModalPortal>
           <div className="crew-modal-overlay" onClick={closeBudgetModal}>
@@ -653,7 +651,6 @@ const CrewDashboard = () => {
         </ModalPortal>
       )}
 
-      {/* TIMELINE MODAL (Read Only) */}
       {selectedTimelineProject && (
         <ModalPortal>
           <div className="sui-modal-overlay">

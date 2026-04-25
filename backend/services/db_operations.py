@@ -1,9 +1,6 @@
 from .database import get_connection
 
 
-# ── Tables ────────────────────────────────────────────────────────────────────
-
-
 def get_phases():
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
@@ -24,13 +21,9 @@ def get_tables():
     return [table[0] for table in result]
 
 
-# ── Projects ──────────────────────────────────────────────────────────────────
-
-
 def get_projects():
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
-    # Get projects with concatenated lists of clients and crew members and version count
     query = """
         SELECT p.*, 
                GROUP_CONCAT(DISTINCT u_client.username SEPARATOR ', ') as client_usernames,
@@ -54,7 +47,13 @@ def get_projects():
 
 
 def insert_project(
-    project_name, code_name=None, start_date=None, end_date=None, location=None, color='#00c6e6', project_image=None
+    project_name,
+    code_name=None,
+    start_date=None,
+    end_date=None,
+    location=None,
+    color="#00c6e6",
+    project_image=None,
 ):
     conn = get_connection()
     cursor = conn.cursor()
@@ -77,8 +76,8 @@ def update_project(
     start_date=None,
     end_date=None,
     location=None,
-    color='#00c6e6',
-    project_image=None
+    color="#00c6e6",
+    project_image=None,
 ):
     conn = get_connection()
     cursor = conn.cursor()
@@ -86,16 +85,24 @@ def update_project(
         """UPDATE projects 
            SET project_name = %s, code_name = %s, start_date = %s, end_date = %s, location = %s, color = %s, project_image = %s 
            WHERE id = %s""",
-        (project_name, code_name, start_date, end_date, location, color, project_image, project_id),
+        (
+            project_name,
+            code_name,
+            start_date,
+            end_date,
+            location,
+            color,
+            project_image,
+            project_id,
+        ),
     )
-    
-    # Sync the color across all schedule tasks associated with this project
+
     if color:
         cursor.execute(
             """UPDATE schedule_tasks SET task_color = %s WHERE project_id = %s""",
-            (color, project_id)
+            (color, project_id),
         )
-        
+
     conn.commit()
     cursor.close()
     conn.close()
@@ -106,16 +113,20 @@ def delete_project(project_id):
     conn = get_connection()
     cursor = conn.cursor()
     try:
-        # Delete related records to handle foreign keys
-        cursor.execute("DELETE FROM client_projects WHERE project_id = %s", (project_id,))
+        cursor.execute(
+            "DELETE FROM client_projects WHERE project_id = %s", (project_id,)
+        )
         cursor.execute("DELETE FROM crew_projects WHERE project_id = %s", (project_id,))
-        cursor.execute("DELETE FROM project_budget_values WHERE project_id = %s", (project_id,))
+        cursor.execute(
+            "DELETE FROM project_budget_values WHERE project_id = %s", (project_id,)
+        )
         cursor.execute("DELETE FROM payments WHERE project_id = %s", (project_id,))
-        cursor.execute("DELETE FROM budget_versions WHERE project_id = %s", (project_id,))
-        
-        # Delete the project itself
+        cursor.execute(
+            "DELETE FROM budget_versions WHERE project_id = %s", (project_id,)
+        )
+
         cursor.execute("DELETE FROM projects WHERE id = %s", (project_id,))
-        
+
         conn.commit()
     except Exception as e:
         conn.rollback()
@@ -124,6 +135,7 @@ def delete_project(project_id):
         cursor.close()
         conn.close()
     return True
+
 
 def get_project_name(project_id):
     conn = get_connection()
@@ -134,11 +146,15 @@ def get_project_name(project_id):
     conn.close()
     return result[0] if result else "Unknown Project"
 
+
 def check_color_exists(color, exclude_project_id=None):
     conn = get_connection()
     cursor = conn.cursor(buffered=True)
     if exclude_project_id:
-        cursor.execute("SELECT project_name FROM projects WHERE color = %s AND id != %s", (color, exclude_project_id))
+        cursor.execute(
+            "SELECT project_name FROM projects WHERE color = %s AND id != %s",
+            (color, exclude_project_id),
+        )
     else:
         cursor.execute("SELECT project_name FROM projects WHERE color = %s", (color,))
     result = cursor.fetchone()
@@ -150,7 +166,6 @@ def check_color_exists(color, exclude_project_id=None):
 def get_project_by_id(project_id):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True, buffered=True)
-    # Get project with team and financial summary
     query = """
         SELECT p.*, 
                GROUP_CONCAT(DISTINCT u_client.username SEPARATOR ', ') as client_usernames,
@@ -172,7 +187,7 @@ def get_project_by_id(project_id):
     """
     cursor.execute(query, (project_id,))
     result = cursor.fetchone()
-    
+
     if result:
         result["latest_budget_total"] = float(result["latest_budget_total"] or 0)
         result["total_paid"] = float(result["total_paid"] or 0)
@@ -181,10 +196,6 @@ def get_project_by_id(project_id):
     cursor.close()
     conn.close()
     return result
-
-
-
-# ── Departments ───────────────────────────────────────────────────────────────
 
 
 def insert_department(department_name, phase_id=2):
@@ -213,9 +224,6 @@ def get_departments():
     return result
 
 
-# ── Categories ────────────────────────────────────────────────────────────────
-
-
 def get_categories():
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
@@ -236,7 +244,6 @@ def get_categories():
 def insert_category(category_name, department_id):
     conn = get_connection()
     cursor = conn.cursor(buffered=True)
-    # Get max sort_order for this department
     cursor.execute(
         "SELECT COALESCE(MAX(sort_order), 0) FROM categories WHERE department_id = %s",
         (department_id,),
@@ -252,9 +259,6 @@ def insert_category(category_name, department_id):
     cursor.close()
     conn.close()
     return new_id
-
-
-# ── Budget Items ──────────────────────────────────────────────────────────────
 
 
 def get_budget_items():
@@ -333,9 +337,6 @@ def update_categories_order(ordered_ids):
     return True
 
 
-# ── Project Budget Values ─────────────────────────────────────────────────────
-
-
 def get_budget_values():
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
@@ -384,9 +385,6 @@ def insert_budget_value(
     return new_id
 
 
-# ── Hierarchy (departments → categories → budget items) ───────────────────────
-
-
 def get_hierarchy():
     """
     Returns the hierarchy grouped by phase using a single optimized JOIN query.
@@ -394,7 +392,6 @@ def get_hierarchy():
     conn = get_connection()
     cursor = conn.cursor(dictionary=True, buffered=True)
 
-    # Combined query to reduce network round-trips
     query = """
         SELECT 
             p.id as phase_id, p.phase_name,
@@ -412,67 +409,56 @@ def get_hierarchy():
     cursor.close()
     conn.close()
 
-    # Reconstruct nested structure while preserving SQL sort order
     phases = []
     phase_map = {}
-    
+
     for row in rows:
-        p_id = row['phase_id']
+        p_id = row["phase_id"]
         if p_id not in phase_map:
             phase = {
-                "phase_id": p_id, 
-                "phase_name": row['phase_name'], 
-                "departments": [], 
-                "_dept_map": {}
+                "phase_id": p_id,
+                "phase_name": row["phase_name"],
+                "departments": [],
+                "_dept_map": {},
             }
             phases.append(phase)
             phase_map[p_id] = phase
-        
+
         phase = phase_map[p_id]
-        d_id = row['dept_id']
-        
+        d_id = row["dept_id"]
+
         if d_id and d_id not in phase["_dept_map"]:
             dept = {
-                "id": d_id, 
-                "department_name": row['department_name'], 
-                "categories": [], 
-                "_cat_map": {}
+                "id": d_id,
+                "department_name": row["department_name"],
+                "categories": [],
+                "_cat_map": {},
             }
             phase["departments"].append(dept)
             phase["_dept_map"][d_id] = dept
-            
+
         if d_id:
             dept = phase["_dept_map"][d_id]
-            c_id = row['cat_id']
+            c_id = row["cat_id"]
             if c_id and c_id not in dept["_cat_map"]:
-                cat = {
-                    "id": c_id, 
-                    "category_name": row['category_name'], 
-                    "items": []
-                }
+                cat = {"id": c_id, "category_name": row["category_name"], "items": []}
                 dept["categories"].append(cat)
                 dept["_cat_map"][c_id] = cat
-            
+
             if c_id:
                 cat = dept["_cat_map"][c_id]
-                i_id = row['item_id']
+                i_id = row["item_id"]
                 if i_id:
-                    cat["items"].append({
-                        "id": i_id, 
-                        "item_name": row['item_name'], 
-                        "category_id": c_id
-                    })
+                    cat["items"].append(
+                        {"id": i_id, "item_name": row["item_name"], "category_id": c_id}
+                    )
 
-    # Remove temporary maps
     for p in phases:
         p.pop("_dept_map")
         for d in p["departments"]:
             d.pop("_cat_map")
 
     return phases
-
-
-# ── Budget values for a specific project (for pre-fill) ───────────────────────
 
 
 def get_budget_values_for_project(project_id, version_id=None):
@@ -520,44 +506,57 @@ def get_budget_values_for_project(project_id, version_id=None):
 
     cursor.execute(query, params)
     rows = cursor.fetchall()
-    
-    # Standardize result by string ID
-    result = {str(row["budget_item_id"]): {**row, "is_itemized": bool(row.get("is_itemized", 0))} for row in rows}
 
-    # Find version_id if it wasn't provided (already queried in subquery if else block)
+    result = {
+        str(row["budget_item_id"]): {
+            **row,
+            "is_itemized": bool(row.get("is_itemized", 0)),
+        }
+        for row in rows
+    }
+
     v_id = version_id
     if not v_id and rows:
-        # If we didn't have version_id, use the one from the first row found
         v_id = rows[0].get("version_id")
-    
+
     if not v_id:
-        # As a fallback if no rows in project_budget_values, get latest version_id
-        cursor.execute("SELECT id FROM budget_versions WHERE project_id = %s ORDER BY version_number DESC LIMIT 1", (project_id,))
+        cursor.execute(
+            "SELECT id FROM budget_versions WHERE project_id = %s ORDER BY version_number DESC LIMIT 1",
+            (project_id,),
+        )
         rv = cursor.fetchone()
-        v_id = rv['id'] if rv else None
+        v_id = rv["id"] if rv else None
 
     if v_id:
-        # SMART DETECTION FALLBACK: Ensure items in budget_item_breakdowns are always marked itemized
-        # Also aggregate the total sum for these items
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT budget_item_id, SUM(total) as agg_total 
             FROM budget_item_breakdowns 
             WHERE version_id = %s 
             GROUP BY budget_item_id
-        """, (v_id,))
+        """,
+            (v_id,),
+        )
         for b_row in cursor.fetchall():
             bid_str = str(b_row["budget_item_id"])
             if bid_str not in result:
                 result[bid_str] = {
                     "budget_item_id": b_row["budget_item_id"],
-                    "quantity": 0, "rate": 0, "rate_type": "day", "rate_multiplier": 1,
-                    "gross_revenue": 0, "additional1": 0, "comment1": "", 
+                    "quantity": 0,
+                    "rate": 0,
+                    "rate_type": "day",
+                    "rate_multiplier": 1,
+                    "gross_revenue": 0,
+                    "additional1": 0,
+                    "comment1": "",
                     "total": b_row["agg_total"] or 0,
-                    "is_itemized": True
+                    "is_itemized": True,
                 }
             else:
                 result[bid_str]["is_itemized"] = True
-                result[bid_str]["total"] = b_row["agg_total"] or result[bid_str]["total"]
+                result[bid_str]["total"] = (
+                    b_row["agg_total"] or result[bid_str]["total"]
+                )
 
     cursor.close()
     conn.close()
@@ -581,23 +580,19 @@ def create_budget_version(project_id, source_version_id=None):
     conn = get_connection()
     cursor = conn.cursor(buffered=True)
     try:
-        # Get next version number
         cursor.execute(
             "SELECT COALESCE(MAX(version_number), 0) + 1 FROM budget_versions WHERE project_id = %s",
             (project_id,),
         )
         next_version = cursor.fetchone()[0]
 
-        # Insert new version
         cursor.execute(
             "INSERT INTO budget_versions (project_id, version_number) VALUES (%s, %s)",
             (project_id, next_version),
         )
         new_version_id = cursor.lastrowid
 
-        # If source version is provided, clone values
         if source_version_id:
-            # 1. Clone main values
             cursor.execute(
                 """
                 INSERT INTO project_budget_values (
@@ -613,7 +608,6 @@ def create_budget_version(project_id, source_version_id=None):
                 (new_version_id, source_version_id),
             )
 
-            # 2. Clone breakdowns
             cursor.execute(
                 """
                 INSERT INTO budget_item_breakdowns (
@@ -643,7 +637,6 @@ def delete_budget_version(version_id):
     conn = get_connection()
     cursor = conn.cursor(buffered=True)
     try:
-        # Get project_id before deleting
         cursor.execute(
             "SELECT project_id FROM budget_versions WHERE id = %s", (version_id,)
         )
@@ -652,15 +645,12 @@ def delete_budget_version(version_id):
             return False
         project_id = row[0]
 
-        # Delete values first (manual cascade)
         cursor.execute(
             "DELETE FROM project_budget_values WHERE version_id = %s", (version_id,)
         )
 
-        # Delete the version entry
         cursor.execute("DELETE FROM budget_versions WHERE id = %s", (version_id,))
 
-        # Resequence remaining versions for this project
         cursor.execute(
             "SELECT id FROM budget_versions WHERE project_id = %s ORDER BY version_number ASC, created_at ASC",
             (project_id,),
@@ -680,9 +670,6 @@ def delete_budget_version(version_id):
     finally:
         cursor.close()
         conn.close()
-
-
-# ── Batch insert / upsert budget values ───────────────────────────────────────
 
 
 def insert_budget_values_batch(project_id, version_id, values, client_ids=None):
@@ -734,14 +721,10 @@ def insert_budget_values_batch(project_id, version_id, values, client_ids=None):
         cursor.executemany(sql, rows)
         affected = cursor.rowcount
 
-        # If client_ids are provided, update the client_projects table
         if client_ids is not None:
-            # Clear existing clients for this project
             cursor.execute(
                 "DELETE FROM client_projects WHERE project_id = %s", (project_id,)
             )
-
-            # Insert the new clients
             if client_ids:
                 client_sql = (
                     "INSERT INTO client_projects (user_id, project_id) VALUES (%s, %s)"
@@ -775,16 +758,17 @@ def get_budget_item_breakdowns(project_id, version_id, budget_item_id):
     return result
 
 
-def save_budget_item_breakdowns_batch(project_id, version_id, budget_item_id, breakdown_items):
+def save_budget_item_breakdowns_batch(
+    project_id, version_id, budget_item_id, breakdown_items
+):
     conn = get_connection()
     cursor = conn.cursor()
     try:
-        # Delete old breakdowns for this item
         cursor.execute(
             "DELETE FROM budget_item_breakdowns WHERE project_id = %s AND version_id = %s AND budget_item_id = %s",
-            (project_id, version_id, budget_item_id)
+            (project_id, version_id, budget_item_id),
         )
-        
+
         if breakdown_items:
             query = """
                 INSERT INTO budget_item_breakdowns 
@@ -803,12 +787,12 @@ def save_budget_item_breakdowns_batch(project_id, version_id, budget_item_id, br
                     b.get("rate", 0),
                     b.get("gross_revenue", 0),
                     b.get("additional1", 0),
-                    b.get("total", 0)
+                    b.get("total", 0),
                 )
                 for b in breakdown_items
             ]
             cursor.executemany(query, rows)
-            
+
         conn.commit()
         return True
     except Exception as e:
@@ -817,9 +801,6 @@ def save_budget_item_breakdowns_batch(project_id, version_id, budget_item_id, br
     finally:
         cursor.close()
         conn.close()
-
-
-# Functions moved to auth_operations.py
 
 
 def insert_payment(project_id, amount, payment_date, notes=""):
@@ -910,9 +891,7 @@ def get_all_projects_financials():
     return result
 
 
-# Milestones moved to milestone_management.py
-
-
+# milestones
 def update_project_status(project_id, status):
     conn = get_connection()
     cursor = conn.cursor()
@@ -931,7 +910,6 @@ def run_budget_migration():
     print("Migration: Connected.")
     cursor = conn.cursor()
     try:
-        # Create budget_versions table
         print("Migration: Creating budget_versions table...")
         cursor.execute(
             """
@@ -945,7 +923,6 @@ def run_budget_migration():
         """
         )
 
-        # Check if version_id already exists in project_budget_values
         print("Migration: Checking for version_id column...")
         cursor.execute("SHOW COLUMNS FROM project_budget_values LIKE 'version_id'")
         if not cursor.fetchone():
@@ -954,7 +931,6 @@ def run_budget_migration():
                 "ALTER TABLE project_budget_values ADD COLUMN version_id INT"
             )
 
-        # Create "Version 1" for existing projects
         print("Migration: Creating Version 1 for existing projects...")
         cursor.execute(
             """
@@ -965,7 +941,6 @@ def run_budget_migration():
         """
         )
 
-        # Link budget values to Version 1
         print("Migration: Linking budget values to Version 1...")
         cursor.execute(
             """
@@ -976,7 +951,6 @@ def run_budget_migration():
         """
         )
 
-        # Handle index update
         print("Migration: Updating index...")
         try:
             cursor.execute("ALTER TABLE project_budget_values DROP INDEX project_id")
@@ -991,7 +965,6 @@ def run_budget_migration():
         except:
             pass
 
-        # Add is_itemized column to project_budget_values
         print("Migration: Checking for is_itemized column...")
         cursor.execute("SHOW COLUMNS FROM project_budget_values LIKE 'is_itemized'")
         if not cursor.fetchone():
@@ -1000,7 +973,6 @@ def run_budget_migration():
                 "ALTER TABLE project_budget_values ADD COLUMN is_itemized TINYINT(1) DEFAULT 0"
             )
 
-        # Create budget_item_breakdowns table
         print("Migration: Creating budget_item_breakdowns table...")
         cursor.execute(
             """

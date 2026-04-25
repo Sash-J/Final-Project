@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { Link } from "react-router-dom";
+import Icon from "../common/Icon";
 import "./LoginPage.css";
 
 const LoginPage = () => {
@@ -8,7 +9,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const { login, startTransition } = useAuth();
+  const { user, login, logout, loading, startTransition } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,6 +21,52 @@ const LoginPage = () => {
       setError(res.error);
     }
   };
+
+  const dashboardPath = () => {
+    if (!user) return "/";
+    if (user.role === "admin" || user.role === "manager") return "/admin";
+    if (user.role === "production_crew") return "/crew-dashboard";
+    return "/dashboard";
+  };
+
+  if (loading) {
+    return (
+      <div className="login-container">
+        <div className="login-loading-glass">
+          <div className="glass-loader"></div>
+          <p>Verifying session...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (user) {
+    return (
+      <div className="login-container">
+        <div className="login-card already-logged-in-card fade-in">
+          <div className="user-icon-hero">
+            <Icon name="account_circle" modifiers="lg" />
+          </div>
+          <h2>Welcome Back</h2>
+          <p className="logged-in-as">
+            Signed in as <strong>{user.username}</strong>
+          </p>
+          
+          <div className="auth-action-group">
+            <button 
+              className="login-btn proceed-btn" 
+              onClick={() => startTransition(dashboardPath())}
+            >
+              Go to Dashboard
+            </button>
+            <button className="logout-direct-btn" onClick={logout}>
+              Sign Out & Switch Account
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="login-container">

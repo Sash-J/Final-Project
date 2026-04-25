@@ -2,7 +2,7 @@ import React from "react";
 import { getCurrencySymbol } from "../../utils/currencyUtils";
 import "./BudgetEntrySkeleton.css";
 
-// ── Shared Table Components ──────────────────────────────────────────────────
+//Table columns
 export const BudgetColGroup = () => (
   <colgroup className="bef-skeleton-colgroup">
     <col />
@@ -73,7 +73,7 @@ export const BudgetTableHeader = ({ isSkeleton = false }) => (
   </thead>
 );
 
-// ── Skeletal Loading Components ─────────────────────────────────────────────
+//keletal
 export const SkeletonBox = ({
   width,
   height,

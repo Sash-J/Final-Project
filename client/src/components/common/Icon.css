@@ -16,9 +16,7 @@
     opacity 0.2s ease;
 }
 
-/* ── Modifiers ───────────────────────────────────────────────────────────── */
-
-/* Sizes modifiers */
+/*Sizes modifiers*/
 .icon-root.sm {
   font-size: 0.85rem;
 }
@@ -32,7 +30,6 @@
   font-size: 3rem;
 }
 
-/* Weights */
 .icon-root.bold {
   font-variation-settings: "wght" 700;
 }
@@ -40,12 +37,10 @@
   font-variation-settings: "wght" 200;
 }
 
-/* Filling */
 .icon-root.filled {
   font-variation-settings: "FILL" 1;
 }
 
-/* Animations */
 .icon-root.spin {
   animation: icon-spin 2s linear infinite;
 }
@@ -59,7 +54,6 @@
   }
 }
 
-/* Ghost / Subtle */
 .icon-root.subtle {
   opacity: 0.6;
 }

@@ -147,7 +147,6 @@
   letter-spacing: -0.5px;
 }
 
-/* ── Dashboard Grid ───────────────────────────────────────────────────────── */
 .dashboard-content-grid {
   display: grid;
   grid-template-columns: 280px 1fr;
@@ -173,7 +172,6 @@
   overflow: hidden;
 }
 
-/* ── Sidebar Nav ──────────────────────────────────────────────────────────── */
 .dashboard-sidebar-nav {
   display: flex;
   flex-direction: column;
@@ -213,7 +211,6 @@
   color: #00c6e6;
 }
 
-/* ── Bento Layout ─────────────────────────────────────────────────────────── */
 .bento-layout {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -287,7 +284,6 @@
   font-size: 0.9rem;
 }
 
-/* ── Integrated Sections ─────────────────────────────────────────────────── */
 .timeline-section-header {
   display: flex;
   justify-content: space-between;
@@ -312,7 +308,6 @@
   scroll-behavior: smooth;
 }
 
-/* Custom Scrollbar for Timeline View */
 .project-timeline-embedded-wrap::-webkit-scrollbar {
   width: 6px;
 }
@@ -364,7 +359,6 @@
   }
 }
 
-/* ── Add Milestone Panel ──────────────────────────────────────────────────── */
 .milestone-add-toggle-btn {
   display: flex;
   align-items: center;
@@ -420,7 +414,6 @@
     gap: 0;
   }
 }
-/* ── Dashboard Skeleton ─────────────────────────────────────────────────── */
 .project-detail-skeleton {
   padding: 40px;
   max-width: 1400px;
@@ -502,7 +495,6 @@
   }
 }
 
-/* ── Budget Version Selector Bar ─────────────────────────────────────────── */
 .budget-version-bar {
   display: flex;
   align-items: center;
@@ -560,7 +552,6 @@
   box-shadow: 0 0 14px rgba(0, 198, 230, 0.35);
 }
 
-/* ── Finance Sub-Nav ────────────────────────────────────────────────────── */
 .finance-sub-nav {
   display: flex;
   gap: 10px;

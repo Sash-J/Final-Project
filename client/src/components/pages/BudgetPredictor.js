@@ -22,10 +22,10 @@ const BudgetPredictor = () => {
     vfx_required: 0,
   });
 
+  // help from openai and my knowledge
   const [prediction, setPrediction] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -68,7 +68,6 @@ const BudgetPredictor = () => {
 
       <div className="predictor-glass-card">
         <form onSubmit={handlePredict} className="predictor-form-bento">
-          {/* Box 1: Scale & Logistics */}
           <div className="bento-box box-logistics">
             <h3>Logistics & Scale</h3>
             <div className="input-field">
@@ -128,7 +127,6 @@ const BudgetPredictor = () => {
             </div>
           </div>
 
-          {/* Box 2: Financial Breakdown */}
           <div className="bento-box box-finance">
             <h3>Dept. Estimates ({getCurrencySymbol()})</h3>
             <div className="finance-grid">
@@ -195,7 +193,6 @@ const BudgetPredictor = () => {
             </div>
           </div>
 
-          {/* Box 3: Quality Factors */}
           <div className="bento-box box-quality">
             <h3>Production Value</h3>
             <div className="input-field">
@@ -230,7 +227,6 @@ const BudgetPredictor = () => {
             </div>
           </div>
 
-          {/* Box 4: User Consideration Notes */}
           <div className="bento-box box-notes">
             <h3>User Considerations</h3>
             <p className="notes-text">
@@ -244,7 +240,6 @@ const BudgetPredictor = () => {
             </p>
           </div>
 
-          {/* Box 5: Prediction Console */}
           <div className="bento-box box-console">
             <div className="console-layout">
               <div className="action-area">
@@ -275,7 +270,7 @@ const BudgetPredictor = () => {
           </div>
         </form>
 
-        {error && <div className="predictor-error">❌ {error}</div>}
+        {error && <div className="predictor-error">{error}</div>}
       </div>
     </div>
   );

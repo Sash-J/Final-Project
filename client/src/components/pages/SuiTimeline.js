@@ -26,7 +26,6 @@ const SuiTimeline = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // Form state
   const [status, setStatus] = useState("pending");
   const [clientNote, setClientNote] = useState("");
   const [title, setTitle] = useState("");
@@ -46,11 +45,8 @@ const SuiTimeline = ({
   useEffect(() => {
     if (projectId) {
       console.log("DEBUG: SuiTimeline initialized for project", projectId);
-      // Only force fetch if updateTrigger is > 0 (meaning something external triggered an update)
-      // Otherwise rely on the context's internal caching logic via getProjectMilestones(projectId, false)
       fetchMilestones(updateTrigger > 0);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId, updateTrigger]);
 
   useEffect(() => {
@@ -59,9 +55,6 @@ const SuiTimeline = ({
         let { clientWidth } = containerRef.current;
         if (clientWidth < 100) clientWidth = 800;
 
-        // Sourced from openAI
-        // Proportional height calculation: 3 milestones per 540px viewport (~180px per milestone)
-        // This ensures the timeline always has vertical "room" to scroll
         const itemHeight = 180;
         const totalHeight = Math.max(540, milestones.length * itemHeight);
 
@@ -80,10 +73,8 @@ const SuiTimeline = ({
     };
   }, [milestones]);
 
-  // Auto-scroll to bottom (inception point) on load
   useEffect(() => {
     if (!loading && containerRef.current && !preview) {
-      // Small delay to ensure browser layout is stable
       const timer = setTimeout(() => {
         const parent = containerRef.current.parentElement;
         if (parent) {
@@ -112,7 +103,6 @@ const SuiTimeline = ({
     setSelectedMilestone(m);
     setStatus(m.status);
 
-    // Strip out internal attribution tag when editing so the user only sees their raw text
     let displayNote = m.client_note || "";
     const noteMatch = displayNote.match(
       /^\[(Admin|Manager|Client|VisionDivision)\]\s*([\s\S]*)$/i,
@@ -172,7 +162,7 @@ const SuiTimeline = ({
         { withCredentials: true },
       );
       closeModal();
-      fetchMilestones(true); // Force re-fetch on save
+      fetchMilestones(true);
       if (onMilestonesChange) onMilestonesChange();
     } catch (err) {
       alert("Failed to save. Please try again.");
@@ -193,7 +183,7 @@ const SuiTimeline = ({
       });
       setShowDeleteConfirm(false);
       closeModal();
-      fetchMilestones(true); // Force re-fetch on delete
+      fetchMilestones(true);
       if (onMilestonesChange) onMilestonesChange();
     } catch (err) {
       console.error(err);
@@ -203,12 +193,10 @@ const SuiTimeline = ({
     }
   };
 
-  // Prepare point coordinates
   const count = milestones.length;
-  const startY = 80; // Increased padding to prevent first milestone overflow
-  const endY = dimensions.height - 100; // Increased padding to prevent last milestone overflow
+  const startY = 80;
+  const endY = dimensions.height - 100;
   const totalVerticalSpace = Math.max(0, endY - startY);
-  // Determine strict scaling factor so text boxes do not push into each other vertically
   const spacePerNode =
     count > 1 ? totalVerticalSpace / (count - 1) : totalVerticalSpace;
   const textScale = Math.min(1, spacePerNode / 120);
@@ -217,7 +205,6 @@ const SuiTimeline = ({
     count > 1 ? (dimensions.width - 120) / (count - 1) : dimensions.width;
   const previewTextScale = Math.min(1, hSpacePerNode / 120);
 
-  // Sort milestones chronologically (Oldest first) to ensure consistent Story flow
   const sortedMilestones = [...milestones].sort((a, b) => {
     const dateA = new Date(a.target_date || 0);
     const dateB = new Date(b.target_date || 0);
@@ -235,15 +222,12 @@ const SuiTimeline = ({
       return { x, y, isTop: i % 2 === 0, ...m };
     }
 
-    // Correct vertical mapping for Bottom-to-Top Story flow:
-    // i=0 (First Milestone) maps to endY (Bottom)
-    // i=N-1 (Last Milestone) maps to startY (Top)
     const y =
       count === 1
         ? (startY + endY) / 2
         : endY - (i / (count - 1)) * (endY - startY);
 
-    const xOffset = 120; // Increased curve amplitude for a more dramatic Story flow
+    const xOffset = 120;
     const isLeft = i % 2 === 0;
     const x = isLeft
       ? dimensions.width * 0.5 - xOffset
@@ -263,7 +247,6 @@ const SuiTimeline = ({
     });
   };
 
-  // Prepare Master Path and Gradient data for the SVG
   const generateMasterPath = () => {
     if (points.length === 0)
       return { dPath: "", gradientStops: [], gradientId: "" };
@@ -329,8 +312,6 @@ const SuiTimeline = ({
         const segment = ` C ${prevX} ${midY}, ${p.x} ${midY}, ${p.x} ${p.y}`;
         dPath += segment;
 
-        // Only add to the glowing path if it's not a future/pending milestone
-        // We allow the glow to reach the latest active milestone
         if (p.status === "completed" || p.status === "in_progress") {
           glowDPath = dPath;
         }
@@ -352,7 +333,6 @@ const SuiTimeline = ({
         prevY = p.y;
       });
 
-      // Tail (pointing to the future/top) - Extends the path toward infinity
       const futureExtend = -300;
       dPath += ` C ${prevX} ${prevY - 100}, ${dimensions.width * 0.5} ${prevY - 100}, ${dimensions.width * 0.5} ${futureExtend}`;
 
@@ -484,7 +464,6 @@ const SuiTimeline = ({
       <div className="sui-milestones-absolute">
         {points.map((p, i) => {
           const isLeft = p.isLeft;
-          // Calculate exact pixel boundaries to ensure it never overflows the container
           const availableWidth = isLeft
             ? p.x - 100
             : dimensions.width - p.x - 100;
@@ -562,7 +541,6 @@ const SuiTimeline = ({
                         if (match) {
                           const rawTag = match[1];
                           text = match[2];
-                          // Map Admin/Manager to VisionDivision for the badge text
                           roleTag =
                             rawTag.toLowerCase() === "admin" ||
                             rawTag.toLowerCase() === "manager" ||

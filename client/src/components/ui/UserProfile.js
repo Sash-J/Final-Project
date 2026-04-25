@@ -12,21 +12,32 @@ const UserProfile = () => {
   const triggerRef = useRef(null);
   const navigate = useNavigate();
 
-  // Close menu when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      // If we clicked the trigger, isOpen state is handled by the onClick
+    const handleClose = (event) => {
       if (triggerRef.current && triggerRef.current.contains(event.target)) {
         return;
       }
-      // Since menu is portalled, we check menuRef specifically
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setIsOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+
+    const handleAction = () => {
+      if (isOpen) setIsOpen(false);
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClose);
+      window.addEventListener("resize", handleAction);
+      window.addEventListener("scroll", handleAction, { passive: true });
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClose);
+      window.removeEventListener("resize", handleAction);
+      window.removeEventListener("scroll", handleAction);
+    };
+  }, [isOpen]);
 
   const toggleMenu = (e) => {
     setAnchorRect(e.currentTarget.getBoundingClientRect());
@@ -41,7 +52,6 @@ const UserProfile = () => {
 
   if (!user) return null;
 
-  // Get display name and role
   const displayName = user.username || "User";
   const initial = displayName.charAt(0).toUpperCase();
 
@@ -62,9 +72,9 @@ const UserProfile = () => {
             ref={menuRef}
             className="glass-profile-menu fade-in"
             style={{
-              top: anchorRect ? anchorRect.bottom + 12 : 0,
+              top: anchorRect ? anchorRect.bottom + 8 : 0,
               right: anchorRect
-                ? window.innerWidth - anchorRect.right
+                ? Math.max(10, window.innerWidth - anchorRect.right)
                 : 20,
             }}
           >

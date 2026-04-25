@@ -1,14 +1,22 @@
 from flask import Blueprint, jsonify, request
-from routes.notifications_management import notify_all_admins, notify_project_stakeholders
+from routes.notifications_management import (
+    notify_all_admins,
+    notify_project_stakeholders,
+)
 import services.db_operations as db
 import services.auth_operations as auth
-from core.session_handler import login_required, roles_required, get_current_user_id, get_current_user_role
+from core.session_handler import (
+    login_required,
+    roles_required,
+    get_current_user_id,
+    get_current_user_role,
+)
 import os
 
-budget_bp = Blueprint('budget_management', __name__)
+budget_bp = Blueprint("budget_management", __name__)
 
-# ── Departments ───────────────────────────────────────────────────────────────
 
+# Departments
 @budget_bp.route("/api/departments", methods=["GET"])
 @login_required
 def departments_get():
@@ -20,7 +28,7 @@ def departments_get():
 def departments_post():
     data = request.get_json()
     department_name = data.get("department_name", "").strip()
-    phase_id = data.get("phase_id", 2)  # Default to Production
+    phase_id = data.get("phase_id", 2)
     if not department_name or not phase_id:
         return jsonify({"error": "department_name and phase_id are required"}), 400
     new_id = db.insert_department(department_name, phase_id)
@@ -33,8 +41,7 @@ def phases_get():
     return jsonify(db.get_phases()), 200
 
 
-# ── Categories ────────────────────────────────────────────────────────────────
-
+# Categories
 @budget_bp.route("/api/categories", methods=["GET"])
 @login_required
 def categories_get():
@@ -67,8 +74,7 @@ def categories_reorder():
         return jsonify({"error": str(e)}), 500
 
 
-# ── Budget Items ──────────────────────────────────────────────────────────────
-
+# Budget Items
 @budget_bp.route("/api/budget-items", methods=["GET"])
 @login_required
 def budget_items_get():
@@ -101,8 +107,7 @@ def budget_items_reorder():
         return jsonify({"error": str(e)}), 500
 
 
-# ── Budget Values ─────────────────────────────────────────────────────────────
-
+# Budget Values
 @budget_bp.route("/api/budget-values", methods=["GET"])
 @login_required
 def budget_values_get():
@@ -154,17 +159,15 @@ def budget_values_batch():
         affected = db.insert_budget_values_batch(
             project_id, version_id, values, client_ids
         )
-        
-        # Notify project stakeholders
         proj_name = db.get_project_name(project_id)
         sender_id = get_current_user_id()
         notify_project_stakeholders(
-            project_id, 
-            f"Budget updated for {proj_name}", 
+            project_id,
+            f"Budget updated for {proj_name}",
             exclude_user_id=sender_id,
-            msg_type="success"
+            msg_type="success",
         )
-        
+
         return jsonify({"message": f"{affected} rows saved", "affected": affected}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -176,12 +179,17 @@ def budget_item_breakdown_get():
     project_id = request.args.get("project_id")
     version_id = request.args.get("version_id")
     item_id = request.args.get("item_id")
-    
+
     if not project_id or not version_id or not item_id:
-        return jsonify({"error": "project_id, version_id, and item_id are required"}), 400
-    
+        return (
+            jsonify({"error": "project_id, version_id, and item_id are required"}),
+            400,
+        )
+
     try:
-        breakdowns = db.get_budget_item_breakdowns(int(project_id), int(version_id), int(item_id))
+        breakdowns = db.get_budget_item_breakdowns(
+            int(project_id), int(version_id), int(item_id)
+        )
         return jsonify(breakdowns), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -195,19 +203,23 @@ def budget_item_breakdown_post():
     version_id = data.get("version_id")
     item_id = data.get("item_id")
     breakdown_items = data.get("breakdown_items", [])
-    
+
     if not project_id or not version_id or not item_id:
-        return jsonify({"error": "project_id, version_id, and item_id are required"}), 400
-    
+        return (
+            jsonify({"error": "project_id, version_id, and item_id are required"}),
+            400,
+        )
+
     try:
-        db.save_budget_item_breakdowns_batch(int(project_id), int(version_id), int(item_id), breakdown_items)
+        db.save_budget_item_breakdowns_batch(
+            int(project_id), int(version_id), int(item_id), breakdown_items
+        )
         return jsonify({"message": "Breakdown saved successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 
-# ── Budget Versions ───────────────────────────────────────────────────────────
-
+# Budget Versions
 @budget_bp.route("/api/projects/<int:project_id>/budget-versions", methods=["POST"])
 @roles_required("admin", "manager")
 def budget_versions_post(project_id):
@@ -215,10 +227,13 @@ def budget_versions_post(project_id):
     source_version_id = data.get("source_version_id")
     try:
         new_id = db.create_budget_version(project_id, source_version_id)
-        notify_all_admins(f"New budget version created for Project ID: {project_id}.", "success")
+        notify_all_admins(
+            f"New budget version created for Project ID: {project_id}.", "success"
+        )
         return jsonify({"message": "New budget version created", "id": new_id}), 201
     except Exception as e:
         import traceback
+
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
@@ -231,6 +246,7 @@ def budget_versions_get(project_id):
         return jsonify(versions), 200
     except Exception as e:
         import traceback
+
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
@@ -245,16 +261,13 @@ def budget_version_delete(version_id):
         return jsonify({"error": str(e)}), 500
 
 
-# ── Hierarchy ─────────────────────────────────────────────────────────────────
-
 @budget_bp.route("/api/hierarchy", methods=["GET"])
 @login_required
 def hierarchy_get():
     return jsonify(db.get_hierarchy()), 200
 
 
-# ── Client Dashboard ──────────────────────────────────────────────────────────
-
+# Client Dashboard
 @budget_bp.route("/api/client/dashboard", methods=["GET"])
 @roles_required("client", "manager", "admin", "production_crew")
 def client_dashboard_get():
@@ -275,8 +288,7 @@ def client_dashboard_get():
     return jsonify(projects), 200
 
 
-# ── Payments ──────────────────────────────────────────────────────────────────
-
+# Payments
 @budget_bp.route("/api/admin/payments", methods=["POST"])
 @roles_required("admin", "manager")
 def payments_post():
@@ -294,20 +306,20 @@ def payments_post():
 
     try:
         new_id = db.insert_payment(project_id, amount, payment_date, notes)
-        
-        # Notify project stakeholders
+
         proj_name = db.get_project_name(project_id)
         sender_id = get_current_user_id()
         notify_project_stakeholders(
-            project_id, 
-            f"Payment of {amount} recorded for {proj_name}", 
+            project_id,
+            f"Payment of {amount} recorded for {proj_name}",
             exclude_user_id=sender_id,
-            msg_type="success"
+            msg_type="success",
         )
-        
+
         return jsonify({"message": "Payment recorded successfully", "id": new_id}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 @budget_bp.route("/api/admin/finance/summary", methods=["GET"])
 @roles_required("admin", "manager")
@@ -317,6 +329,7 @@ def finance_summary_get():
         return jsonify(summary), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 @budget_bp.route("/api/admin/finance/projects", methods=["GET"])
 @roles_required("admin", "manager")

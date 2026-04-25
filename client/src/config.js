@@ -1,15 +1,16 @@
-/**
- * Centralized API configuration for the entire frontend.
- * This file replaces the local 'const API' definitions in every component.
- */
+//Detect if we are running in a local development environment
+//OpenAI guidance used for this part of code
+const isLocal =
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1";
 
-// Detect if running on a Vercel preview or production URL
-const isVercel = window.location.hostname.includes("vercel.app");
+export const API = isLocal
+  ? "http://localhost:5000"
+  : "https://api.visiondivision.lk";
 
-// Fallback for local development
-const localAPI = process.env.REACT_APP_API_URL || "http://localhost:5000";
-
-// API URL logic: Use relative paths on Vercel for 100% reliability
-export const API = isVercel ? "" : (localAPI.endsWith("/") ? localAPI.slice(0, -1) : localAPI);
-
-console.log("UNIFIED API MODE:", isVercel ? "Vercel (Relative)" : API);
+console.log(
+  "UNIFIED API MODE:",
+  isLocal
+    ? `Local Development (${API})`
+    : `Production Subdomain (https://api.visiondivision.lk)`,
+);

@@ -10,13 +10,18 @@ const ConfirmationModal = ({
   onCancel,
   confirmLabel = "Yes, Proceed",
   cancelLabel = "Cancel",
-  confirmVariant = "danger", // 'danger' | 'accent' | 'glass'
-  cancelVariant = "glass",   // 'danger' | 'accent' | 'glass'
+  confirmVariant = "danger",
+  cancelVariant = "glass",
 }) => {
   if (!isOpen) return null;
 
   return (
-    <ModalPortal onClose={onCancel} size="small" showClose={false} className="confirmation-modal-glass">
+    <ModalPortal
+      onClose={onCancel}
+      size="small"
+      showClose={false}
+      className="confirmation-modal-glass"
+    >
       <div className="modal-header">
         <h3>{title}</h3>
       </div>
@@ -24,14 +29,14 @@ const ConfirmationModal = ({
         <p>{message}</p>
       </div>
       <div className="modal-footer">
-        <button 
-          className={`btn-modal-cancel variant-${cancelVariant}`} 
+        <button
+          className={`btn-modal-cancel variant-${cancelVariant}`}
           onClick={onCancel}
         >
           {cancelLabel}
         </button>
-        <button 
-          className={`btn-modal-confirm variant-${confirmVariant}`} 
+        <button
+          className={`btn-modal-confirm variant-${confirmVariant}`}
           onClick={onConfirm}
         >
           {confirmLabel}

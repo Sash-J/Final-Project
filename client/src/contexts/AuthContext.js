@@ -6,7 +6,8 @@ import SessionTimeoutModal from "../components/common/SessionTimeoutModal";
 
 const AuthContext = createContext();
 
-// Configure axios for credentials (sessions)
+//Code helping from OpenAI and Google
+//Configure axios sessions
 axios.defaults.withCredentials = true;
 
 export const AuthProvider = ({ children }) => {
@@ -31,13 +32,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // 1. Axios Interceptor for seamless 401 handling
+  //Axios 401 handling
   useEffect(() => {
     const interceptor = axios.interceptors.response.use(
       (response) => response,
       (error) => {
         if (error.response && error.response.status === 401) {
-          // If not already handling or on login
           if (window.location.pathname !== "/login" && !sessionExpired) {
             setSessionExpired(true);
             setUser(null);
@@ -78,7 +78,6 @@ export const AuthProvider = ({ children }) => {
   const startTransition = (to) => {
     setIsTransiting(true);
 
-    // Fail-safe: Always hide overlay after 1.5s max
     const failSafeId = setTimeout(() => setIsTransiting(false), 1500);
 
     setTimeout(() => {
@@ -87,15 +86,14 @@ export const AuthProvider = ({ children }) => {
         setIsTransiting(false);
         clearTimeout(failSafeId);
       }, 500);
-    }, 400); // Wait for fade-out
+    }, 400);
   };
 
-  // ── Idle Timeout Logic ───────────────────────────────────────────────────
   useEffect(() => {
     if (!user) return;
 
     let timeoutId;
-    const IDLE_TIMEOUT = 10 * 60 * 1000; // 10 mins session timeout
+    const IDLE_TIMEOUT = 10 * 60 * 1000;
 
     const handleActivity = () => {
       if (timeoutId) clearTimeout(timeoutId);
@@ -115,7 +113,6 @@ export const AuthProvider = ({ children }) => {
     ];
     events.forEach((event) => window.addEventListener(event, handleActivity));
 
-    // Start the initial timer
     handleActivity();
 
     return () => {

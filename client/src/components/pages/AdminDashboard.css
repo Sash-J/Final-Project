@@ -1,5 +1,4 @@
 .admin-content-animated {
-  /* Panel Styling for main dashboard area */
   background: rgba(13, 15, 23, 0.4);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -12,7 +11,7 @@
   transition: padding 0.3s ease;
 }
 
-/* ── Main Layout ── */
+/*Main Layout*/
 .admin-dashboard-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -22,7 +21,7 @@
   contain: layout style;
 }
 
-/* ── Modal Overrides & Enhancements ────────────────────────────────────────── */
+/*Modal Overrides & Enhancements*/
 .new-project-btn {
   background: rgba(0, 198, 230, 0.15) !important;
   backdrop-filter: blur(8px);
@@ -47,7 +46,7 @@
   box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5) !important;
 }
 
-/* ── Warning Tags ──────────────────────────────────────────────────────────── */
+/*Warning Tags */
 .warning-tag {
   background: rgba(255, 149, 0, 0.1);
   color: #ff9500;
@@ -81,7 +80,7 @@
   transform: translateY(-1px);
 }
 
-/* ── Archived Section ── */
+/*Archived Section*/
 .archived-section {
   margin-top: 60px;
   padding-top: 40px;
@@ -124,7 +123,7 @@
   }
 }
 
-/* 📱 Mobile Responsiveness */
+/*Mobile Responsiveness fixing*/
 @media (max-width: 1200px) {
   .milestone-sidebar {
     width: 320px;
@@ -140,7 +139,7 @@
 
 @media (max-width: 768px) {
   .admin-content-animated {
-    padding: 15px; /* Maximize space for cards on mobile */
+    padding: 20px 15px;
     border-radius: 20px;
     margin-top: 10px;
   }
@@ -152,11 +151,25 @@
 
   .project-tiles-grid {
     gap: 16px;
-    padding: 10px 0;
+    padding: 5px 0;
+  }
+
+  .archived-section {
+    margin-top: 40px;
+    padding-top: 30px;
   }
 }
 
-/* ── Empty State ──────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .admin-content-animated {
+    padding: 15px 10px;
+    border-radius: 16px;
+  }
+
+  .project-tiles-grid {
+    gap: 12px;
+  }
+}
 
 .no-projects-message {
   grid-column: 1 / -1;

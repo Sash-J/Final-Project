@@ -4,7 +4,6 @@ import GlassDropdown from "../common/GlassDropdown";
 import { API } from "../../config";
 import "./ProjectForm.css";
 
-// ── Reusable status message ───────────────────────────────────────────────────
 export const StatusMsg = ({ msg }) => {
   if (!msg) return null;
   const isError = msg.startsWith("Error") || msg.startsWith("❌");
@@ -105,7 +104,7 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
     const file = e.target.files[0];
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
-        setMsg("❌ Image size must be less than 2MB");
+        setMsg("Image size must be less than 2MB");
         return;
       }
       const reader = new FileReader();
@@ -153,10 +152,6 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
 
   return (
     <>
-      {/* 
-        The modal backdrop and close button are now handled globally 
-        by the ModalPortal wrapper in the parent component.
-      */}
       <div className="modal-header-section">
         <h2>
           {editingProject ? "Edit Project Profile" : "Initialize New Project"}
@@ -171,7 +166,6 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
       <StatusMsg msg={msg} />
 
       <div className="modal-split-layout">
-        {/* Left: Visuals */}
         <div className="modal-side-panel">
           <label
             style={{
@@ -263,7 +257,6 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
           </div>
         </div>
 
-        {/* Right: Metadata */}
         <div className="modal-main-content">
           <form onSubmit={handleSubmit}>
             <div className="project-form-row">

@@ -230,7 +230,6 @@
   font-style: italic;
 }
 
-/* ── Schedule Tasks ────────────────────────────────────────────────────────── */
 .calendar-tasks {
   margin-top: auto;
   display: flex;
@@ -301,7 +300,6 @@
   transform: scale(1.1);
 }
 
-/* ── Notes Modal Styles ────────────────────────────────────────────────────── */
 .notes-list {
   max-height: 350px;
   overflow-y: auto;
@@ -553,7 +551,6 @@
   text-align: center;
 }
 
-/* ── UI Refinement: Glass Dropdown & Color Palette ── */
 .glass-select-wrapper {
   position: relative;
   width: 100%;
@@ -565,7 +562,7 @@
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   color: #fff !important;
   cursor: pointer;
-  padding-right: 40px !important; /* Space for arrow */
+  padding-right: 40px !important;
 }
 
 .glass-dropdown option {
@@ -708,7 +705,6 @@
   transform: none;
 }
 
-/* ── Modal Fixes for Schedule ────────────────────────────────────────────── */
 .sui-modal-overlay {
   z-index: 2000 !important;
 }

@@ -1,4 +1,3 @@
-/* ── Root ───────────────────────────────────────────────────────────────────── */
 .um-root {
   padding: 0 0 60px;
   font-family: "Funnel Sans", sans-serif;
@@ -7,8 +6,6 @@
   min-height: 100vh;
 }
 
-
-/* ── Content Layout ─────────────────────────────────────────────────────────── */
 .admin-content-animated {
   display: flex;
   flex-direction: column;
@@ -23,7 +20,6 @@
   padding-bottom: 10px;
 }
 
-/* ── Table Styles ───────────────────────────────────────────────────────────── */
 .um-table-container {
   overflow-x: auto;
 }
@@ -36,7 +32,7 @@
 }
 
 .um-table thead th {
-  background: rgba(255, 255, 255, 0.03) !important; /* Perfect glass match */
+  background: rgba(255, 255, 255, 0.03) !important;
   color: #fff !important;
   font-size: 0.75rem;
   font-weight: 700;
@@ -56,7 +52,6 @@
   background: rgba(255, 255, 255, 0.02);
 }
 
-/* ── Status Indicators & Pills ──────────────────────────────────────────────── */
 .status-indicator {
   padding: 4px 10px;
   border-radius: 20px;
@@ -148,7 +143,6 @@
   color: #fb923c;
 }
 
-/* ── Buttons ────────────────────────────────────────────────────────────────── */
 .approve-btn {
   background: rgba(0, 198, 230, 0.1) !important;
   color: #00c6e6 !important;
@@ -190,7 +184,6 @@
   justify-content: center;
 }
 
-/* ── Status Messages ────────────────────────────────────────────────────────── */
 .status-msg {
   padding: 12px;
   border-radius: 8px;
@@ -218,7 +211,6 @@
   text-align: center;
 }
 
-/* ── Responsive ─────────────────────────────────────────────────────────────── */
 @media (max-width: 700px) {
   .um-content {
     margin: 0 12px;
