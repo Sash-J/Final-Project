@@ -41,9 +41,9 @@ export default function Starfield() {
     const densityMultiplier = isMobile ? 0.4 : 1;
 
     const layers = [
-      { count: Math.floor(80 * densityMultiplier), speed: 0.05, size: 0.8 },
+      { count: Math.floor(80 * densityMultiplier), speed: 0.06, size: 0.8 },
       { count: Math.floor(50 * densityMultiplier), speed: 0.1, size: 1.2 },
-      { count: Math.floor(30 * densityMultiplier), speed: 0.2, size: 1.6 },
+      { count: Math.floor(30 * densityMultiplier), speed: 0.15, size: 1.6 },
     ];
 
     let stars = [];
@@ -88,7 +88,7 @@ export default function Starfield() {
         const x = star.cx + Math.cos(star.angle) * star.radius;
         const y = star.cy + Math.sin(star.angle) * star.radius;
 
-        ctx.fillStyle = "white";
+        ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
         ctx.beginPath();
         ctx.arc(x, y, star.size, 0, Math.PI * 2);
         ctx.fill();

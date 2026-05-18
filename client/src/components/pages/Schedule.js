@@ -93,13 +93,13 @@ const Schedule = () => {
 
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
-      hasUnsavedChanges && currentLocation.pathname !== nextLocation.pathname
+      hasUnsavedChanges && currentLocation.pathname !== nextLocation.pathname,
   );
 
   useEffect(() => {
     if (blocker.state === "blocked") {
       const proceed = window.confirm(
-        "You have unsaved schedule edits. Are you sure you want to leave and discard changes?"
+        "You have unsaved schedule edits. Are you sure you want to leave and discard changes?",
       );
       if (proceed) {
         blocker.proceed();
@@ -125,7 +125,7 @@ const Schedule = () => {
     try {
       const res = await fetch(
         `${API}/api/schedule/tasks?year=${viewYear}&month=${viewMonth + 1}`,
-        { credentials: "include" }
+        { credentials: "include" },
       );
       const data = await res.json();
       const taskArray = Array.isArray(data) ? data : [];
@@ -139,7 +139,9 @@ const Schedule = () => {
 
   const fetchProjects = async () => {
     try {
-      const response = await fetch(`${API}/api/projects`, { credentials: "include" });
+      const response = await fetch(`${API}/api/projects`, {
+        credentials: "include",
+      });
       const data = await response.json();
       setProjects(data);
     } catch (error) {
@@ -149,7 +151,9 @@ const Schedule = () => {
 
   const fetchNotes = async (taskId) => {
     try {
-      const res = await fetch(`${API}/api/schedule/tasks/${taskId}/notes`, { credentials: "include" });
+      const res = await fetch(`${API}/api/schedule/tasks/${taskId}/notes`, {
+        credentials: "include",
+      });
       const data = await res.json();
       setNotes(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -160,11 +164,13 @@ const Schedule = () => {
   const handleSubmitTask = (e) => {
     e.preventDefault();
     const isEditing = !!taskForm.id;
-    
+
     let updatedTasks;
     if (isEditing) {
       updatedTasks = tasks.map((t) =>
-        t.id === taskForm.id ? { ...t, ...taskForm, task_date: selectedDate } : t
+        t.id === taskForm.id
+          ? { ...t, ...taskForm, task_date: selectedDate }
+          : t,
       );
     } else {
       const newTask = {
@@ -172,7 +178,9 @@ const Schedule = () => {
         id: `temp-${Date.now()}`,
         task_date: selectedDate,
         creator_name: user?.username || "You",
-        project_name: projects.find(p => String(p.id) === String(taskForm.project_id))?.project_name || ""
+        project_name:
+          projects.find((p) => String(p.id) === String(taskForm.project_id))
+            ?.project_name || "",
       };
       updatedTasks = [...tasks, newTask];
     }
@@ -203,14 +211,14 @@ const Schedule = () => {
     setSubmitting(true);
     try {
       // Sanitize task_date to YYYY-MM-DD for all tasks before saving
-      const sanitizedTasks = tasks.map(t => {
+      const sanitizedTasks = tasks.map((t) => {
         const d = new Date(t.task_date);
         const y = d.getFullYear();
         const m = String(d.getMonth() + 1).padStart(2, "0");
         const day = String(d.getDate()).padStart(2, "0");
-        return { 
-          ...t, 
-          task_date: `${y}-${m}-${day}` 
+        return {
+          ...t,
+          task_date: `${y}-${m}-${day}`,
         };
       });
 
@@ -249,12 +257,15 @@ const Schedule = () => {
     if (!noteText.trim()) return;
     setSubmitting(true);
     try {
-      const res = await fetch(`${API}/api/schedule/tasks/${selectedTask.id}/notes`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ note_text: noteText }),
-      });
+      const res = await fetch(
+        `${API}/api/schedule/tasks/${selectedTask.id}/notes`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ note_text: noteText }),
+        },
+      );
       if (res.ok) {
         setNoteText("");
         fetchNotes(selectedTask.id);
@@ -291,7 +302,9 @@ const Schedule = () => {
 
   const openNotesModal = (task) => {
     if (String(task.id).startsWith("temp")) {
-      alert("Please save the schedule before viewing or adding notes to new tasks.");
+      alert(
+        "Please save the schedule before viewing or adding notes to new tasks.",
+      );
       return;
     }
     setSelectedTask(task);
@@ -336,22 +349,25 @@ const Schedule = () => {
     setCurrentDate(new Date(viewYear, viewMonth + 1, 1));
   };
 
-  const isTaskUnsaved = useCallback((task) => {
-    // Check if task is new (temp ID)
-    if (String(task.id).startsWith("temp")) return true;
-    
-    // Check if task was modified (different from its version in originalTasks)
-    const original = originalTasks.find(o => o.id === task.id);
-    if (!original) return false;
+  const isTaskUnsaved = useCallback(
+    (task) => {
+      // Check if task is new (temp ID)
+      if (String(task.id).startsWith("temp")) return true;
 
-    return (
-      task.title !== original.title ||
-      task.description !== (original.description || "") ||
-      task.project_id !== original.project_id ||
-      task.task_color !== original.task_color ||
-      task.task_date !== original.task_date
-    );
-  }, [originalTasks]);
+      // Check if task was modified (different from its version in originalTasks)
+      const original = originalTasks.find((o) => o.id === task.id);
+      if (!original) return false;
+
+      return (
+        task.title !== original.title ||
+        task.description !== (original.description || "") ||
+        task.project_id !== original.project_id ||
+        task.task_color !== original.task_color ||
+        task.task_date !== original.task_date
+      );
+    },
+    [originalTasks],
+  );
 
   const handleGoToToday = () => {
     setCurrentDate(new Date());
@@ -477,7 +493,10 @@ const Schedule = () => {
 
   return (
     <div className="schedule-container">
-      <PageHeader title="Production Schedule" />
+      <PageHeader
+        title="Production Schedule"
+        description="Manage project tasks and schedule."
+      ></PageHeader>
 
       {hasUnsavedChanges && (
         <div className="unsaved-changes-bar">
@@ -486,10 +505,17 @@ const Schedule = () => {
             <span>You have unsaved schedule edits for this month.</span>
           </div>
           <div className="unsaved-actions">
-            <button className="sui-btn discard-btn" onClick={handleDiscardChanges}>
+            <button
+              className="sui-btn discard-btn"
+              onClick={handleDiscardChanges}
+            >
               Discard Changes
             </button>
-            <button className="sui-btn save-all-btn" onClick={handleMasterSave} disabled={submitting}>
+            <button
+              className="sui-btn save-all-btn"
+              onClick={handleMasterSave}
+              disabled={submitting}
+            >
               {submitting ? "Saving..." : "Save All Updates"}
             </button>
           </div>
@@ -498,125 +524,128 @@ const Schedule = () => {
 
       <div className="schedule-content-animated">
         <div className="schedule-main-content">
-        <div className="calendar-window grid-window">
-          <div className="calendar-controls">
-            <button onClick={handlePrevMonth} className="cal-nav-btn">
-              {"<"}
-            </button>
-            <div className="current-month-display">
-              {monthNames[viewMonth]} {viewYear}
-            </div>
-            <button onClick={handleNextMonth} className="cal-nav-btn">
-              {">"}
-            </button>
-            <button onClick={handleGoToToday} className="today-btn">
-              Today
-            </button>
-            {(user?.role === "admin" || user?.role === "manager") && (
-              <button
-                onClick={handleDownloadPDF}
-                className="download-pdf-btn"
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
-              >
-                <Icon name="download" modifiers="sm" />
-                Download PDF
+          <div className="calendar-window grid-window">
+            <div className="calendar-controls">
+              <button onClick={handlePrevMonth} className="cal-nav-btn">
+                {"<"}
               </button>
-            )}
+              <div className="current-month-display">
+                {monthNames[viewMonth]} {viewYear}
+              </div>
+              <button onClick={handleNextMonth} className="cal-nav-btn">
+                {">"}
+              </button>
+              <button onClick={handleGoToToday} className="today-btn">
+                Today
+              </button>
+              {(user?.role === "admin" || user?.role === "manager") && (
+                <button
+                  onClick={handleDownloadPDF}
+                  className="download-pdf-btn"
+                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                >
+                  <Icon name="download" modifiers="sm" />
+                  Download PDF
+                </button>
+              )}
+            </div>
+
+            <div className="calendar-grid">
+              <div className="calendar-day-label">Mon</div>
+              <div className="calendar-day-label">Tue</div>
+              <div className="calendar-day-label">Wed</div>
+              <div className="calendar-day-label">Thu</div>
+              <div className="calendar-day-label">Fri</div>
+              <div className="calendar-day-label">Sat</div>
+              <div className="calendar-day-label">Sun</div>
+              {renderCells()}
+            </div>
           </div>
 
-          <div className="calendar-grid">
-            <div className="calendar-day-label">Mon</div>
-            <div className="calendar-day-label">Tue</div>
-            <div className="calendar-day-label">Wed</div>
-            <div className="calendar-day-label">Thu</div>
-            <div className="calendar-day-label">Fri</div>
-            <div className="calendar-day-label">Sat</div>
-            <div className="calendar-day-label">Sun</div>
-            {renderCells()}
-          </div>
-        </div>
-
-        <div className="schedule-sidebar grid-window">
-          <div className="sidebar-header">
-            <h3>Monthly Tasks</h3>
-            <span className="task-count">{tasks.length} Total</span>
-          </div>
-          <div className="sidebar-task-list">
-            {[...tasks]
-              .sort((a, b) => new Date(a.task_date) - new Date(b.task_date))
-              .map((task) => {
-                const date = new Date(task.task_date);
-                return (
-                  <div
-                    className={`sidebar-task-card ${isTaskUnsaved(task) ? "is-unsaved" : ""}`}
-                    key={task.id}
-                    onClick={() => openNotesModal(task)}
-                    style={{
-                      borderLeft: `4px solid ${task.task_color || "#a78bfa"}`,
-                    }}
-                  >
+          <div className="schedule-sidebar grid-window">
+            <div className="sidebar-header">
+              <h3>Monthly Tasks</h3>
+              <span className="task-count">{tasks.length} Total</span>
+            </div>
+            <div className="sidebar-task-list">
+              {[...tasks]
+                .sort((a, b) => new Date(a.task_date) - new Date(b.task_date))
+                .map((task) => {
+                  const date = new Date(task.task_date);
+                  return (
                     <div
-                      className="sidebar-task-date"
+                      className={`sidebar-task-card ${isTaskUnsaved(task) ? "is-unsaved" : ""}`}
+                      key={task.id}
+                      onClick={() => openNotesModal(task)}
                       style={{
-                        backgroundColor: `${task.task_color || DEFAULT_TASK_COLOR}22`,
-                        color: task.task_color || DEFAULT_TASK_COLOR
+                        borderLeft: `4px solid ${task.task_color || "#a78bfa"}`,
                       }}
                     >
-                      <span className="day">{date.getDate()}</span>
-                      <span className="month">
-                        {date.toLocaleString("default", { month: "short" })}
-                      </span>
-                    </div>
-                    <div className="sidebar-task-info">
-                      <h4 className="sidebar-task-title">{task.title}</h4>
-                      {task.project_name && (
-                        <span
-                          className="sidebar-project-tag"
-                          style={{ color: task.task_color }}
-                        >
-                          • {task.project_name}
+                      <div
+                        className="sidebar-task-date"
+                        style={{
+                          backgroundColor: `${task.task_color || DEFAULT_TASK_COLOR}22`,
+                          color: task.task_color || DEFAULT_TASK_COLOR,
+                        }}
+                      >
+                        <span className="day">{date.getDate()}</span>
+                        <span className="month">
+                          {date.toLocaleString("default", { month: "short" })}
                         </span>
-                      )}
+                      </div>
+                      <div className="sidebar-task-info">
+                        <h4 className="sidebar-task-title">{task.title}</h4>
+                        {task.project_name && (
+                          <span
+                            className="sidebar-project-tag"
+                            style={{ color: task.task_color }}
+                          >
+                            • {task.project_name}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            {tasks.length === 0 && (
-              <div className="no-tasks-sidebar">
-                No tasks scheduled for this month.
-              </div>
-            )}
+                  );
+                })}
+              {tasks.length === 0 && (
+                <div className="no-tasks-sidebar">
+                  No tasks scheduled for this month.
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      {viewYear === 2026 && (
-        <div className="holidays-legend grid-window">
-          <h3>
-            Sri Lankan Public Holidays - {monthNames[viewMonth]} {viewYear}
-          </h3>
-          <ul className="holiday-list">
-            {SRI_LANKA_HOLIDAYS_2026.filter((h) => {
-              const d = new Date(h.date);
-              return d.getMonth() === viewMonth && d.getFullYear() === viewYear;
-            }).map((h, i) => (
-              <li key={i}>
-                <span className="holiday-date">
-                  {new Date(h.date).getDate()} {monthNames[viewMonth]}:
-                </span>
-                <span className="holiday-name">{h.name}</span>
-              </li>
-            ))}
-            {SRI_LANKA_HOLIDAYS_2026.filter((h) => {
-              const d = new Date(h.date);
-              return d.getMonth() === viewMonth && d.getFullYear() === viewYear;
-            }).length === 0 && (
-              <li className="no-holidays">No public holidays this month.</li>
-            )}
-          </ul>
-        </div>
-      )}
-
+        {viewYear === 2026 && (
+          <div className="holidays-legend grid-window">
+            <h3>
+              Sri Lankan Public Holidays - {monthNames[viewMonth]} {viewYear}
+            </h3>
+            <ul className="holiday-list">
+              {SRI_LANKA_HOLIDAYS_2026.filter((h) => {
+                const d = new Date(h.date);
+                return (
+                  d.getMonth() === viewMonth && d.getFullYear() === viewYear
+                );
+              }).map((h, i) => (
+                <li key={i}>
+                  <span className="holiday-date">
+                    {new Date(h.date).getDate()} {monthNames[viewMonth]}:
+                  </span>
+                  <span className="holiday-name">{h.name}</span>
+                </li>
+              ))}
+              {SRI_LANKA_HOLIDAYS_2026.filter((h) => {
+                const d = new Date(h.date);
+                return (
+                  d.getMonth() === viewMonth && d.getFullYear() === viewYear
+                );
+              }).length === 0 && (
+                <li className="no-holidays">No public holidays this month.</li>
+              )}
+            </ul>
+          </div>
+        )}
       </div>
 
       {showTaskModal && (
@@ -667,11 +696,14 @@ const Schedule = () => {
                       value={taskForm.project_id}
                       onChange={(e) => {
                         const pid = e.target.value;
-                        const selectedProject = projects.find((p) => String(p.id) === String(pid));
-                        setTaskForm({ 
-                          ...taskForm, 
+                        const selectedProject = projects.find(
+                          (p) => String(p.id) === String(pid),
+                        );
+                        setTaskForm({
+                          ...taskForm,
                           project_id: pid,
-                          task_color: selectedProject?.color || DEFAULT_TASK_COLOR 
+                          task_color:
+                            selectedProject?.color || DEFAULT_TASK_COLOR,
                         });
                       }}
                     >
@@ -686,8 +718,8 @@ const Schedule = () => {
                 </div>
 
                 {/* Identity Preview Strip */}
-                <div 
-                  className="identity-preview-strip" 
+                <div
+                  className="identity-preview-strip"
                   style={{
                     height: "8px",
                     width: "100%",
@@ -695,7 +727,7 @@ const Schedule = () => {
                     borderRadius: "4px",
                     marginBottom: "24px",
                     boxShadow: `0 0 15px ${taskForm.task_color}44`,
-                    transition: "all 0.4s ease"
+                    transition: "all 0.4s ease",
                   }}
                 />
 

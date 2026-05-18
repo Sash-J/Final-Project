@@ -485,7 +485,7 @@ const ClientDashboard = () => {
       )}
 
       {selectedProject && (
-        <ModalPortal>
+        <ModalPortal className="no-glass" showClose={false}>
           <div className="cd-modal-overlay" onClick={closeBudgetModal}>
             <div
               className="cd-modal-content"
@@ -685,7 +685,7 @@ const ClientDashboard = () => {
       )}
 
       {selectedTimelineProject && (
-        <ModalPortal>
+        <ModalPortal className="no-glass" showClose={false}>
           <div className="sui-modal-overlay">
             <div className="milestone-modal-content-wide">
               <button

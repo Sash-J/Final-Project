@@ -88,4 +88,4 @@ def home():
 
 if __name__ == "__main__":
     print("Server started on port 5000")
-    app.run(debug=True, host="127.0.0.1")
+    app.run(debug=False, host="127.0.0.1")

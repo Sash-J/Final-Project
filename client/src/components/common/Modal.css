@@ -46,6 +46,19 @@
   align-self: center;
 }
 
+.modal-glass-container.no-glass {
+  max-width: none;
+  width: auto;
+  background: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: none;
+  padding: 0;
+  box-shadow: none;
+  transform: none;
+  animation: none;
+}
+
 @keyframes modalSlideUp {
   from {
     opacity: 0;

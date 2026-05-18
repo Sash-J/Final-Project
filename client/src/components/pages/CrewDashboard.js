@@ -447,7 +447,7 @@ const CrewDashboard = () => {
       )}
 
       {selectedProject && (
-        <ModalPortal>
+        <ModalPortal className="no-glass" showClose={false}>
           <div className="crew-modal-overlay" onClick={closeBudgetModal}>
             <div
               className="crew-modal-content"
@@ -652,7 +652,7 @@ const CrewDashboard = () => {
       )}
 
       {selectedTimelineProject && (
-        <ModalPortal>
+        <ModalPortal className="no-glass" showClose={false}>
           <div className="sui-modal-overlay">
             <div className="milestone-modal-content-wide">
               <button

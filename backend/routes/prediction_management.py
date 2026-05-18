@@ -51,8 +51,8 @@ def predict_budget():
 
         input_data = np.array([features])
         prediction = model.predict(input_data)
+        print(f"Predicted total budget: {prediction[0]:,.2f}")
 
-        # Return float
         return (
             jsonify({"predicted_total": float(prediction[0]), "currency": "Rs."}),
             200,

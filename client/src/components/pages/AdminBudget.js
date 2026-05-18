@@ -13,7 +13,7 @@ import { API } from "../../config";
 // ── Reusable status message ───────────────────────────────────────────────────
 const StatusMsg = ({ msg }) => {
   if (!msg) return null;
-  const isError = msg.startsWith("Error") || msg.startsWith("❌");
+  const isError = msg.startsWith("Error") || msg.startsWith("X");
   return <p className={`status-msg ${isError ? "error" : "success"}`}>{msg}</p>;
 };
 
@@ -106,7 +106,7 @@ const AddCategory = ({ departments, onAdded }) => {
       setDeptId("");
       onAdded && onAdded();
     } catch (err) {
-      setMsg(`❌ ${err.message}`);
+      setMsg(`${err.message}`);
     }
   };
 
@@ -165,7 +165,7 @@ const AddBudgetItem = ({ categories, onAdded }) => {
       setCatId("");
       onAdded && onAdded();
     } catch (err) {
-      setMsg(`❌ ${err.message}`);
+      setMsg(`${err.message}`);
     }
   };
 

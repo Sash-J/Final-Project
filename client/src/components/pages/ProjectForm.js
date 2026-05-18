@@ -6,7 +6,7 @@ import "./ProjectForm.css";
 
 export const StatusMsg = ({ msg }) => {
   if (!msg) return null;
-  const isError = msg.startsWith("Error") || msg.startsWith("❌");
+  const isError = msg.startsWith("Error") || msg.startsWith("X");
   return <p className={`status-msg ${isError ? "error" : "success"}`}>{msg}</p>;
 };
 

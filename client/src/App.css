@@ -9,7 +9,7 @@ textarea {
   font-family: "Funnel Sans", "Rethink Sans", sans-serif !important;
 }
 
-/* ── Material Symbols Global Setup ───────────────────────────────────────── */
+/*Material Symbols*/
 .material-symbols-outlined {
   font-family: "Material Symbols Outlined" !important;
   font-weight: normal;
@@ -36,23 +36,12 @@ section {
   padding: 60px 20px;
 }
 
-h2 {
-  font-size: 2.5rem;
-  margin-bottom: 40px;
-  color: var(--accent-color);
-  text-transform: uppercase;
-  line-height: 1.1;
-  letter-spacing: 2px;
-}
-
 /* Main Content Wrapper */
 .main-content {
-  padding-top: 30px;
+  padding-top: 10px;
   min-height: calc(100vh - 80px);
   background: transparent !important;
   box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
-  /* Entrance animation deactivated - Blocks backdrop-filter sampling */
-  /* animation: pageFadeIn 0.5s ease-out forwards; */
 }
 
 @keyframes pageFadeIn {
@@ -271,17 +260,17 @@ body {
 
 /* Footer */
 footer {
-  background: rgba(5, 5, 10, 0.7); /* Dark glass to match navbar */
+  background: rgba(5, 5, 10, 0.7);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-top: var(--glass-border);
   padding: 40px 20px;
-  color: #eeeeee; /* Lighter text */
+  color: #eeeeee;
   font-size: 0.9rem;
   margin-top: 60px;
 }
 
-/* ── Global Glass Window (Strict DOM Matching) ───────────────────────── */
+/*Global Glass Window*/
 .grid-window {
   position: relative;
   background: rgba(10, 12, 18, 0.2) !important;
@@ -307,7 +296,7 @@ footer {
   }
 }
 
-/* ── Global Custom Scrollbar (Sandblasted Glass) ────────────────────────── */
+/*Scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -342,7 +331,6 @@ footer {
     inset 0 1px 2px rgba(255, 255, 255, 0.2);
 }
 
-/* Firefox Support */
 * {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.2) rgba(0, 0, 0, 0.25);

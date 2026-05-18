@@ -13,15 +13,15 @@
 }
 
 .page-header-desc {
-  color: #888;
+  color: #b7b7b7;
   font-size: 0.95rem;
   max-width: 600px;
   margin: 0 auto;
-  padding-bottom: 20px;
+  padding-bottom: 10px;
 }
 
 .page-header-actions {
-  margin-top: 20px;
+  margin-top: 10px;
   display: flex;
   justify-content: center;
   gap: 12px;
