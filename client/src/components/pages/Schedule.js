@@ -393,7 +393,7 @@ const Schedule = () => {
       html2canvas: {
         scale: 2,
         useCORS: true,
-        backgroundColor: "#0a0a0a", // Match the dark theme background
+        backgroundColor: "#000000",
       },
       jsPDF: { unit: "mm", format: [400, 400], orientation: "landscape" },
       pagebreak: { mode: "avoid-all" },

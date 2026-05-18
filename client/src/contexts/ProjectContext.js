@@ -284,7 +284,7 @@ export const ProjectProvider = ({ children }) => {
         setBudgetLoading(false);
       }
     },
-    [budgetCache],
+    [budgetCache, getBudgetMetadata],
   );
 
   const invalidateCache = useCallback((projectId = null) => {

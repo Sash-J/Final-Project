@@ -31,7 +31,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  //Axios 401 handling
   useEffect(() => {
     const interceptor = axios.interceptors.response.use(
       (response) => response,
