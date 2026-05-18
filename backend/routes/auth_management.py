@@ -12,13 +12,14 @@ from core.session_handler import (
 
 auth_bp = Blueprint("auth_management", __name__)
 
-# help from ChatGPT
 # Bcrypt instance injected by app.py via init_auth(bcrypt)
 _bcrypt = None
+
 
 def init_auth(bcrypt_instance):
     global _bcrypt
     _bcrypt = bcrypt_instance
+
 
 def validate_register_data(username, password, role, full_name, telephone, address):
     """Deep validation of registration data before database insertion."""

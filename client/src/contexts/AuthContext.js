@@ -6,7 +6,6 @@ import SessionTimeoutModal from "../components/common/SessionTimeoutModal";
 
 const AuthContext = createContext();
 
-//Code helping from OpenAI and Google
 //Configure axios sessions
 axios.defaults.withCredentials = true;
 

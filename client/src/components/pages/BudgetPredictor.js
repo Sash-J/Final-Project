@@ -22,7 +22,6 @@ const BudgetPredictor = () => {
     vfx_required: 0,
   });
 
-  // help from openai and my knowledge
   const [prediction, setPrediction] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

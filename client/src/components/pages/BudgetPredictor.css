@@ -298,7 +298,6 @@ input:checked + .bento-slider:before {
   font-size: 0.9rem;
 }
 
-/*Responsiveness, help from OpenAI*/
 @media (max-width: 1000px) {
   .predictor-form-bento {
     grid-template-columns: repeat(1, 1fr);

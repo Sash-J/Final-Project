@@ -1,5 +1,4 @@
 //Detect if we are running in a local development environment
-//OpenAI guidance used for this part of code
 const isLocal =
   window.location.hostname === "localhost" ||
   window.location.hostname === "127.0.0.1";

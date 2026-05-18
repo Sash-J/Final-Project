@@ -44,7 +44,6 @@ const SuiTimeline = ({
 
   useEffect(() => {
     if (projectId) {
-      console.log("DEBUG: SuiTimeline initialized for project", projectId);
       fetchMilestones(updateTrigger > 0);
     }
   }, [projectId, updateTrigger]);
@@ -58,9 +57,6 @@ const SuiTimeline = ({
         const itemHeight = 180;
         const totalHeight = Math.max(540, milestones.length * itemHeight);
 
-        console.log(
-          `DEBUG: Proportional Dimensions updated to ${clientWidth}x${totalHeight} (${milestones.length} nodes)`,
-        );
         setDimensions({ width: clientWidth, height: totalHeight });
       }
     };

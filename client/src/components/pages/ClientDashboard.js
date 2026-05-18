@@ -68,7 +68,6 @@ const ClientDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  //Modal state for Budget / help from OpenAi
   const [selectedProject, setSelectedProject] = useState(null);
   const [budgetData, setBudgetData] = useState(null);
   const [budgetLoading, setBudgetLoading] = useState(false);

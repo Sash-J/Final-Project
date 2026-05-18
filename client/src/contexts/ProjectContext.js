@@ -3,7 +3,6 @@ import { API } from "../config";
 
 const ProjectContext = createContext();
 
-//Code helping from OpenAI and Google
 export const ProjectProvider = ({ children }) => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(false);

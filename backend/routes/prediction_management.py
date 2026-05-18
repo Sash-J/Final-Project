@@ -5,7 +5,6 @@ import os
 prediction_bp = Blueprint("prediction_management", __name__)
 
 # Load the budget model from the models directory
-# Coding helping from OpenAI
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "models", "xgboost_budget_model.pkl")
 model = None

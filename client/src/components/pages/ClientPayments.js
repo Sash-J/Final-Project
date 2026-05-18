@@ -5,7 +5,6 @@ import Icon from "../common/Icon";
 import "./ClientPayments.css";
 import { formatCurrency, getCurrencySymbol } from "../../utils/currencyUtils";
 
-/*Help from OpenAI*/
 const ClientPayments = ({ projectId }) => {
   const { user } = useAuth();
   const {
