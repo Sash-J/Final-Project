@@ -1,4 +1,5 @@
 import React from 'react';
+import dunesBackground from '../../assets/dunes_background1.png';
 
 const projects = [
     { id: 1, title: 'Neon Nights', category: 'Music Video', image: 'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae' },
@@ -11,7 +12,11 @@ const projects = [
 
 const Projects = () => {
     return (
-        <section id="projects">
+        <section 
+            id="projects" 
+            className="reframe-projects-section"
+            style={{ backgroundImage: `url(${dunesBackground})` }}
+        >
             <h2>Selected Works</h2>
             <div className="projects-grid">
                 {projects.map((project) => (

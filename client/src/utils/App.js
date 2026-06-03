@@ -12,7 +12,7 @@ import { ProjectProvider } from "../contexts/ProjectContext";
 import ProtectedRoute from "../components/ui/ProtectedRoute";
 
 import Navbar from "../components/ui/Navbar";
-import Home from "../components/pages/Home";
+import Home from "../components/home/Home";
 import AdminBudget from "../components/pages/AdminBudget";
 import AdminDashboard from "../components/pages/AdminDashboard";
 import ProjectDetailDashboard from "../components/pages/ProjectDetailDashboard";
@@ -33,7 +33,7 @@ import { useAuth } from "../contexts/AuthContext";
 function RootLayout() {
   const location = useLocation();
   const { isTransiting } = useAuth();
-  const hideFooter = ["/login", "/register"].includes(location.pathname);
+  const hideFooter = ["/login", "/register", "/"].includes(location.pathname);
 
   return (
     <div className="App">
