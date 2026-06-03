@@ -1,9 +1,17 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import {
+  validateAddress,
+  validateConfirmPassword,
+  validatePassword,
+  validateTelephone,
+  validateUsername,
+} from "../../utils/validators";
 import "./RegisterPage.css";
 
 import { API } from "../../config";
+import Icon from "../common/Icon";
 
 const RegisterPage = () => {
   const [step, setStep] = useState(1);
@@ -39,40 +47,21 @@ const RegisterPage = () => {
     let error = "";
     switch (name) {
       case "username":
-        if (value && !/^[a-zA-Z_]+$/.test(value)) {
-          error = "Only letters and underscores allowed (no spaces).";
-        }
+        error = validateUsername(value);
         break;
       case "password":
-        error = getPasswordError(value);
+        error = validatePassword(value);
         break;
       case "confirmPassword":
-        if (value !== currentPassword) {
-          error = "Passwords do not match.";
-        }
+        error = validateConfirmPassword(value, currentPassword);
         break;
       case "address":
-        if (/[<>{}[\]]/.test(value)) {
-          error = "Special characters < > { } [ ] are prohibited for security.";
-        }
+        error = validateAddress(value);
         break;
       default:
         break;
     }
     setFieldErrors((prev) => ({ ...prev, [name]: error }));
-  };
-
-  const getPasswordError = (value) => {
-    if (!value) return "";
-    if (value.includes(" ")) return "Password cannot contain spaces.";
-    if (value.length < 8 || value.length > 20)
-      return "Must be between 8 and 20 characters.";
-    if (!/[A-Z]/.test(value) || !/[a-z]/.test(value))
-      return "Must contain both uppercase and lowercase letters.";
-    const specialCount = (value.match(/[^a-zA-Z0-9]/g) || []).length;
-    if (specialCount !== 1)
-      return "Must contain exactly one special character.";
-    return "";
   };
 
   const handleUsernameChange = (e) => {
@@ -83,7 +72,7 @@ const RegisterPage = () => {
 
   const handlePasswordChange = (e) => {
     const value = e.target.value.replace(/\s/g, "");
-    const passError = getPasswordError(value);
+    const passError = validatePassword(value);
 
     setFormData((prev) => {
       const newData = { ...prev, password: value };
@@ -117,18 +106,8 @@ const RegisterPage = () => {
   const handlePhoneChange = (e) => {
     const value = e.target.value;
     const filteredValue = value.replace(/(?!^\+)\D/g, "");
-
     setFormData({ ...formData, telephone: filteredValue });
-
-    let phoneError = "";
-    const cleanDigits = filteredValue.replace(/\D/g, "");
-    if (
-      cleanDigits.length > 0 &&
-      (cleanDigits.length < 10 || cleanDigits.length > 15)
-    ) {
-      phoneError = "Invalid phone number (10-15 digits required).";
-    }
-    setFieldErrors((prev) => ({ ...prev, telephone: phoneError }));
+    setFieldErrors((prev) => ({ ...prev, telephone: validateTelephone(filteredValue) }));
   };
 
   const handleNameChange = (e) => {
@@ -207,9 +186,10 @@ const RegisterPage = () => {
         return (
           <div className="step-content">
             <h3>Step 1: Account Credentials</h3>
-            <div className="form-group">
-              <label>Username</label>
+            <div className="neo-form-group">
+              <label className="neo-label">Username</label>
               <input
+                className="neo-input"
                 name="username"
                 type="text"
                 value={formData.username}
@@ -219,15 +199,16 @@ const RegisterPage = () => {
                 placeholder="Choose a username"
               />
               {fieldErrors.username && (
-                <span className="field-validation-error">
+                <span className="neo-field-error-msg">
                   {fieldErrors.username}
                 </span>
               )}
             </div>
-            <div className="form-group password-group">
-              <label>Password</label>
+            <div className="neo-form-group password-group">
+              <label className="neo-label">Password</label>
               <div className="password-input-wrapper">
                 <input
+                  className="neo-input"
                   name="password"
                   type={showPassword ? "text" : "password"}
                   value={formData.password}
@@ -275,17 +256,18 @@ const RegisterPage = () => {
                 </button>
               </div>
               {fieldErrors.password && (
-                <span className="field-validation-error">
+                <span className="neo-field-error-msg">
                   {fieldErrors.password}
                 </span>
               )}
             </div>
 
             {formData.password && !fieldErrors.password && (
-              <div className="form-group password-group animate-in">
-                <label>Confirm Password</label>
+              <div className="neo-form-group password-group animate-in">
+                <label className="neo-label">Confirm Password</label>
                 <div className="password-input-wrapper">
                   <input
+                    className="neo-input"
                     name="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
                     value={formData.confirmPassword}
@@ -335,7 +317,7 @@ const RegisterPage = () => {
                   </button>
                 </div>
                 {fieldErrors.confirmPassword && (
-                  <span className="field-validation-error">
+                  <span className="neo-field-error-msg">
                     {fieldErrors.confirmPassword}
                   </span>
                 )}
@@ -344,7 +326,8 @@ const RegisterPage = () => {
 
             <button
               type="button"
-              className="register-btn next-btn"
+              className="btn-neo btn-neo-solid next-btn"
+              style={{ width: '100%', padding: '16px' }}
               onClick={nextStep}
               disabled={
                 !formData.username ||
@@ -363,9 +346,10 @@ const RegisterPage = () => {
         return (
           <div className="step-content animate-in">
             <h3>Step 2: Personal Details</h3>
-            <div className="form-group">
-              <label>Full Name</label>
+            <div className="neo-form-group">
+              <label className="neo-label">Full Name</label>
               <input
+                className="neo-input"
                 name="full_name"
                 type="text"
                 value={formData.full_name}
@@ -375,9 +359,10 @@ const RegisterPage = () => {
                 placeholder="Enter your full name"
               />
             </div>
-            <div className="form-group">
-              <label>Telephone</label>
+            <div className="neo-form-group">
+              <label className="neo-label">Telephone</label>
               <input
+                className="neo-input"
                 name="telephone"
                 type="tel"
                 value={formData.telephone}
@@ -387,18 +372,19 @@ const RegisterPage = () => {
                 placeholder="07XXXXXXXX"
               />
               {fieldErrors.telephone && (
-                <span className="field-validation-error">
+                <span className="neo-field-error-msg">
                   {fieldErrors.telephone}
                 </span>
               )}
             </div>
             <div className="btn-row">
-              <button type="button" className="prev-btn" onClick={prevStep}>
+              <button type="button" className="btn-neo-cancel prev-btn" onClick={prevStep} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <span className="material-symbols-outlined">arrow_back</span>
               </button>
               <button
                 type="button"
-                className="register-btn next-btn"
+                className="btn-neo btn-neo-solid next-btn"
+                style={{ flex: 1, padding: '16px' }}
                 onClick={nextStep}
                 disabled={
                   !formData.full_name ||
@@ -415,9 +401,10 @@ const RegisterPage = () => {
         return (
           <div className="step-content animate-in">
             <h3>Step 3: Contact Information</h3>
-            <div className="form-group">
-              <label>Physical Address</label>
+            <div className="neo-form-group">
+              <label className="neo-label">Physical Address</label>
               <textarea
+                className="neo-input"
                 name="address"
                 value={formData.address}
                 onChange={handleAddressChange}
@@ -427,18 +414,19 @@ const RegisterPage = () => {
                 rows="4"
               ></textarea>
               {fieldErrors.address && (
-                <span className="field-validation-error">
+                <span className="neo-field-error-msg">
                   {fieldErrors.address}
                 </span>
               )}
             </div>
             <div className="btn-row">
-              <button type="button" className="prev-btn" onClick={prevStep}>
+              <button type="button" className="btn-neo-cancel prev-btn" onClick={prevStep} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <span className="material-symbols-outlined">arrow_back</span>
               </button>
               <button
                 type="submit"
-                className="register-btn submit-btn"
+                className="btn-neo btn-neo-solid submit-btn"
+                style={{ flex: 1, padding: '16px' }}
                 disabled={loading}
               >
                 {loading ? "Creating Account..." : "Finish Registration"}
@@ -465,9 +453,13 @@ const RegisterPage = () => {
 
         <form onSubmit={handleSubmit}>
           {renderStep()}
-          <div className="status-msg-container" style={{ minHeight: "40px" }}>
-            {message && <p className="success-msg">{message}</p>}
-            {error && <p className="error-msg">{error}</p>}
+          <div className="neo-status-messages" style={{ marginTop: "10px", minHeight: "40px" }}>
+            <div className={`neo-status error ${error ? "show" : ""}`}>
+              <Icon name="error" modifiers="sm" /> <span>{error}</span>
+            </div>
+            <div className={`neo-status success ${message ? "show" : ""}`}>
+              <Icon name="check_circle" modifiers="sm" /> <span>{message}</span>
+            </div>
           </div>
         </form>
 

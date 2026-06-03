@@ -279,3 +279,85 @@ def clear_project_crew(project_id):
     finally:
         cursor.close()
         conn.close()
+
+
+def get_user_profile(user_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute(
+        "SELECT id, username, role, full_name, email, profile_image, theme_mode, email_notifications, pause_notifications FROM users WHERE id = %s",
+        (user_id,),
+    )
+    user = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return user
+
+
+def update_user_profile(user_id, data, password_hash=None):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        if password_hash:
+            cursor.execute(
+                """UPDATE users SET 
+                   username = %s, full_name = %s, email = %s, profile_image = %s,
+                   theme_mode = %s, email_notifications = %s, pause_notifications = %s,
+                   password_hash = %s
+                   WHERE id = %s""",
+                (
+                    data["username"],
+                    data["full_name"],
+                    data["email"],
+                    data["profile_image"],
+                    data["theme_mode"],
+                    data["email_notifications"],
+                    data["pause_notifications"],
+                    password_hash,
+                    user_id,
+                ),
+            )
+        else:
+            cursor.execute(
+                """UPDATE users SET 
+                   username = %s, full_name = %s, email = %s, profile_image = %s,
+                   theme_mode = %s, email_notifications = %s, pause_notifications = %s
+                   WHERE id = %s""",
+                (
+                    data["username"],
+                    data["full_name"],
+                    data["email"],
+                    data["profile_image"],
+                    data["theme_mode"],
+                    data["email_notifications"],
+                    data["pause_notifications"],
+                    user_id,
+                ),
+            )
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        cursor.close()
+        conn.close()
+    return True
+
+
+def update_user_theme(user_id, theme_mode):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "UPDATE users SET theme_mode = %s WHERE id = %s",
+            (theme_mode, user_id),
+        )
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        cursor.close()
+        conn.close()
+    return True
+

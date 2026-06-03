@@ -35,6 +35,7 @@ def set_user_session(user):
     session["user_id"] = user["id"]
     session["username"] = user["username"]
     session["user_role"] = user["role"]
+    session["theme_mode"] = user.get("theme_mode", "dark")
 
 
 def clear_session():
@@ -60,5 +61,11 @@ def is_logged_in():
 def get_current_user_data():
     """Returns basic data for the logged-in user, or None."""
     if is_logged_in():
-        return {"username": session.get("username"), "role": session.get("user_role")}
+        return {
+            "username": session.get("username"),
+            "role": session.get("user_role"),
+            "theme_mode": session.get("theme_mode", "dark"),
+            "profile_image": "",
+        }
     return None
+

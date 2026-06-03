@@ -1,6 +1,6 @@
 import React from "react";
-import Icon from "../common/Icon";
-import { formatCurrency, getCurrencySymbol } from "../../utils/currencyUtils";
+import Icon from "../../common/Icon";
+import { formatCurrency, getCurrencySymbol } from "../../../utils/currencyUtils";
 import "./BudgetSummary.css";
 
 const BudgetSummary = ({
@@ -52,13 +52,23 @@ const BudgetSummary = ({
   return (
     <div className="budget-summary-root">
       <div className="budget-summary-header">
-        <div className="grand-total-display glass-card">
-          <label>Project Total Budget</label>
-          <h2>{formatCurrency(grandTotal)}</h2>
+        <div className="payment-stat-card glass-card">
+          <div className="stat-icon-wrap budget">
+            <Icon name="payments" modifiers="md" />
+          </div>
+          <div className="stat-content">
+            <label>Project Total Budget</label>
+            <h3>{formatCurrency(grandTotal)}</h3>
+          </div>
         </div>
-        <div className="grand-total-display glass-card">
-          <label>Total Payments</label>
-          <h2 className="success-text">{formatCurrency(totalPaid)}</h2>
+        <div className="payment-stat-card glass-card">
+          <div className="stat-icon-wrap received">
+            <Icon name="account_balance_wallet" modifiers="md" />
+          </div>
+          <div className="stat-content">
+            <label>Total Payments</label>
+            <h3 className="success-text">{formatCurrency(totalPaid)}</h3>
+          </div>
         </div>
       </div>
 

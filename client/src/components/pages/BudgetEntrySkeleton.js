@@ -1,77 +1,9 @@
 import React from "react";
 import { getCurrencySymbol } from "../../utils/currencyUtils";
 import "./BudgetEntrySkeleton.css";
+import BudgetColGroup from "./BudgetEntry/components/BudgetColGroup";
+import BudgetTableHeader from "./BudgetEntry/components/BudgetTableHeader";
 
-//Table columns
-export const BudgetColGroup = () => (
-  <colgroup className="bef-skeleton-colgroup">
-    <col />
-    <col />
-    <col />
-    <col />
-    <col />
-    <col />
-    <col />
-    <col />
-  </colgroup>
-);
-
-export const BudgetTableHeader = ({ isSkeleton = false }) => (
-  <thead>
-    <tr>
-      <th className="col-drag"></th>
-      <th className="col-item-name">
-        {isSkeleton ? (
-          <SkeletonBox className="skel-header-bar-left" />
-        ) : (
-          "ITEM NAME"
-        )}
-      </th>
-      <th className="col-units">
-        {isSkeleton ? (
-          <SkeletonBox className="skel-header-bar-center" />
-        ) : (
-          "UNITS"
-        )}
-      </th>
-      <th className="col-rate-type">
-        {isSkeleton ? (
-          <SkeletonBox className="skel-header-bar-center" />
-        ) : (
-          "TYPE"
-        )}
-      </th>
-      <th className="col-rate">
-        {isSkeleton ? (
-          <SkeletonBox className="skel-header-bar-right" />
-        ) : (
-          "RATE"
-        )}
-      </th>
-      <th className="col-gross">
-        {isSkeleton ? (
-          <SkeletonBox className="skel-header-bar-right" />
-        ) : (
-          `GROSS (${getCurrencySymbol()})`
-        )}
-      </th>
-      <th className="col-add">
-        {isSkeleton ? (
-          <SkeletonBox className="skel-header-bar-right" />
-        ) : (
-          "ADDITIONAL"
-        )}
-      </th>
-      <th className="col-total">
-        {isSkeleton ? (
-          <SkeletonBox className="skel-header-bar-right" />
-        ) : (
-          `TOTAL (${getCurrencySymbol()})`
-        )}
-      </th>
-    </tr>
-  </thead>
-);
 
 //keletal
 export const SkeletonBox = ({
@@ -196,14 +128,3 @@ export const SkeletonTable = () => (
   </div>
 );
 
-export const BudgetFormatEmpty = () => (
-  <div className="bef-sheet empty-format-sheet">
-    <table className="bef-table header-only-table">
-      <BudgetColGroup />
-      <BudgetTableHeader />
-    </table>
-    <div className="empty-format-placeholder">
-      Select a project and version to view the budget
-    </div>
-  </div>
-);

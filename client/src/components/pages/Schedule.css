@@ -772,3 +772,88 @@
   border-style: dashed;
   border-color: rgba(255, 255, 255, 0.2);
 }
+
+/* ==========================================
+   Light Theme Styling Overrides for Schedule Page
+   ========================================== */
+body.light-theme .schedule-container {
+  color: #24292f;
+}
+
+body.light-theme .calendar-window,
+body.light-theme .schedule-sidebar,
+body.light-theme .holidays-legend {
+  background: #ffffff !important;
+  border-color: #d0d7de !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
+  color: #24292f !important;
+}
+
+body.light-theme .calendar-header h2 {
+  color: #24292f;
+}
+
+body.light-theme .day-header {
+  background: #f6f8fa;
+  color: #57606a;
+  border-bottom-color: #d0d7de;
+}
+
+body.light-theme .calendar-day {
+  background: #ffffff;
+  border-color: #e1e4e8;
+  color: #24292f;
+}
+
+body.light-theme .calendar-day.other-month {
+  background: #fafbfc;
+  color: #8c959f;
+}
+
+body.light-theme .calendar-day.today {
+  background: rgba(9, 105, 218, 0.05);
+}
+
+body.light-theme .day-number {
+  color: #24292f;
+}
+
+body.light-theme .calendar-day.today .day-number {
+  background: #0969da;
+  color: #ffffff;
+}
+
+body.light-theme .task-item {
+  color: #ffffff; /* keep white text on colorful tasks */
+}
+
+body.light-theme .schedule-sidebar h3 {
+  color: #24292f;
+}
+
+body.light-theme .sidebar-task-card {
+  background: #f6f8fa;
+  border-color: #d0d7de;
+}
+
+body.light-theme .sidebar-task-card h4 {
+  color: #24292f;
+}
+
+body.light-theme .sidebar-task-card p {
+  color: #57606a;
+}
+
+body.light-theme .holidays-legend h4 {
+  color: #24292f;
+}
+
+body.light-theme .legend-item {
+  color: #57606a;
+}
+
+body.light-theme .sidebar-task-card.is-unsaved {
+  background: rgba(9, 105, 218, 0.05);
+  border-color: #0969da;
+}
+

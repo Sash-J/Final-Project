@@ -1,8 +1,8 @@
 .admin-content-animated {
   background: rgba(13, 15, 23, 0.4);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px) saturate(180%);
+  -webkit-backdrop-filter: blur(8px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.01);
   border-radius: 32px;
   padding: 40px;
   margin-top: 20px;
@@ -26,12 +26,12 @@
   background: rgba(0, 198, 230, 0.15) !important;
   backdrop-filter: blur(8px);
   color: #fff !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.01) !important;
   padding: 12px 32px !important;
   font-size: 0.9rem;
   font-weight: 600 !important;
   margin-top: 20px;
-  border-radius: 50px !important;
+  border-radius: 12px !important;
   text-transform: none;
   letter-spacing: 1px;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -41,9 +41,8 @@
 }
 
 .new-project-btn:hover {
-  transform: translateY(-2px) scale(1.02);
-  background: rgba(0, 198, 230, 0.2) !important;
-  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5) !important;
+  background: rgba(0, 198, 230, 0.2);
+  color: #00c6e6;
 }
 
 /*Warning Tags */
@@ -201,3 +200,44 @@
     contain: layout style;
   }
 }
+
+/* Light Theme Styling Overrides */
+body.light-theme .admin-content-animated {
+  background: #ffffff;
+  border-color: #d0d7de;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+body.light-theme .new-project-btn {
+  background: #0969da !important;
+  color: #fff !important;
+  border: 1px solid #0969da !important;
+  box-shadow: 0 4px 15px rgba(9, 105, 218, 0.15) !important;
+}
+
+body.light-theme .new-project-btn:hover {
+  background: #1f883d !important;
+  border-color: #1f883d !important;
+  box-shadow: 0 6px 20px rgba(31, 136, 61, 0.2) !important;
+}
+
+body.light-theme .archived-section {
+  border-top-color: #d0d7de;
+}
+
+body.light-theme .archived-header {
+  color: #57606a;
+}
+
+body.light-theme .archived-count {
+  background: #f6f8fa;
+  color: #24292f;
+  border: 1px solid #d0d7de;
+}
+
+body.light-theme .no-projects-message {
+  background: #f6f8fa;
+  border-color: #d0d7de;
+  color: #57606a;
+}
+

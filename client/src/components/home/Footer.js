@@ -4,7 +4,7 @@ const Footer = () => {
   return (
     <footer id="contact">
       <p>
-        &copy; {new Date().getFullYear()} Vision Division Studios. All Rights
+        &copy; {new Date().getFullYear()} Vision Division. All Rights
         Reserved.
       </p>
     </footer>

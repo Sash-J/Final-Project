@@ -1,4 +1,3 @@
-import React from "react";
 import "./Icon.css";
 
 /**
@@ -11,12 +10,12 @@ import "./Icon.css";
  * @param {Object} props.style - Inline style overrides (e.g., for specific colors)
  * @param {string} props.className - Additional custom classes from parent
  */
-const Icon = ({ name, modifiers = "", style = {}, className = "" }) => {
+const Icon = ({ name, modifiers = "", style = {}, className = "", ...rest }) => {
   const fullClassName =
     `icon-root material-symbols-outlined ${modifiers} ${className}`.trim();
 
   return (
-    <span className={fullClassName} style={style}>
+    <span className={fullClassName} style={style} {...rest}>
       {name}
     </span>
   );

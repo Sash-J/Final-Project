@@ -17,6 +17,8 @@ is_production = os.getenv("FLASK_ENV") == "production"
 cookie_settings = {
     "SESSION_COOKIE_HTTPONLY": True,
     "SESSION_COOKIE_SECURE": is_production,
+    # SameSite=None + Secure=True is required for cross-origin production (HTTPS).
+    # SameSite=Lax + Secure=False is correct for local development (HTTP localhost).
     "SESSION_COOKIE_SAMESITE": "None" if is_production else "Lax",
 }
 
@@ -28,8 +30,28 @@ app.config.update(cookie_settings)
 CORS(app, supports_credentials=True)
 
 
+@app.before_request
+def log_request_info():
+    if request.path.startswith("/api/"):
+        try:
+            log_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "requests.log")
+            with open(log_path, "a", encoding="utf-8") as f:
+                f.write(f"--- Request: {request.method} {request.url}\n")
+                f.write(f"Headers: {dict(request.headers)}\n")
+                f.write(f"Body: {request.get_data(as_text=True)}\n")
+        except Exception as e:
+            pass
+
 @app.after_request
 def add_cors_headers(response):
+    if request.path.startswith("/api/"):
+        try:
+            log_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "requests.log")
+            with open(log_path, "a", encoding="utf-8") as f:
+                f.write(f"=== Response: {response.status_code}\n")
+                f.write(f"Body: {response.get_data(as_text=True)[:500]}\n\n")
+        except Exception as e:
+            pass
     origin = request.headers.get("Origin")
     if origin:
         # Authorized origins
@@ -67,10 +89,10 @@ from routes.budget_management import budget_bp
 from routes.schedule_management import schedule_bp
 from routes.milestone_management import milestone_bp
 from routes.notifications_management import notifications_bp
-from routes.prediction_management import prediction_bp
 
 init_auth(bcrypt)
 
+# Register Blueprints and Run Migrations
 app.register_blueprint(auth_bp)
 app.register_blueprint(user_mgmt_bp)
 app.register_blueprint(project_bp)
@@ -78,8 +100,12 @@ app.register_blueprint(budget_bp)
 app.register_blueprint(schedule_bp)
 app.register_blueprint(milestone_bp)
 app.register_blueprint(notifications_bp)
-app.register_blueprint(prediction_bp)
 
+try:
+    from services.db_operations import run_budget_migration
+    run_budget_migration()
+except Exception as e:
+    print("Error running migrations on startup:", e)
 
 @app.route("/", methods=["GET"])
 def home():

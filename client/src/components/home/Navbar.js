@@ -1,17 +1,26 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import NotificationBell from "./NotificationBell";
-import UserProfile from "./UserProfile";
 import Icon from "../common/Icon";
+import NotificationBell from "../ui/NotificationBell";
+import UserProfile from "../ui/UserProfile";
 import "./Navbar.css";
 
 const Navbar = () => {
-  const { user } = useAuth();
+  const { user, updateUserTheme, theme } = useAuth();
   const [useImageLogo, setUseImageLogo] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const location = useLocation();
+
+  const themeMode = user?.theme_mode || theme || "dark";
+
+
+  const isHomePage =
+    window.location.pathname === "/" && location.pathname !== undefined;
 
   useEffect(() => {
+    setIsMounted(true);
     const interval = setInterval(() => {
       setUseImageLogo((prev) => !prev);
     }, 300000);
@@ -23,7 +32,9 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="navbar">
+    <nav
+      className={`navbar ${isHomePage ? "is-home" : ""} ${!isMounted ? "no-transition" : ""}`}
+    >
       <Link
         to="/"
         className={`logo ${useImageLogo ? "is-image-mode" : "is-text-mode"}`}
@@ -75,15 +86,6 @@ const Navbar = () => {
                 <span>Budget</span>
               </Link>
             </li>
-            <li>
-              <Link
-                to="/budget-predictor"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <Icon name="auto_graph" modifiers="md" />
-                <span>Predictor</span>
-              </Link>
-            </li>
           </>
         )}
 
@@ -117,21 +119,23 @@ const Navbar = () => {
 
       <div className="navbar-controls">
         <div className="nav-item-flex">
+          {!isHomePage && (
+            <button
+              className="theme-toggle-nav-btn"
+              onClick={() => updateUserTheme(themeMode === "dark" ? "light" : "dark")}
+              title={`Switch to ${themeMode === "dark" ? "Day" : "Night"} Mode`}
+              aria-label="Toggle Theme"
+            >
+              <Icon name={themeMode === "dark" ? "light_mode" : "dark_mode"} modifiers="md" />
+            </button>
+          )}
+
           {user ? (
             <>
               <NotificationBell />
               <UserProfile />
             </>
-          ) : (
-            <>
-              <Link to="/" className="nav-link-right desktop-only">
-                Home
-              </Link>
-              <Link to="/login" className="login-link">
-                Login
-              </Link>
-            </>
-          )}
+          ) : null}
         </div>
 
         <button

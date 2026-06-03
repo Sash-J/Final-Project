@@ -16,16 +16,17 @@ const LoginPage = () => {
     setError("");
     const res = await login(username, password);
     if (res.success) {
-      startTransition("/");
+      startTransition(dashboardPath(res.user));
     } else {
       setError(res.error);
     }
   };
 
-  const dashboardPath = () => {
-    if (!user) return "/";
-    if (user.role === "admin" || user.role === "manager") return "/admin";
-    if (user.role === "production_crew") return "/crew-dashboard";
+  const dashboardPath = (resolvedUser) => {
+    const u = resolvedUser || user;
+    if (!u) return "/";
+    if (u.role === "admin" || u.role === "manager") return "/admin";
+    if (u.role === "production_crew") return "/crew-dashboard";
     return "/dashboard";
   };
 
@@ -54,12 +55,12 @@ const LoginPage = () => {
           
           <div className="auth-action-group">
             <button 
-              className="login-btn proceed-btn" 
+              className="btn-neo btn-neo-solid proceed-btn" 
               onClick={() => startTransition(dashboardPath())}
             >
               Go to Dashboard
             </button>
-            <button className="logout-direct-btn" onClick={logout}>
+            <button className="btn-neo-cancel" onClick={logout}>
               Sign Out & Switch Account
             </button>
           </div>
@@ -73,20 +74,22 @@ const LoginPage = () => {
       <div className="login-card">
         <h2>USER LOGIN</h2>
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Username</label>
+          <div className="neo-form-group">
+            <label className="neo-label">Username</label>
             <input
               type="text"
+              className="neo-input"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
             />
           </div>
-          <div className="form-group password-group">
-            <label>Password</label>
+          <div className="neo-form-group password-group">
+            <label className="neo-label">Password</label>
             <div className="password-input-wrapper">
               <input
                 type={showPassword ? "text" : "password"}
+                className="neo-input"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -108,7 +111,7 @@ const LoginPage = () => {
           <div className="status-msg-container" style={{ minHeight: '24px', margin: '10px 0' }}>
             {error && <p className="error-msg">{error}</p>}
           </div>
-          <button type="submit" className="login-btn">
+          <button type="submit" className="btn-neo btn-neo-solid" style={{ width: '100%' }}>
             Sign In
           </button>
         </form>

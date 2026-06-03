@@ -1,30 +1,29 @@
-import React from "react";
 import {
   createBrowserRouter,
-  RouterProvider,
   Outlet,
+  RouterProvider,
   useLocation,
 } from "react-router-dom";
 import "../App.css";
+import ProtectedRoute from "../components/ui/ProtectedRoute";
 import { AuthProvider } from "../contexts/AuthContext";
 import { ModalProvider } from "../contexts/ModalContext";
 import { ProjectProvider } from "../contexts/ProjectContext";
-import ProtectedRoute from "../components/ui/ProtectedRoute";
 
-import Navbar from "../components/ui/Navbar";
+import Footer from "../components/home/Footer";
 import Home from "../components/home/Home";
+import Navbar from "../components/home/Navbar";
 import AdminBudget from "../components/pages/AdminBudget";
 import AdminDashboard from "../components/pages/AdminDashboard";
-import ProjectDetailDashboard from "../components/pages/ProjectDetailDashboard";
-import LoginPage from "../components/pages/LoginPage";
-import RegisterPage from "../components/pages/RegisterPage";
-import UserManagement from "../components/pages/UserManagement";
+
 import ClientDashboard from "../components/pages/ClientDashboard";
 import CrewDashboard from "../components/pages/CrewDashboard";
-import Schedule from "../components/pages/Schedule";
 import FinancialDashboard from "../components/pages/FinancialDashboard";
-import BudgetPredictor from "../components/pages/BudgetPredictor";
-import Footer from "../components/ui/Footer";
+import LoginPage from "../components/pages/LoginPage";
+import ProjectDetailDashboard from "../components/pages/project/ProjectDetailDashboard";
+import RegisterPage from "../components/pages/RegisterPage";
+import Schedule from "../components/pages/Schedule";
+import UserManagement from "../components/pages/UserManagement";
 import Starfield from "../components/ui/Starfield";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -37,8 +36,9 @@ function RootLayout() {
 
   return (
     <div className="App">
+      <Starfield />
       <div className={`transition-overlay ${isTransiting ? "active" : ""}`} />
-      <Navbar />
+      {location.pathname !== "/" && <Navbar />}
       <div className={`main-content ${isTransiting ? "fading-out" : ""}`}>
         <Outlet />
       </div>
@@ -54,7 +54,6 @@ function AppProviders() {
     <AuthProvider>
       <ModalProvider>
         <ProjectProvider>
-          <Starfield />
           <RootLayout />
         </ProjectProvider>
       </ModalProvider>
@@ -136,20 +135,18 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      {
-        path: "budget-predictor",
-        element: (
-          <ProtectedRoute roles={["admin", "manager"]}>
-            <BudgetPredictor />
-          </ProtectedRoute>
-        ),
-      },
+
+
     ],
   },
 ]);
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <RouterProvider router={router} />
+    </>
+  );
 }
 
 export default App;

@@ -1,0 +1,134 @@
+/* ==========================================================================
+   1. Base Containers
+   ========================================================================== */
+
+.production-glass-override {
+  max-width: 1200px !important;
+  height: 90vh !important; /* Fixed height so it doesn't change size based on content */
+}
+
+.production-modal-container {
+  width: calc(100% + 40px); /* Expand the width by 40px (20px each side) */
+  box-sizing: border-box;
+  margin: 0 -20px; /* Pull the container left and right by 20px */
+  padding: 0 20px; /* Push the actual content back to its exact original alignment */
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   2. Sub-Navigation
+   ========================================================================== */
+
+.production-sub-nav {
+  display: flex;
+  gap: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 12px;
+}
+
+.sub-nav-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.95rem;
+  padding: 10px 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.sub-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.sub-nav-btn.active {
+  background: rgba(0, 198, 230, 0.15);
+  color: #00c6e6;
+}
+
+/* ==========================================================================
+   3. Meta Data / Badges
+   ========================================================================== */
+
+.org-metadata-nav {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.75rem;
+  font-weight: 400;
+  padding: 4px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.org-metadata-nav strong {
+  color: #00c6e6;
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   4. Tab Content & Animations
+   ========================================================================== */
+
+.production-tab-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  align-items: stretch;
+  justify-content: flex-start;
+  min-height: 0;
+  width: 100%;
+}
+
+.tab-content-animator {
+  animation: tabFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+  transform: translateY(10px);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+@keyframes tabFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================================================
+   5. Light Theme Overrides
+   ========================================================================== */
+
+body.light-theme .production-modal-container {
+  color: #24292f;
+}
+
+body.light-theme .production-sub-nav {
+  border-bottom-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .org-metadata-nav {
+  color: #57606a;
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+body.light-theme .org-metadata-nav strong {
+  color: #0969da;
+}

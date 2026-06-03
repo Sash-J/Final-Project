@@ -17,7 +17,7 @@ db_config = {
 # Connection Pool
 try:
     connection_pool = pooling.MySQLConnectionPool(
-        pool_name="vision_division_pool", pool_size=5, **db_config
+        pool_name="vision_division_pool", pool_size=1, **db_config
     )
     print("DEBUG: MySQL Connection Pool initialized successfully.")
 except mysql.connector.Error as err:

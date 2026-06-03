@@ -208,3 +208,95 @@
     display: none;
   }
 }
+
+/* ==========================================
+   Light Theme Styling Overrides for Financial Dashboard
+   ========================================== */
+body.light-theme .fd-root {
+  color: #24292f;
+}
+
+body.light-theme .fd-stat-card {
+  background: #ffffff;
+  border-color: #d0d7de;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+body.light-theme .fd-stat-card:hover {
+  background: #f6f8fa;
+  border-color: #0969da;
+}
+
+body.light-theme .fd-stat-card h3 {
+  color: #57606a;
+}
+
+body.light-theme .fd-stat-value {
+  color: #24292f;
+}
+
+body.light-theme .fd-table-container {
+  background: #ffffff;
+  border-color: #d0d7de;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+body.light-theme .fd-table th {
+  background: #f6f8fa;
+  color: #57606a;
+  border-bottom-color: #d0d7de;
+}
+
+body.light-theme .fd-table td {
+  color: #24292f;
+  border-bottom-color: #e1e4e8;
+}
+
+body.light-theme .fd-table tr:hover td {
+  background: #f6f8fa;
+}
+
+body.light-theme .fd-project-name {
+  color: #24292f;
+}
+
+body.light-theme .fd-project-code {
+  color: #57606a;
+}
+
+body.light-theme .fd-amount-pos {
+  color: #24292f;
+}
+
+body.light-theme .fd-amount-neg {
+  color: #cf222e;
+}
+
+body.light-theme .fd-amount-paid {
+  color: #1a7f37;
+}
+
+body.light-theme .fd-progress-bar {
+  background: #e1e4e8;
+}
+
+body.light-theme .fd-progress-text {
+  color: #57606a;
+}
+
+body.light-theme .fd-btn-view {
+  background: #f6f8fa;
+  border-color: #d0d7de;
+  color: #24292f;
+}
+
+body.light-theme .fd-btn-view:hover {
+  background: #0969da;
+  border-color: #0969da;
+  color: #ffffff;
+}
+
+body.light-theme .fd-empty {
+  color: #57606a;
+}
+

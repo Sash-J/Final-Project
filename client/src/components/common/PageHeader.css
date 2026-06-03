@@ -30,7 +30,6 @@
 
 .fd-root,
 .schedule-container,
-.predictor-container,
 #admin-dashboard,
 #admin-budget {
   max-width: 1400px;
@@ -38,3 +37,13 @@
   padding: 80px 20px 40px;
   min-height: 100vh;
 }
+
+/* Light Theme Styling Overrides */
+body.light-theme .page-header h2 {
+  color: #24292f;
+}
+
+body.light-theme .page-header-desc {
+  color: #57606a;
+}
+

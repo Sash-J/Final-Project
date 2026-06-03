@@ -35,6 +35,20 @@ def departments_post():
     return jsonify({"message": "Department added successfully", "id": new_id}), 201
 
 
+@budget_bp.route("/api/departments/reorder", methods=["POST"])
+@roles_required("admin", "manager")
+def departments_reorder():
+    data = request.get_json()
+    ordered_ids = data.get("ordered_ids", [])
+    if not ordered_ids:
+        return jsonify({"error": "ordered_ids are required"}), 400
+    try:
+        db.update_departments_order(ordered_ids)
+        return jsonify({"message": "Departments reordered successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @budget_bp.route("/api/phases", methods=["GET"])
 @login_required
 def phases_get():
@@ -138,6 +152,23 @@ def budget_values_for_project(project_id):
             version_id = int(version_id)
         except ValueError:
             version_id = None
+
+    role = get_current_user_role()
+    if role in ["production_crew", "client"]:
+        versions = db.get_budget_versions(project_id)
+        if role == "production_crew":
+            allowed_ids = [v["id"] for v in versions if v.get("published_to_crew") == 1]
+        else:
+            allowed_ids = [v["id"] for v in versions if v.get("published_to_client") == 1]
+
+        if version_id:
+            if version_id not in allowed_ids:
+                return jsonify({}), 200
+        else:
+            if not allowed_ids:
+                return jsonify({}), 200
+            version_id = allowed_ids[-1]
+
     return jsonify(db.get_budget_values_for_project(project_id, version_id)), 200
 
 
@@ -243,6 +274,11 @@ def budget_versions_post(project_id):
 def budget_versions_get(project_id):
     try:
         versions = db.get_budget_versions(project_id)
+        role = get_current_user_role()
+        if role == "production_crew":
+            versions = [v for v in versions if v.get("published_to_crew") == 1]
+        elif role == "client":
+            versions = [v for v in versions if v.get("published_to_client") == 1]
         return jsonify(versions), 200
     except Exception as e:
         import traceback
@@ -257,6 +293,19 @@ def budget_version_delete(version_id):
     try:
         db.delete_budget_version(version_id)
         return jsonify({"message": "Budget version deleted"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@budget_bp.route("/api/budget-versions/<int:version_id>/publish", methods=["PUT"])
+@roles_required("admin", "manager")
+def budget_version_publish(version_id):
+    try:
+        data = request.get_json() or {}
+        published_to_crew = data.get("published_to_crew", False)
+        published_to_client = data.get("published_to_client", False)
+        db.publish_budget_version(version_id, published_to_crew, published_to_client)
+        return jsonify({"message": "Budget version publish status updated successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -339,3 +388,67 @@ def finance_projects_get():
         return jsonify(projects), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@budget_bp.route("/api/projects/<int:project_id>/department-crew", methods=["GET"])
+@login_required
+def get_project_department_crew_endpoint(project_id):
+    try:
+        return jsonify(db.get_project_department_crew(project_id)), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@budget_bp.route("/api/projects/<int:project_id>/departments/<int:dept_id>/assign-crew", methods=["POST"])
+@roles_required("admin", "manager")
+def assign_project_department_crew_endpoint(project_id, dept_id):
+    try:
+        data = request.get_json() or {}
+        user_ids = data.get("user_ids", [])
+        db.update_project_department_crew(project_id, dept_id, user_ids)
+        return jsonify({"message": "Crew assigned successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@budget_bp.route("/api/projects/<int:project_id>/category-crew", methods=["GET"])
+@login_required
+def get_project_category_crew_endpoint(project_id):
+    try:
+        return jsonify(db.get_project_category_crew(project_id)), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@budget_bp.route("/api/projects/<int:project_id>/categories/<int:cat_id>/assign-crew", methods=["POST"])
+@roles_required("admin", "manager")
+def assign_project_category_crew_endpoint(project_id, cat_id):
+    try:
+        data = request.get_json() or {}
+        user_ids = data.get("user_ids", [])
+        db.update_project_category_crew(project_id, cat_id, user_ids)
+        return jsonify({"message": "Crew assigned to category successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@budget_bp.route("/api/projects/<int:project_id>/budget-item-crew", methods=["GET"])
+@login_required
+def get_project_budget_item_crew_endpoint(project_id):
+    try:
+        return jsonify(db.get_project_budget_item_crew(project_id)), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@budget_bp.route("/api/projects/<int:project_id>/budget-items/<int:item_id>/assign-crew", methods=["POST"])
+@roles_required("admin", "manager")
+def assign_project_budget_item_crew_endpoint(project_id, item_id):
+    try:
+        data = request.get_json() or {}
+        user_ids = data.get("user_ids", [])
+        db.update_project_budget_item_crew(project_id, item_id, user_ids)
+        return jsonify({"message": "Crew assigned to budget item successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+

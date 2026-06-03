@@ -1,7 +1,6 @@
-import React from "react";
+import Icon from "../common/Icon";
 import ModalPortal from "./ModalPortal";
 import "./SessionTimeoutModal.css";
-import Icon from "../common/Icon";
 
 const SessionTimeoutModal = ({ onLogin }) => {
   return (

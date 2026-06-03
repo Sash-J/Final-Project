@@ -29,6 +29,12 @@ textarea {
 .App {
   text-align: center;
   background: transparent;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  position: relative;
+  z-index: 1;
 }
 
 /* Sections */
@@ -38,10 +44,13 @@ section {
 
 /* Main Content Wrapper */
 .main-content {
-  padding-top: 10px;
+  padding-top: 80px;
   min-height: calc(100vh - 80px);
-  background: transparent !important;
-  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
 }
 
 @keyframes pageFadeIn {
@@ -80,8 +89,17 @@ section {
   pointer-events: all;
 }
 
-body {
+html {
   background-color: #040911;
+  min-height: 100vh;
+}
+
+html[data-theme="light"] {
+  background-color: #ffffff;
+}
+
+body {
+  background-color: transparent;
   color: white;
   min-height: 100vh;
   overflow-x: hidden;
@@ -102,12 +120,12 @@ footer {
 /*Global Glass Window*/
 .grid-window {
   position: relative;
-  background: rgba(10, 12, 18, 0.2) !important;
+  background: rgba(18, 19, 26, 0.65) !important;
   backdrop-filter: blur(10px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(10px) saturate(180%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  border-radius: 20px;
-  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4) !important;
   padding: 25px;
   margin-bottom: 20px;
   transform: translateZ(0);
@@ -164,3 +182,32 @@ footer {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.2) rgba(0, 0, 0, 0.25);
 }
+
+/* Light Theme Styling Overrides */
+body.light-theme {
+  background-color: transparent !important;
+  background-image: none !important;
+  color: #24292f !important;
+}
+
+body.light-theme .grid-window {
+  background: #ffffff !important;
+  border: 1px solid #d0d7de !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
+  color: #24292f !important;
+}
+
+body.light-theme .main-content {
+  box-shadow: none !important;
+}
+
+body.light-theme .transition-overlay {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+body.light-theme footer {
+  background: #f6f8fa;
+  border-top: 1px solid #d0d7de;
+  color: #57606a;
+}
+

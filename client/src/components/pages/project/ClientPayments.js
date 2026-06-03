@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useProjects } from "../../contexts/ProjectContext";
-import { useAuth } from "../../contexts/AuthContext";
-import Icon from "../common/Icon";
+import { useProjects } from "../../../contexts/ProjectContext";
+import { useAuth } from "../../../contexts/AuthContext";
+import Icon from "../../common/Icon";
 import "./ClientPayments.css";
-import { formatCurrency, getCurrencySymbol } from "../../utils/currencyUtils";
+import { formatCurrency, getCurrencySymbol } from "../../../utils/currencyUtils";
 
 const ClientPayments = ({ projectId }) => {
   const { user } = useAuth();

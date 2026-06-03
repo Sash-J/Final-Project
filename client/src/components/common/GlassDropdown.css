@@ -14,6 +14,15 @@
   font-family: inherit;
 }
 
+.glass-dropdown-label {
+  display: block;
+  text-align: left;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.65);
+  font-weight: 400;
+  margin-bottom: 8px;
+}
+
 .glass-dropdown-container.sm {
   --dd-padding: 4px 10px;
   --dd-radius: 8px;
@@ -203,3 +212,50 @@
 .glass-dropdown-menu::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 198, 230, 0.5);
 }
+
+/* Light Theme Styling Overrides */
+body.light-theme .glass-dropdown-trigger {
+  background: #f6f8fa;
+  border: 1px solid #d0d7de;
+  color: #24292f;
+}
+
+body.light-theme .glass-dropdown-trigger:hover {
+  background: #ebf0f4;
+  border-color: #0969da;
+}
+
+body.light-theme .glass-dropdown-trigger.active {
+  background: rgba(9, 105, 218, 0.08);
+  border-color: #0969da;
+  box-shadow: 0 0 10px rgba(9, 105, 218, 0.15);
+}
+
+body.light-theme .glass-dropdown-menu {
+  background: #ffffff !important;
+  border-color: #d0d7de !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-theme .glass-dropdown-item {
+  color: #24292f;
+}
+
+body.light-theme .glass-dropdown-item:hover {
+  background: rgba(9, 105, 218, 0.08);
+  color: #0969da;
+}
+
+body.light-theme .glass-dropdown-item.selected {
+  background: rgba(9, 105, 218, 0.15);
+  color: #0969da;
+}
+
+body.light-theme .glass-dropdown-no-options {
+  color: #57606a;
+}
+
+body.light-theme .glass-dropdown-label {
+  color: #57606a;
+}
+

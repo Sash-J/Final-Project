@@ -75,7 +75,7 @@ def login():
     password = data.get("password")
 
     user = auth.get_user_by_username(username)
-    if user and _bcrypt.check_password_hash(user["password_hash"], password):
+    if user and user["username"] == username and _bcrypt.check_password_hash(user["password_hash"], password):
         if not user.get("is_approved"):
             return (
                 jsonify({"error": "Your account is pending admin approval"}),
@@ -83,11 +83,17 @@ def login():
             )
 
         set_user_session(user)
+        profile = auth.get_user_profile(user["id"])
         return (
             jsonify(
                 {
                     "message": "Logged in successfully",
-                    "user": {"username": user["username"], "role": user["role"]},
+                    "user": {
+                        "username": user["username"],
+                        "role": user["role"],
+                        "theme_mode": user.get("theme_mode", "dark"),
+                        "profile_image": profile.get("profile_image", "") if profile else "",
+                    },
                 }
             ),
             200,
@@ -104,8 +110,12 @@ def logout():
 
 @auth_bp.route("/api/me", methods=["GET"])
 def get_me():
+    from flask import session
     user_data = get_current_user_data()
     if user_data:
+        profile = auth.get_user_profile(session.get("user_id"))
+        if profile:
+            user_data["profile_image"] = profile.get("profile_image", "")
         return (
             jsonify(
                 {
@@ -215,3 +225,87 @@ def register():
         ),
         201,
     )
+
+
+@auth_bp.route("/api/profile", methods=["GET"])
+@login_required
+def get_profile():
+    from core.session_handler import get_current_user_id
+    user_id = get_current_user_id()
+    profile = auth.get_user_profile(user_id)
+    if not profile:
+        return jsonify({"error": "User not found"}), 404
+    return jsonify(profile), 200
+
+
+@auth_bp.route("/api/profile", methods=["PUT"])
+@login_required
+def update_profile():
+    from flask import session
+    from core.session_handler import get_current_user_id
+    user_id = get_current_user_id()
+    data = request.get_json() or {}
+
+    username = data.get("username", "").strip()
+    full_name = data.get("full_name", "").strip()
+    email = data.get("email", "").strip()
+    new_password = data.get("password")
+
+    if not username:
+        return jsonify({"error": "Username is required"}), 400
+
+    # Validate Username format
+    if not re.match(r"^[a-zA-Z0-9_]+$", username):
+        return jsonify({"error": "Username can only contain letters, numbers and underscores."}), 400
+
+    # Check if username is taken by someone else
+    existing = auth.get_user_by_username(username)
+    if existing and existing["id"] != user_id:
+        return jsonify({"error": "Username already taken"}), 400
+
+    hashed_pass = None
+    if new_password:
+        if " " in new_password:
+            return jsonify({"error": "Password cannot contain spaces"}), 400
+        if len(new_password) < 8 or len(new_password) > 20:
+            return jsonify({"error": "Password must be between 8 and 20 characters"}), 400
+        hashed_pass = _bcrypt.generate_password_hash(new_password).decode("utf-8")
+
+    try:
+        current_profile = auth.get_user_profile(user_id)
+        existing_theme = current_profile.get("theme_mode", "dark") if current_profile else "dark"
+
+        db_data = {
+            "username": username,
+            "full_name": full_name,
+            "email": email,
+            "profile_image": data.get("profile_image"),
+            "theme_mode": data.get("theme_mode", existing_theme),
+            "email_notifications": 1 if data.get("email_notifications") else 0,
+            "pause_notifications": 1 if data.get("pause_notifications") else 0,
+        }
+        auth.update_user_profile(user_id, db_data, hashed_pass)
+        session["username"] = username
+        session["theme_mode"] = db_data["theme_mode"]
+        return jsonify({"message": "Profile updated successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@auth_bp.route("/api/profile/theme", methods=["PUT"])
+@login_required
+def update_theme():
+    from flask import session
+    from core.session_handler import get_current_user_id
+    user_id = get_current_user_id()
+    data = request.get_json() or {}
+    theme_mode = data.get("theme_mode", "dark")
+    if theme_mode not in ["light", "dark"]:
+        return jsonify({"error": "Invalid theme mode"}), 400
+    try:
+        auth.update_user_theme(user_id, theme_mode)
+        session["theme_mode"] = theme_mode
+        return jsonify({"message": "Theme updated successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+

@@ -47,6 +47,173 @@
   overflow: hidden;
 }
 
+/* ==========================================
+   Light Theme Styling Overrides for Client Dashboard
+   ========================================== */
+body.light-theme .cd-root {
+  color: #24292f;
+}
+
+body.light-theme .cd-project-card {
+  background: #ffffff;
+  border-color: #d0d7de;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+body.light-theme .cd-project-card:hover {
+  background: #f6f8fa;
+  border-color: #0969da;
+}
+
+body.light-theme .cd-card-header h3 {
+  color: #24292f;
+}
+
+body.light-theme .cd-status-label {
+  color: #57606a;
+}
+
+body.light-theme .cd-status-label.completed {
+  color: #1a7f37;
+}
+
+body.light-theme .cd-date {
+  color: #57606a;
+  background: #f6f8fa;
+}
+
+body.light-theme .cd-timeline-preview {
+  background: #f6f8fa;
+  border-color: #d0d7de;
+}
+
+body.light-theme .cd-timeline-labels {
+  color: #57606a;
+}
+
+body.light-theme .cd-timeline-status {
+  color: #0969da;
+  background: rgba(9, 105, 218, 0.1);
+}
+
+body.light-theme .cd-timeline-track {
+  background: #e1e4e8 !important;
+}
+
+body.light-theme .cd-financials {
+  background: #f6f8fa;
+  border-color: #d0d7de;
+}
+
+body.light-theme .cd-fin-item span {
+  color: #57606a;
+}
+
+body.light-theme .cd-fin-item strong {
+  color: #24292f;
+}
+
+body.light-theme .highlight-paid strong {
+  color: #1a7f37;
+}
+
+body.light-theme .highlight-balance strong {
+  color: #cf222e;
+}
+
+body.light-theme .cd-progress-info span {
+  color: #57606a;
+}
+
+body.light-theme .cd-progress-container {
+  background: #e1e4e8;
+  border-color: #d0d7de;
+}
+
+body.light-theme .cd-payments-section h4 {
+  color: #24292f;
+}
+
+body.light-theme .cd-payments-section h4::after {
+  background: #d0d7de;
+}
+
+body.light-theme .cd-payments-table th {
+  color: #57606a;
+}
+
+body.light-theme .cd-payments-table td {
+  background: #ffffff;
+  border-top-color: #e1e4e8;
+  border-bottom-color: #e1e4e8;
+}
+
+body.light-theme .cd-payments-table td:first-child {
+  border-left-color: #e1e4e8;
+}
+
+body.light-theme .cd-payments-table td:last-child {
+  border-right-color: #e1e4e8;
+}
+
+body.light-theme .cd-view-budget-btn {
+  background: #0969da;
+  box-shadow: 0 4px 15px rgba(9, 105, 218, 0.15);
+}
+
+body.light-theme .cd-modal-content {
+  background: #ffffff;
+  border-color: #d0d7de;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .cd-modal-header-row {
+  background: #f6f8fa;
+  border-bottom-color: #d0d7de;
+}
+
+body.light-theme .cd-modal-header-row h3 {
+  color: #24292f;
+}
+
+body.light-theme .cd-modal-close {
+  color: #cf222e;
+}
+
+body.light-theme .cd-modal-close:hover {
+  color: #24292f;
+}
+
+body.light-theme .cd-table-container {
+  background: #ffffff !important;
+}
+
+body.light-theme .cd-phase-row {
+  background: #f6f8fa;
+}
+
+body.light-theme .cd-phase-header-cell {
+  color: #0969da;
+}
+
+body.light-theme .cd-phase-subtotal-cell {
+  color: #0969da;
+}
+
+body.light-theme .cd-budget-footer {
+  background: #f6f8fa;
+  border-color: #d0d7de;
+}
+
+body.light-theme .cd-loading,
+body.light-theme .cd-error,
+body.light-theme .cd-empty {
+  background: #ffffff;
+  border-color: #d0d7de;
+  color: #24292f;
+}
+
+
 .cd-project-card::before {
   content: "";
   position: absolute;

@@ -1,0 +1,194 @@
+/* ==========================================================================
+   GLOBAL NEO FORM CONTROLS
+   Standardized styles for labels, inputs, selects, textareas, and cancel buttons
+   ========================================================================== */
+
+.neo-form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.neo-label {
+  display: block;
+  text-align: left;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.65);
+  font-weight: 400;
+  margin-bottom: 8px;
+}
+
+.neo-input {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: #fff;
+  padding: 12px 16px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.neo-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.neo-input:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.neo-input:focus {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: #00c6e6;
+  box-shadow: 0 0 0 3px rgba(0, 198, 230, 0.15);
+}
+
+.btn-neo-cancel {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 0.9rem;
+}
+
+.btn-neo-cancel:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+/* Light Theme Overrides */
+body.light-theme .neo-label {
+  color: #57606a;
+}
+
+body.light-theme .neo-input {
+  background: #f6f8fa;
+  border-color: #d0d7de;
+  color: #24292f;
+}
+
+body.light-theme .neo-input:focus {
+  background: #fff;
+  border-color: #0969da;
+  box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.1);
+}
+
+body.light-theme .btn-neo-cancel {
+  background: #f6f8fa;
+  border-color: #d0d7de;
+  color: #57606a;
+}
+
+body.light-theme .btn-neo-cancel:hover {
+  background: #ffebe9;
+  color: #cf222e;
+  border-color: rgba(207, 34, 46, 0.2);
+}
+
+.icon-field-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.icon-field-wrapper .icon-root {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+}
+
+body.light-theme .icon-field-wrapper .icon-root {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.neo-status-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 20px;
+}
+
+.neo-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform: translateY(-10px);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15);
+  border: 1px solid transparent;
+  box-sizing: border-box;
+}
+
+.neo-status.show {
+  padding: 10px 14px;
+  max-height: 80px;
+  opacity: 1;
+  transform: translateY(0);
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+.neo-status.error {
+  background: rgba(248, 113, 113, 0.1);
+  color: #f87171;
+  border-color: rgba(248, 113, 113, 0.15);
+}
+
+.neo-status.success {
+  background: rgba(52, 211, 153, 0.1);
+  color: #34d399;
+  border-color: rgba(52, 211, 153, 0.15);
+}
+
+body.light-theme .neo-status.error {
+  background: rgba(207, 34, 46, 0.1);
+  color: #cf222e;
+  border-color: rgba(207, 34, 46, 0.2);
+}
+
+body.light-theme .neo-status.success {
+  background: rgba(5, 150, 105, 0.1);
+  color: #059669;
+  border-color: rgba(5, 150, 105, 0.2);
+}
+
+.neo-field-error-msg {
+  color: #f87171;
+  font-size: 0.75rem;
+  font-weight: 400;
+  margin-top: 4px;
+  display: block;
+  text-align: left;
+}
+
+body.light-theme .neo-field-error-msg {
+  color: #cf222e;
+}
+
+.char-counter {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+body.light-theme .char-counter {
+  color: rgba(0, 0, 0, 0.4);
+}

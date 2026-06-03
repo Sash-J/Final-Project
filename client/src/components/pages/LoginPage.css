@@ -1,11 +1,14 @@
 .password-input-wrapper {
-  position: relative;
+
   display: flex;
   align-items: center;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .password-input-wrapper input {
   width: 100% !important;
+  box-sizing: border-box !important;
   padding-right: 60px !important;
 }
 
@@ -33,73 +36,61 @@
   transform: scale(1.1);
 }
 
+body.light-theme .password-toggle-btn {
+  color: rgba(0, 0, 0, 0.4) !important;
+}
+
+body.light-theme .password-toggle-btn:hover {
+  color: #24292f !important;
+}
+
 .login-container {
-  position: fixed;
-  top: 80px; /* Below navbar */
-  left: 0;
-  right: 0;
-  bottom: 0;
+  width: 100%;
+  min-height: calc(100vh - 80px);
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 20px;
   box-sizing: border-box;
   background: transparent !important;
-  overflow: hidden;
 }
 
+/* Glass Card - Matches profile-modal-glass */
 .login-card {
   position: relative;
   z-index: 1;
-  background: rgba(10, 12, 18, 0.45) !important;
-  backdrop-filter: blur(8px) saturate(150%) !important;
-  -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
+  background: rgba(10, 12, 18, 0.05) !important;
+  backdrop-filter: blur(60px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(60px) saturate(180%) !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6) !important;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8) !important;
   padding: 40px;
-  border-radius: 20px;
-  width: 350px;
+  border-radius: 32px;
+  width: 380px;
+  box-sizing: border-box;
   overflow: hidden;
   isolation: auto !important;
-  transform: translateZ(0);
   backface-visibility: hidden;
+}
+
+body.light-theme .login-card {
+  background: rgba(255, 255, 255, 0.3) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
 }
 
 .login-card h2 {
   font-size: 1.8rem;
-  background: linear-gradient(to right, #aaf8ff, #00c6e6);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-bottom: 30px;
-  letter-spacing: 2px;
-}
-
-.form-group {
-  text-align: left;
-  margin-bottom: 20px;
-}
-
-.form-group label {
-  display: block;
-  color: #888;
-  margin-bottom: 8px;
-  font-size: 0.9rem;
-}
-
-.form-group input {
-  width: 100%;
-  background: #1a1a1a;
-  border: 1px solid #333;
-  padding: 12px;
-  border-radius: 8px;
   color: #fff;
-  outline: none;
-  transition: border-color 0.2s;
+  margin-top: 0;
+  margin-bottom: 30px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-align: center;
 }
 
-.form-group input:focus {
-  border-color: #00c6e6;
+body.light-theme .login-card h2 {
+  color: #24292f;
 }
 
 .error-msg {
@@ -108,29 +99,8 @@
   margin-bottom: 15px;
 }
 
-.login-btn {
-  width: 100%;
-  background: rgba(0, 198, 230, 0.15) !important;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: #fff !important;
-  border: 1px solid rgba(255, 255, 255, 0.25) !important;
-  padding: 14px;
-  border-radius: 50px !important;
-  font-weight: 600 !important;
-  text-transform: none;
-  letter-spacing: 0.5px;
-  cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.3),
-    inset 0 1px 2px rgba(255, 255, 255, 0.2) !important;
-}
-
-.login-btn:hover {
-  transform: translateY(-2px) scale(1.02);
-  background: rgba(0, 198, 230, 0.2) !important;
-  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5) !important;
+body.light-theme .error-msg {
+  color: #cf222e;
 }
 
 .login-hint {
@@ -143,11 +113,16 @@
   color: #00c6e6;
 }
 
+/* Footer - Matches modal subtexts */
 .login-footer {
-  margin-top: 80px;
+  margin-top: 40px;
   text-align: center;
   font-size: 0.9rem;
-  color: #718096;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+body.light-theme .login-footer {
+  color: #57606a;
 }
 
 .login-footer a {
@@ -155,33 +130,50 @@
   text-decoration: none;
   font-weight: 500;
   margin-left: 5px;
-  font-size: 0.9rem;
+  transition: all 0.2s ease;
 }
 
 .login-footer a:hover {
-  font-weight: 800;
+  font-weight: 700;
 }
 
-/* ── Already Logged In Specific Styles ── */
+body.light-theme .login-footer a {
+  color: #0969da;
+}
+
+/* Already Logged In View */
 .already-logged-in-card {
   text-align: center;
   padding: 50px 40px !important;
 }
 
 .user-icon-hero {
-  color: var(--accent-color);
+  color: #00c6e6;
   margin-bottom: 20px;
   filter: drop-shadow(0 0 10px rgba(0, 198, 230, 0.3));
 }
 
+body.light-theme .user-icon-hero {
+  color: #0969da;
+  filter: none;
+}
+
 .logged-in-as {
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.65);
   font-size: 1rem;
   margin-bottom: 35px;
 }
 
+body.light-theme .logged-in-as {
+  color: #57606a;
+}
+
 .logged-in-as strong {
   color: #fff;
+}
+
+body.light-theme .logged-in-as strong {
+  color: #24292f;
 }
 
 .auth-action-group {
@@ -195,44 +187,38 @@
   padding: 16px !important;
 }
 
-.logout-direct-btn {
-  background: transparent !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  color: rgba(255, 255, 255, 0.5) !important;
-  padding: 12px !important;
-  border-radius: 50px !important;
-  cursor: pointer;
-  font-size: 0.85rem;
-  transition: all 0.3s ease;
-}
-
-.logout-direct-btn:hover {
-  background: rgba(255, 71, 87, 0.1) !important;
-  color: #ff6b81 !important;
-  border-color: rgba(255, 71, 87, 0.3) !important;
-}
-
-/* ── Loader ── */
+/* Loader */
 .login-loading-glass {
-  background: rgba(10, 12, 18, 0.45);
-  backdrop-filter: blur(8px);
-  padding: 40px 60px;
-  border-radius: 20px;
+  background: rgba(10, 12, 18, 0.05);
+  backdrop-filter: blur(60px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 40px 60px;
+  border-radius: 32px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 20px;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.65);
+}
+
+body.light-theme .login-loading-glass {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #57606a;
 }
 
 .glass-loader {
   width: 40px;
   height: 40px;
   border: 3px solid rgba(0, 198, 230, 0.1);
-  border-top-color: var(--accent-color);
+  border-top-color: #00c6e6;
   border-radius: 50%;
   animation: spin 1s linear infinite;
+}
+
+body.light-theme .glass-loader {
+  border: 3px solid rgba(9, 105, 218, 0.1);
+  border-top-color: #0969da;
 }
 
 @keyframes spin {

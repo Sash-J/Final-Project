@@ -29,6 +29,8 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
   const colorInputRef = useRef(null);
+  const startDateRef = useRef(null);
+  const endDateRef = useRef(null);
 
   const formatDateForInput = (dateStr) => {
     if (!dateStr) return "";
@@ -262,10 +264,10 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
             <div className="project-form-row">
               <div className="project-form-col">
                 <div className="project-form-group">
-                  <label>Project Name</label>
+                  <label className="neo-label">Project Name</label>
                   <input
                     type="text"
-                    className="project-form-input-full"
+                    className="neo-input"
                     required
                     value={formData.project_name}
                     onChange={(e) =>
@@ -279,10 +281,10 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
               </div>
               <div className="project-form-col">
                 <div className="project-form-group">
-                  <label>Code Name</label>
+                  <label className="neo-label">Code Name</label>
                   <input
                     type="text"
-                    className="project-form-input-full"
+                    className="neo-input"
                     value={formData.code_name}
                     onChange={(e) =>
                       setFormData({ ...formData, code_name: e.target.value })
@@ -295,12 +297,18 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
             <div className="project-form-row">
               <div className="project-form-col">
                 <div className="project-form-group">
-                  <label>Start Date</label>
+                  <label className="neo-label">Start Date</label>
                   <div className="icon-field-wrapper">
-                    <Icon name="calendar_month" modifiers="md" />
+                    <Icon
+                      name="calendar_month"
+                      modifiers="md"
+                      onClick={() => startDateRef.current?.showPicker()}
+                      style={{ cursor: "pointer", pointerEvents: "auto" }}
+                    />
                     <input
                       type="date"
-                      className="project-form-input-full"
+                      ref={startDateRef}
+                      className="neo-input"
                       value={formData.start_date}
                       onChange={(e) =>
                         setFormData({
@@ -314,12 +322,18 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
               </div>
               <div className="project-form-col">
                 <div className="project-form-group">
-                  <label>Target Delivery</label>
+                  <label className="neo-label">Target Delivery</label>
                   <div className="icon-field-wrapper">
-                    <Icon name="calendar_month" modifiers="md" />
+                    <Icon
+                      name="calendar_month"
+                      modifiers="md"
+                      onClick={() => endDateRef.current?.showPicker()}
+                      style={{ cursor: "pointer", pointerEvents: "auto" }}
+                    />
                     <input
                       type="date"
-                      className="project-form-input-full"
+                      ref={endDateRef}
+                      className="neo-input"
                       value={formData.end_date}
                       onChange={(e) =>
                         setFormData({ ...formData, end_date: e.target.value })
@@ -331,12 +345,12 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
             </div>
 
             <div className="project-form-group">
-              <label>Main Location</label>
+              <label className="neo-label">Main Location</label>
               <div className="icon-field-wrapper">
                 <Icon name="location_on" modifiers="md" />
                 <input
                   type="text"
-                  className="project-form-input-full"
+                  className="neo-input"
                   value={formData.location}
                   onChange={(e) =>
                     setFormData({ ...formData, location: e.target.value })
@@ -348,7 +362,7 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
             <div className="project-form-row">
               <div className="project-form-col">
                 <div className="project-form-group">
-                  <label>Associate Client</label>
+                  <label className="neo-label">Associate Client</label>
                   <GlassDropdown
                     isMulti
                     options={clients.map((c) => ({
@@ -365,7 +379,7 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
               </div>
               <div className="project-form-col">
                 <div className="project-form-group">
-                  <label>Assign Production Crew</label>
+                  <label className="neo-label">Assign Production Crew</label>
                   <GlassDropdown
                     isMulti
                     options={crew.map((c) => ({
@@ -385,16 +399,15 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
             <div className="project-form-actions">
               <button
                 type="button"
-                className="btn-cancel"
+                className="btn-neo-cancel"
                 onClick={onCancelEdit}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="btn-submit-neo"
+                className="btn-neo btn-neo-solid"
                 disabled={loading}
-                style={{ background: formData.color }}
               >
                 {loading
                   ? "Processing..."

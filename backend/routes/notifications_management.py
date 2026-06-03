@@ -78,7 +78,7 @@ def get_notifications():
     cursor = conn.cursor(dictionary=True)
     try:
         cursor.execute(
-            "SELECT * FROM notifications WHERE user_id = %s ORDER BY created_at DESC LIMIT 50",
+            "SELECT * FROM notifications WHERE user_id = %s ORDER BY created_at DESC LIMIT 20",
             (user_id,),
         )
         notifications = cursor.fetchall()

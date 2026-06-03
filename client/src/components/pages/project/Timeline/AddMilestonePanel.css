@@ -1,0 +1,174 @@
+.add-milestone-panel {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  animation: milestoneSlideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes milestoneSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.add-milestone-panel-row {
+  display: flex;  
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.add-milestone-panel-row .neo-form-group {
+  flex: 1;
+  min-width: 160px;
+}
+
+.add-milestone-panel-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.provenance-badge {
+  color: #fff;
+  padding: 2px 10px;
+  border-radius: 4px;
+  margin-left: 10px;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.provenance-badge.role-client {
+  background: #2dd4bf;
+}
+
+.provenance-badge.role-visiondivision {
+  background: #6366f1;
+}
+
+@media (max-width: 768px) {
+  .add-milestone-panel-row {
+    flex-direction: column;
+    gap: 0;
+  }
+}
+/* Morphing Sync Button */
+.btn-morph-sync {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--accent-color, #00c6e6);
+  color: var(--accent-color, #00c6e6);
+  padding: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-top: -10px;
+  margin-left: 20px;
+
+}
+
+.btn-morph-sync:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.btn-morph-sync.synced {
+  background: var(--accent-color, #00c6e6);
+  border-color: var(--accent-color, #00c6e6);
+  color: #fff;
+  box-shadow: 0 0 8px var(--accent-color, rgba(0, 198, 230, 0.85));
+}
+
+.btn-morph-sync .sync-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.btn-morph-sync.synced .sync-icon {
+  transform: rotate(360deg) scale(1.15);
+}
+
+/* Tooltip for Sync Button */
+.sync-hover-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sync-hover-modal {
+  position: absolute;
+  bottom: 140%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(10, 12, 18, 0.05);
+  backdrop-filter: blur(60px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
+  pointer-events: none;
+  animation: fadeInModal 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sync-hover-modal::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: rgba(10, 12, 18, 0.8) transparent transparent transparent;
+}
+
+.sync-hover-modal-icon {
+  color: var(--accent-color, #00c6e6);
+  font-size: 0.9rem !important;
+}
+
+.sync-hover-modal-text {
+  font-size: 0.8rem;
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+@keyframes fadeInModal {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 6px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+body.light-theme .sync-hover-modal {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: #d0d7de;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+body.light-theme .sync-hover-modal-text {
+  color: #24292f;
+}
+body.light-theme .sync-hover-modal::after {
+  border-color: rgba(255, 255, 255, 0.95) transparent transparent transparent;
+}

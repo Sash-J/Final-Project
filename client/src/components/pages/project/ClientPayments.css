@@ -6,7 +6,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
-  margin-bottom: 30px;
+  margin-bottom: 28px;
 }
 
 .payment-stat-card {
@@ -51,8 +51,9 @@
 
 .payments-main-layout {
   display: grid;
+  margin-top: 0 ;
   grid-template-columns: 1fr 350px;
-  gap: 25px;
+  gap: 20px;
   align-items: start;
 }
 
@@ -315,3 +316,126 @@
     transform: rotate(360deg);
   }
 }
+
+/* ==========================================
+   Light Theme Styling Overrides for Client Payments Page
+   ========================================== */
+body.light-theme .client-payments-root {
+  color: #24292f;
+}
+
+body.light-theme .payment-stat-card {
+  background: #ffffff;
+  border-color: #d0d7de;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+body.light-theme .stat-content label {
+  color: #57606a;
+}
+
+body.light-theme .stat-content h3 {
+  color: #24292f;
+}
+
+body.light-theme .payment-history-panel {
+  background: #ffffff;
+  border-color: #d0d7de;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+body.light-theme .panel-header {
+  border-bottom-color: #d0d7de;
+}
+
+body.light-theme .panel-header h3 {
+  color: #24292f;
+}
+
+body.light-theme .count-badge {
+  background: #f6f8fa;
+  color: #57606a;
+  border: 1px solid #d0d7de;
+}
+
+body.light-theme .payment-table th {
+  color: #57606a;
+  border-bottom-color: #d0d7de;
+}
+
+body.light-theme .payment-row:hover {
+  background: #f6f8fa;
+}
+
+body.light-theme .payment-row td {
+  color: #24292f;
+  border-bottom-color: #e1e4e8;
+}
+
+body.light-theme .date-cell {
+  color: #57606a;
+}
+
+body.light-theme .no-notes {
+  opacity: 0.5;
+}
+
+body.light-theme .record-payment-panel {
+  background: #ffffff;
+  border-color: #d0d7de;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+body.light-theme .record-payment-panel h3 {
+  color: #24292f;
+}
+
+body.light-theme .panel-subtext {
+  color: #57606a;
+}
+
+body.light-theme .payment-form .form-group label {
+  color: #57606a;
+}
+
+body.light-theme .currency-tag {
+  color: #57606a;
+}
+
+body.light-theme .payment-form .form-group input,
+body.light-theme .payment-form .form-group textarea {
+  background: #ffffff;
+  border-color: #d0d7de;
+  color: #24292f;
+}
+
+body.light-theme .payment-form input:focus,
+body.light-theme .payment-form textarea:focus {
+  background: #f6f8fa;
+  border-color: #0969da;
+}
+
+body.light-theme .btn-record-payment {
+  background: rgba(9, 105, 218, 0.05);
+  border-color: rgba(9, 105, 218, 0.3);
+  color: #0969da;
+}
+
+body.light-theme .btn-record-payment:hover:not(:disabled) {
+  background: rgba(9, 105, 218, 0.15);
+  box-shadow: 0 5px 15px rgba(9, 105, 218, 0.15);
+}
+
+body.light-theme .empty-payments {
+  color: #57606a;
+}
+
+body.light-theme .payments-loading {
+  color: #57606a;
+}
+
+body.light-theme .spinner-simple {
+  border-color: #e1e4e8;
+  border-top-color: #0969da;
+}
+

@@ -32,46 +32,18 @@
 
 .project-form-row {
   display: flex;
-  gap: 15px;
+  gap: 20px;
   width: 100%;
-  margin-bottom: 15px;
+}
+
+.project-form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
 }
 
 .project-form-col {
   flex: 1;
-}
-
-.project-form-group {
-  margin-bottom: 18px;
-}
-
-.project-form-group label,
-.project-form-col label {
-  display: block;
-  text-align: left;
-  margin-left: 10px;
-  margin-bottom: 8px;
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 0.85rem;
-}
-
-.sui-form-control,
-.project-form-input-full {
-  width: 100%;
-  padding: 12px 16px;
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  color: #fff;
-  font-size: 0.95rem;
-  transition: all 0.2s;
-  box-sizing: border-box;
-}
-
-.sui-form-control:focus {
-  border-color: #00c6e6;
-  background: rgba(0, 198, 230, 0.05);
-  outline: none;
 }
 
 .icon-field-wrapper {
@@ -92,6 +64,11 @@
 
 .icon-field-wrapper input {
   padding-right: 38px !important;
+}
+
+.icon-field-wrapper input[type="date"]::-webkit-calendar-picker-indicator {
+  display: none !important;
+  -webkit-appearance: none !important;
 }
 
 .project-image-upload-panel {
@@ -117,7 +94,8 @@
   align-items: center;
   color: rgba(255, 255, 255, 0.6);
   gap: 5px;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
+  font-weight: 300;
   font-style: italic;
 }
 
@@ -165,49 +143,9 @@
 
 .project-form-actions {
   display: flex;
+  justify-content: flex-end;
   gap: 15px;
   margin-top: 20px;
-}
-
-.btn-cancel {
-  flex: 1;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.6);
-  border-radius: 14px;
-  padding: 12px 24px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.btn-cancel:hover {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-}
-
-.btn-submit-neo {
-  flex: 2;
-  background: #00c6e6;
-  border: none;
-  color: #000;
-  border-radius: 14px;
-  padding: 12px 24px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s;
-  box-shadow: 0 5px 15px rgba(0, 198, 230, 0.3);
-}
-
-.btn-submit-neo:hover {
-  transform: translateY(-2px);
-  background: #00e0ff;
-  box-shadow: 0 8px 25px rgba(0, 198, 230, 0.4);
-}
-
-.btn-submit-neo:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 .status-msg {
@@ -263,4 +201,69 @@
     width: 100%;
     flex: none;
   }
+}
+
+/* Light Theme Styling Overrides for Project Form */
+body.light-theme .modal-header-section h2 {
+  color: #24292f;
+}
+
+body.light-theme .modal-header-section p {
+  color: #57606a;
+}
+
+body.light-theme .project-form-group label,
+body.light-theme .project-form-col label {
+  color: #57606a;
+}
+
+body.light-theme .sui-form-control,
+body.light-theme .project-form-input-full {
+  background: #f6f8fa;
+  border-color: #d0d7de;
+  color: #24292f;
+}
+
+body.light-theme .sui-form-control:focus,
+body.light-theme .project-form-input-full:focus {
+  background: #fff;
+  border-color: #0969da;
+  box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.1);
+}
+
+body.light-theme .icon-field-wrapper .icon-root {
+  color: #8c959f;
+}
+
+body.light-theme .project-image-upload-panel {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+body.light-theme .project-image-upload-panel:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+body.light-theme .image-upload-placeholder {
+  color: #57606a;
+}
+
+body.light-theme .color-hex-label {
+  color: #57606a !important;
+}
+
+body.light-theme .btn-cancel {
+  background: #f6f8fa;
+  border-color: #d0d7de;
+  color: #57606a;
+}
+
+body.light-theme .btn-cancel:hover {
+  background: #ffebe9;
+  color: #cf222e;
+  border-color: rgba(207, 34, 46, 0.2);
+}
+
+body.light-theme .identity-sphere {
+  border-color: rgba(0, 0, 0, 0.1);
 }

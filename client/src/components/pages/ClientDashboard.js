@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from "react";
 import axios from "axios";
+import html2pdf from "html2pdf.js";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import "./ClientDashboard.css";
-import "./BudgetEntryForm.css";
-import SuiTimeline from "./SuiTimeline";
-import ModalPortal from "../common/ModalPortal";
 import GlassDropdown from "../common/GlassDropdown";
 import Icon from "../common/Icon";
-import html2pdf from "html2pdf.js";
-import Skeleton from "../ui/Skeleton";
+import ModalPortal from "../common/ModalPortal";
 import PageHeader from "../common/PageHeader";
+import Skeleton from "../ui/Skeleton";
+import "./BudgetEntryForm.css";
+import "./ClientDashboard.css";
+import SuiTimeline from "./project/Timeline/SuiTimeline";
 
 import { API } from "../../config";
 import { formatCurrency } from "../../utils/currencyUtils";
@@ -184,13 +184,7 @@ const ClientDashboard = () => {
                         const a1 = parseFloat(val.additional1) || 0;
                         const t = parseFloat(val.total) || 0;
 
-                        if (
-                          q > 0 ||
-                          r > 0 ||
-                          t > 0 ||
-                          a1 > 0 ||
-                          val.is_itemized
-                        ) {
+                        if (t > 0) {
                           newCat.items.push({
                             ...item,
                             val: {
@@ -562,14 +556,13 @@ const ClientDashboard = () => {
                       <thead>
                         <tr>
                           <th className="col-item-name">Item Name</th>
-                          <th className="col-num">Qty</th>
+                          <th className="col-num">Units</th>
                           <th
                             className="col-rate-type"
                             style={{ width: "80px", textAlign: "center" }}
                           >
                             Type
                           </th>
-                          <th className="col-num">Rate</th>
                           <th className="col-num">Total</th>
                         </tr>
                       </thead>
@@ -577,7 +570,7 @@ const ClientDashboard = () => {
                         <React.Fragment key={phase.phase_id}>
                           <tbody className="bef-phase-group-header">
                             <tr className="cd-phase-row">
-                              <td colSpan="4" className="cd-phase-header-cell">
+                              <td colSpan="3" className="cd-phase-header-cell">
                                 {phase.phase_name}
                               </td>
                               <td className="col-num cd-phase-subtotal-cell">
@@ -589,7 +582,7 @@ const ClientDashboard = () => {
                             <React.Fragment key={dept.id}>
                               <tbody className="bef-dept-body">
                                 <tr className="bef-dept-row">
-                                  <td colSpan="5">
+                                  <td colSpan="4">
                                     <div className="dept-header-content">
                                       <span className="dept-id">
                                         {String(deptIdx + 1).padStart(2, "0")}
@@ -604,7 +597,7 @@ const ClientDashboard = () => {
                               {dept.categories.map((cat, catIdx) => (
                                 <tbody className="bef-cat-body" key={cat.id}>
                                   <tr className="bef-cat-row">
-                                    <td colSpan="4">
+                                    <td colSpan="3">
                                       <span className="cat-id">
                                         {deptIdx + 1}.{catIdx + 1}
                                       </span>
@@ -644,14 +637,6 @@ const ClientDashboard = () => {
                                         {item.val.is_itemized
                                           ? "—"
                                           : item.val.rate_type}
-                                      </td>
-                                      <td
-                                        className="col-num"
-                                        style={{ textAlign: "center" }}
-                                      >
-                                        {item.val.is_itemized
-                                          ? "—"
-                                          : formatCurrency(item.val.rate)}
                                       </td>
                                       <td className="col-num total-cell has-value">
                                         {formatCurrency(item.val.total)}

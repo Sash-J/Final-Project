@@ -127,7 +127,7 @@
   position: absolute;
   top: 50%;
   width: max-content;
-  max-width: 35vw;
+  max-width: 400px;
   opacity: 0.6;
   white-space: normal;
   word-wrap: break-word;
@@ -147,14 +147,15 @@
   opacity: 1;
 }
 
-.sui-exact-content.align-right {
-  right: 25px;
-  text-align: right;
+.sui-drop-line {
+  transition: all 0.5s ease;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2));
 }
 
-.sui-exact-content.align-left {
-  left: 25px;
-  text-align: left;
+.sui-exact-content.align-drop {
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .sui-date {
@@ -217,22 +218,12 @@
   border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-.sui-exact-content.align-left .sui-title {
-  align-items: flex-start;
-  text-align: left;
-}
-
-.sui-exact-content.align-left .sui-vd-badge {
-  align-self: flex-start;
-}
-
-.sui-exact-content.align-right .sui-title {
+.sui-exact-content.align-drop[style*="right"] .sui-title {
   align-items: flex-end;
-  text-align: right;
 }
 
-.sui-exact-content.align-right .sui-vd-badge {
-  align-self: flex-end;
+.sui-exact-content.align-drop[style*="left"] .sui-title {
+  align-items: flex-start;
 }
 
 .sui-status-completed .sui-exact-dot {
@@ -533,34 +524,6 @@
   cursor: pointer;
 }
 
-.sui-preview-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(2px);
-  color: #fff;
-  font-weight: 600;
-  font-size: 1.1rem;
-  opacity: 0;
-  transition: all 0.2s ease-in-out;
-  z-index: 10;
-  border-radius: 12px;
-}
-
-.sui-preview-clickable:hover .sui-preview-overlay {
-  opacity: 1;
-}
-
-.sui-preview-overlay span {
-  padding: 8px 16px;
-  background: rgba(0, 198, 230, 0.2);
-  border: 1px solid rgba(0, 198, 230, 0.4);
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0, 198, 230, 0.2);
-}
 
 .milestone-modal-content-wide {
   max-width: 1200px !important;

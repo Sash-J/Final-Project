@@ -1,300 +1,34 @@
-import React, { useState, useEffect, useRef } from "react";
-import ReactDOM from "react-dom";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import "./BudgetEntryForm.css";
+import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import html2pdf from "html2pdf.js";
-import BreakdownModal from "../modals/BreakdownModal";
-import ConfirmationModal from "../common/ConfirmationModal";
-import Icon from "../common/Icon";
+import { useEffect, useRef, useState } from "react";
 import { API } from "../../config";
-import { formatCurrency, getCurrencySymbol } from "../../utils/currencyUtils";
 import { useProjects } from "../../contexts/ProjectContext";
+import { useAuth } from "../../contexts/AuthContext";
+import { formatCurrency } from "../../utils/currencyUtils";
+import ConfirmationModal from "../common/ConfirmationModal";
+import BreakdownModal from "../modals/BreakdownModal";
+import "./BudgetEntryForm.css";
 
 import {
-  BudgetColGroup,
-  BudgetTableHeader,
-  SkeletonBox,
   SkeletonRow,
-  SkeletonPhase,
   SkeletonTable,
-  BudgetFormatEmpty,
 } from "./BudgetEntrySkeleton";
 
-// ── Item Row Component ──────────────────────────────────────────────────────
-const BudgetRow = ({
-  item,
-  index,
-  getVal,
-  handleChange,
-  handleToggleItemize,
-  setActiveBreakdownId,
-  setActiveBreakdownItem,
-  commentAnchorRect,
-  setCommentAnchorRect,
-  activeComment,
-  setActiveComment,
-  showVersionWarning,
-  grossDisplay,
-  totalDisplay,
-  isFilled,
-  focusedInput,
-  setFocusedInput,
-}) => {
-  const v = getVal(item.id, "all") || {};
-  const rateType = getVal(item.id, "rate_type");
+import BudgetRow from "./BudgetEntry/components/BudgetRow";
+import BudgetSearchWidget from "./BudgetEntry/components/BudgetSearchWidget";
+import BudgetSubNav from "./BudgetEntry/components/BudgetSubNav";
+import CrewAssignmentDropdown from "./BudgetEntry/components/CrewAssignmentDropdown";
+import BudgetColGroup from "./BudgetEntry/components/BudgetColGroup";
+import BudgetTableHeader from "./BudgetEntry/components/BudgetTableHeader";
+import BudgetFormatEmpty from "./BudgetEntry/components/BudgetFormatEmpty";
+import { useBudgetState } from "./BudgetEntry/hooks/useBudgetState";
+import { useBudgetAssignments } from "./BudgetEntry/hooks/useBudgetAssignments";
+import { useBudgetCalculations } from "./BudgetEntry/hooks/useBudgetCalculations";
+import { useBudgetDragAndDrop } from "./BudgetEntry/hooks/useBudgetDragAndDrop";
 
-  return (
-    <Draggable draggableId={String(item.id)} index={index}>
-      {(providedRow, snapshotRow) => (
-        <tr
-          ref={providedRow.innerRef}
-          {...providedRow.draggableProps}
-          className={`bef-row ${isFilled ? "filled" : ""} ${snapshotRow.isDragging ? "dragging" : ""}`}
-        >
-          <td className="col-drag" {...providedRow.dragHandleProps}>
-            <span className="material-symbols-outlined drag-handle-icon">
-              drag_indicator
-            </span>
-          </td>
-          <td className="col-item-name">
-            <div className="item-name-cell-wrapper">
-              <button
-                className={`item-itemize-toggle ${v.is_itemized ? "active" : ""}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleToggleItemize(item.id, item.item_name);
-                }}
-                title={v.is_itemized ? "Disable Breakdown" : "Enable Breakdown"}
-              >
-                <i
-                  className={`fas ${v.is_itemized ? "fa-list-ul" : "fa-list"}`}
-                ></i>
-              </button>
-              <span className="item-name-text">{item.item_name}</span>
-              {v.is_itemized && (
-                <span
-                  className="breakdown-badge"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveBreakdownId(item.id);
-                    setActiveBreakdownItem(item.item_name);
-                  }}
-                >
-                  Itemized
-                </span>
-              )}
-            </div>
-          </td>
-          <td className="col-units">
-            <input
-              type="number"
-              min="0"
-              step="any"
-              placeholder={v.is_itemized ? "—" : "0"}
-              value={v.is_itemized ? "" : getVal(item.id, "qty")}
-              onChange={(e) => {
-                if (showVersionWarning) return;
-                const val = e.target.value;
-                if (val.length <= 3) {
-                  handleChange(item.id, "qty", val);
-                }
-              }}
-              disabled={showVersionWarning || v.is_itemized}
-            />
-          </td>
-          <td className="col-rate-type">
-            <div
-              className={`rate-type-column-content ${v.is_itemized ? "disabled" : ""}`}
-            >
-              <input
-                type="number"
-                min="0"
-                step="any"
-                className="multiplier-input"
-                placeholder="1"
-                value={getVal(item.id, "multiplier")}
-                onChange={(e) => {
-                  if (showVersionWarning) return;
-                  const val = e.target.value;
-                  if (val.length <= 3) {
-                    handleChange(item.id, "multiplier", val);
-                  }
-                }}
-                disabled={showVersionWarning || v.is_itemized}
-              />
-              <div
-                className={`rate-type-toggle ${v.is_itemized ? "disabled" : ""}`}
-              >
-                <label
-                  className={`rt-option ${rateType === "day" ? "active" : ""}`}
-                >
-                  <input
-                    type="radio"
-                    name={`rate_type-${item.id}`}
-                    value="day"
-                    checked={rateType === "day"}
-                    onChange={() =>
-                      !v.is_itemized &&
-                      handleChange(item.id, "rate_type", "day")
-                    }
-                    disabled={v.is_itemized || showVersionWarning}
-                  />
-                  Day
-                </label>
-                <label
-                  className={`rt-option ${rateType === "cs" ? "active" : ""}`}
-                >
-                  <input
-                    type="radio"
-                    name={`rate_type-${item.id}`}
-                    value="cs"
-                    checked={rateType === "cs"}
-                    onChange={() =>
-                      !v.is_itemized && handleChange(item.id, "rate_type", "cs")
-                    }
-                    disabled={v.is_itemized || showVersionWarning}
-                  />
-                  CS
-                </label>
-              </div>
-            </div>
-          </td>
-          <td className="col-rate">
-            {focusedInput?.itemId === item.id &&
-            focusedInput?.field === "rate" ? (
-              <input
-                type="number"
-                min="0"
-                step="any"
-                autoFocus
-                placeholder={v.is_itemized ? "—" : "0.00"}
-                value={v.is_itemized ? "" : getVal(item.id, "rate")}
-                onBlur={() => setFocusedInput(null)}
-                onChange={(e) => {
-                  if (showVersionWarning) return;
-                  handleChange(item.id, "rate", e.target.value);
-                }}
-                disabled={showVersionWarning || v.is_itemized}
-              />
-            ) : (
-              <div
-                className="readability-input-proxy"
-                onClick={() =>
-                  !v.is_itemized &&
-                  !showVersionWarning &&
-                  setFocusedInput({ itemId: item.id, field: "rate" })
-                }
-              >
-                {v.is_itemized
-                  ? "—"
-                  : formatCurrency(getVal(item.id, "rate") || 0, false)}
-              </div>
-            )}
-          </td>
-          <td className={`col-gross gross-cell ${isFilled ? "has-value" : ""}`}>
-            {v.is_itemized ? "—" : grossDisplay(item.id)}
-          </td>
-          <td className="col-add bef-relative">
-            <div className="add-input-group">
-              {focusedInput?.itemId === item.id &&
-              focusedInput?.field === "add1" ? (
-                <input
-                  type="number"
-                  min="0"
-                  step="any"
-                  autoFocus
-                  placeholder="0.00"
-                  value={getVal(item.id, "add1")}
-                  onBlur={() => setFocusedInput(null)}
-                  onChange={(e) => {
-                    if (showVersionWarning) return;
-                    handleChange(item.id, "add1", e.target.value);
-                  }}
-                  disabled={showVersionWarning}
-                />
-              ) : (
-                <div
-                  className="readability-input-proxy"
-                  onClick={() =>
-                    !showVersionWarning &&
-                    setFocusedInput({ itemId: item.id, field: "add1" })
-                  }
-                >
-                  {formatCurrency(getVal(item.id, "add1") || 0, false)}
-                </div>
-              )}
-              <button
-                className={`bef-comment-btn ${getVal(item.id, "c1") ? "has-comment" : ""}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setCommentAnchorRect(e.currentTarget.getBoundingClientRect());
-                  setActiveComment({ itemId: item.id, field: "c1" });
-                }}
-              >
-                <svg
-                  className="comment-icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  width="16"
-                  height="16"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" />
-                </svg>
-                {getVal(item.id, "c1") && (
-                  <div className="bef-comment-preview">
-                    {getVal(item.id, "c1")}
-                  </div>
-                )}
-              </button>
-              {activeComment?.itemId === item.id &&
-                activeComment?.field === "c1" &&
-                ReactDOM.createPortal(
-                  <div
-                    className="bef-comment-popover glass-sandblasted animated-popover"
-                    style={{
-                      top: commentAnchorRect
-                        ? commentAnchorRect.bottom + 10
-                        : 0,
-                      left: commentAnchorRect
-                        ? commentAnchorRect.right - 220
-                        : 0,
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <textarea
-                      placeholder="Add a detailed note for this row..."
-                      value={getVal(item.id, "c1")}
-                      onChange={(e) =>
-                        handleChange(item.id, "c1", e.target.value)
-                      }
-                      autoFocus
-                    />
-                    <div className="popover-footer">
-                      <button
-                        className="popover-done-btn"
-                        onClick={() => setActiveComment(null)}
-                      >
-                        Done
-                      </button>
-                    </div>
-                  </div>,
-                  document.body,
-                )}
-            </div>
-          </td>
-          <td className={`col-total total-cell ${isFilled ? "has-value" : ""}`}>
-            {totalDisplay(item.id)}
-          </td>
-        </tr>
-      )}
-    </Draggable>
-  );
-};
+
+
+
 
 const BudgetEntryForm = ({
   embedded = false,
@@ -304,148 +38,425 @@ const BudgetEntryForm = ({
   versionName = "",
   refreshKey = 0,
   onDirtyChange = () => {},
+  selectedCatId = "",
+  selectedDeptId = "",
+  onPublish = null,
 }) => {
-  const [hierarchy, setHierarchy] = useState([]);
-  const [expandedPhases, setExpandedPhases] = useState(new Set([2]));
-  const [values, setValues] = useState({});
-  const [activeComment, setActiveComment] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [status, setStatus] = useState(null);
-  const [breakdownData, setBreakdownData] = useState({});
-  const [activeBreakdownId, setActiveBreakdownId] = useState(null);
-  const [activeBreakdownItem, setActiveBreakdownItem] = useState(null);
-  const [showDisableConfirm, setShowDisableConfirm] = useState(false);
-  const [pendingDisableId, setPendingDisableId] = useState(null);
-  const [commentAnchorRect, setCommentAnchorRect] = useState(null);
-  const [focusedInput, setFocusedInput] = useState(null);
+  const { user } = useAuth();
+  const isManager = user?.role === "manager";
+  const isAdmin = user?.role === "admin";
+  const canEdit = isManager || isAdmin;
 
   const {
     getBudgetData,
-    budgetCache,
-    budgetLoading,
     invalidateCache,
+    invalidateHierarchyCache,
     hierarchyCache,
-    getBudgetMetadata,
   } = useProjects();
-  const initialDataRef = useRef(null);
 
-  const togglePhase = (phaseId) => {
-    const next = new Set(expandedPhases);
-    if (next.has(phaseId)) next.delete(phaseId);
-    else next.add(phaseId);
-    setExpandedPhases(next);
-  };
+  const {
+    hierarchy, setHierarchy,
+    expandedPhases, setExpandedPhases, togglePhase,
+    collapsedDepts, setCollapsedDepts, toggleDept,
+    values, setValues, getVal, handleChange,
+    activeComment, setActiveComment,
+    loading,
+    submitting, setSubmitting,
+    status, setStatus,
+    breakdownData, setBreakdownData,
+    activeBreakdownId, setActiveBreakdownId,
+    activeBreakdownItem, setActiveBreakdownItem,
+    showDisableConfirm, setShowDisableConfirm,
+    showClearConfirm, setShowClearConfirm,
+    pendingDisableId, setPendingDisableId,
+    commentAnchorRect, setCommentAnchorRect,
+    focusedInput, setFocusedInput,
+    initialDataRef
+  } = useBudgetState({
+    externalProjectId,
+    versionId,
+    refreshKey,
+    onDirtyChange,
+    hierarchyCache,
+    getBudgetData,
+  });
+
+  const {
+
+    projectCrew,
+    deptAssignments,
+    categoryAssignments,
+    budgetItemAssignments,
+    activeAssignDeptId,
+    setActiveAssignDeptId,
+    activeAssignCatId,
+    setActiveAssignCatId,
+    activeAssignItemId,
+    setActiveAssignItemId,
+    isCrewEditing,
+    setIsCrewEditing,
+    handleAssignCrew,
+    handleAssignCategoryCrew,
+    handleAssignBudgetItemCrew,
+  } = useBudgetAssignments(externalProjectId, onDirtyChange);
+
   useEffect(() => {
-    //Reset unsaved changes tracking immediately on project/version switch
-    //help gained from OpenAIChat
-    initialDataRef.current = null;
-    onDirtyChange(false);
+    if (!selectedCatId || !hierarchy.length) return;
 
-    if (!externalProjectId || !versionId) {
-      setHierarchy([]);
-      setValues({});
-      setBreakdownData({});
-      setStatus(null);
+    let foundPhaseId = null;
+    let foundDeptId = null;
+    for (const phase of hierarchy) {
+      if (phase.departments) {
+        for (const dept of phase.departments) {
+          if (dept.categories) {
+            const hasCat = dept.categories.some(
+              (cat) => String(cat.id) === String(selectedCatId)
+            );
+            if (hasCat) {
+              foundPhaseId = phase.phase_id;
+              foundDeptId = dept.id;
+              break;
+            }
+          }
+        }
+      }
+      if (foundPhaseId) break;
+    }
+
+    if (foundPhaseId) {
+      setExpandedPhases((prev) => {
+        if (prev.has(foundPhaseId)) return prev;
+        const next = new Set(prev);
+        next.add(foundPhaseId);
+        return next;
+      });
+
+      if (foundDeptId) {
+        setCollapsedDepts((prev) => {
+          if (!prev.has(foundDeptId)) return prev;
+          const next = new Set(prev);
+          next.delete(foundDeptId);
+          return next;
+        });
+      }
+
+      const timer = setTimeout(() => {
+        const element = document.getElementById(`cat-section-${selectedCatId}`);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "center" });
+          element.classList.add("highlight-row-glow");
+          const removeTimer = setTimeout(() => {
+            element.classList.remove("highlight-row-glow");
+          }, 3000);
+          return () => clearTimeout(removeTimer);
+        }
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedCatId, hierarchy, setCollapsedDepts, setExpandedPhases]);
+
+  useEffect(() => {
+    if (!selectedDeptId || !hierarchy.length) return;
+
+    let foundPhaseId = null;
+    for (const phase of hierarchy) {
+      if (phase.departments) {
+        const hasDept = phase.departments.some(
+          (dept) => String(dept.id) === String(selectedDeptId)
+        );
+        if (hasDept) {
+          foundPhaseId = phase.phase_id;
+          break;
+        }
+      }
+      if (foundPhaseId) break;
+    }
+
+    if (foundPhaseId) {
+      setExpandedPhases((prev) => {
+        if (prev.has(foundPhaseId)) return prev;
+        const next = new Set(prev);
+        next.add(foundPhaseId);
+        return next;
+      });
+
+      setCollapsedDepts((prev) => {
+        const dId = Number(selectedDeptId);
+        if (!prev.has(dId)) return prev;
+        const next = new Set(prev);
+        next.delete(dId);
+        return next;
+      });
+
+      const timer = setTimeout(() => {
+        const element = document.getElementById(`dept-section-${selectedDeptId}`);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "center" });
+          element.classList.add("highlight-row-glow");
+          const removeTimer = setTimeout(() => {
+            element.classList.remove("highlight-row-glow");
+          }, 3000);
+          return () => clearTimeout(removeTimer);
+        }
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedDeptId, hierarchy, setCollapsedDepts, setExpandedPhases]);
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [currentMatchIndex, setCurrentMatchIndex] = useState(-1);
+
+  const containerRef = useRef(null);
+  const widgetRef = useRef(null);
+  const searchInputRef = useRef(null);
+  const [translateY, setTranslateY] = useState(0);
+  const translateYRef = useRef(0);
+  translateYRef.current = translateY;
+
+  useEffect(() => {
+    let scrollTimeout = null;
+    let isScrolling = false;
+    let containerDocTop = 0;
+    let initialTranslateY = 0;
+
+    const handleScroll = () => {
+      if (!containerRef.current || !widgetRef.current) return;
+
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const maxScrollLimit = document.documentElement.scrollHeight - window.innerHeight;
+      const clampedScroll = Math.max(0, Math.min(scrollTop, maxScrollLimit));
+
+      // Calculate layout coordinates once at the start of a scroll gesture
+      // to completely prevent layout thrashing (forced reflows) during scroll ticks.
+      if (!isScrolling) {
+        isScrolling = true;
+        const rect = containerRef.current.getBoundingClientRect();
+        containerDocTop = rect.top + scrollTop;
+        initialTranslateY = translateYRef.current;
+      }
+
+      const clampedRectTop = containerDocTop - clampedScroll;
+
+      // Safe viewport boundary limits for the widget (navbar to viewport bottom)
+      const topLimit = 140;
+      const widgetHeight = searchOpen ? 240 : 80;
+      const bottomLimit = window.innerHeight - widgetHeight - 40; // 40px safety padding
+
+      // Calculate widget's viewport position based on its last settled absolute position
+      const naturalViewportTop = initialTranslateY + clampedRectTop;
+
+      let adjustedViewportTop = naturalViewportTop;
+      const resistance = 0.15; // 85% resistance factor
+
+      // Apply rubber-band dampening at boundaries so it slows down and never goes out of frame
+      if (naturalViewportTop < topLimit) {
+        const overshoot = topLimit - naturalViewportTop;
+        adjustedViewportTop = topLimit - overshoot * resistance;
+      } else if (naturalViewportTop > bottomLimit) {
+        const overshoot = naturalViewportTop - bottomLimit;
+        adjustedViewportTop = bottomLimit + overshoot * resistance;
+      }
+
+      // Convert back to container-relative coordinate and clamp to container height
+      const requiredTranslateY = adjustedViewportTop - clampedRectTop;
+      const maxScroll = containerRef.current.offsetHeight - widgetHeight;
+      const clampedTranslateY = Math.max(0, Math.min(requiredTranslateY, maxScroll));
+
+      // Disable transition for instantaneous feedback during scrolling
+      widgetRef.current.style.transition = "none";
+      widgetRef.current.style.transform = `translateY(${clampedTranslateY}px)`;
+
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+
+      // Settle smoothly after scrolling stops
+      scrollTimeout = setTimeout(() => {
+        isScrolling = false;
+        
+        if (containerRef.current && widgetRef.current) {
+          const currentRect = containerRef.current.getBoundingClientRect();
+          const currentScrollTop = window.scrollY || document.documentElement.scrollTop;
+          const currentClampedScroll = Math.max(0, Math.min(currentScrollTop, maxScrollLimit));
+          const currentContainerDocTop = currentRect.top + currentScrollTop;
+          const finalClampedRectTop = currentContainerDocTop - currentClampedScroll;
+
+          // Keep widget 140px from viewport top below navbar
+          const targetOffset = 140 - finalClampedRectTop;
+          const finalMaxScroll = containerRef.current.offsetHeight - widgetHeight;
+          const finalOffset = Math.min(
+            Math.max(0, targetOffset),
+            Math.max(0, finalMaxScroll)
+          );
+
+          const distance = Math.abs(translateYRef.current - finalOffset);
+          if (distance > 300) {
+            widgetRef.current.style.transition = "none";
+          } else {
+            widgetRef.current.style.transition = "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)";
+          }
+          void widgetRef.current.offsetHeight; // force reflow
+          widgetRef.current.style.transform = `translateY(${finalOffset}px)`;
+          setTranslateY(finalOffset);
+        }
+      }, 150); // 150ms Stop-scroll detection
+    };
+
+    window.addEventListener("scroll", handleScroll, true);
+
+    // Initial position set immediately (without debounce)
+    if (containerRef.current) {
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const maxScrollLimit = document.documentElement.scrollHeight - window.innerHeight;
+      const clampedScroll = Math.max(0, Math.min(scrollTop, maxScrollLimit));
+
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const containerDocTop = containerRect.top + scrollTop;
+      const clampedRectTop = containerDocTop - clampedScroll;
+
+      const targetOffset = 140 - clampedRectTop;
+      const maxScroll = containerRef.current.offsetHeight - (searchOpen ? 240 : 80);
+      const offset = Math.min(
+        Math.max(0, targetOffset),
+        Math.max(0, maxScroll)
+      );
+      setTranslateY(offset);
+      if (widgetRef.current) {
+        widgetRef.current.style.transition = "none";
+        widgetRef.current.style.transform = `translateY(${offset}px)`;
+      }
+    }
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll, true);
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+    };
+  }, [searchOpen]);
+
+  // Focus the search input when the widget is expanded
+  useEffect(() => {
+    if (searchOpen && searchInputRef.current) {
+      setTimeout(() => {
+        if (searchInputRef.current) {
+          searchInputRef.current.focus();
+        }
+      }, 50);
+    }
+  }, [searchOpen]);
+
+  // Search items in hierarchy
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      setCurrentMatchIndex(-1);
       return;
     }
 
-    const loadBudget = async () => {
-      setLoading(true);
-      setStatus(null);
-      if (hierarchyCache) {
-        setHierarchy(hierarchyCache);
-      } else {
-        getBudgetMetadata();
-      }
+    const query = searchQuery.toLowerCase().trim();
+    const results = [];
 
-      try {
-        const data = await getBudgetData(
-          externalProjectId,
-          versionId,
-          refreshKey > 0,
-        );
-
-        if (data.hierarchy) setHierarchy(data.hierarchy);
-
-        const serverValues = data.values || {};
-        const initialValues = {};
-
-        Object.keys(serverValues).forEach((itemId) => {
-          const idNum = parseInt(itemId);
-          const rowData = serverValues[itemId];
-          initialValues[idNum] = {
-            qty: String(parseFloat(rowData.quantity) || ""),
-            rate: String(parseFloat(rowData.rate) || ""),
-            rate_type: rowData.rate_type || "day",
-            multiplier: String(
-              parseFloat(rowData.rate_multiplier || rowData.multiplier) || "1",
-            ),
-            gross: String(parseFloat(rowData.gross_revenue) || ""),
-            add1: String(parseFloat(rowData.additional1) || ""),
-            c1: rowData.comment1 || "",
-            is_itemized: !!rowData.is_itemized,
-            total: String(parseFloat(rowData.total) || "0"),
-          };
+    hierarchy.forEach((phase) => {
+      if (phase.departments) {
+        phase.departments.forEach((dept) => {
+          if (dept.categories) {
+            dept.categories.forEach((cat) => {
+              if (cat.items) {
+                cat.items.forEach((item) => {
+                  if (item.item_name.toLowerCase().includes(query)) {
+                    results.push({
+                      itemId: item.id,
+                      phaseId: phase.phase_id,
+                      deptId: dept.id,
+                      itemName: item.item_name,
+                    });
+                  }
+                });
+              }
+            });
+          }
         });
-
-        setValues(initialValues);
-        setBreakdownData(data.breakdowns || {});
-
-        initialDataRef.current = {
-          values: JSON.stringify(initialValues),
-          breakdowns: JSON.stringify(data.breakdowns || {}),
-        };
-        onDirtyChange(false);
-      } catch (err) {
-        console.error("BudgetEntryForm: Failed to load budget data", err);
-        setStatus({
-          type: "error",
-          text: "Failed to load budget data from cache.",
-        });
-      } finally {
-        setLoading(false);
       }
-    };
+    });
 
-    loadBudget();
-  }, [externalProjectId, versionId, getBudgetData, refreshKey, onDirtyChange]);
+    setSearchResults(results);
+    setCurrentMatchIndex(results.length > 0 ? 0 : -1);
+  }, [searchQuery, hierarchy]);
 
-  //Budget unsaved changes tracking -help gained from OpenAI
-  useEffect(() => {
-    if (!initialDataRef.current) return;
+  const goToMatch = (idx) => {
+    if (searchResults.length === 0 || idx < 0 || idx >= searchResults.length) return;
 
-    const isValuesDirty =
-      initialDataRef.current.values !== JSON.stringify(values);
-    const isBreakdownsDirty =
-      initialDataRef.current.breakdowns !== JSON.stringify(breakdownData);
+    const match = searchResults[idx];
+    
+    // Expand the phase if it is collapsed
+    if (!expandedPhases.has(match.phaseId)) {
+      setExpandedPhases((prev) => {
+        const next = new Set(prev);
+        next.add(match.phaseId);
+        return next;
+      });
+    }
 
-    onDirtyChange(isValuesDirty || isBreakdownsDirty);
-  }, [values, breakdownData, onDirtyChange]);
+    // Expand the department if it is collapsed
+    if (collapsedDepts.has(match.deptId)) {
+      setCollapsedDepts((prev) => {
+        const next = new Set(prev);
+        next.delete(match.deptId);
+        return next;
+      });
+    }
 
-  const getVal = (itemId, field) => {
-    if (field === "all") return values[itemId] || {};
-    if (field === "rate_type") return values[itemId]?.rate_type || "day";
-    return values[itemId]?.[field] || "";
+    // Wait for rendering to complete, locate DOM row, scroll and flash it cyan
+    setTimeout(() => {
+      const element = document.getElementById(`budget-row-${match.itemId}`);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
+        
+        // Remove previous highlight class if any
+        element.classList.remove("cyan-flash-highlight");
+        
+        // Trigger reflow to restart CSS animation
+        void element.offsetWidth;
+        
+        // Add highlight class
+        element.classList.add("cyan-flash-highlight");
+        
+        // Clean up class after animation ends
+        setTimeout(() => {
+          element.classList.remove("cyan-flash-highlight");
+        }, 2000);
+      }
+    }, 100);
   };
 
-  const handleChange = (itemId, field, val) => {
-    setValues((prev) => ({
-      ...prev,
-      [itemId]: {
-        ...(prev[itemId] || {
-          qty: "",
-          rate: "",
-          rate_type: "day",
-          multiplier: "1",
-          add1: "",
-          c1: "",
-          is_itemized: false,
-        }),
-        [field]: val,
-      },
-    }));
+  const handleSearchNext = () => {
+    if (searchResults.length === 0) return;
+    const nextIdx = (currentMatchIndex + 1) % searchResults.length;
+    setCurrentMatchIndex(nextIdx);
+    goToMatch(nextIdx);
   };
+
+  const handleSearchPrev = () => {
+    if (searchResults.length === 0) return;
+    const prevIdx = (currentMatchIndex - 1 + searchResults.length) % searchResults.length;
+    setCurrentMatchIndex(prevIdx);
+    goToMatch(prevIdx);
+  };
+
+  const handleSearchKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSearchNext();
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      setSearchQuery("");
+      setSearchOpen(false);
+    }
+  };
+
 
   const handleToggleItemize = async (itemId, itemName) => {
     if (showVersionWarning) return;
@@ -523,9 +534,19 @@ const BudgetEntryForm = ({
   const handleBreakdownSave = (validItems, grandTotal) => {
     const itemId = activeBreakdownId;
 
+    const cleanedItems = validItems.map((item) => ({
+      ...item,
+      quantity: parseFloat(item.quantity) || 0,
+      rate_multiplier: parseFloat(item.rate_multiplier) || 1,
+      rate: parseFloat(item.rate) || 0,
+      additional1: parseFloat(item.additional1) || 0,
+      gross_revenue: parseFloat(item.gross_revenue) || 0,
+      total: parseFloat(item.total) || 0,
+    }));
+
     setBreakdownData((prev) => ({
       ...prev,
-      [itemId]: validItems,
+      [itemId]: cleanedItems,
     }));
 
     setValues((prev) => ({
@@ -545,7 +566,7 @@ const BudgetEntryForm = ({
         project_id: parseInt(externalProjectId),
         version_id: parseInt(versionId),
         item_id: parseInt(itemId),
-        breakdown_items: validItems,
+        breakdown_items: cleanedItems,
       }),
     })
       .then(() => {
@@ -555,57 +576,18 @@ const BudgetEntryForm = ({
       .catch((err) => console.error("Failed to save breakdown:", err));
   };
 
-  const calcGross = (itemValues) => {
-    const q = parseFloat(itemValues.qty) || 0;
-    const m = parseFloat(itemValues.multiplier) || 1;
-    const r = parseFloat(itemValues.rate) || 0;
-    return +(q * m * r).toFixed(2);
-  };
+  const {
+    calcGross,
+    totalRaw,
+    getCategorySubtotal,
+    getDeptSubtotal,
+    grossDisplay,
+    totalDisplay,
+    getPhaseSubtotal,
+    grandTotal,
+  } = useBudgetCalculations(values, hierarchy);
 
-  const calcItemTotal = (itemValues) => {
-    const grossVal = calcGross(itemValues);
-    const a1 = parseFloat(itemValues.add1) || 0;
-    return +(grossVal + a1).toFixed(2);
-  };
-
-  const grossRaw = (itemId) => {
-    const itemValues = values[itemId] || {};
-    return calcGross(itemValues);
-  };
-
-  //If itemized take itemaized total
-  const totalRaw = (itemId) => {
-    const itemValues = values[itemId] || {};
-    if (itemValues.is_itemized) return parseFloat(itemValues.total) || 0;
-    return calcItemTotal(itemValues);
-  };
-
-  const getCategorySubtotal = (category) => {
-    return (category.items || []).reduce(
-      (sum, item) => sum + totalRaw(item.id),
-      0,
-    );
-  };
-
-  const grossDisplay = (itemId) => formatCurrency(grossRaw(itemId));
-
-  const totalDisplay = (itemId) => formatCurrency(totalRaw(itemId));
-
-  const getPhaseSubtotal = (phase) => {
-    if (!phase.departments) return 0;
-    return phase.departments.reduce((deptSum, dept) => {
-      return (
-        deptSum +
-        (dept.categories || []).reduce((catSum, cat) => {
-          return catSum + getCategorySubtotal(cat);
-        }, 0)
-      );
-    }, 0);
-  };
-
-  const grandTotal = hierarchy.reduce((total, phase) => {
-    return total + getPhaseSubtotal(phase);
-  }, 0);
+  const { onDragEnd } = useBudgetDragAndDrop(hierarchy, setHierarchy, invalidateHierarchyCache);
 
   const handleSubmit = async () => {
     if (!externalProjectId) {
@@ -620,17 +602,29 @@ const BudgetEntryForm = ({
       return;
     }
 
+    const initialValuesObj = initialDataRef.current
+      ? JSON.parse(initialDataRef.current.values)
+      : {};
+    const prefilledIds = new Set(
+      Object.keys(initialValuesObj).map((id) => parseInt(id)),
+    );
+
     const payload = [];
     Object.entries(values).forEach(([itemId, v]) => {
+      const itemIdNum = parseInt(itemId);
       const q = parseFloat(v.qty) || 0;
       const r = parseFloat(v.rate) || 0;
       const m = parseFloat(v.multiplier) || 1;
       const a1 = parseFloat(v.add1) || 0;
       const c1 = v.c1 || "";
+      const isItemized = v.is_itemized ? 1 : 0;
 
-      if (q > 0 || r > 0 || a1 > 0 || c1) {
+      const hasInputs = q > 0 || r > 0 || a1 > 0 || c1;
+      const isPrefilled = prefilledIds.has(itemIdNum);
+
+      if (hasInputs || isItemized || isPrefilled) {
         payload.push({
-          budget_item_id: parseInt(itemId),
+          budget_item_id: itemIdNum,
           quantity: q,
           rate: r,
           rate_type: v.rate_type || "day",
@@ -638,8 +632,8 @@ const BudgetEntryForm = ({
           additional1: a1,
           comment1: c1,
           gross_revenue: calcGross(v),
-          total: totalRaw(itemId),
-          is_itemized: v.is_itemized ? 1 : 0,
+          total: totalRaw(itemIdNum),
+          is_itemized: isItemized,
         });
       }
     });
@@ -666,6 +660,36 @@ const BudgetEntryForm = ({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed");
+
+      // Save crew assignments
+      const deptPromises = Object.entries(deptAssignments).map(([deptId, crewList]) => {
+        const userIds = crewList.map(c => c.id);
+        return fetch(`${API}/api/projects/${externalProjectId}/departments/${deptId}/assign-crew`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ user_ids: userIds }),
+        });
+      });
+      const catPromises = Object.entries(categoryAssignments).map(([catId, crewList]) => {
+        const userIds = crewList.map(c => c.id);
+        return fetch(`${API}/api/projects/${externalProjectId}/categories/${catId}/assign-crew`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ user_ids: userIds }),
+        });
+      });
+      const itemPromises = Object.entries(budgetItemAssignments).map(([itemId, crewList]) => {
+        const userIds = crewList.map(c => c.id);
+        return fetch(`${API}/api/projects/${externalProjectId}/budget-items/${itemId}/assign-crew`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ user_ids: userIds }),
+        });
+      });
+      await Promise.all([...deptPromises, ...catPromises, ...itemPromises]);
 
       invalidateCache(externalProjectId);
 
@@ -710,120 +734,45 @@ const BudgetEntryForm = ({
     html2pdf().set(opt).from(element).save();
   };
 
-  const onDragEnd = async (result) => {
-    const { source, destination, type } = result;
-    if (!destination) return;
-
-    if (
-      source.droppableId === destination.droppableId &&
-      source.index === destination.index
-    )
-      return;
-
-    const newHierarchy = JSON.parse(JSON.stringify(hierarchy));
-
-    //Category drag
-    if (type === "CATEGORY") {
-      let foundPhaseIdx = -1;
-      let foundDeptIdx = -1;
-      for (let p = 0; p < newHierarchy.length; p++) {
-        const d = newHierarchy[p].departments.findIndex(
-          (dept) => `dept-${dept.id}` === source.droppableId,
-        );
-        if (d !== -1) {
-          foundPhaseIdx = p;
-          foundDeptIdx = d;
-          break;
-        }
-      }
-      if (foundDeptIdx === -1) return;
-
-      const newCategories = Array.from(
-        newHierarchy[foundPhaseIdx].departments[foundDeptIdx].categories,
-      );
-      const [removed] = newCategories.splice(source.index, 1);
-      newCategories.splice(destination.index, 0, removed);
-
-      newHierarchy[foundPhaseIdx].departments[foundDeptIdx].categories =
-        newCategories;
-      setHierarchy(newHierarchy);
-
-      try {
-        const orderedIds = newCategories.map((c) => c.id);
-        await fetch(`${API}/api/categories/reorder`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ ordered_ids: orderedIds }),
-        });
-      } catch (err) {
-        console.error("Failed to persist category order:", err);
-      }
-      return;
-    }
-
-    //Item dragging
-    let phaseIdx = -1;
-    let deptIdx = -1;
-    let catIdx = -1;
-    let targetCat = null;
-
-    for (let p = 0; p < newHierarchy.length; p++) {
-      for (let d = 0; d < newHierarchy[p].departments.length; d++) {
-        const c = newHierarchy[p].departments[d].categories.findIndex(
-          (cat) => `cat-${cat.id}` === destination.droppableId,
-        );
-        if (c !== -1) {
-          phaseIdx = p;
-          deptIdx = d;
-          catIdx = c;
-          targetCat = newHierarchy[p].departments[d].categories[c];
-          break;
-        }
-      }
-      if (targetCat) break;
-    }
-
-    if (!targetCat) return;
-
-    const newItems = Array.from(targetCat.items);
-    const [removed] = newItems.splice(source.index, 1);
-    newItems.splice(destination.index, 0, removed);
-
-    newHierarchy[phaseIdx].departments[deptIdx].categories[catIdx].items =
-      newItems;
-    setHierarchy(newHierarchy);
-
-    try {
-      const orderedIds = newItems.map((item) => item.id);
-      await fetch(`${API}/api/budget-items/reorder`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ ordered_ids: orderedIds }),
-      });
-    } catch (err) {
-      console.error("Failed to persist item order:", err);
-    }
+  const handleClear = () => {
+    setShowClearConfirm(true);
   };
 
-  const handleClear = () => {
+  const handleConfirmClear = () => {
     setValues({});
     setStatus(null);
+    setShowClearConfirm(false);
   };
 
-  const filledCount = Object.values(values).filter(
-    (v) =>
-      (parseFloat(v.qty) || 0) > 0 ||
-      (parseFloat(v.rate) || 0) > 0 ||
-      (parseFloat(v.add1) || 0) > 0,
-  ).length;
+  const handleCancelClear = () => {
+    setShowClearConfirm(false);
+  };
 
   const showVersionWarning = externalProjectId && !versionId;
+  const isReadOnly = showVersionWarning || (!!versionId && !canEdit);
+  const canDrag = isAdmin && !isReadOnly;
 
   return (
     <div className="bef-root" onClick={() => setActiveComment(null)}>
-      <div className="bef-main-content">
+      {/* Floating Collapsible Search Widget */}
+      {externalProjectId && versionId && hierarchy.length > 0 && (
+        <BudgetSearchWidget 
+          widgetRef={widgetRef}
+          searchOpen={searchOpen}
+          setSearchOpen={setSearchOpen}
+          translateY={translateY}
+          searchInputRef={searchInputRef}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          handleSearchKeyDown={handleSearchKeyDown}
+          searchResults={searchResults}
+          currentMatchIndex={currentMatchIndex}
+          handleSearchPrev={handleSearchPrev}
+          handleSearchNext={handleSearchNext}
+        />
+      )}
+
+      <div className="bef-main-content" ref={containerRef}>
         {!embedded && (
           <div className="bef-header">
             <h2>Budget Entry</h2>
@@ -850,7 +799,7 @@ const BudgetEntryForm = ({
               borderRadius: "12px",
             }}
           >
-            <div className="bef-sheet">
+            <div className={`bef-sheet ${!canDrag ? "drag-disabled" : ""}`}>
               <DragDropContext onDragEnd={onDragEnd}>
                 <table className="bef-table header-only-table">
                   <BudgetColGroup />
@@ -871,9 +820,6 @@ const BudgetEntryForm = ({
                         onClick={() => togglePhase(phase.phase_id)}
                       >
                         <div className="phase-header-left">
-                          <span
-                            className={`phase-toggle-icon ${isExpanded ? "open" : ""}`}
-                          ></span>
                           <h3>{phase.phase_name}</h3>
                         </div>
                         <div className="phase-header-right">
@@ -885,180 +831,273 @@ const BudgetEntryForm = ({
                       </div>
 
                       {isExpanded && (
-                        <div className="phase-content">
-                          {phase.departments.map((dept, deptIdx) => (
-                            <div key={dept.id} className="dept-section">
-                              <table className="bef-table dept-header-table">
-                                <BudgetColGroup />
-                                <tbody className="bef-dept-body">
-                                  <tr className="bef-dept-row">
-                                    <td colSpan="8">
-                                      <div className="dept-header-content">
-                                        <span className="dept-id">
-                                          {String(deptIdx + 1).padStart(2, "0")}
-                                        </span>
-                                        <span className="dept-name">
-                                          {dept.department_name}
-                                        </span>
-                                      </div>
-                                    </td>
-                                  </tr>
-                                </tbody>
-                              </table>
-
-                              <Droppable
-                                droppableId={`dept-${dept.id}`}
-                                type="CATEGORY"
-                              >
-                                {(provided) => (
-                                  <table
-                                    className="bef-table cat-list-table"
-                                    ref={provided.innerRef}
-                                    {...provided.droppableProps}
-                                  >
-                                    <BudgetColGroup />
-                                    {dept.categories.map((cat, catIdx) => (
-                                      <Draggable
-                                        key={cat.id}
-                                        draggableId={`cat-${cat.id}`}
-                                        index={catIdx}
-                                      >
-                                        {(providedCat, snapshotCat) => (
-                                          <Droppable
-                                            droppableId={`cat-${cat.id}`}
-                                            type="ITEM"
+                        <Droppable
+                          droppableId={`phase-${phase.phase_id}`}
+                          type="DEPARTMENT"
+                        >
+                          {(providedDeptList) => (
+                            <div
+                              className="phase-content"
+                              ref={providedDeptList.innerRef}
+                              {...providedDeptList.droppableProps}
+                            >
+                              {phase.departments.map((dept, deptIdx) => (
+                                <Draggable
+                                  key={dept.id}
+                                  draggableId={`dept-${dept.id}`}
+                                  index={deptIdx}
+                                  isDragDisabled={!canDrag}
+                                >
+                                  {(providedDept, snapshotDept) => (
+                                    <div
+                                      ref={providedDept.innerRef}
+                                      {...providedDept.draggableProps}
+                                      className={`dept-section ${snapshotDept.isDragging ? "dragging-dept" : ""}`}
+                                    >
+                                      <table className="bef-table dept-header-table">
+                                        <BudgetColGroup />
+                                        <tbody className="bef-dept-body">
+                                          <tr
+                                            id={`dept-section-${dept.id}`}
+                                            className="bef-dept-row"
                                           >
-                                            {(providedItem) => (
-                                              <tbody
-                                                className={`bef-cat-body ${snapshotCat.isDragging ? "dragging-cat" : ""}`}
-                                                ref={(el) => {
-                                                  providedCat.innerRef(el);
-                                                  providedItem.innerRef(el);
-                                                }}
-                                                {...providedCat.draggableProps}
-                                                {...providedItem.droppableProps}
+                                            <td
+                                              className="col-drag"
+                                              {...providedDept.dragHandleProps}
+                                            >
+                                              <span className="material-symbols-outlined drag-handle-icon">
+                                                drag_indicator
+                                              </span>
+                                            </td>
+                                            <td
+                                              colSpan="6"
+                                              onClick={() => toggleDept(dept.id)}
+                                              className="dept-header-cell"
+                                            >
+                                              <div className="dept-header-content">
+                                                <div className="dept-title-wrapper">
+                                                  <span className="dept-id">
+                                                    {String(deptIdx + 1).padStart(2, "0")}
+                                                  </span>
+                                                  <span className="dept-name">
+                                                    {dept.department_name}
+                                                  </span>
+                                                </div>
+                                                <div 
+                                                  className="dept-crew-container"
+                                                  onClick={(e) => e.stopPropagation()}
+                                                >
+                                                  {(!user || user.role === "admin" || user.role === "manager") && (
+                                                      <CrewAssignmentDropdown
+                                                        assignedCrew={deptAssignments[dept.id] || []}
+                                                        projectCrew={projectCrew}
+                                                        isActive={activeAssignDeptId === dept.id}
+                                                        onToggle={() => setActiveAssignDeptId(activeAssignDeptId === dept.id ? null : dept.id)}
+                                                        onAssign={(crewId) => handleAssignCrew(dept.id, crewId)}
+                                                        isCrewEditing={isCrewEditing}
+                                                        setIsCrewEditing={setIsCrewEditing}
+                                                        badgeSize={20}
+                                                      />)}
+                                                </div>
+                                              </div>
+                                            </td>
+                                            <td className="col-total dept-subtotal-val" style={{ fontWeight: "700", color: "var(--accent-color)", textAlign: "right", paddingRight: "24px" }}>
+                                              {(() => {
+                                                const total = getDeptSubtotal(dept);
+                                                return total > 0 ? formatCurrency(total) : "";
+                                              })()}
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+
+                                      <Droppable
+                                        droppableId={`dept-${dept.id}`}
+                                        type="CATEGORY"
+                                      >
+                                        {(provided) => (
+                                          <table
+                                            className="bef-table cat-list-table"
+                                            ref={provided.innerRef}
+                                            {...provided.droppableProps}
+                                            style={{
+                                              display: collapsedDepts.has(dept.id) ? "none" : "table"
+                                            }}
+                                          >
+                                            <BudgetColGroup />
+                                            {dept.categories.map((cat, catIdx) => (
+                                              <Draggable
+                                                key={cat.id}
+                                                draggableId={`cat-${cat.id}`}
+                                                index={catIdx}
+                                                isDragDisabled={!canDrag}
                                               >
-                                                <tr className="bef-cat-row">
-                                                  <td
-                                                    className="col-drag"
-                                                    {...providedCat.dragHandleProps}
+                                                {(providedCat, snapshotCat) => (
+                                                  <Droppable
+                                                    droppableId={`cat-${cat.id}`}
+                                                    type="ITEM"
                                                   >
-                                                    <span className="material-symbols-outlined drag-handle-icon">
-                                                      drag_indicator
-                                                    </span>
-                                                  </td>
-                                                  <td
-                                                    colSpan="6"
-                                                    className="cat-name-cell"
-                                                  >
-                                                    <div className="cat-header-row">
-                                                      <span className="cat-name">
-                                                        {cat.category_name}
-                                                      </span>
-                                                    </div>
-                                                  </td>
-                                                  <td className="col-total cat-subtotal">
-                                                    {(() => {
-                                                      const subtotal =
-                                                        getCategorySubtotal(
-                                                          cat,
-                                                        );
-                                                      return subtotal > 0
-                                                        ? formatCurrency(
-                                                            subtotal,
+                                                    {(providedItem) => (
+                                                      <tbody
+                                                        className={`bef-cat-body ${snapshotCat.isDragging ? "dragging-cat" : ""}`}
+                                                        ref={(el) => {
+                                                          providedCat.innerRef(el);
+                                                          providedItem.innerRef(el);
+                                                        }}
+                                                        {...providedCat.draggableProps}
+                                                        {...providedItem.droppableProps}
+                                                      >
+                                                        <tr id={`cat-section-${cat.id}`} className="bef-cat-row">
+                                                          <td
+                                                            className="col-drag"
+                                                            {...providedCat.dragHandleProps}
+                                                          >
+                                                            <span className="material-symbols-outlined drag-handle-icon">
+                                                              drag_indicator
+                                                            </span>
+                                                          </td>
+                                                          <td
+                                                            colSpan="6"
+                                                            className="cat-name-cell"
+                                                          >
+                                                            <div className="cat-header-row" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                                              <span className="cat-name">
+                                                                {cat.category_name}
+                                                              </span>
+                                                              
+                                                              <div className="crew-assign-wrapper" style={{ marginLeft: "10px", position: "relative" }}>
+                                                                <CrewAssignmentDropdown
+                                                                  assignedCrew={categoryAssignments[cat.id] || []}
+                                                                  projectCrew={projectCrew}
+                                                                  isActive={activeAssignCatId === cat.id}
+                                                                  onToggle={() => setActiveAssignCatId(activeAssignCatId === cat.id ? null : cat.id)}
+                                                                  onAssign={(crewId) => handleAssignCategoryCrew(cat.id, crewId)}
+                                                                  isCrewEditing={isCrewEditing}
+                                                                  setIsCrewEditing={setIsCrewEditing}
+                                                                  badgeSize={18}
+                                                                />
+                                                              </div>
+
+                                                            </div>
+                                                          </td>
+                                                          <td className="col-total cat-subtotal">
+                                                            {(() => {
+                                                              const subtotal =
+                                                                getCategorySubtotal(
+                                                                  cat,
+                                                                );
+                                                              return subtotal > 0
+                                                                ? formatCurrency(
+                                                                    subtotal,
+                                                                  )
+                                                                : "";
+                                                            })()}
+                                                          </td>
+                                                        </tr>
+
+                                                        {loading &&
+                                                        (!values ||
+                                                          Object.keys(values).length ===
+                                                            0) ? (
+                                                          <>
+                                                            <SkeletonRow />
+                                                            <SkeletonRow />
+                                                            <SkeletonRow />
+                                                          </>
+                                                        ) : (
+                                                          cat.items.map(
+                                                            (item, index) => {
+                                                              const v =
+                                                                values[item.id] || {};
+                                                              const isFilled =
+                                                                (parseFloat(v.qty) ||
+                                                                  0) > 0 ||
+                                                                (parseFloat(v.rate) ||
+                                                                  0) > 0 ||
+                                                                (parseFloat(v.add1) ||
+                                                                  0) > 0;
+
+                                                              return (
+                                                                <BudgetRow
+                                                                  key={item.id}
+                                                                  item={item}
+                                                                  index={index}
+                                                                  getVal={getVal}
+                                                                  handleChange={
+                                                                    handleChange
+                                                                  }
+                                                                  handleToggleItemize={
+                                                                    handleToggleItemize
+                                                                  }
+                                                                  setActiveBreakdownId={
+                                                                    setActiveBreakdownId
+                                                                  }
+                                                                  setActiveBreakdownItem={
+                                                                    setActiveBreakdownItem
+                                                                  }
+                                                                  commentAnchorRect={
+                                                                    commentAnchorRect
+                                                                  }
+                                                                  setCommentAnchorRect={
+                                                                    setCommentAnchorRect
+                                                                  }
+                                                                  activeComment={
+                                                                    activeComment
+                                                                  }
+                                                                  setActiveComment={
+                                                                    setActiveComment
+                                                                  }
+                                                                  showVersionWarning={
+                                                                    isReadOnly
+                                                                  }
+                                                                  grossDisplay={
+                                                                    grossDisplay
+                                                                  }
+                                                                  totalDisplay={
+                                                                    totalDisplay
+                                                                  }
+                                                                  isFilled={isFilled}
+                                                                  focusedInput={
+                                                                    focusedInput
+                                                                  }
+                                                                  setFocusedInput={
+                                                                    setFocusedInput
+                                                                  }
+                                                                  isDragDisabled={!canDrag}
+                                                                  projectCrew={projectCrew}
+                                                                  budgetItemAssignments={budgetItemAssignments}
+                                                                  activeAssignItemId={activeAssignItemId}
+                                                                  setActiveAssignItemId={setActiveAssignItemId}
+                                                                  isCrewEditing={isCrewEditing}
+                                                                  setIsCrewEditing={setIsCrewEditing}
+                                                                  handleAssignBudgetItemCrew={handleAssignBudgetItemCrew}
+                                                                />
+                                                              );
+                                                            },
                                                           )
-                                                        : "";
-                                                    })()}
-                                                  </td>
-                                                </tr>
-
-                                                {loading &&
-                                                (!values ||
-                                                  Object.keys(values).length ===
-                                                    0) ? (
-                                                  <>
-                                                    <SkeletonRow />
-                                                    <SkeletonRow />
-                                                    <SkeletonRow />
-                                                  </>
-                                                ) : (
-                                                  cat.items.map(
-                                                    (item, index) => {
-                                                      const v =
-                                                        values[item.id] || {};
-                                                      const isFilled =
-                                                        (parseFloat(v.qty) ||
-                                                          0) > 0 ||
-                                                        (parseFloat(v.rate) ||
-                                                          0) > 0 ||
-                                                        (parseFloat(v.add1) ||
-                                                          0) > 0;
-
-                                                      return (
-                                                        <BudgetRow
-                                                          key={item.id}
-                                                          item={item}
-                                                          index={index}
-                                                          getVal={getVal}
-                                                          handleChange={
-                                                            handleChange
-                                                          }
-                                                          handleToggleItemize={
-                                                            handleToggleItemize
-                                                          }
-                                                          setActiveBreakdownId={
-                                                            setActiveBreakdownId
-                                                          }
-                                                          setActiveBreakdownItem={
-                                                            setActiveBreakdownItem
-                                                          }
-                                                          commentAnchorRect={
-                                                            commentAnchorRect
-                                                          }
-                                                          setCommentAnchorRect={
-                                                            setCommentAnchorRect
-                                                          }
-                                                          activeComment={
-                                                            activeComment
-                                                          }
-                                                          setActiveComment={
-                                                            setActiveComment
-                                                          }
-                                                          showVersionWarning={
-                                                            showVersionWarning
-                                                          }
-                                                          grossDisplay={
-                                                            grossDisplay
-                                                          }
-                                                          totalDisplay={
-                                                            totalDisplay
-                                                          }
-                                                          isFilled={isFilled}
-                                                          focusedInput={
-                                                            focusedInput
-                                                          }
-                                                          setFocusedInput={
-                                                            setFocusedInput
-                                                          }
-                                                        />
-                                                      );
-                                                    },
-                                                  )
+                                                        )}
+                                                        {providedItem.placeholder}
+                                                        <tr className="bef-cat-spacer-row">
+                                                          <td colSpan="8"></td>
+                                                        </tr>
+                                                      </tbody>
+                                                    )}
+                                                  </Droppable>
                                                 )}
-                                                {providedItem.placeholder}
-                                              </tbody>
-                                            )}
-                                          </Droppable>
+                                              </Draggable>
+                                            ))}
+                                            {provided.placeholder}
+                                          </table>
                                         )}
-                                      </Draggable>
-                                    ))}
-                                    {provided.placeholder}
-                                  </table>
-                                )}
-                              </Droppable>
+                                      </Droppable>
+                                    </div>
+                                  )}
+                                </Draggable>
+                              ))}
+                              {providedDeptList.placeholder}
                             </div>
-                          ))}
-                        </div>
+                          )}
+                        </Droppable>
                       )}
                     </div>
                   );
@@ -1076,39 +1115,15 @@ const BudgetEntryForm = ({
 
         {!loading && hierarchy.length > 0 && (
           <div className="bef-footer bef-actions-only-footer">
-            <div className="bef-actions" style={{ marginLeft: "auto" }}>
-              <button
-                className="bef-btn-submit"
-                onClick={handleDownloadPDF}
-                style={{
-                  background: "#4bc0c0",
-                  marginRight: "10px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                }}
-              >
-                <Icon name="download" modifiers="sm" />
-                Download PDF
-              </button>
-              <button
-                className="bef-btn-clear"
-                onClick={handleClear}
-                disabled={submitting}
-              >
-                Clear All
-              </button>
-              <button
-                id="bef-save-button"
-                className="bef-btn-submit"
-                onClick={handleSubmit}
-                disabled={submitting || !externalProjectId}
-              >
-                {submitting
-                  ? "Saving…"
-                  : `Submit All${filledCount ? ` (${filledCount})` : ""}`}
-              </button>
-            </div>
+            <BudgetSubNav 
+              handleDownloadPDF={handleDownloadPDF}
+              onPublish={onPublish}
+              versionId={versionId}
+              handleClear={handleClear}
+              submitting={submitting}
+              handleSubmit={handleSubmit}
+              externalProjectId={externalProjectId}
+            />
           </div>
         )}
 
@@ -1145,6 +1160,17 @@ const BudgetEntryForm = ({
           onCancel={handleCancelDisable}
           confirmLabel="Yes, Clear Breakdown"
           cancelLabel="Wait, Keep it"
+        />
+
+        <ConfirmationModal
+          isOpen={showClearConfirm}
+          title="Clear Budget Form"
+          message="Are you sure you want to clear all values from the budget form? This will reset all current unsaved edits on the screen."
+          onConfirm={handleConfirmClear}
+          onCancel={handleCancelClear}
+          confirmLabel="Yes, Clear All"
+          cancelLabel="Cancel"
+          confirmVariant="danger"
         />
       </div>
     </div>

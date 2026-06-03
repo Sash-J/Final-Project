@@ -1,0 +1,561 @@
+.org-tree-container {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+  overflow-x: auto;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.org-tree {
+  display: flex;
+  justify-content: center;
+}
+
+.org-tree ul {
+  padding-top: 20px;
+  position: relative;
+  transition: all 0.5s;
+  display: flex;
+  margin: 0;
+  padding-left: 0;
+}
+
+.org-tree li {
+  float: left;
+  text-align: center;
+  list-style-type: none;
+  position: relative;
+  padding: 20px 15px 0 15px;
+  transition: all 0.5s;
+}
+
+/* Connectors */
+.org-tree li::before,
+.org-tree li::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 50%;
+  border-top: 2px solid rgba(255, 255, 255, 0.2);
+  width: 50%;
+  height: 20px;
+}
+.org-tree li::after {
+  right: auto;
+  left: 50%;
+  border-left: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Remove left/right connectors from solitary elements */
+.org-tree li:only-child::after,
+.org-tree li:only-child::before {
+  display: none;
+}
+
+/* Remove space from the top of single children */
+.org-tree li:only-child {
+  padding-top: 0;
+}
+
+/* Remove left connector from first child and right from last */
+.org-tree li:first-child::before,
+.org-tree li:last-child::after {
+  border: 0 none;
+}
+
+/* Add vertical connectors to first and last nodes */
+.org-tree li:last-child::before {
+  border-right: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0 6px 0 0;
+}
+.org-tree li:first-child::after {
+  border-radius: 6px 0 0 0;
+}
+
+/* Downward connectors from parents */
+.org-tree ul::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  border-left: 2px solid rgba(255, 255, 255, 0.2);
+  width: 0;
+  height: 20px;
+  transform: translateX(-50%);
+}
+
+.org-node-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 4px solid #00c6e6;
+  border-radius: 12px;
+  padding: 16px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 160px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 1;
+}
+
+.org-node-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 12px;
+  width: 100%;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 8px;
+}
+
+.org-node-members {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.org-node-member {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.org-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  color: #fff;
+  border: 2px solid rgba(0, 198, 230, 0.4);
+  flex-shrink: 0;
+}
+
+.org-member-info {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.org-member-name {
+  font-size: 0.85rem;
+  color: #f1f1f1;
+  font-weight: 500;
+}
+
+.org-member-role {
+  font-size: 0.75rem;
+  color: #00c6e6;
+}
+
+.org-tree-wrapper {
+  overflow: hidden;
+  position: relative; 
+  width: 100%;
+  flex: 1;
+  padding: 40px; 
+  box-sizing: border-box;
+}
+
+.org-tree-scaled {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max-content; /* Prevents the tree from squishing into the container width */
+  transform-origin: center center; 
+}
+
+/* Drag and Drop / Interaction Styles */
+
+.org-node-card.drag-over {
+  border-color: #5eff5e;
+  box-shadow: 0 0 15px rgba(0, 255, 0, 0.4);
+  transform: scale(1.05);
+  transition: all 0.2s ease;
+}
+
+.add-node-btn {
+  background: rgba(0, 198, 230, 0.1);
+  border: 1px solid rgba(0, 198, 230, 0.3);
+  color: #00c6e6;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.add-node-btn:hover {
+  background: #00c6e6;
+  color: #12161b;
+  transform: scale(1.1);
+}
+
+.org-node-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  /* Existing org-node-title styles are already handled further up, so we just override the flex part here safely */
+}
+
+/* Light Theme Overrides */
+body.light-theme .org-tree li::before,
+body.light-theme .org-tree li::after,
+body.light-theme .org-tree li:last-child::before,
+body.light-theme .org-tree ul::before {
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+body.light-theme .org-node-card {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+body.light-theme .org-node-title {
+  color: #24292f;
+  border-bottom-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .org-avatar {
+  background: rgba(9, 105, 218, 0.1);
+  border-color: rgba(9, 105, 218, 0.4);
+  color: #0969da;
+}
+
+body.light-theme .org-member-name {
+  color: #24292f;
+}
+
+body.light-theme .org-member-role {
+  color: #0969da;
+}
+
+body.light-theme .org-node-card.drag-over {
+  border-color: #3bdb69;
+  box-shadow: 0 0 15px rgba(26, 127, 55, 0.2);
+}
+
+body.light-theme .add-node-btn {
+  background: rgba(9, 105, 218, 0.1);
+  border-color: rgba(9, 105, 218, 0.3);
+  color: #0969da;
+}
+
+body.light-theme .add-node-btn:hover {
+  background: #0969da;
+  color: #fff;
+}
+
+/* Mini Modal Styles */
+.mm-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: transparent; /* No blur, let user see entire hierarchy */
+  z-index: 99999;
+}
+
+.mm-card {
+  position: absolute;
+  background: rgba(13, 15, 23, 0.4);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 12px;
+  width: 170px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  color: #fff;
+}
+
+.mm-header {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 2px;
+}
+
+.mm-header h2 {
+  font-size: 0.8rem;
+  margin: 0;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: -0.2px;
+}
+
+.mm-header p {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.6rem;
+  font-weight: 400;
+  margin: 2px 0 0 0;
+  padding-right: 20px; /* Space for delete btn */
+}
+
+.mm-delete-btn {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.mm-delete-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ff6b6b;
+}
+
+.mm-input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 6px 8px;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.6rem;
+  outline: none;
+  transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.mm-members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.mm-members-list::-webkit-scrollbar {
+  width: 4px;
+}
+.mm-members-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.mm-member-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 6px;
+  border-radius: 6px;
+}
+
+.mm-member-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mm-member-label {
+  font-size: 0.55rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.mm-remove-member-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.mm-remove-member-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ff6b6b;
+}
+
+.mm-add-member-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.6);
+  padding: 6px;
+  border-radius: 6px;
+  font-size: 0.6rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.mm-add-member-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.mm-input-sm {
+  font-size: 0.55rem;
+  padding: 4px 6px;
+}
+
+.mm-input:focus {
+  border-color: #00c6e6;
+  background: rgba(0, 198, 230, 0.05);
+}
+
+.mm-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.mm-actions .btn-neo,
+.mm-actions .btn-neo-cancel {
+  flex: 1;
+  padding: 6px 8px;
+  font-size: 0.7rem !important;
+  border-radius: 8px !important;
+  width: 100%;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Light Theme overrides for mini modal */
+body.light-theme .mm-overlay {
+  background: transparent;
+}
+body.light-theme .mm-card {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  color: #24292f;
+}
+body.light-theme .mm-header h2 {
+  color: #24292f;
+}
+body.light-theme .mm-header p {
+  color: #57606a;
+}
+body.light-theme .mm-input {
+  background: #f6f8fa;
+  border-color: #d0d7de;
+  color: #24292f;
+}
+
+body.light-theme .mm-member-group {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+body.light-theme .mm-member-label {
+  color: #57606a;
+}
+
+body.light-theme .mm-remove-member-btn {
+  color: #57606a;
+}
+
+body.light-theme .mm-remove-member-btn:hover {
+  background: #ffebe9;
+  color: #cf222e;
+}
+
+body.light-theme .mm-add-member-btn {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.15);
+  color: #24292f;
+}
+
+body.light-theme .mm-add-member-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
+body.light-theme .mm-delete-btn {
+  color: rgba(36, 41, 47, 0.4);
+}
+body.light-theme .mm-delete-btn:hover {
+  background: #ffebe9;
+  color: #cf222e;
+}
+
+body.light-theme .mm-input:focus {
+  border-color: #0969da;
+}
+
+/* Zoom and Pan Controls */
+.org-zoom-controls {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  gap: 8px;
+  background: rgba(18, 19, 26, 0.98); /* Opaque to match mm-card */
+  padding: 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  z-index: 50;
+}
+
+.org-zoom-controls button {
+  background: transparent;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.org-zoom-controls button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+body.light-theme .org-zoom-controls {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+body.light-theme .org-zoom-controls button {
+  color: #24292f;
+}
+
+body.light-theme .org-zoom-controls button:hover {
+  background: rgba(0, 0, 0, 0.05);
+}

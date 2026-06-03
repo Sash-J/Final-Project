@@ -12,7 +12,7 @@
   gap: 32px;
 }
 
-.grid-window h3 {
+.um-root .grid-window h3 {
   color: #fff;
   border-bottom: 2px solid #2a2a2a;
   margin-bottom: 20px;
@@ -216,3 +216,74 @@
     margin: 0 12px;
   }
 }
+
+/* Light Theme Styling Overrides */
+body.light-theme .um-root .grid-window h3 {
+  color: #24292f;
+  border-bottom-color: #d0d7de;
+}
+
+body.light-theme .um-table {
+  color: #24292f;
+}
+
+body.light-theme .um-table thead th {
+  background: #f6f8fa !important;
+  color: #24292f !important;
+  border-bottom-color: #d0d7de !important;
+}
+
+body.light-theme .um-table tbody td {
+  border-bottom-color: #e1e4e8;
+}
+
+body.light-theme .um-table tbody tr:hover {
+  background: #f6f8fa;
+}
+
+body.light-theme .role-badge.admin {
+  background: rgba(207, 34, 46, 0.1);
+  color: #cf222e;
+  border-color: rgba(207, 34, 46, 0.3);
+}
+
+body.light-theme .approve-btn {
+  background: rgba(9, 105, 218, 0.08) !important;
+  color: #0969da !important;
+  border-color: rgba(9, 105, 218, 0.2) !important;
+}
+
+body.light-theme .approve-btn:hover {
+  background: rgba(9, 105, 218, 0.15) !important;
+  border-color: #0969da !important;
+}
+
+body.light-theme .reject-btn {
+  background: rgba(207, 34, 46, 0.08);
+  color: #cf222e;
+  border-color: rgba(207, 34, 46, 0.2);
+}
+
+body.light-theme .reject-btn:hover {
+  background: rgba(207, 34, 46, 0.15);
+  border-color: #cf222e;
+}
+
+body.light-theme .status-msg.success {
+  background: #dafbe1;
+  color: #1a7f37;
+}
+
+body.light-theme .status-msg.error {
+  background: #ffebe9;
+  color: #cf222e;
+}
+
+body.light-theme .no-pending {
+  color: #57606a;
+}
+
+body.light-theme .um-loading {
+  color: #57606a;
+}
+

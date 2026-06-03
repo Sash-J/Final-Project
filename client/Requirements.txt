@@ -1,0 +1,214 @@
+Front End
+
+Site Roles (gender selection on registration)
+    - Admin (All)
+    - Director (Niman, Sashen)
+            --> Budget form modals hidden
+            --> All available
+            --> user management (full access)
+            --> project profile is editable / updatable
+    - Manager (Gaishu, Rawindu)
+            --> project profile is editable / updatable
+            --> user management (restricted)
+    - Accountant (Roshmika)
+    - Coordinator (Buddhi)
+    - Viewer (tharusha)
+
+    - Dept Head (Art, Light and other depts, allow for multiple dept assigns, multiple dept heads for same dept)
+    - Crew (All)
+
+
+    - user registration has 3 filters
+        - if production crew / client
+            - if production crew
+                - external - dept head (skills assign), crew
+                    - dept head --> access to add dept crew names. no login
+                    
+                - internal - Director, Manager, Accountant, Coordinator, Viewer
+
+    - if client
+        - if Full access / Half access (roles)
+            - if Full access (skills)
+                - Artist
+                - Producer
+                - Director
+                - Corporate client
+                - Colloborated production house
+
+            - if Half access (skills)
+                - Cast
+                - Actor / Actress
+                - Modal
+                - Child Actor
+                - Extras
+                    
+
+Home
+    The vision
+    - Who we are (Aims and Objectives)
+
+    The divisions (projects - All projects) (single page with 3 distinct sections) empty sections are locked
+        - Music video - featured & list of all other projects (project pages, linked to artist too)
+            - featured (10 with project description, hero image and main video) : other projects (all projects)
+
+        - Commercials
+        - Short films
+
+    The vision division (crew)
+        - Crew members (linked to team page) - individual landing page to main, all are listed
+
+    Shared visions (testamonies)
+
+    Behind the vision (blog/gallery)
+
+    Talk to vision (contact us)
+    
+All features are available for ADMIN
+
+Back End
+
+    Client UI (done ✅)
+        - Edit Profile
+            - Change email
+            - Change name
+            - Change username
+            - Change password
+            - Change profile image
+            - Night/day mode
+            - Email notifications
+            - Pause notifications (toggle)
+            - Email address
+        - 
+
+        client dashboard UI
+            - Greeting message (Good morning, Good noon, Good evening + name + verification mark)
+            - Header
+                - Time joined with our production company
+                - Total value of the projects / number of projects in total
+                - Total shooting hours
+                - Lastest projects
+            - Active projects (project cards)
+            - Released projects (done cards - done make it too small)
+            - (yt view count)
+            - Social media links
+            - live client project count down  + release countdown (floating modal)
+            - Live client shedule (project based schedule summary) floating modal
+            - Request a meeting (Add note, dropdown selection date, online / physical, place)
+            - Clock (12 hrs / 24 hrs + toogle client UI settings)
+            - Online meeting popup display (like live coundown - client + all interanl project users)
+            - Deadline popup for clients for budget deadlines and payments and etc...
+
+        Client project detail
+            - Overview image replaced with timeline (clickable)
+            - Current budget version and budget (with latest payment)
+            - Shooting location, dates, crew count, total hours, upcoming payments
+            - Production docs (downloadable area)
+                - production dept - schedule, call sheets, travel plan,
+                - creative dept - moodboard, ideology doc, VFX guides, storyboards, scripts
+                - legal dept - contracts (crew /cast), NDA, agreements, location letters, permission request letters, SOW
+                - finance dept - invoices, payments confirmations, budget versions
+                - equipment dept - camera (image and name only)
+            - Project audio upload (encrypt and decrypt with popup messages for clients)
+
+
+    admin dashboard UI
+        - time of the day --> ( Good morning, Good noon, Good evening + user name)
+        - access level
+        - Active project (project cards)
+        - released projects (done cards)
+        - profile
+        - user payments (payment history + pending payments - project based --> must include to nav bar)
+        - live client project count down  + release countdown (floating modal)
+        - Live client shedule (project based schedule summary) floating modal
+        - Online meeting popup display (like live coundown - client + all interanl project users)
+        - Deadline popup for clients for budget deadlines and payments and etc...
+
+
+        - user settings
+            - Verification toogle
+            -
+
+        admin dashboard
+            - project detail page
+                - Crew assign (hierachy Chart --> assign access level)
+                - Project user assigning updates
+                - Department budget on personalized users. if no department N/A
+                - Add artist profile and name
+                - Finance overview
+                    - (manger and above RBAC)
+                        - Approved full budget (finalized budget version + number)
+                        - Total expenditure / Remaining expenditure
+                    - All RBAC
+                        - individual salaray + advanced paid
+                        - Dept head --> department total and advances
+                - Equipment (rates available is shared)
+                - Shooting data and shooting location more prominant
+                - Payments tile
+                    - Manager, Director --> Request payment from full access client (invoice)
+                        - Crew request handling area (slection options - phases, departments, categories --> full amount request or manual amount request)
+                        - Payment verification area for client + crew (for manager, director only + auto verification id)
+                            - select request for verification.
+                            - advance payment without a request.
+                        - Received and pending payment records
+                    - Coordinator, Accountant, Dept heads, crew, half access roles --> Request payments from Manager, Director
+                    - Request from production button (for all RBAC)
+                    - All requests should be accepted from a higher level.(Manager, Director)
+                - Project delete approval done by admin
+
+    schedule
+        - Project schedule edit (above Coordinator + client)
+        - Project wise schedule (Client availability check + milestones push to schedule) --> master schedule
+        - Shootings date are highlighted and shown across dashboards for all linked crew of the Project
+        - Task done marking on master schedule
+        - Reminder for shooting dates. (whatsapp)
+
+    users
+        - RBAC change button with confirmations
+        - registration approvals with filtered confirmations
+        - Manger and Director can change roles
+        - Roles above manager can be only changed by a higher roles.
+        - Verifcation levels for all roles (Director, Manager)
+        - User profile picture change access. (director , manager)
+        - Delete profile request by all roles (request to Admin for approval)
+        - Client can allow a selected emial for login on behalf of client. (with same user roles as client)
+ 
+    Budget
+        - Food headcount taken for project headcount 
+    
+    
+Create tab
+    - Create Dashboard
+        - Greetings
+        - Production document creation
+            - Shooting schedule
+            - call sheet
+            - travel plan
+            - lyrics breakdown
+        - Creative docs
+            - shot division breakdown
+            - moodboard
+            - ideology doc
+            - Director guides
+            - storyboards
+            - scripts
+        - Legal docs
+            - contracts (crew /cast)
+            - NDA
+            - agreements
+            - location letters
+            - permission request letters
+            - SOW
+        - Payment docs
+            - invoices
+            - payments confirmations
+            - budget versions
+
+Location tab / People
+    - Location bank
+        - add location 
+            - Name
+            - Type (Studio, Outdoor, Indoor, etc.)
+            - Category (Commercial, Short film, Feature film, etc.)
+            - Description
+            - Image upload for location (from imge metadata)
+            - nearast hospital

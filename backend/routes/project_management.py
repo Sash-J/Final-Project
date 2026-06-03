@@ -203,3 +203,24 @@ def post_project_payment(project_id):
         return jsonify({"message": "Payment recorded successfully", "id": new_id}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@project_bp.route("/api/projects/<int:project_id>/crew", methods=["GET"])
+@login_required
+def get_project_crew_members(project_id):
+    try:
+        crew_ids = auth.get_project_crew(project_id)
+        crew_list = []
+        for c_id in crew_ids:
+            u_prof = auth.get_user_profile(c_id)
+            if u_prof:
+                crew_list.append({
+                    "id": u_prof["id"],
+                    "username": u_prof["username"],
+                    "full_name": u_prof["full_name"],
+                    "profile_image": u_prof["profile_image"]
+                })
+        return jsonify(crew_list), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+

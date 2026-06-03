@@ -161,11 +161,12 @@ export const ProjectProvider = ({ children }) => {
       setMetaLoading(true);
       try {
         const fetchOptions = { credentials: "include" };
+        const ts = Date.now();
         const [hRes, pRes, dRes, cRes] = await Promise.all([
-          fetch(`${API}/api/hierarchy`, fetchOptions),
-          fetch(`${API}/api/phases`, fetchOptions),
-          fetch(`${API}/api/departments`, fetchOptions),
-          fetch(`${API}/api/categories`, fetchOptions),
+          fetch(`${API}/api/hierarchy?_=${ts}`, fetchOptions),
+          fetch(`${API}/api/phases?_=${ts}`, fetchOptions),
+          fetch(`${API}/api/departments?_=${ts}`, fetchOptions),
+          fetch(`${API}/api/categories?_=${ts}`, fetchOptions),
         ]);
 
         const hData = await hRes.json();
@@ -195,7 +196,7 @@ export const ProjectProvider = ({ children }) => {
       setVersionsLoading(true);
       try {
         const res = await fetch(
-          `${API}/api/projects/${projectId}/budget-versions`,
+          `${API}/api/projects/${projectId}/budget-versions?_=${Date.now()}`,
           { credentials: "include" },
         );
         const data = await res.json();
@@ -228,7 +229,7 @@ export const ProjectProvider = ({ children }) => {
         const [meta, vRes] = await Promise.all([
           getBudgetMetadata(force),
           fetch(
-            `${API}/api/budget-values/project/${projectId}?version_id=${versionId}`,
+            `${API}/api/budget-values/project/${projectId}?version_id=${versionId}&_=${Date.now()}`,
             fetchOptions,
           ),
         ]);
@@ -305,6 +306,15 @@ export const ProjectProvider = ({ children }) => {
         delete next[projectId];
         return next;
       });
+      setMilestonesCache((prev) => {
+        const next = { ...prev };
+        delete next[projectId];
+        return next;
+      });
+    } else {
+      setDetailsCache({});
+      setBudgetCache({});
+      setPaymentsCache({});
       setMilestonesCache({});
       setHierarchyCache(null);
       setPhasesCache(null);
@@ -312,6 +322,14 @@ export const ProjectProvider = ({ children }) => {
       setCatsCache(null);
       setVersionsCache({});
     }
+  }, []);
+
+  const invalidateHierarchyCache = useCallback(() => {
+    setHierarchyCache(null);
+    setPhasesCache(null);
+    setDeptsCache(null);
+    setCatsCache(null);
+    setBudgetCache({});
   }, []);
 
   return (
@@ -350,6 +368,7 @@ export const ProjectProvider = ({ children }) => {
         getProjectMilestones,
 
         invalidateCache,
+        invalidateHierarchyCache,
       }}
     >
       {children}

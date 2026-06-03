@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Icon from "../common/Icon";
 import "./ProjectCard.css";
@@ -11,6 +11,7 @@ const ProjectCard = ({
   variant = "standard",
 }) => {
   const navigate = useNavigate();
+  const [showVerifiedModal, setShowVerifiedModal] = useState(false);
   const isCompleted = project.status === "completed";
   const isCompact = variant === "compact";
 
@@ -49,7 +50,11 @@ const ProjectCard = ({
               <Icon
                 name="movie"
                 modifiers={isCompact ? "sm" : "lg"}
-                style={{ color: "#fff", opacity: 0.5 }}
+                style={{
+                  color: "#fff",
+                  opacity: 0.5,
+                  transform: isCompact ? "none" : "translateY(-20px)",
+                }}
               />
             </div>
           )}
@@ -70,11 +75,23 @@ const ProjectCard = ({
               <h3 className="project-card-title">
                 {project.project_name}
                 {!isCompleted && (
-                  <Icon
-                    name="verified"
-                    modifiers="xs"
-                    className="verified-badge"
-                  />
+                  <span
+                    className="verified-badge-wrapper"
+                    onMouseEnter={() => setShowVerifiedModal(true)}
+                    onMouseLeave={() => setShowVerifiedModal(false)}
+                  >
+                    <Icon
+                      name="verified"
+                      modifiers="xs"
+                      className="verified-badge"
+                    />
+                    {showVerifiedModal && (
+                      <span className="verified-hover-modal">
+                        <Icon name="verified" modifiers="xs" className="verified-hover-modal-icon" />
+                        <span className="verified-hover-modal-text">Verified project</span>
+                      </span>
+                    )}
+                  </span>
                 )}
               </h3>
               {isCompact && (

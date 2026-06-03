@@ -200,10 +200,16 @@ def get_project_by_id(project_id):
 
 def insert_department(department_name, phase_id=2):
     conn = get_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(buffered=True)
     cursor.execute(
-        "INSERT INTO departments (department_name, phase_id) VALUES (%s, %s)",
-        (department_name, phase_id),
+        "SELECT COALESCE(MAX(sort_order), 0) FROM departments WHERE phase_id = %s",
+        (phase_id,),
+    )
+    max_order = cursor.fetchone()[0]
+
+    cursor.execute(
+        "INSERT INTO departments (department_name, phase_id, sort_order) VALUES (%s, %s, %s)",
+        (department_name, phase_id, max_order + 1),
     )
     conn.commit()
     new_id = cursor.lastrowid
@@ -216,12 +222,34 @@ def get_departments():
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute(
-        "SELECT d.*, p.phase_name FROM departments d LEFT JOIN budget_phases p ON d.phase_id = p.id ORDER BY d.id DESC"
+        "SELECT d.*, p.phase_name FROM departments d LEFT JOIN budget_phases p ON d.phase_id = p.id ORDER BY d.sort_order ASC, d.id DESC"
     )
     result = cursor.fetchall()
     cursor.close()
     conn.close()
     return result
+
+
+def update_departments_order(ordered_ids):
+    """
+    Updates the sort_order for a list of department IDs.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        for index, dept_id in enumerate(ordered_ids):
+            cursor.execute(
+                "UPDATE departments SET sort_order = %s WHERE id = %s",
+                (index, dept_id),
+            )
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        cursor.close()
+        conn.close()
+    return True
 
 
 def get_categories():
@@ -402,7 +430,7 @@ def get_hierarchy():
         LEFT JOIN departments d ON p.id = d.phase_id
         LEFT JOIN categories c ON d.id = c.department_id
         LEFT JOIN budget_items i ON c.id = i.category_id
-        ORDER BY p.sort_order, d.id, c.sort_order, i.sort_order
+        ORDER BY p.sort_order, d.sort_order, d.id, c.sort_order, i.sort_order
     """
     cursor.execute(query)
     rows = cursor.fetchall()
@@ -567,13 +595,35 @@ def get_budget_versions(project_id):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute(
-        "SELECT id, version_number, created_at FROM budget_versions WHERE project_id = %s ORDER BY version_number ASC",
+        "SELECT id, version_number, published_to_crew, published_to_client, created_at, published_at FROM budget_versions WHERE project_id = %s ORDER BY version_number ASC",
         (project_id,),
     )
     rows = cursor.fetchall()
     cursor.close()
     conn.close()
     return rows
+
+
+def publish_budget_version(version_id, published_to_crew, published_to_client):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            """UPDATE budget_versions 
+               SET published_to_crew = %s, published_to_client = %s,
+                   published_at = CASE WHEN %s = 1 OR %s = 1 THEN CURRENT_TIMESTAMP ELSE NULL END
+               WHERE id = %s""",
+            (1 if published_to_crew else 0, 1 if published_to_client else 0,
+             1 if published_to_crew else 0, 1 if published_to_client else 0, version_id),
+        )
+        conn.commit()
+        return True
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        cursor.close()
+        conn.close()
 
 
 def create_budget_version(project_id, source_version_id=None):
@@ -761,6 +811,14 @@ def get_budget_item_breakdowns(project_id, version_id, budget_item_id):
 def save_budget_item_breakdowns_batch(
     project_id, version_id, budget_item_id, breakdown_items
 ):
+    def to_float(val, default=0.0):
+        try:
+            if val is None or val == "":
+                return default
+            return float(val)
+        except (ValueError, TypeError):
+            return default
+
     conn = get_connection()
     cursor = conn.cursor()
     try:
@@ -781,13 +839,13 @@ def save_budget_item_breakdowns_batch(
                     version_id,
                     budget_item_id,
                     b.get("description", ""),
-                    b.get("quantity", 0),
+                    to_float(b.get("quantity"), 0.0),
                     b.get("rate_type", "day"),
-                    b.get("rate_multiplier", 1.0),
-                    b.get("rate", 0),
-                    b.get("gross_revenue", 0),
-                    b.get("additional1", 0),
-                    b.get("total", 0),
+                    to_float(b.get("rate_multiplier"), 1.0),
+                    to_float(b.get("rate"), 0.0),
+                    to_float(b.get("gross_revenue"), 0.0),
+                    to_float(b.get("additional1"), 0.0),
+                    to_float(b.get("total"), 0.0),
                 )
                 for b in breakdown_items
             ]
@@ -917,11 +975,37 @@ def run_budget_migration():
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 project_id INT NOT NULL,
                 version_number INT NOT NULL,
+                published_to_crew TINYINT(1) DEFAULT 0,
+                published_to_client TINYINT(1) DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
             )
         """
         )
+
+        print("Migration: Checking for published_to_crew column...")
+        cursor.execute("SHOW COLUMNS FROM budget_versions LIKE 'published_to_crew'")
+        if not cursor.fetchone():
+            print("Migration: Adding published_to_crew column...")
+            cursor.execute(
+                "ALTER TABLE budget_versions ADD COLUMN published_to_crew TINYINT(1) DEFAULT 0"
+            )
+
+        print("Migration: Checking for published_to_client column...")
+        cursor.execute("SHOW COLUMNS FROM budget_versions LIKE 'published_to_client'")
+        if not cursor.fetchone():
+            print("Migration: Adding published_to_client column...")
+            cursor.execute(
+                "ALTER TABLE budget_versions ADD COLUMN published_to_client TINYINT(1) DEFAULT 0"
+            )
+
+        print("Migration: Checking for published_at column...")
+        cursor.execute("SHOW COLUMNS FROM budget_versions LIKE 'published_at'")
+        if not cursor.fetchone():
+            print("Migration: Adding published_at column...")
+            cursor.execute(
+                "ALTER TABLE budget_versions ADD COLUMN published_at TIMESTAMP NULL DEFAULT NULL"
+            )
 
         print("Migration: Checking for version_id column...")
         cursor.execute("SHOW COLUMNS FROM project_budget_values LIKE 'version_id'")
@@ -997,6 +1081,81 @@ def run_budget_migration():
         """
         )
 
+        print("Migration: Checking for email column in users...")
+        cursor.execute("SHOW COLUMNS FROM users LIKE 'email'")
+        if not cursor.fetchone():
+            print("Migration: Adding email column to users...")
+            cursor.execute("ALTER TABLE users ADD COLUMN email VARCHAR(255) NULL")
+
+        print("Migration: Checking for profile_image column in users...")
+        cursor.execute("SHOW COLUMNS FROM users LIKE 'profile_image'")
+        if not cursor.fetchone():
+            print("Migration: Adding profile_image column to users...")
+            cursor.execute("ALTER TABLE users ADD COLUMN profile_image LONGTEXT NULL")
+
+        print("Migration: Checking for theme_mode column in users...")
+        cursor.execute("SHOW COLUMNS FROM users LIKE 'theme_mode'")
+        if not cursor.fetchone():
+            print("Migration: Adding theme_mode column to users...")
+            cursor.execute("ALTER TABLE users ADD COLUMN theme_mode VARCHAR(50) DEFAULT 'dark'")
+
+        print("Migration: Checking for email_notifications column in users...")
+        cursor.execute("SHOW COLUMNS FROM users LIKE 'email_notifications'")
+        if not cursor.fetchone():
+            print("Migration: Adding email_notifications column to users...")
+            cursor.execute("ALTER TABLE users ADD COLUMN email_notifications TINYINT(1) DEFAULT 1")
+
+        print("Migration: Checking for pause_notifications column in users...")
+        cursor.execute("SHOW COLUMNS FROM users LIKE 'pause_notifications'")
+        if not cursor.fetchone():
+            print("Migration: Adding pause_notifications column to users...")
+            cursor.execute("ALTER TABLE users ADD COLUMN pause_notifications TINYINT(1) DEFAULT 0")
+
+        print("Migration: Creating department_crew_assignments table...")
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS department_crew_assignments (
+                project_id INT NOT NULL,
+                department_id INT NOT NULL,
+                user_id INT NOT NULL,
+                PRIMARY KEY (project_id, department_id, user_id),
+                FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+                FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE CASCADE,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
+        """
+        )
+
+        print("Migration: Creating category_crew_assignments table...")
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS category_crew_assignments (
+                project_id INT NOT NULL,
+                category_id INT NOT NULL,
+                user_id INT NOT NULL,
+                PRIMARY KEY (project_id, category_id, user_id),
+                FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+                FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
+        """
+        )
+
+        print("Migration: Creating budget_item_crew_assignments table...")
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS budget_item_crew_assignments (
+                project_id INT NOT NULL,
+                budget_item_id INT NOT NULL,
+                user_id INT NOT NULL,
+                PRIMARY KEY (project_id, budget_item_id, user_id),
+                FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+                FOREIGN KEY (budget_item_id) REFERENCES budget_items(id) ON DELETE CASCADE,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
+        """
+        )
+
         print("Migration: Committing...")
         conn.commit()
         print("Migration: Success!")
@@ -1008,3 +1167,163 @@ def run_budget_migration():
     finally:
         cursor.close()
         conn.close()
+
+
+def get_project_department_crew(project_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    query = """
+        SELECT dca.department_id, u.id as user_id, u.username, u.full_name, u.profile_image
+        FROM department_crew_assignments dca
+        JOIN users u ON dca.user_id = u.id
+        WHERE dca.project_id = %s
+    """
+    cursor.execute(query, (project_id,))
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    
+    # Group by department_id
+    result = {}
+    for r in rows:
+        dept_id = str(r["department_id"])
+        if dept_id not in result:
+            result[dept_id] = []
+        result[dept_id].append({
+            "id": r["user_id"],
+            "username": r["username"],
+            "full_name": r["full_name"],
+            "profile_image": r["profile_image"]
+        })
+    return result
+
+
+def update_project_department_crew(project_id, department_id, user_ids):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        # Clear existing assignments for this project and department
+        cursor.execute(
+            "DELETE FROM department_crew_assignments WHERE project_id = %s AND department_id = %s",
+            (project_id, department_id)
+        )
+        # Add new assignments
+        if user_ids:
+            insert_query = """
+                INSERT INTO department_crew_assignments (project_id, department_id, user_id)
+                VALUES (%s, %s, %s)
+            """
+            rows = [(project_id, department_id, u_id) for u_id in user_ids]
+            cursor.executemany(insert_query, rows)
+        conn.commit()
+        return True
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        cursor.close()
+        conn.close()
+
+def get_project_category_crew(project_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    query = """
+        SELECT cca.category_id, u.id as user_id, u.username, u.full_name, u.profile_image
+        FROM category_crew_assignments cca
+        JOIN users u ON cca.user_id = u.id
+        WHERE cca.project_id = %s
+    """
+    cursor.execute(query, (project_id,))
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    
+    result = {}
+    for r in rows:
+        cat_id = str(r["category_id"])
+        if cat_id not in result:
+            result[cat_id] = []
+        result[cat_id].append({
+            "id": r["user_id"],
+            "username": r["username"],
+            "full_name": r["full_name"],
+            "profile_image": r["profile_image"]
+        })
+    return result
+
+def update_project_category_crew(project_id, category_id, user_ids):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "DELETE FROM category_crew_assignments WHERE project_id = %s AND category_id = %s",
+            (project_id, category_id)
+        )
+        if user_ids:
+            insert_query = """
+                INSERT INTO category_crew_assignments (project_id, category_id, user_id)
+                VALUES (%s, %s, %s)
+            """
+            rows = [(project_id, category_id, u_id) for u_id in user_ids]
+            cursor.executemany(insert_query, rows)
+        conn.commit()
+        return True
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        cursor.close()
+        conn.close()
+
+def get_project_budget_item_crew(project_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    query = """
+        SELECT bca.budget_item_id, u.id as user_id, u.username, u.full_name, u.profile_image
+        FROM budget_item_crew_assignments bca
+        JOIN users u ON bca.user_id = u.id
+        WHERE bca.project_id = %s
+    """
+    cursor.execute(query, (project_id,))
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    
+    result = {}
+    for r in rows:
+        item_id = str(r["budget_item_id"])
+        if item_id not in result:
+            result[item_id] = []
+        result[item_id].append({
+            "id": r["user_id"],
+            "username": r["username"],
+            "full_name": r["full_name"],
+            "profile_image": r["profile_image"]
+        })
+    return result
+
+def update_project_budget_item_crew(project_id, budget_item_id, user_ids):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "DELETE FROM budget_item_crew_assignments WHERE project_id = %s AND budget_item_id = %s",
+            (project_id, budget_item_id)
+        )
+        if user_ids:
+            insert_query = """
+                INSERT INTO budget_item_crew_assignments (project_id, budget_item_id, user_id)
+                VALUES (%s, %s, %s)
+            """
+            rows = [(project_id, budget_item_id, u_id) for u_id in user_ids]
+            cursor.executemany(insert_query, rows)
+        conn.commit()
+        return True
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        cursor.close()
+        conn.close()
+
+

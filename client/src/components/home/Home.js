@@ -1,11 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import Hero from '../ui/Hero';
-import Projects from '../pages/Projects';
+import Navbar from './Navbar';
+import Hero from './Hero';
+import Projects from './Projects';
 import Team from '../ui/Team';
 import Testimonials from '../ui/Testimonials';
-import Footer from '../ui/Footer';
+import Footer from './Footer';
 import './Home.css';
 
 const Home = () => {
@@ -67,23 +68,26 @@ const Home = () => {
     }
 
     return (
-        <div className="horizontal-scroll-container" ref={containerRef}>
-            <div className="horizontal-section">
-                <Hero />
+        <>
+            <Navbar />
+            <div className="horizontal-scroll-container" ref={containerRef}>
+                <div className="horizontal-section">
+                    <Hero />
+                </div>
+                <div className="horizontal-section">
+                    <Projects />
+                </div>
+                <div className="horizontal-section">
+                    <Team />
+                </div>
+                <div className="horizontal-section">
+                    <Testimonials />
+                </div>
+                <div className="horizontal-section footer-slide">
+                    <Footer />
+                </div>
             </div>
-            <div className="horizontal-section">
-                <Projects />
-            </div>
-            <div className="horizontal-section">
-                <Team />
-            </div>
-            <div className="horizontal-section">
-                <Testimonials />
-            </div>
-            <div className="horizontal-section footer-slide">
-                <Footer />
-            </div>
-        </div>
+        </>
     );
 };
 

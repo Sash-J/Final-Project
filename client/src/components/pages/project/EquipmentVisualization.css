@@ -1,0 +1,157 @@
+.equipment-viz-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.equipment-hero-card {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 30px;
+  background: linear-gradient(135deg, rgba(0, 198, 230, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border: 1px solid rgba(0, 198, 230, 0.3);
+}
+
+.hero-camera-image {
+  width: 100px;
+  height: 100px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #00c6e6;
+  border: 1px solid rgba(0, 198, 230, 0.4);
+}
+
+.hero-camera-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hero-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #00c6e6;
+  font-weight: 600;
+}
+
+.hero-camera-details h2 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: #fff;
+}
+
+.hero-camera-details p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.hero-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 5px;
+  font-size: 0.85rem;
+  color: #10b981;
+}
+
+.equipment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.equipment-category {
+  padding: 20px;
+}
+
+.cat-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  color: #fff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 10px;
+}
+
+.cat-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.equipment-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.equipment-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.eq-qty {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  color: #fff;
+}
+
+/* Light Theme Overrides */
+body.light-theme .equipment-hero-card {
+  background: linear-gradient(135deg, rgba(9, 105, 218, 0.05) 0%, rgba(255, 255, 255, 0.8) 100%);
+  border-color: rgba(9, 105, 218, 0.2);
+}
+
+body.light-theme .hero-camera-image {
+  background: rgba(9, 105, 218, 0.05);
+  border-color: rgba(9, 105, 218, 0.2);
+  color: #0969da;
+}
+
+body.light-theme .hero-label {
+  color: #0969da;
+}
+
+body.light-theme .hero-camera-details h2 {
+  color: #24292f;
+}
+
+body.light-theme .hero-camera-details p {
+  color: #57606a;
+}
+
+body.light-theme .hero-status {
+  color: #1a7f37;
+}
+
+body.light-theme .cat-header {
+  color: #24292f;
+  border-bottom-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .equipment-list li {
+  color: #57606a;
+}
+
+body.light-theme .eq-qty {
+  background: rgba(0, 0, 0, 0.05);
+  color: #24292f;
+}

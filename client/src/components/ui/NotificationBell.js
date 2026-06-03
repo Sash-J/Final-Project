@@ -141,7 +141,7 @@ const NotificationBell = () => {
                   No notifications found
                 </div>
               ) : (
-                notifications.map((note) => (
+                notifications.slice(0, 20).map((note) => (
                   <div
                     key={note.id}
                     className={`notification-item ${!note.is_read ? "unread" : ""}`}

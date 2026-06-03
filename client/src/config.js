@@ -4,7 +4,7 @@ const isLocal =
   window.location.hostname === "127.0.0.1";
 
 export const API = isLocal
-  ? "http://localhost:5000"
+  ? ""
   : "https://api.visiondivision.lk";
 
 console.log(
