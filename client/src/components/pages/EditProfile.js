@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { API } from "../../config";
 import { useAuth } from "../../contexts/AuthContext";
 import { validateEditProfileForm } from "../../utils/validators";
+import HoverTooltip from "../common/HoverTooltip";
 import Icon from "../common/Icon";
 import "./EditProfile.css";
 
@@ -241,9 +242,18 @@ const EditProfile = ({ onClose }) => {
                   ) : (
                     <div className="avatar-text-preview">{initial}</div>
                   )}
-                  <label htmlFor="avatar-file-input" className="avatar-edit-badge" title="Upload New Photo">
-                    <Icon name="edit" modifiers="sm" />
-                  </label>
+                  <HoverTooltip 
+                    text="Upload New Photo" 
+                    style={{ position: 'absolute', bottom: 0, right: 0, zIndex: 10, display: 'flex' }}
+                  >
+                    <label 
+                      htmlFor="avatar-file-input" 
+                      className="avatar-edit-badge" 
+                      style={{ position: 'static' }}
+                    >
+                      <Icon name="edit" modifiers="sm" />
+                    </label>
+                  </HoverTooltip>
                 </div>
                 <input
                   id="avatar-file-input"

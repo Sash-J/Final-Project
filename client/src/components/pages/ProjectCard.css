@@ -75,6 +75,16 @@
   justify-content: center;
 }
 
+.project-card-placeholder-icon {
+  color: #fff;
+  opacity: 0.5;
+  transform: translateY(-20px);
+}
+
+.project-card-placeholder-icon.compact {
+  transform: none;
+}
+
 .project-card-overlay-gradient {
   position: absolute;
   inset: 0;
@@ -286,69 +296,6 @@
   }
 }
 
-/* Verified Hover Modal Custom Styling */
-.verified-badge-wrapper {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.verified-hover-modal {
-  position: absolute;
-  bottom: 140%;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10000;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  background: rgba(10, 12, 18, 0.05);
-  backdrop-filter: blur(60px) saturate(180%);
-  -webkit-backdrop-filter: blur(60px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
-  white-space: nowrap;
-  pointer-events: none; /* Prevents cursor-flickering loop */
-  animation: fadeInModal 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.verified-hover-modal::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border-width: 5px;
-  border-style: solid;
-  border-color: rgba(10, 12, 18, 0.8) transparent transparent transparent;
-}
-
-.verified-hover-modal-icon {
-  color: #3b82f6;
-  font-size: 0.9rem !important;
-}
-
-.verified-hover-modal-text {
-  font-size: 0.8rem;
-  color: #fff;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-}
-
-@keyframes fadeInModal {
-  from {
-    opacity: 0;
-    transform: translate(-50%, 6px);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
-}
-
 /* Light Theme Styling Overrides */
 body.light-theme .project-card-glass {
   background: #ffffff;
@@ -395,19 +342,5 @@ body.light-theme .pill-toggle-btn:hover {
 body.light-theme .project-card-container.compact .project-card-glass {
   background: rgba(255, 255, 255, 0.8);
   border-color: #d0d7de;
-}
-
-body.light-theme .verified-hover-modal {
-  background: rgba(255, 255, 255, 0.95);
-  border-color: #d0d7de;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-}
-
-body.light-theme .verified-hover-modal-text {
-  color: #24292f;
-}
-
-body.light-theme .verified-hover-modal::after {
-  border-color: rgba(255, 255, 255, 0.95) transparent transparent transparent;
 }
 

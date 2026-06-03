@@ -308,6 +308,19 @@ body.light-theme .admin-content-animated {
   align-items: center;
 }
 
+.version-action-btn-delete {
+  padding: 8px 16px;
+}
+
+.version-action-icon-delete {
+  font-size: 1rem;
+}
+
+.version-action-btn-clone {
+  padding: 8px 16px;
+  border-radius: 12px;
+}
+
 .version-controls .glass-dropdown-container {
   margin-bottom: 0 !important;
 }

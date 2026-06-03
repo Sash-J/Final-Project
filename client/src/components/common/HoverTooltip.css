@@ -1,0 +1,81 @@
+.hover-tooltip-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hover-tooltip-positioner {
+  position: fixed;
+  width: 0;
+  height: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  z-index: 999999;
+  pointer-events: none;
+  animation: fadeInTooltipModal 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hover-tooltip-modal {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
+  background: rgba(18, 19, 26, 0.65);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  position: relative;
+}
+
+.hover-tooltip-modal::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: rgba(18, 19, 26, 0.65) transparent transparent transparent;
+}
+
+.hover-tooltip-icon {
+  color: #ffffff;
+  font-size: 0.8rem !important;
+}
+
+.hover-tooltip-text {
+  font-size: 0.8rem;
+  color: #fff;
+  font-weight: 500;
+}
+
+@keyframes fadeInTooltipModal {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Light Theme Styling Overrides */
+body.light-theme .hover-tooltip-modal {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: #d0d7de;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .hover-tooltip-text {
+  color: #24292f;
+}
+
+body.light-theme .hover-tooltip-modal::after {
+  border-color: rgba(255, 255, 255, 0.95) transparent transparent transparent;
+}

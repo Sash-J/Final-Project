@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Icon from "../../common/Icon";
+import HoverTooltip from "../../common/HoverTooltip";
 import "./CrewHierarchy.css";
 
 const OrgNode = ({ node, onDragStart, onDragOver, onDragLeave, onDrop, onAddNode, onEditNode }) => {
@@ -46,16 +47,17 @@ const OrgNode = ({ node, onDragStart, onDragOver, onDragLeave, onDrop, onAddNode
         {node.department && (
           <div className="org-node-title">
             {node.department}
-            <button 
-              className="add-node-btn" 
-              onClick={(e) => {
-                e.stopPropagation();
-                onAddNode(node.id, e);
-              }}
-              title="Add Child Node"
-            >
-              +
-            </button>
+            <HoverTooltip text="Add Child Node">
+              <button 
+                className="add-node-btn" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAddNode(node.id, e);
+                }}
+              >
+                +
+              </button>
+            </HoverTooltip>
           </div>
         )}
         <div className="org-node-members">
@@ -506,9 +508,15 @@ const CrewHierarchy = ({ project, onUpdateHierarchy }) => {
       </div>
 
       <div className="org-zoom-controls">
-        <button onClick={handleZoomOut} title="Zoom Out"><Icon name="remove" modifiers="sm" /></button>
-        <button onClick={handleZoomFit} title="Fit to Screen"><Icon name="fit_screen" modifiers="sm" /></button>
-        <button onClick={handleZoomIn} title="Zoom In"><Icon name="add" modifiers="sm" /></button>
+        <HoverTooltip text="Zoom Out">
+          <button onClick={handleZoomOut}><Icon name="remove" modifiers="sm" /></button>
+        </HoverTooltip>
+        <HoverTooltip text="Fit to Screen">
+          <button onClick={handleZoomFit}><Icon name="fit_screen" modifiers="sm" /></button>
+        </HoverTooltip>
+        <HoverTooltip text="Zoom In">
+          <button onClick={handleZoomIn}><Icon name="add" modifiers="sm" /></button>
+        </HoverTooltip>
       </div>
 
       {addModalVisible && createPortal(
@@ -528,13 +536,17 @@ const CrewHierarchy = ({ project, onUpdateHierarchy }) => {
               <h2>{modalMode === 'add' ? 'Add Node' : 'Edit Node'}</h2>
               <p>{modalMode === 'add' ? 'Create new department' : 'Update department details'}</p>
               {modalMode === 'edit' && treeData.id !== editNodeId && (
-                <button 
-                  className="mm-delete-btn" 
-                  onClick={handleDeleteNode}
-                  title="Delete Node"
+                <HoverTooltip 
+                  text="Delete Node"
+                  style={{ position: 'absolute', top: '-2px', right: '-2px' }}
                 >
-                  <Icon name="delete" modifiers="sm" />
-                </button>
+                  <button 
+                    className="mm-delete-btn" 
+                    onClick={handleDeleteNode}
+                  >
+                    <Icon name="delete" modifiers="sm" />
+                  </button>
+                </HoverTooltip>
               )}
             </div>
             <input 
@@ -552,17 +564,18 @@ const CrewHierarchy = ({ project, onUpdateHierarchy }) => {
                   <div className="mm-member-header">
                     <span className="mm-member-label">Member {index + 1}</span>
                     {newNodeData.members.length > 1 && (
-                      <button 
-                        className="mm-remove-member-btn"
-                        onClick={() => {
-                          const newMembers = [...newNodeData.members];
-                          newMembers.splice(index, 1);
-                          setNewNodeData({...newNodeData, members: newMembers});
-                        }}
-                        title="Remove Member"
-                      >
-                        <Icon name="close" modifiers="sm" />
-                      </button>
+                      <HoverTooltip text="Remove Member">
+                        <button 
+                          className="mm-remove-member-btn"
+                          onClick={() => {
+                            const newMembers = [...newNodeData.members];
+                            newMembers.splice(index, 1);
+                            setNewNodeData({...newNodeData, members: newMembers});
+                          }}
+                        >
+                          <Icon name="close" modifiers="sm" />
+                        </button>
+                      </HoverTooltip>
                     )}
                   </div>
                   <input 
