@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Icon from "../common/Icon";
 import GlassDropdown from "../common/GlassDropdown";
+import GlassDatePicker from "../common/GlassDatePicker";
 import { API } from "../../config";
 import "./ProjectForm.css";
 
@@ -298,48 +299,21 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
               <div className="project-form-col">
                 <div className="project-form-group">
                   <label className="neo-label">Start Date</label>
-                  <div className="icon-field-wrapper">
-                    <Icon
-                      name="calendar_month"
-                      modifiers="md"
-                      onClick={() => startDateRef.current?.showPicker()}
-                      style={{ cursor: "pointer", pointerEvents: "auto" }}
-                    />
-                    <input
-                      type="date"
-                      ref={startDateRef}
-                      className="neo-input"
-                      value={formData.start_date}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          start_date: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
+                  <GlassDatePicker
+                    value={formData.start_date}
+                    onChange={(val) => setFormData({ ...formData, start_date: val })}
+                    placeholder="YYYY-MM-DD"
+                  />
                 </div>
               </div>
               <div className="project-form-col">
                 <div className="project-form-group">
                   <label className="neo-label">Target Delivery</label>
-                  <div className="icon-field-wrapper">
-                    <Icon
-                      name="calendar_month"
-                      modifiers="md"
-                      onClick={() => endDateRef.current?.showPicker()}
-                      style={{ cursor: "pointer", pointerEvents: "auto" }}
-                    />
-                    <input
-                      type="date"
-                      ref={endDateRef}
-                      className="neo-input"
-                      value={formData.end_date}
-                      onChange={(e) =>
-                        setFormData({ ...formData, end_date: e.target.value })
-                      }
-                    />
-                  </div>
+                  <GlassDatePicker
+                    value={formData.end_date}
+                    onChange={(val) => setFormData({ ...formData, end_date: val })}
+                    placeholder="YYYY-MM-DD"
+                  />
                 </div>
               </div>
             </div>

@@ -47,6 +47,31 @@
   box-shadow: 0 0 0 3px rgba(0, 198, 230, 0.15);
 }
 
+/* Remove up/down spin arrows from number inputs */
+.neo-input[type="number"]::-webkit-outer-spin-button,
+.neo-input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.neo-input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Hide native calendar icon so we can use custom Material icons */
+.neo-input[type="date"]::-webkit-calendar-picker-indicator,
+.neo-input[type="time"]::-webkit-calendar-picker-indicator,
+.neo-input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  cursor: pointer;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
 .btn-neo-cancel {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);

@@ -721,13 +721,8 @@ const Schedule = () => {
                 <div
                   className="identity-preview-strip"
                   style={{
-                    height: "8px",
-                    width: "100%",
                     backgroundColor: taskForm.task_color,
-                    borderRadius: "4px",
-                    marginBottom: "24px",
                     boxShadow: `0 0 15px ${taskForm.task_color}44`,
-                    transition: "all 0.4s ease",
                   }}
                 />
 
@@ -814,9 +809,7 @@ const Schedule = () => {
                         placeholder="Write your note here..."
                       ></textarea>
                     </div>
-                    <div
-                      style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}
-                    >
+                    <div className="task-actions">
                       <button
                         type="submit"
                         className="sui-btn sui-btn-save"
@@ -843,11 +836,6 @@ const Schedule = () => {
                             type="button"
                             className="sui-btn sui-btn-delete"
                             onClick={() => handleDeleteTask(selectedTask.id)}
-                            style={{
-                              background: "rgba(239, 68, 68, 0.2)",
-                              border: "1px solid rgba(239, 68, 68, 0.4)",
-                              color: "#f87171",
-                            }}
                           >
                             Delete
                           </button>

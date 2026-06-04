@@ -23,7 +23,7 @@ const SessionTimeoutModal = ({ onLogin }) => {
 
       <div className="modal-footer">
         <button
-          className="sui-btn sui-btn-save session-timeout-modal-btn"
+          className="btn-neo btn-neo-solid session-timeout-modal-btn"
           onClick={onLogin}
         >
           Return to Login
