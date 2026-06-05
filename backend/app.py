@@ -30,23 +30,13 @@ app.config.update(cookie_settings)
 CORS(app, supports_credentials=True)
 
 
-@app.before_request
-def log_request_info():
-    if request.path.startswith("/api/"):
-        try:
-            log_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "requests.log")
-            with open(log_path, "a", encoding="utf-8") as f:
-                f.write(f"--- Request: {request.method} {request.url}\n")
-                f.write(f"Headers: {dict(request.headers)}\n")
-                f.write(f"Body: {request.get_data(as_text=True)}\n")
-        except Exception as e:
-            pass
-
 @app.after_request
 def add_cors_headers(response):
     if request.path.startswith("/api/"):
         try:
-            log_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "requests.log")
+            log_path = os.path.join(
+                os.path.dirname(os.path.abspath(__file__)), "requests.log"
+            )
             with open(log_path, "a", encoding="utf-8") as f:
                 f.write(f"=== Response: {response.status_code}\n")
                 f.write(f"Body: {response.get_data(as_text=True)[:500]}\n\n")
@@ -103,9 +93,11 @@ app.register_blueprint(notifications_bp)
 
 try:
     from services.db_operations import run_budget_migration
+
     run_budget_migration()
 except Exception as e:
     print("Error running migrations on startup:", e)
+
 
 @app.route("/", methods=["GET"])
 def home():
