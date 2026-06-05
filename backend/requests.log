@@ -48273,3 +48273,6 @@ Body:
 Body: {"unread_count":1}
 
 
+--- Request: GET http://127.0.0.1:5000/api/notifications/unread-count
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/admin', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
