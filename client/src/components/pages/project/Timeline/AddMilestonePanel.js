@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { API } from "../../../../config";
 import { validateAddMilestoneForm, validateMilestoneNote } from "../../../../utils/validators";
 import Icon from "../../../common/Icon";
+import HoverTooltip from "../../../common/HoverTooltip";
 import "./AddMilestonePanel.css";
 
 const AddMilestonePanel = ({ 
@@ -20,7 +21,6 @@ const AddMilestonePanel = ({
   const [milestoneDesc, setMilestoneDesc] = useState("");
   const [clientNote, setClientNote] = useState("");
   const [pushToSchedule, setPushToSchedule] = useState(false);
-  const [showTooltip, setShowTooltip] = useState(false);
   const [milestoneSaving, setMilestoneSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
@@ -176,8 +176,8 @@ const AddMilestonePanel = ({
 
   return (
     <>
-      <div className="modal-header-section" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+      <div className="modal-header-section add-milestone-header-row">
+        <div className="add-milestone-header-title-block">
           <div>
             <h2>
               {mode === "add" 
@@ -193,11 +193,7 @@ const AddMilestonePanel = ({
             </p>
           </div>
           {userRole !== "production_crew" && userRole !== "client" && (
-            <div 
-              className="sync-hover-wrapper"
-              onMouseEnter={() => setShowTooltip(true)}
-              onMouseLeave={() => setShowTooltip(false)}
-            >
+            <HoverTooltip text="Push to schedule" icon="event" style={{ display: "inline-flex" }}>
               <button 
                 type="button" 
                 className={`btn-morph-sync ${pushToSchedule ? 'synced' : ''}`}
@@ -207,13 +203,7 @@ const AddMilestonePanel = ({
                   <Icon name={pushToSchedule ? "check_circle" : "event"} modifiers="md" />
                 </div>
               </button>
-              {showTooltip && (
-                <span className="sync-hover-modal">
-                  <Icon name="event" modifiers="xs" className="sync-hover-modal-icon" />
-                  <span className="sync-hover-modal-text">Push to schedule</span>
-                </span>
-              )}
-            </div>
+            </HoverTooltip>
           )}
         </div>
       </div>
@@ -229,8 +219,8 @@ const AddMilestonePanel = ({
 
       {userRole !== "client" || mode === "add" ? (
         <>
-          <div className="neo-form-group" style={{ marginTop: '20px' }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+          <div className="neo-form-group add-milestone-form-top">
+            <div className="add-milestone-label-row">
               <label className="neo-label">Title</label>
               <span className="char-counter">{milestoneTitle.length}/25</span>
             </div>
@@ -305,7 +295,7 @@ const AddMilestonePanel = ({
           </div>
 
           <div className="neo-form-group">
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+            <div className="add-milestone-label-row">
               <label className="neo-label">Description (Optional)</label>
               <span className="char-counter">{milestoneDesc.length}/75</span>
             </div>
@@ -356,8 +346,8 @@ const AddMilestonePanel = ({
 
       {mode === "edit" && userRole !== "production_crew" && (
         <div className="neo-form-group">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-            <label className="neo-label" style={{ display: "flex", alignItems: "center" }}>
+          <div className="add-milestone-label-row">
+            <label className="neo-label add-milestone-label-with-badge">
               Timeline Notes (Optional)
               {renderProvenanceBadge()}
             </label>
@@ -384,24 +374,16 @@ const AddMilestonePanel = ({
 
       <div className="add-milestone-panel-actions">
         {mode === "edit" && userRole !== "client" && userRole !== "production_crew" && onDelete && (
-          <button
-            type="button"
-            className="btn-neo-cancel"
-            style={{ 
-              color: "#f87171", 
-              borderColor: "rgba(248,113,113,0.3)",
-              marginRight: "auto",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "8px 12px"
-            }}
-            onClick={onDelete}
-            title="Delete Milestone"
-            disabled={milestoneSaving}
-          >
-            <Icon name="delete" modifiers="sm" />
-          </button>
+          <HoverTooltip text="Delete Milestone" style={{ marginRight: "auto" }}>
+            <button
+              type="button"
+              className="btn-neo-cancel btn-milestone-delete"
+              onClick={onDelete}
+              disabled={milestoneSaving}
+            >
+              <Icon name="delete" modifiers="sm" />
+            </button>
+          </HoverTooltip>
         )}
         <button 
           type="button" 

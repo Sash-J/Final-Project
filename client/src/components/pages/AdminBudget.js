@@ -7,6 +7,8 @@ import GlassDropdown from "../common/GlassDropdown";
 import PageHeader from "../common/PageHeader";
 import ConfirmationModal from "../common/ConfirmationModal";
 import ModalPortal from "../common/ModalPortal";
+import Icon from "../common/Icon";
+import HoverTooltip from "../common/HoverTooltip";
 import "./AdminBudget.css";
 
 import { API } from "../../config";
@@ -614,31 +616,30 @@ const AdminBudget = () => {
                   </div>
 
                   <div className="version-actions-row">
-                      <button
-                        type="button"
-                        className="btn-neo-cancel"
-                        onClick={handleDeleteVersion}
-                        disabled={!versionId}
-                        title="Delete selected version"
-                        style={{ padding: "8px 16px" }}
-                      >
-                        <span
-                          className="material-symbols-outlined"
-                          style={{ fontSize: "1rem" }}
+                      <HoverTooltip text="Delete selected version">
+                        <button
+                          type="button"
+                          className="btn-neo-cancel version-action-btn-delete"
+                          onClick={handleDeleteVersion}
+                          disabled={!versionId}
                         >
-                          delete
-                        </span>
-                      </button>
+                          <span
+                            className="material-symbols-outlined version-action-icon-delete"
+                          >
+                            delete
+                          </span>
+                        </button>
+                      </HoverTooltip>
 
-                      <button
-                        type="button"
-                        className="btn-neo"
-                        onClick={handleCreateNewVersion}
-                        title="Clone current version to a new one"
-                        style={{ padding: "8px 16px", borderRadius: "12px" }}
-                      >
-                        + New Version
-                      </button>
+                      <HoverTooltip text="Clone current version to a new one">
+                        <button
+                          type="button"
+                          className="btn-neo version-action-btn-clone"
+                          onClick={handleCreateNewVersion}
+                        >
+                          + New Version
+                        </button>
+                      </HoverTooltip>
                     </div>
                   </div>
                 </div>

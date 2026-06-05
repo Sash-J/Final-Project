@@ -1,4 +1,5 @@
 import React from "react";
+import HoverTooltip from "../../../common/HoverTooltip";
 
 const CrewAssignmentDropdown = ({
   assignedCrew = [],
@@ -11,34 +12,35 @@ const CrewAssignmentDropdown = ({
   badgeSize = 18,
 }) => {
   return (
-    <div className="crew-assign-selector-wrapper" style={{ position: "relative", marginLeft: "auto" }}>
-      <button 
-        type="button"
-        className="btn-assign-crew-trigger" 
-        onClick={(e) => {
-          e.stopPropagation();
-          onToggle();
-        }}
-        title="Assign Crew"
-      >
-        {assignedCrew.length > 0 ? (() => {
-          const firstCrew = assignedCrew[0];
-          const initial = firstCrew.full_name 
-            ? firstCrew.full_name.charAt(0).toUpperCase() 
-            : (firstCrew.username ? firstCrew.username.charAt(0).toUpperCase() : "?");
-          return (
-            <div className="crew-avatar-badge" style={{ margin: 0, width: `${badgeSize}px`, height: `${badgeSize}px` }}>
-              {firstCrew.profile_image ? (
-                <img src={firstCrew.profile_image} alt={firstCrew.username} className="crew-avatar-img" />
-              ) : (
-                <div className="crew-avatar-text" style={{ fontSize: "0.6rem" }}>{initial}</div>
-              )}
-            </div>
-          );
-        })() : (
-          <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>person_add</span>
-        )}
-      </button>
+    <div className="crew-assign-selector-wrapper">
+      <HoverTooltip text="Assign Crew">
+        <button 
+          type="button"
+          className="btn-assign-crew-trigger" 
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggle();
+          }}
+        >
+          {assignedCrew.length > 0 ? (() => {
+            const firstCrew = assignedCrew[0];
+            const initial = firstCrew.full_name 
+              ? firstCrew.full_name.charAt(0).toUpperCase() 
+              : (firstCrew.username ? firstCrew.username.charAt(0).toUpperCase() : "?");
+            return (
+              <div className="crew-avatar-badge" style={{ '--badge-size': `${badgeSize}px` }}>
+                {firstCrew.profile_image ? (
+                  <img src={firstCrew.profile_image} alt={firstCrew.username} className="crew-avatar-img" />
+                ) : (
+                  <div className="crew-avatar-text">{initial}</div>
+                )}
+              </div>
+            );
+          })() : (
+            <span className="material-symbols-outlined">person_add</span>
+          )}
+        </button>
+      </HoverTooltip>
       {isActive && (
         <div className="crew-assign-dropdown glass-sandblasted" onClick={(e) => e.stopPropagation()}>
           <div className="dropdown-title-container">

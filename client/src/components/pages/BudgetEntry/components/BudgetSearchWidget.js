@@ -1,4 +1,5 @@
 import React from "react";
+import HoverTooltip from "../../../common/HoverTooltip";
 
 const BudgetSearchWidget = ({
   widgetRef,
@@ -37,16 +38,17 @@ const BudgetSearchWidget = ({
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleSearchKeyDown}
           />
-          <button
-            className="bef-search-close-btn"
-            onClick={() => {
-              setSearchQuery("");
-              setSearchOpen(false);
-            }}
-            title="Close search"
-          >
-            <span className="material-symbols-outlined">close</span>
-          </button>
+          <HoverTooltip text="Close search">
+            <button
+              className="bef-search-close-btn"
+              onClick={() => {
+                setSearchQuery("");
+                setSearchOpen(false);
+              }}
+            >
+              <span className="material-symbols-outlined">close</span>
+            </button>
+          </HoverTooltip>
         </div>
         {searchQuery.trim() && (
           <div className="bef-search-status-bar">
@@ -56,20 +58,22 @@ const BudgetSearchWidget = ({
                 : "No matches"}
             </span>
             <div className="bef-search-nav-buttons">
-              <button
-                onClick={handleSearchPrev}
-                disabled={searchResults.length === 0}
-                title="Previous match"
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: '1.2rem' }}>arrow_upward</span>
-              </button>
-              <button
-                onClick={handleSearchNext}
-                disabled={searchResults.length === 0}
-                title="Next match"
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: '1.2rem' }}>arrow_downward</span>
-              </button>
+              <HoverTooltip text="Previous match">
+                <button
+                  onClick={handleSearchPrev}
+                  disabled={searchResults.length === 0}
+                >
+                  <span className="material-symbols-outlined">arrow_upward</span>
+                </button>
+              </HoverTooltip>
+              <HoverTooltip text="Next match">
+                <button
+                  onClick={handleSearchNext}
+                  disabled={searchResults.length === 0}
+                >
+                  <span className="material-symbols-outlined">arrow_downward</span>
+                </button>
+              </HoverTooltip>
             </div>
           </div>
         )}

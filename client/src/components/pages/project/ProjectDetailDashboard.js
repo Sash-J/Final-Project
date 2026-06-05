@@ -14,47 +14,46 @@ import AddMilestonePanel from "./Timeline/AddMilestonePanel";
 import SuiTimeline from "./Timeline/SuiTimeline";
 
 const ProjectDetailSkeleton = () => (
-  <div className="project-detail-skeleton">
-    <div className="skeleton-header-wrap">
-      <div
-        className="skeleton-base"
-        style={{ width: "100px", height: "36px" }}
-      ></div>
-      <div className="skeleton-hero-box">
-        <div className="skeleton-title-stack">
-          <div
-            className="skeleton-base"
-            style={{ width: "120px", height: "14px", opacity: 0.5 }}
-          ></div>
-          <div
-            className="skeleton-base"
-            style={{ width: "400px", height: "40px" }}
-          ></div>
-          <div
-            className="skeleton-base"
-            style={{ width: "200px", height: "18px" }}
-          ></div>
-        </div>
-        <div className="skeleton-metrics-row">
-          <div className="skeleton-base skeleton-metrics-item"></div>
-          <div className="skeleton-base skeleton-metrics-item"></div>
+  <div className="project-detail-root">
+    <div className="project-detail-header-wrap">
+      <div className="pd-top-row">
+        <div className="skeleton-base" style={{ width: "80px", height: "30px" }}></div>
+        <div className="skeleton-base" style={{ width: "40px", height: "40px", borderRadius: "12px" }}></div>
+      </div>
+      <div className="project-main-info">
+        <div className="project-hero-area" style={{ borderLeft: "8px solid rgba(255,255,255,0.1)" }}>
+          <div className="project-title-stack" style={{ width: "100%" }}>
+            <div className="skeleton-base" style={{ width: "120px", height: "14px", opacity: 0.5, marginBottom: "5px" }}></div>
+            <div className="project-name-group">
+              <div className="skeleton-base" style={{ width: "400px", height: "48px" }}></div>
+            </div>
+            <div className="project-metadata-row" style={{ marginTop: "15px" }}>
+              <div className="skeleton-base" style={{ width: "150px", height: "18px" }}></div>
+              <div className="skeleton-base" style={{ width: "180px", height: "18px" }}></div>
+              <div className="skeleton-base" style={{ width: "180px", height: "18px" }}></div>
+            </div>
+          </div>
+          <div className="project-hero-stats" style={{ gap: "40px" }}>
+            <div className="skeleton-base" style={{ width: "100px", height: "55px", borderRadius: "8px" }}></div>
+            <div className="skeleton-base" style={{ width: "100px", height: "55px", borderRadius: "8px" }}></div>
+            <div className="skeleton-base" style={{ width: "120px", height: "55px", borderRadius: "8px" }}></div>
+            <div className="skeleton-base" style={{ width: "120px", height: "55px", borderRadius: "8px" }}></div>
+          </div>
         </div>
       </div>
     </div>
 
-    <div className="dashboard-skeleton-grid">
-      <div className="skeleton-sidebar glass-card" style={{ padding: "20px" }}>
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="skeleton-base skeleton-nav-item"></div>
-        ))}
+    <div className="dashboard-content-grid">
+      <div className="dashboard-nav-card glass-card">
+        <nav className="dashboard-sidebar-nav">
+          <div className="skeleton-base" style={{ width: "100%", height: "45px", borderRadius: "12px" }}></div>
+        </nav>
       </div>
-      <div className="skeleton-main-content">
-        <div
-          className="skeleton-base glass-card"
-          style={{ gridColumn: "span 2", gridRow: "span 2" }}
-        ></div>
-        <div className="skeleton-base glass-card"></div>
-        <div className="skeleton-base glass-card"></div>
+
+      <div className="bento-layout">
+        <div className="bento-item lg-rect glass-card skeleton-base"></div>
+        <div className="bento-item sm-square glass-card skeleton-base"></div>
+        <div className="bento-item sm-square glass-card skeleton-base"></div>
       </div>
     </div>
   </div>

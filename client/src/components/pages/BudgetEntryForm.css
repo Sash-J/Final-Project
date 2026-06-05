@@ -1302,6 +1302,10 @@
   border-color: var(--accent-color);
 }
 
+.bef-search-nav-buttons button .material-symbols-outlined {
+  font-size: 1.2rem;
+}
+
 .bef-search-nav-buttons button:disabled {
   opacity: 0.3;
   cursor: not-allowed;
@@ -1429,6 +1433,26 @@
   max-width: 250px;
   opacity: 1;
   margin-left: 8px;
+}
+
+/* Crew Assignment Selector */
+.crew-assign-selector-wrapper {
+  position: relative;
+  margin-left: auto;
+}
+
+.crew-assign-selector-wrapper .crew-avatar-badge {
+  margin: 0;
+  width: var(--badge-size, 18px);
+  height: var(--badge-size, 18px);
+}
+
+.crew-assign-selector-wrapper .crew-avatar-text {
+  font-size: 0.6rem;
+}
+
+.btn-assign-crew-trigger .material-symbols-outlined {
+  font-size: 1rem;
 }
 
 /* Crew Assignment & Avatars in Department Header */

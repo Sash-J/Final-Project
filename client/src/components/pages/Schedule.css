@@ -621,6 +621,33 @@
   font-size: 1rem;
 }
 
+.identity-preview-strip {
+  height: 8px;
+  width: 100%;
+  border-radius: 4px;
+  margin-bottom: 24px;
+  transition: all 0.4s ease;
+}
+
+.task-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.sui-btn-delete {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+}
+
+.sui-btn-delete:hover {
+  background: rgba(239, 68, 68, 0.3);
+  border-color: #f87171;
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
+}
+
 @media (max-width: 900px) {
   .calendar-tasks {
     max-height: 60px;

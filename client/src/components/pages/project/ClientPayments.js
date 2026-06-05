@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useProjects } from "../../../contexts/ProjectContext";
 import { useAuth } from "../../../contexts/AuthContext";
 import Icon from "../../common/Icon";
+import HoverTooltip from "../../common/HoverTooltip";
+import GlassDatePicker from "../../common/GlassDatePicker";
 import "./ClientPayments.css";
 import { formatCurrency, getCurrencySymbol } from "../../../utils/currencyUtils";
 
@@ -20,6 +22,7 @@ const ClientPayments = ({ projectId }) => {
   const [notes, setNotes] = useState("");
   const [recording, setRecording] = useState(false);
   const [msg, setMsg] = useState(null);
+  const dateRef = useRef(null);
 
   const payments = paymentsCache[projectId] || [];
   const project = detailsCache[projectId] || {};
@@ -150,23 +153,25 @@ const ClientPayments = ({ projectId }) => {
             <p className="panel-subtext">Add a client payment to the ledger.</p>
 
             {msg && (
-              <div className={`payment-msg ${msg.type}`}>
-                <Icon
-                  name={msg.type === "success" ? "check_circle" : "error"}
-                  modifiers="sm"
-                />
-                <span>{msg.text}</span>
+              <div className="neo-status-messages" style={{ marginBottom: "20px" }}>
+                <div className={`neo-status ${msg.type} show`}>
+                  <Icon
+                    name={msg.type === "success" ? "check_circle" : "error"}
+                    modifiers="sm"
+                  />
+                  <span>{msg.text}</span>
+                </div>
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="payment-form">
-              <div className="form-group">
-                <label>Amount ({getCurrencySymbol()})</label>
+            <form onSubmit={handleSubmit} className="neo-form">
+              <div className="neo-form-group">
+                <label className="neo-label">Amount ({getCurrencySymbol()})</label>
                 <div className="input-with-icon">
                   <span className="currency-tag">{getCurrencySymbol()}</span>
                   <input
                     type="number"
-                    step="0.01"
+                    className="neo-input"
                     placeholder="0.00"
                     required
                     value={amount}
@@ -175,19 +180,19 @@ const ClientPayments = ({ projectId }) => {
                 </div>
               </div>
 
-              <div className="form-group">
-                <label>Payment Date</label>
-                <input
-                  type="date"
-                  required
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
+              <div className="neo-form-group">
+                <label className="neo-label">Payment Date</label>
+                <GlassDatePicker 
+                  value={date} 
+                  onChange={(val) => setDate(val)} 
+                  required 
                 />
               </div>
 
-              <div className="form-group">
-                <label>Reference / Notes</label>
+              <div className="neo-form-group">
+                <label className="neo-label">Reference / Notes</label>
                 <textarea
+                  className="neo-input"
                   placeholder="e.g. Bank Transfer Ref #12345"
                   rows="3"
                   value={notes}
@@ -197,8 +202,9 @@ const ClientPayments = ({ projectId }) => {
 
               <button
                 type="submit"
-                className="btn-record-payment"
+                className="btn-neo btn-neo-solid"
                 disabled={recording}
+                style={{ width: "100%", marginTop: "10px" }}
               >
                 {recording ? "Recording..." : "Capture Payment"}
               </button>
