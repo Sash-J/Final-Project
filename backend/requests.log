@@ -47992,3 +47992,284 @@ Body: {"logged_in":true,"user":{"profile_image":"data:image/jpeg;base64,/9j/4AAQ
 === Response: 200
 Body: [{"client_ids":"16","client_name":null,"client_usernames":"ums","code_name":"THE PULSE","color":"#00a096","created_at":"Mon, 06 Apr 2026 23:31:04 GMT","crew_ids":null,"crew_usernames":null,"end_date":null,"id":17,"location":"Colombo","project_image":null,"project_name":"Nashe-ke Lover","start_date":null,"status":"completed","version_count":0},{"client_ids":"16","client_name":null,"client_usernames":"ums","code_name":"THE FINAL WALK","color":"#99b3ff","created_at":"Mon, 06 Apr 2026 23:30:23 GMT",
 
+--- Request: GET http://127.0.0.1:5000/api/notifications/unread-count
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiHllQ.v4BNEsu64WZae9xsL6wbJ_gZoAo', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/schedule', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Chromium";v="148", "Brave";v="148", "Not/A)Brand";v="99"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"unread_count":0}
+
+
+--- Request: GET http://127.0.0.1:5000/api/me
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"logged_in":false}
+
+
+--- Request: GET http://127.0.0.1:5000/api/me
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"logged_in":false}
+
+
+--- Request: GET http://127.0.0.1:5000/api/me
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/login', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"logged_in":false}
+
+
+--- Request: GET http://127.0.0.1:5000/api/me
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/login', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"logged_in":false}
+
+
+--- Request: POST http://127.0.0.1:5000/api/login
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/login', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Origin': 'http://127.0.0.1:5000', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Content-Type': 'application/json', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Content-Length': '42', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: {"username":"Admin","password":"admin123"}
+=== Response: 200
+Body: {"message":"Logged in successfully","user":{"profile_image":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wgARCAREAr4DASIAAhEBAxEB/8QAGwAAAwEBAQEBAAAAAAAAAAAAAAECAwQFBgf/xAAZAQEBAQEBAQAAAAAAAAAAAAAAAQIDBAX/2gAMAwEAAhADEAAAAfz4H6POhgAAAAAAAmCGgAUByIErJVUMQARgKAAAAAAAAICx93P07wk0iTUohK8mpZbcsLR24LdHPPSo5M+2M64Y
+
+--- Request: GET http://127.0.0.1:5000/api/notifications/unread-count
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/login', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+--- Request: GET http://127.0.0.1:5000/api/projects
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/admin', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Accept': '*/*', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"unread_count":1}
+
+
+--- Request: GET http://127.0.0.1:5000/api/notifications/unread-count
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/login', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: [{"client_ids":"16","client_name":null,"client_usernames":"ums","code_name":"THE PULSE","color":"#00a096","created_at":"Mon, 06 Apr 2026 23:31:04 GMT","crew_ids":null,"crew_usernames":null,"end_date":null,"id":17,"location":"Colombo","project_image":null,"project_name":"Nashe-ke Lover","start_date":null,"status":"completed","version_count":0},{"client_ids":"16","client_name":null,"client_usernames":"ums","code_name":"THE FINAL WALK","color":"#99b3ff","created_at":"Mon, 06 Apr 2026 23:30:23 GMT",
+
+--- Request: GET http://127.0.0.1:5000/api/projects
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/admin', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Accept': '*/*', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"unread_count":1}
+
+
+--- Request: GET http://127.0.0.1:5000/api/notifications
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/admin', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: [{"created_at":"Fri, 05 Jun 2026 08:11:21 GMT","id":535,"is_read":0,"message":"New user registered: testnew. Awaiting approval.","type":"info","user_id":1},{"created_at":"Wed, 03 Jun 2026 01:28:40 GMT","id":529,"is_read":1,"message":"New user registered: SashenMJayasinghe. Awaiting approval.","type":"info","user_id":1},{"created_at":"Mon, 25 May 2026 23:09:18 GMT","id":424,"is_read":1,"message":"New user registered: rawindu. Awaiting approval.","type":"info","user_id":1},{"created_at":"Wed, 22 A
+
+=== Response: 200
+Body: [{"client_ids":"16","client_name":null,"client_usernames":"ums","code_name":"THE PULSE","color":"#00a096","created_at":"Mon, 06 Apr 2026 23:31:04 GMT","crew_ids":null,"crew_usernames":null,"end_date":null,"id":17,"location":"Colombo","project_image":null,"project_name":"Nashe-ke Lover","start_date":null,"status":"completed","version_count":0},{"client_ids":"16","client_name":null,"client_usernames":"ums","code_name":"THE FINAL WALK","color":"#99b3ff","created_at":"Mon, 06 Apr 2026 23:30:23 GMT",
+
+--- Request: GET http://127.0.0.1:5000/api/admin/users
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/users', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Accept': '*/*', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+--- Request: GET http://127.0.0.1:5000/api/admin/pending-users
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/users', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Accept': '*/*', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: [{"id":1,"is_approved":1,"role":"admin","username":"Admin"},{"id":7,"is_approved":1,"role":"client","username":"Sashen2"},{"id":13,"is_approved":1,"role":"production_crew","username":"sith"},{"id":15,"is_approved":1,"role":"manager","username":"sashen"},{"id":16,"is_approved":1,"role":"client","username":"ums"},{"id":17,"is_approved":1,"role":"client","username":"dilmin"},{"id":21,"is_approved":1,"role":"manager","username":"Niman"},{"id":29,"is_approved":1,"role":"manager","username":"rawindu"}
+
+--- Request: GET http://127.0.0.1:5000/api/admin/users
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/users', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Accept': '*/*', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: [{"id":31,"is_approved":0,"role":"client","username":"testnew"}]
+
+
+--- Request: GET http://127.0.0.1:5000/api/admin/pending-users
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/users', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Accept': '*/*', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: [{"id":1,"is_approved":1,"role":"admin","username":"Admin"},{"id":7,"is_approved":1,"role":"client","username":"Sashen2"},{"id":13,"is_approved":1,"role":"production_crew","username":"sith"},{"id":15,"is_approved":1,"role":"manager","username":"sashen"},{"id":16,"is_approved":1,"role":"client","username":"ums"},{"id":17,"is_approved":1,"role":"client","username":"dilmin"},{"id":21,"is_approved":1,"role":"manager","username":"Niman"},{"id":29,"is_approved":1,"role":"manager","username":"rawindu"}
+
+=== Response: 200
+Body: [{"id":31,"is_approved":0,"role":"client","username":"testnew"}]
+
+
+--- Request: GET http://127.0.0.1:5000/api/notifications/unread-count
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/users', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"unread_count":1}
+
+
+--- Request: GET http://127.0.0.1:5000/api/notifications/unread-count
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/admin', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"unread_count":1}
+
+
+--- Request: GET http://127.0.0.1:5000/api/notifications/unread-count
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/admin', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"unread_count":1}
+
+
+--- Request: GET http://127.0.0.1:5000/api/notifications/unread-count
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/admin', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"unread_count":1}
+
+
+--- Request: GET http://127.0.0.1:5000/api/notifications/unread-count
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/admin', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"unread_count":1}
+
+
+--- Request: GET http://127.0.0.1:5000/api/notifications/unread-count
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/admin', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"unread_count":1}
+
+
+--- Request: GET http://127.0.0.1:5000/api/notifications/unread-count
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/admin', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"unread_count":1}
+
+
+--- Request: GET http://127.0.0.1:5000/api/notifications/unread-count
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/admin', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"unread_count":1}
+
+
+--- Request: GET http://127.0.0.1:5000/api/notifications/unread-count
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/admin', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"unread_count":1}
+
+
+--- Request: GET http://127.0.0.1:5000/api/notifications/unread-count
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/admin', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"unread_count":1}
+
+
+--- Request: GET http://127.0.0.1:5000/api/notifications/unread-count
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/admin', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"unread_count":1}
+
+
+--- Request: GET http://127.0.0.1:5000/api/notifications/unread-count
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/admin', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"unread_count":1}
+
+
+--- Request: GET http://127.0.0.1:5000/api/notifications/unread-count
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/admin', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"unread_count":1}
+
+
+--- Request: GET http://127.0.0.1:5000/api/notifications/unread-count
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/admin', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"unread_count":1}
+
+
+--- Request: GET http://127.0.0.1:5000/api/notifications/unread-count
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/admin', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"unread_count":1}
+
+
+--- Request: GET http://127.0.0.1:5000/api/notifications/unread-count
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/admin', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"unread_count":1}
+
+
+--- Request: GET http://127.0.0.1:5000/api/notifications/unread-count
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/admin', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"unread_count":1}
+
+
+--- Request: GET http://127.0.0.1:5000/api/notifications/unread-count
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/admin', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"unread_count":1}
+
+
+--- Request: GET http://127.0.0.1:5000/api/notifications/unread-count
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/admin', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"unread_count":1}
+
+
+--- Request: GET http://127.0.0.1:5000/api/notifications/unread-count
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/admin', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"unread_count":1}
+
+
+--- Request: GET http://127.0.0.1:5000/api/notifications/unread-count
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/admin', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"unread_count":1}
+
+
+--- Request: GET http://127.0.0.1:5000/api/notifications/unread-count
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/admin', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"unread_count":1}
+
+
+--- Request: GET http://127.0.0.1:5000/api/notifications/unread-count
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/admin', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"unread_count":1}
+
+
+--- Request: GET http://127.0.0.1:5000/api/notifications/unread-count
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/admin', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"unread_count":1}
+
+
+--- Request: GET http://127.0.0.1:5000/api/notifications/unread-count
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/admin', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"unread_count":1}
+
+
+--- Request: GET http://127.0.0.1:5000/api/notifications/unread-count
+Headers: {'X-Forwarded-Host': 'localhost:3000', 'X-Forwarded-Proto': 'http', 'X-Forwarded-Port': '3000', 'X-Forwarded-For': '127.0.0.1', 'Cookie': 'session=.eJyrVirJSM1Njc_NT0lVslJKSSzKVtJRKi1OLYrPTFGyMoSyi_JzQNKJKbmZeVD5vMRckJAjWKgWAHxAGDg.aiMFew.mqeAXhWM3kAAgoTXxtEDN_5pd_U', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Referer': 'http://localhost:3000/admin', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-origin', 'Accept-Language': 'en-US,en;q=0.9', 'Sec-Gpc': '1', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua': '"Brave";v="149", "Chromium";v="149", "Not)A;Brand";v="24"', 'Accept': 'application/json, text/plain, */*', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'Sec-Ch-Ua-Platform': '"Windows"', 'Connection': 'close', 'Host': '127.0.0.1:5000'}
+Body: 
+=== Response: 200
+Body: {"unread_count":1}
+
+
