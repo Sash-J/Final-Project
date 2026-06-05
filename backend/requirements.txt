@@ -4,10 +4,11 @@ flask-bcrypt==1.0.1
 mysql-connector-python==9.1.0
 python-dotenv==1.2.2
 requests==2.32.3
-numpy==2.1.2
+numpy
 xgboost==2.1.2
-scipy==1.14.1
+scipy
 bcrypt==4.2.0
 Werkzeug>=3.1.0
 PyJWT==2.9.0
 joblib==1.4.2
+flask

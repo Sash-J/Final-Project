@@ -271,8 +271,9 @@ const UserManagement = () => {
                               { value: "manager", label: "MANAGER" },
                               {
                                 value: "production_crew",
-                                label: "PRODUCTION CREW",
+                                label: "PRODUCTION CREW"
                               },
+                              { value: "director", label: "DIRECTOR" },
                             ]}
                             value={role}
                             onChange={(val) =>

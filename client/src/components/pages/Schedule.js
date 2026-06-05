@@ -4,7 +4,7 @@ import PageHeader from "../common/PageHeader";
 import "./Schedule.css";
 import ModalPortal from "../common/ModalPortal";
 import Icon from "../common/Icon";
-import html2pdf from "html2pdf.js";
+import html2pdf from "html2pdf.js/dist/html2pdf.bundle.min.js";
 import { API } from "../../config";
 
 // Sri Lankan Public Holidays 2026 (Hardcoded for simplicity)

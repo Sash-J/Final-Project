@@ -7,7 +7,7 @@ import Projects from './Projects';
 import Team from '../ui/Team';
 import Testimonials from '../ui/Testimonials';
 import Footer from './Footer';
-import './Home.css';
+import './home.css';
 
 const Home = () => {
     const { user, loading } = useAuth();
