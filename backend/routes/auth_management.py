@@ -75,7 +75,11 @@ def login():
     password = data.get("password")
 
     user = auth.get_user_by_username(username)
-    if user and user["username"] == username and _bcrypt.check_password_hash(user["password_hash"], password):
+    if (
+        user
+        and user["username"] == username
+        and _bcrypt.check_password_hash(user["password_hash"], password)
+    ):
         if not user.get("is_approved"):
             return (
                 jsonify({"error": "Your account is pending admin approval"}),
@@ -92,7 +96,9 @@ def login():
                         "username": user["username"],
                         "role": user["role"],
                         "theme_mode": user.get("theme_mode", "dark"),
-                        "profile_image": profile.get("profile_image", "") if profile else "",
+                        "profile_image": (
+                            profile.get("profile_image", "") if profile else ""
+                        ),
                     },
                 }
             ),
@@ -111,6 +117,7 @@ def logout():
 @auth_bp.route("/api/me", methods=["GET"])
 def get_me():
     from flask import session
+
     user_data = get_current_user_data()
     if user_data:
         profile = auth.get_user_profile(session.get("user_id"))
@@ -126,42 +133,6 @@ def get_me():
             200,
         )
     return jsonify({"logged_in": False}), 200
-
-
-@auth_bp.route("/api/init-admin", methods=["GET"])
-def init_admin():
-    try:
-        # Check user already exists
-        existing = auth.get_user_by_username("admin")
-        if existing:
-            return jsonify({"message": "Admin already exists"}), 200
-
-        # Safety check for bcrypt
-        if not _bcrypt:
-            return jsonify({"error": "Bcrypt not initialized. Check app.py."}), 500
-
-        # Create admin with empty strings for metadata
-        hashed = _bcrypt.generate_password_hash("admin123").decode("utf-8")
-        auth.create_user(
-            username="admin",
-            password_hash=hashed,
-            role="admin",
-            is_approved=1,
-            full_name="Default Admin",
-            address="",
-            telephone="",
-        )
-        return jsonify({"message": "Admin user created: admin / admin123"}), 201
-    except Exception as e:
-        return (
-            jsonify(
-                {
-                    "error": str(e),
-                    "context": "Error during admin user initialization. Your database might be refusing specific values or the 'users' table is missing columns.",
-                }
-            ),
-            500,
-        )
 
 
 @auth_bp.route("/api/check-connection", methods=["GET"])
@@ -231,6 +202,7 @@ def register():
 @login_required
 def get_profile():
     from core.session_handler import get_current_user_id
+
     user_id = get_current_user_id()
     profile = auth.get_user_profile(user_id)
     if not profile:
@@ -243,6 +215,7 @@ def get_profile():
 def update_profile():
     from flask import session
     from core.session_handler import get_current_user_id
+
     user_id = get_current_user_id()
     data = request.get_json() or {}
 
@@ -256,7 +229,12 @@ def update_profile():
 
     # Validate Username format
     if not re.match(r"^[a-zA-Z0-9_]+$", username):
-        return jsonify({"error": "Username can only contain letters, numbers and underscores."}), 400
+        return (
+            jsonify(
+                {"error": "Username can only contain letters, numbers and underscores."}
+            ),
+            400,
+        )
 
     # Check if username is taken by someone else
     existing = auth.get_user_by_username(username)
@@ -268,12 +246,17 @@ def update_profile():
         if " " in new_password:
             return jsonify({"error": "Password cannot contain spaces"}), 400
         if len(new_password) < 8 or len(new_password) > 20:
-            return jsonify({"error": "Password must be between 8 and 20 characters"}), 400
+            return (
+                jsonify({"error": "Password must be between 8 and 20 characters"}),
+                400,
+            )
         hashed_pass = _bcrypt.generate_password_hash(new_password).decode("utf-8")
 
     try:
         current_profile = auth.get_user_profile(user_id)
-        existing_theme = current_profile.get("theme_mode", "dark") if current_profile else "dark"
+        existing_theme = (
+            current_profile.get("theme_mode", "dark") if current_profile else "dark"
+        )
 
         db_data = {
             "username": username,
@@ -297,6 +280,7 @@ def update_profile():
 def update_theme():
     from flask import session
     from core.session_handler import get_current_user_id
+
     user_id = get_current_user_id()
     data = request.get_json() or {}
     theme_mode = data.get("theme_mode", "dark")
@@ -308,4 +292,3 @@ def update_theme():
         return jsonify({"message": "Theme updated successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-

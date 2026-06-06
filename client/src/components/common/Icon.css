@@ -17,17 +17,20 @@
 }
 
 /*Sizes modifiers*/
+.icon-root.xs {
+  font-size: 0.75rem !important;
+}
 .icon-root.sm {
-  font-size: 0.85rem;
+  font-size: 0.85rem !important;
 }
 .icon-root.md {
-  font-size: 1.25rem;
+  font-size: 1.25rem !important;
 }
 .icon-root.lg {
-  font-size: 2rem;
+  font-size: 2rem !important;
 }
 .icon-root.xl {
-  font-size: 3rem;
+  font-size: 3rem !important;
 }
 
 .icon-root.bold {

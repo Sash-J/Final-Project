@@ -1,0 +1,194 @@
+/* Floating collapsible search widget (Dynamic scroll layout) */
+.bef-search-widget {
+  position: absolute;
+  right: 4px;
+  top: 24px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-family: inherit;
+  height: 0;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.bef-search-trigger-btn {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  max-width: 48px;
+  max-height: 48px;
+  flex-shrink: 0;
+  padding: 0;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(10, 12, 18, 0.05);
+  backdrop-filter: blur(60px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
+  transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+              transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              background 0.3s, border-color 0.3s, box-shadow 0.3s;
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+  visibility: visible;
+}
+
+.bef-search-widget.expanded .bef-search-trigger-btn {
+  opacity: 0;
+  transform: scale(0.8);
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.bef-search-trigger-btn span {
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.bef-search-trigger-btn:hover {
+  background: rgba(0, 198, 230, 0.25);
+  border-color: var(--accent-color);
+  box-shadow: 0 8px 32px 0 rgba(0, 198, 230, 0.3);
+  transform: scale(1.1);
+  animation: pulseSearchGlow 1.5s infinite;
+}
+
+.bef-search-trigger-btn:hover span {
+  transform: rotate(15deg) scale(1.15);
+}
+
+.bef-search-card {
+  width: 320px;
+  padding: 8px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(10, 12, 18, 0.05);
+  backdrop-filter: blur(60px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              visibility 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+  transform: scale(0.9) translate(15px, -15px);
+  pointer-events: none;
+  visibility: hidden;
+  position: absolute;
+  right: 0;
+  top: 0;
+  transform-origin: top right;
+}
+
+.bef-search-widget.expanded .bef-search-card {
+  opacity: 1;
+  transform: scale(1) translate(0, 0);
+  pointer-events: auto;
+  visibility: visible;
+}
+
+.bef-search-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.20);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 6px 10px;
+  transition: border-color 0.2s;
+}
+
+.bef-search-input-wrapper:focus-within {
+  border-color: var(--accent-color);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.search-input-icon {
+  color: #888;
+  font-size: .9rem !important;
+}
+
+.bef-search-input-wrapper input {
+  flex: 1;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  color: #fff !important;
+  font-size: 0.85rem !important;
+  padding: 2px 0 !important;
+}
+
+.bef-search-close-btn {
+  background: transparent;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.bef-search-close-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.bef-search-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+  font-size: 0.8rem;
+  color: #aaa;
+}
+
+.bef-search-matches-count {
+  font-weight: 500;
+}
+
+.bef-search-nav-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.bef-search-nav-buttons button {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.bef-search-nav-buttons button:hover:not(:disabled) {
+  background: rgba(0, 198, 230, 0.2);
+  border-color: var(--accent-color);
+}
+
+.bef-search-nav-buttons button .material-symbols-outlined {
+  font-size: 1.2rem;
+}
+
+.bef-search-nav-buttons button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}

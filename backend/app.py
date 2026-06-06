@@ -32,16 +32,7 @@ CORS(app, supports_credentials=True)
 
 @app.after_request
 def add_cors_headers(response):
-    if request.path.startswith("/api/"):
-        try:
-            log_path = os.path.join(
-                os.path.dirname(os.path.abspath(__file__)), "requests.log"
-            )
-            with open(log_path, "a", encoding="utf-8") as f:
-                f.write(f"=== Response: {response.status_code}\n")
-                f.write(f"Body: {response.get_data(as_text=True)[:500]}\n\n")
-        except Exception as e:
-            pass
+
     origin = request.headers.get("Origin")
     if origin:
         # Authorized origins
