@@ -1,0 +1,227 @@
+.readability-input-proxy {
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  color: #bfbfbf;
+  cursor: text;
+  min-height: 33px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.multiplier-input {
+  width: 40% !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 4px;
+  color: #fff !important;
+  padding: 4px 8px !important;
+  font-size: 0.8rem !important;
+  font-weight: 400 !important;
+  text-align: center !important;
+}
+
+.multiplier-input:focus {
+  border-color: var(--accent-color) !important;
+  outline: none !important;
+}
+
+.item-name-cell-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.item-name-text {
+  flex: 1;
+  font-size: 0.82rem;
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.breakdown-badge {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 198, 230, 0.2),
+    rgba(0, 198, 230, 0.1)
+  );
+  color: var(--accent-color, #00c6e6);
+  font-size: 0.65rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 198, 230, 0.2);
+  cursor: pointer;
+  animation: badgeGlow 2s infinite alternate;
+}
+
+.breakdown-badge:hover {
+  font-weight: 700;
+  filter: brightness(1.2);
+  transform: translateY(-1px);
+}
+
+.add-input-group {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.add-input-group input,
+.add-input-group .readability-input-proxy {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+}
+
+.bef-comment-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.bef-comment-btn:hover {
+  opacity: 0.8;
+}
+
+.bef-comment-btn.has-comment .comment-icon {
+  color: #22c55e;
+  opacity: 1;
+}
+
+.bef-comment-btn:not(.has-comment) .comment-icon {
+  color: #dedede;
+}
+
+/* Comment Hover Preview */
+.bef-comment-preview {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  right: 0;
+  background: rgba(15, 20, 30, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: #fff;
+  font-size: 0.85rem;
+  width: max-content;
+  max-width: 250px;
+  white-space: pre-wrap;
+  text-align: left;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  z-index: 50;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+}
+
+.bef-comment-preview::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: 15px;
+  border-width: 6px;
+  border-style: solid;
+  border-color: rgba(15, 20, 30, 0.95) transparent transparent transparent;
+}
+
+.bef-comment-btn.has-comment:hover .bef-comment-preview {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Hide preview when editor is open */
+.add-input-group:has(.bef-comment-popover) .bef-comment-preview {
+  display: none !important;
+}
+
+.bef-comment-popover {
+  position: fixed;
+  z-index: 10001;
+  background: rgba(10, 12, 18, 0.06);
+  backdrop-filter: blur(25px) saturate(180%);
+  -webkit-backdrop-filter: blur(25px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  padding: 0;
+  width: 240px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow: hidden;
+  transform: translateY(0);
+}
+
+.animated-popover {
+  animation: popoverFadeIn 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.popover-header {
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.popover-header span {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.popover-header i {
+  color: var(--accent-color);
+  font-size: 0.8rem;
+}
+
+.bef-comment-popover textarea {
+  width: 100%;
+  height: 90px;
+  background: transparent;
+  border: none;
+  color: #fff;
+  padding: 12px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  resize: none;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.popover-footer {
+  padding: 8px 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.popover-done-btn {
+  background: var(--accent-color);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.popover-done-btn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
