@@ -19,16 +19,22 @@ const SuiTimeline = ({
   onMilestonesChange,
   onClick,
   scrollProgress = 0,
+  viewMode = "detailed",
 }) => {
-  const { getProjectMilestones, milestonesCache } = useProjects();
+  const { getProjectMilestones, milestonesCache, detailsCache } = useProjects();
   const milestones = milestonesCache[projectId] || [];
+  const project = detailsCache ? (detailsCache[projectId] || {}) : {};
+  const projectColor = project.color || "#00c6e6";
   const [loading, setLoading] = useState(true);
   const [selectedMilestone, setSelectedMilestone] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const containerRef = useRef(null);
+  const hiddenPathRef = useRef(null);
+  const [svgPathPoints, setSvgPathPoints] = useState([]);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
+  const [animProgress, setAnimProgress] = useState(0);
 
   const fetchMilestones = async (force = false) => {
     setLoading(true);
@@ -42,6 +48,49 @@ const SuiTimeline = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId, updateTrigger]);
+
+  useEffect(() => {
+    setAnimProgress(0);
+    let start = null;
+    const duration = 2500;
+    let animationFrameId;
+
+    const animate = (timestamp) => {
+      if (!start) start = timestamp;
+      const elapsed = timestamp - start;
+      const t = Math.min(elapsed / duration, 1.0);
+      
+      const easeOutQuart = 1 - Math.pow(1 - t, 4);
+      setAnimProgress(easeOutQuart);
+
+      if (t < 1.0) {
+        animationFrameId = requestAnimationFrame(animate);
+      }
+    };
+
+    animationFrameId = requestAnimationFrame(animate);
+
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [projectId]);
+
+  useEffect(() => {
+    if (hiddenPathRef.current) {
+      try {
+        const len = hiddenPathRef.current.getTotalLength();
+        if (len > 0) {
+          const points = [];
+          const samples = 400;
+          for (let i = 0; i <= samples; i++) {
+            const pt = hiddenPathRef.current.getPointAtLength((i / samples) * len);
+            points.push({ x: pt.x, y: pt.y });
+          }
+          setSvgPathPoints(points);
+        }
+      } catch (e) {
+        console.error("Failed to extract path length", e);
+      }
+    }
+  }, [dimensions]);
 
   useEffect(() => {
     const updateDims = () => {
@@ -116,6 +165,35 @@ const SuiTimeline = ({
     return dateA - dateB;
   });
 
+  const getCurvePoint = (t) => {
+    if (!svgPathPoints || svgPathPoints.length === 0) {
+      const y = dimensions.height * 0.95 - t * dimensions.height * 0.9;
+      return { x: dimensions.width / 2, y, depthFactor: 1.0, yProgress: t };
+    }
+
+    const maxIdx = svgPathPoints.length - 1;
+    const exactIdx = t * maxIdx;
+    const idx1 = Math.floor(exactIdx);
+    const idx2 = Math.min(maxIdx, idx1 + 1);
+    const fraction = exactIdx - idx1;
+
+    const p1 = svgPathPoints[idx1];
+    const p2 = svgPathPoints[idx2];
+
+    const rawX = p1.x + (p2.x - p1.x) * fraction;
+    const rawY = p1.y + (p2.y - p1.y) * fraction;
+
+    const scaleX = dimensions.width / 841.89;
+    const scaleY = dimensions.height / 595.28;
+
+    const x = rawX * scaleX;
+    const y = rawY * scaleY;
+
+    const depthFactor = 1.0 - Math.pow(t, 0.6) * 0.85; 
+
+    return { x, y, depthFactor, yProgress: t };
+  };
+
   const points = sortedMilestones.map((m, i) => {
     if (preview) {
       const startX = 40;
@@ -131,29 +209,26 @@ const SuiTimeline = ({
       return { x, y, isTop: i % 2 === 0, ...m };
     }
 
-    const y =
-      count === 1
-        ? (startY + endY) / 2
-        : endY - (i / (count - 1)) * (endY - startY);
-
-    const normalizedY = count <= 1 ? 0.5 : (endY - y) / (endY - startY);
-    
-    // Depth perspective mapping: tighter at top (0.15), wider at bottom (1.0)
-    const perspectiveFactor = 0.15 + (normalizedY * 0.85); 
-    const amplitude = count <= 1 ? 0 : dimensions.width * 0.35 * perspectiveFactor;
-    
-    const centerX = dimensions.width / 2;
-    // 1.5 cycles depending on count to make it look winding
-    const x = centerX + Math.sin(normalizedY * Math.PI * Math.min(count, 3)) * amplitude;
-
     // Drop line logic
-    // we want nodes to drop down or slightly left/right. 
-    // Just a clean vertical drop-down line
-    const dropLength = 60 + (i % 3) * 20; // Stagger drops slightly
-    const textY = y + dropLength;
-    const isLeft = x < centerX;
+    const t = count <= 1 ? 0 : i / (count - 1);
+    const curve = getCurvePoint(t);
+    
+    const pt1 = getCurvePoint(Math.max(0, t - 0.01));
+    const pt2 = getCurvePoint(Math.min(1, t + 0.01));
+    let isLeft = pt2.x > pt1.x;
 
-    return { x, y, textY, isLeft, dropLength, ...m };
+    // Bounds checking to prevent clipping
+    const contentWidth = 340; // 320px width + padding
+    if (curve.x < contentWidth) {
+      isLeft = false; // Force right
+    } else if (curve.x > dimensions.width - contentWidth) {
+      isLeft = true; // Force left
+    }
+
+    const dropLength = 60 + (i % 3) * 20; 
+    const textY = curve.y + dropLength;
+
+    return { ...curve, textY, isLeft, dropLength, t, ...m };
   });
 
   const formatDt = (dStr) => {
@@ -168,98 +243,53 @@ const SuiTimeline = ({
   };
 
   const generateMasterPath = () => {
-    if (points.length === 0)
-      return { previewDPath: "", segments: [], gradientStops: [], gradientId: "" };
-
     let previewDPath = "";
-    let segments = [];
+    let combinedPathD = "";
+    let activeClipY = dimensions.height;
     const gradientStops = [];
     const gradientId = preview
       ? `timeline-gradient-hz-${projectId}`
       : `timeline-gradient-vt-${projectId}`;
 
     const getColor = (status) => {
-      if (status === "completed") return "#00c6e6";
+      if (status === "completed") return projectColor;
       if (status === "in_progress") return "#e0f2fe"; // brighter glowing cyan
       return "rgba(0, 198, 230, 0.2)";
     };
 
-    if (preview) {
-      let prevX = 0;
-      let prevY = dimensions.height / 2;
-      previewDPath += `M ${prevX} ${prevY}`;
-
-      points.forEach((p, i) => {
-        const midX = (prevX + p.x) / 2;
-        previewDPath += ` C ${midX} ${prevY}, ${midX} ${p.y}, ${p.x} ${p.y}`;
-        const startPercent = (prevX / dimensions.width) * 100;
-        const endPercent = (p.x / dimensions.width) * 100;
-        const color = getColor(p.status);
-        gradientStops.push(
-          <stop key={`start-${i}`} offset={`${startPercent}%`} stopColor={color} />
-        );
-        gradientStops.push(
-          <stop key={`end-${i}`} offset={`${endPercent}%`} stopColor={color} />
-        );
-        prevX = p.x;
-        prevY = p.y;
-      });
-      previewDPath += ` L ${dimensions.width} ${prevY}`;
-    } else {
-      let prevX = dimensions.width * 0.5;
-      let prevY = dimensions.height;
-
-      points.forEach((p, i) => {
-        const midY = (prevY + p.y) / 2;
-        const d = `M ${prevX} ${prevY} C ${prevX} ${midY}, ${p.x} ${midY}, ${p.x} ${p.y}`;
-        
-        // Depth logic for stroke width and opacity
-        const avgY = (prevY + p.y) / 2;
-        // normY goes from 0 at top to 1 at bottom
-        const normY = Math.max(0, Math.min(1, avgY / dimensions.height));
-        const strokeW = 1 + (normY * 5); // 1px at top, 6px at bottom
-        const opacity = 0.15 + (normY * 0.85); // Faded at top
-
-        const isGlow = p.status === "completed" || p.status === "in_progress";
-        
-        segments.push({
-          id: `seg-${i}`,
-          d,
-          strokeW,
-          opacity,
-          isGlow
-        });
-
-        const startPercent = 100 - (prevY / dimensions.height) * 100;
-        const endPercent = 100 - (p.y / dimensions.height) * 100;
-        const color = getColor(p.status);
-        gradientStops.push(
-          <stop key={`start-${i}`} offset={`${startPercent}%`} stopColor={color} />
-        );
-        gradientStops.push(
-          <stop key={`end-${i}`} offset={`${endPercent}%`} stopColor={color} />
-        );
-        prevX = p.x;
-        prevY = p.y;
-      });
-
-      const futureExtend = -150;
-      // Gently curve the tail upwards to the center, or just extend straight if at center
-      const tailD = count <= 1 
-        ? `M ${prevX} ${prevY} L ${prevX} ${futureExtend}`
-        : `M ${prevX} ${prevY} C ${prevX} ${prevY - 100}, ${dimensions.width * 0.5} ${prevY - 100}, ${dimensions.width * 0.5} ${futureExtend}`;
-      segments.push({
-        id: `seg-tail`,
-        d: tailD,
-        strokeW: 1,
-        opacity: 0.15,
-        isGlow: false
-      });
+    if (points.length === 0) {
+      return { previewDPath, combinedPathD, gradientStops, gradientId, activeClipY };
     }
-    return { previewDPath, segments, gradientStops, gradientId };
+
+    if (preview) {
+      const p0 = points[0];
+      const pLast = points[points.length - 1];
+      const c1x = p0.x + (pLast.x - p0.x) * 0.3;
+      const c1y = p0.y - 40;
+      const c2x = p0.x + (pLast.x - p0.x) * 0.7;
+      const c2y = pLast.y + 40;
+      previewDPath = `M ${p0.x} ${p0.y} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${pLast.x} ${pLast.y}`;
+      gradientStops.push(<stop key="s" offset="0%" stopColor={projectColor} stopOpacity="0.8" />);
+      gradientStops.push(<stop key="e" offset="100%" stopColor="#60a5fa" stopOpacity="0.8" />);
+    } else {
+      const activeTList = points.filter(p => p.status === 'completed' || p.status === 'in_progress').map(p => p.t);
+      const activeT = activeTList.length > 0 ? Math.max(...activeTList) : -1;
+      
+      if (activeT >= 0) {
+        const pt = getCurvePoint(activeT);
+        activeClipY = pt.y;
+      }
+
+      combinedPathD = "M205.27,494.02c81.79-18.18,305.44-71.84,352.04-136.57c5.26-7.59,8.28-17.02,5.61-26.05c-6.07-18.38-22.58-31.13-38.83-40.6c-52.07-28.43-111.88-36.68-168.31-52.96c-25.59-7.78-76.46-21.62-40.79-53.9c10.63-10.36,23.09-18.81,36-26.03c30.39-16.52,63.78-26.85,97.42-34.29c19.26-4.17,38.74-7.48,58.36-9.44c-19.59,2.12-39.03,5.59-58.25,9.93c-33.51,7.72-66.7,18.28-96.86,35c-12.71,7.27-25.04,15.76-35.44,26.08c-7.24,6.81-16.33,17.71-8.68,27.41c9.74,12.14,34.11,18.41,48.93,22.84c56.81,15.84,117.02,23.68,169.61,51.88c19.52,10.72,47.55,33.51,41.57,58.61c-10.27,41.46-95.94,74.77-133.31,89.51c-74.03,27.85-150.34,48.74-227.37,66.41C206.94,501.85,205.27,494.02,205.27,494.02L205.27,494.02z";
+
+      gradientStops.push(<stop key="start" offset="0%" stopColor={getColor("pending")} />);
+      gradientStops.push(<stop key="mid" offset="50%" stopColor={getColor("in_progress")} />);
+      gradientStops.push(<stop key="end" offset="100%" stopColor={getColor("completed")} />);
+    }
+    return { previewDPath, combinedPathD, gradientStops, gradientId, activeClipY };
   };
 
-  const { previewDPath, segments, gradientStops, gradientId } = generateMasterPath();
+  const { previewDPath, combinedPathD, gradientStops, gradientId, activeClipY } = generateMasterPath();
 
   if (loading) {
     return (
@@ -312,7 +342,7 @@ const SuiTimeline = ({
       >
         <defs>
           <filter id="glow-effect" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="2" result="blur" />
+            <feGaussianBlur stdDeviation="3" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="blur" />
@@ -325,14 +355,29 @@ const SuiTimeline = ({
               id={gradientId}
               gradientUnits="userSpaceOnUse"
               x1="0"
-              y1={preview ? "0" : dimensions.height}
+              y1={preview ? "0" : "595.28"}
               x2={preview ? dimensions.width : "0"}
               y2={preview ? "0" : "0"}
             >
               {gradientStops}
             </linearGradient>
           )}
+
+          <clipPath id={`active-clip-${projectId}`}>
+            <rect 
+              x="-500" 
+              y={dimensions.height - (dimensions.height - (activeClipY - 50)) * animProgress} 
+              width={dimensions.width + 1000} 
+              height={(dimensions.height - activeClipY + 100) * animProgress} 
+            />
+          </clipPath>
         </defs>
+
+        <path
+          ref={hiddenPathRef}
+          d="M205.27,494.02c81.79-18.18,305.44-71.84,352.04-136.57c5.26-7.59,8.28-17.02,5.61-26.05c-6.07-18.38-22.58-31.13-38.83-40.6c-52.07-28.43-111.88-36.68-168.31-52.96c-25.59-7.78-76.46-21.62-40.79-53.9c10.63-10.36,23.09-18.81,36-26.03c30.39-16.52,63.78-26.85,97.42-34.29c19.26-4.17,38.74-7.48,58.36-9.44"
+          style={{ opacity: 0, pointerEvents: "none" }}
+        />
 
         <g className="sui-svg-content">
           {preview ? (
@@ -345,29 +390,27 @@ const SuiTimeline = ({
             />
           ) : (
             <>
-              {segments.map((seg) => (
-                <g key={seg.id}>
-                  {seg.isGlow && (
-                    <path
-                      d={seg.d}
-                      fill="none"
-                      stroke={`url(#${gradientId})`}
-                      strokeWidth={seg.strokeW + 2}
-                      filter="url(#glow-effect)"
-                      opacity={seg.opacity}
+              <g transform={`scale(${dimensions.width / 841.89}, ${dimensions.height / 595.28})`}>
+                <path 
+                  d={combinedPathD} 
+                  fill={`url(#${gradientId})`} 
+                  opacity={0.15} 
+                  className="sui-path-base"
+                />
+              </g>
+              
+              {activeClipY < dimensions.height && (
+                <g clipPath={`url(#active-clip-${projectId})`}>
+                  <g transform={`scale(${dimensions.width / 841.89}, ${dimensions.height / 595.28})`}>
+                    <path 
+                      d={combinedPathD} 
+                      fill={projectColor} 
+                      filter="url(#glow-effect)" 
                       className="sui-path-glow"
                     />
-                  )}
-                  <path
-                    d={seg.d}
-                    fill="none"
-                    stroke={`url(#${gradientId})`}
-                    strokeWidth={seg.strokeW}
-                    opacity={seg.opacity}
-                    className="sui-path-base"
-                  />
+                  </g>
                 </g>
-              ))}
+              )}
             </>
           )}
           
@@ -378,7 +421,7 @@ const SuiTimeline = ({
               y1={p.y}
               x2={p.x}
               y2={p.textY}
-              stroke={p.status === "completed" ? "#00c6e6" : p.status === "in_progress" ? "#e0f2fe" : "rgba(0, 198, 230, 0.2)"}
+              stroke={p.status === "completed" ? projectColor : p.status === "in_progress" ? "#e0f2fe" : "rgba(0, 198, 230, 0.2)"}
               strokeWidth="1"
               className="sui-drop-line"
             />
@@ -400,7 +443,7 @@ const SuiTimeline = ({
                 position: 'absolute',
                 "--dot-shadow":
                   p.status === "completed"
-                    ? "#00c6e6"
+                    ? projectColor
                     : p.status === "in_progress"
                       ? "#e0f2fe"
                       : "#fff",
@@ -410,7 +453,7 @@ const SuiTimeline = ({
               {preview && <div className="sui-exact-dot"></div>}
               
               <div
-                className={`sui-exact-content align-drop`}
+                className={`sui-exact-content align-drop ${!preview ? 'sui-milestone-box' : ''}`}
                 style={
                   preview
                     ? {
@@ -435,7 +478,7 @@ const SuiTimeline = ({
                     {p.is_visiondivision === 1 ? "VisionDivision" : "Client"}
                   </span>
                 </div>
-                {!preview && (
+                {!preview && viewMode === "detailed" && (
                   <>
                     <div className="sui-desc">{p.description}</div>
                     {p.client_note &&

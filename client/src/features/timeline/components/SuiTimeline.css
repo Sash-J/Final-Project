@@ -57,7 +57,6 @@
 }
 
 .sui-path-base {
-  fill: none;
   stroke: rgba(255, 255, 255, 0.12);
   stroke-width: 3px;
   stroke-linecap: round;
@@ -227,11 +226,11 @@
 }
 
 .sui-status-completed .sui-exact-dot {
-  background: #00c6e6;
+  background: var(--dot-shadow);
 }
 
 .sui-status-in_progress .sui-exact-dot {
-  background: #60a5fa;
+  background: var(--dot-shadow);
 }
 
 .sui-note {
@@ -706,4 +705,87 @@
 
 .milestone-sidebar-submit {
   width: 100%;
+}
+
+.sui-milestone-box {
+  background: rgba(15, 20, 30, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.sui-absolute-item:hover .sui-milestone-box {
+  background: rgba(20, 25, 40, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Timeline Settings Menu */
+.sui-timeline-settings {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.sui-settings-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+}
+
+.sui-settings-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
+}
+
+.sui-settings-menu {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  background: rgba(15, 20, 30, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  min-width: 150px;
+}
+
+.sui-menu-item {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 10px 16px;
+  text-align: left;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sui-menu-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.sui-menu-item.active {
+  background: rgba(0, 198, 230, 0.15);
+  color: #00c6e6;
+  font-weight: 500;
 }

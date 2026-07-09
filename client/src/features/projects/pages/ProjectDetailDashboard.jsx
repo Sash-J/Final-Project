@@ -82,6 +82,8 @@ const ProjectDetailDashboard = () => {
   const [showFinanceModal, setShowFinanceModal] = useState(false);
   const [showProductionModal, setShowProductionModal] = useState(false);
   const [timelineTrigger, setTimelineTrigger] = useState(0);
+  const [timelineViewMode, setTimelineViewMode] = useState("detailed");
+  const [showTimelineSettings, setShowTimelineSettings] = useState(false);
 
   const project = detailsCache[projectId];
 
@@ -309,13 +311,13 @@ const ProjectDetailDashboard = () => {
             <ModalPortal 
               onClose={() => setShowTimelineModal(false)}
               size="large"
-              className="profile-modal-glass"
+              className="profile-modal-glass timeline-glass-override"
             >
               <div className="timeline-modal-container">
                 <div className="modal-header-section">
                   <h2>Project Timeline</h2>
                   <p>Manage and track project milestones</p>
-                  <div style={{ marginTop: '15px' }}>
+                  <div style={{ marginTop: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <button
                       className="sui-btn sui-btn-save milestone-add-toggle-btn"
                       onClick={() => setShowAddMilestone(true)}
@@ -323,6 +325,31 @@ const ProjectDetailDashboard = () => {
                       <Icon name="add" modifiers="sm" />
                       <span>Add Milestone</span>
                     </button>
+                    
+                    <div className="sui-timeline-settings" style={{ position: 'relative', top: 'auto', right: 'auto' }}>
+                      <button 
+                        className="sui-settings-btn"
+                        onClick={() => setShowTimelineSettings(!showTimelineSettings)}
+                      >
+                        <Icon name="more_vert" modifiers="md" />
+                      </button>
+                      {showTimelineSettings && (
+                        <div className="sui-settings-menu">
+                          <button 
+                            className={`sui-menu-item ${timelineViewMode === "detailed" ? "active" : ""}`}
+                            onClick={() => { setTimelineViewMode("detailed"); setShowTimelineSettings(false); }}
+                          >
+                            Detailed View
+                          </button>
+                          <button 
+                            className={`sui-menu-item ${timelineViewMode === "simple" ? "active" : ""}`}
+                            onClick={() => { setTimelineViewMode("simple"); setShowTimelineSettings(false); }}
+                          >
+                            Simple View
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
                 
@@ -348,6 +375,7 @@ const ProjectDetailDashboard = () => {
                     projectId={projectId}
                     userRole="admin"
                     updateTrigger={timelineTrigger}
+                    viewMode={timelineViewMode}
                   />
                 </div>
               </div>

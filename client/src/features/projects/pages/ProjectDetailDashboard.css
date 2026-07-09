@@ -295,12 +295,20 @@
 }
 
 
+.timeline-glass-override {
+  max-width: 1200px !important;
+  height: 90vh !important;
+}
+
 .timeline-modal-container {
-  padding: 20px 30px;
-  width: 100%;
-  height: 80vh;
+  width: calc(100% + 40px);
+  box-sizing: border-box;
+  margin: 0 -20px;
+  padding: 0 20px;
   display: flex;
   flex-direction: column;
+  height: 100%;
+  overflow: hidden;
 }
 
 .timeline-modal-container .project-timeline-embedded-wrap {
