@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import HoverTooltip from "../../../components/common/HoverTooltip";
 import Icon from "../../../components/common/Icon";
+import ScrambleText from "../../../components/common/ScrambleText";
 import "./ProjectCard.css";
 
 const ProjectCard = ({
@@ -68,7 +69,7 @@ const ProjectCard = ({
           <div className="project-card-main-info">
             <div className="project-card-header">
               <h3 className="project-card-title">
-                {project.project_name}
+                <ScrambleText text={project.project_name} as="span" />
                 {!isCompleted && (
                   <HoverTooltip text="Verified project" icon="verified">
                     <Icon
