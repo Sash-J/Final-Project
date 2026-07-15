@@ -9,11 +9,13 @@ import ModalPortal from "../../../components/common/ModalPortal";
 import ProjectDashboardFinance from "../components/ProjectDashboardFinance";
 import ProjectDashboardProduction from "../components/ProjectDashboardProduction";
 import "./ProjectDetailDashboard.css";
+import ScrambleText from "../../../components/common/ScrambleText";
 import ProjectForm from "../components/ProjectForm";
 import AddMilestonePanel from "../../timeline/components/AddMilestonePanel";
 import SuiTimeline from "../../timeline/components/SuiTimeline";
+import HoverTooltip from "../../../components/common/HoverTooltip";
 
-const ProjectDetailSkeleton = () => (
+const ProjectDetailSkeleton = ({ projectId }) => (
   <div className="project-detail-root">
     <div className="project-detail-header-wrap">
       <div className="pd-top-row">
@@ -44,14 +46,16 @@ const ProjectDetailSkeleton = () => (
     </div>
 
     <div className="dashboard-content-grid">
-      <div className="dashboard-nav-card glass-card">
-        <nav className="dashboard-sidebar-nav">
-          <div className="skeleton-base" style={{ width: "100%", height: "45px", borderRadius: "12px" }}></div>
-        </nav>
-      </div>
-
       <div className="bento-layout">
-        <div className="bento-item lg-rect glass-card skeleton-base"></div>
+        <div className="bento-item lg-rect glass-card no-padding overflow-hidden">
+          {projectId ? (
+            <div className="project-timeline-preview">
+              <SuiTimeline projectId={projectId} userRole="admin" preview={true} />
+            </div>
+          ) : (
+            <div className="skeleton-base" style={{ width: "100%", height: "100%" }}></div>
+          )}
+        </div>
         <div className="bento-item sm-square glass-card skeleton-base"></div>
         <div className="bento-item sm-square glass-card skeleton-base"></div>
       </div>
@@ -82,6 +86,8 @@ const ProjectDetailDashboard = () => {
   const [showFinanceModal, setShowFinanceModal] = useState(false);
   const [showProductionModal, setShowProductionModal] = useState(false);
   const [timelineTrigger, setTimelineTrigger] = useState(0);
+  const [timelineViewMode, setTimelineViewMode] = useState("detailed");
+  const [showTimelineSettings, setShowTimelineSettings] = useState(false);
 
   const project = detailsCache[projectId];
 
@@ -132,7 +138,7 @@ const ProjectDetailDashboard = () => {
 
 
 
-  if (detailsLoading && !project) return <ProjectDetailSkeleton />;
+  if (detailsLoading && !project) return <ProjectDetailSkeleton projectId={projectId} />;
   if (!project) return null;
 
   return (
@@ -171,7 +177,7 @@ const ProjectDetailDashboard = () => {
                 {project.code_name}
               </span>
               <div className="project-name-group">
-                <h1>{project.project_name}</h1>
+                <ScrambleText as="h1" text={project.project_name} />
                 <button
                   className="project-hero-btn edit"
                   onClick={() => setShowEditModal(true)}
@@ -224,17 +230,6 @@ const ProjectDetailDashboard = () => {
       </div>
 
       <div className="dashboard-content-grid">
-        <div className="dashboard-nav-card glass-card">
-          <nav className="dashboard-sidebar-nav fade-in">
-            <button
-              className={activeTab === "overview" ? "active" : ""}
-              onClick={() => setActiveTab("overview")}
-            >
-              <Icon name="dashboard" modifiers="md" />
-              <span>Overview</span>
-            </button>
-          </nav>
-        </div>
 
         <>
           {activeTab === "overview" && (
@@ -309,20 +304,43 @@ const ProjectDetailDashboard = () => {
             <ModalPortal 
               onClose={() => setShowTimelineModal(false)}
               size="large"
-              className="profile-modal-glass"
+              className="profile-modal-glass timeline-glass-override"
             >
               <div className="timeline-modal-container">
                 <div className="modal-header-section">
-                  <h2>Project Timeline</h2>
-                  <p>Manage and track project milestones</p>
-                  <div style={{ marginTop: '15px' }}>
-                    <button
-                      className="sui-btn sui-btn-save milestone-add-toggle-btn"
-                      onClick={() => setShowAddMilestone(true)}
-                    >
-                      <Icon name="add" modifiers="sm" />
-                      <span>Add Milestone</span>
-                    </button>
+                  <div className="timeline-header-top-row">
+                    <div className="timeline-header-title-group">
+                      <div>
+                        <h2>Project Timeline</h2>
+                        <p>Manage and track project milestones</p>
+                      </div>
+                      <button
+                        className="btn-neo btn-neo-solid"
+                        onClick={() => setShowAddMilestone(true)}
+                      >
+                        <Icon name="add" modifiers="sm" />
+                        <span>Add Milestone</span>
+                      </button>
+                    </div>
+                    
+                    <div className="sui-view-toggle">
+                      <HoverTooltip text="Detailed View">
+                        <button 
+                          className={`sui-view-toggle-btn ${timelineViewMode === "detailed" ? "active" : ""}`}
+                          onClick={() => setTimelineViewMode("detailed")}
+                        >
+                          <Icon name="view_comfy" modifiers="sm" />
+                        </button>
+                      </HoverTooltip>
+                      <HoverTooltip text="Simple View">
+                        <button 
+                          className={`sui-view-toggle-btn ${timelineViewMode === "simple" ? "active" : ""}`}
+                          onClick={() => setTimelineViewMode("simple")}
+                        >
+                          <Icon name="view_cozy" modifiers="sm" />
+                        </button>
+                      </HoverTooltip>
+                    </div>
                   </div>
                 </div>
                 
@@ -348,6 +366,7 @@ const ProjectDetailDashboard = () => {
                     projectId={projectId}
                     userRole="admin"
                     updateTrigger={timelineTrigger}
+                    viewMode={timelineViewMode}
                   />
                 </div>
               </div>
