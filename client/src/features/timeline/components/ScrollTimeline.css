@@ -256,6 +256,28 @@
   font-size: 3rem;
 }
 
+.premium-glass-card.simple-view {
+  display: flex;
+  align-items: center;
+}
+
+.premium-glass-card.simple-view .premium-glass-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  width: 100%;
+  padding-right: 65px;
+}
+
+.premium-glass-card.simple-view .premium-title {
+  margin-top: 6px;
+}
+
+.premium-glass-card.simple-view .premium-badge {
+  margin-top: 4px;
+}
+
 /* Pill Badge */
 .premium-badge {
   display: inline-flex;
@@ -546,7 +568,8 @@
 }
 
 .scroll-timeline-container.light-theme .premium-card-number {
-  color: rgba(0, 0, 0, 0.3);
+  color: #000052;
+  opacity: 0.6;
   text-shadow: none;
 }
 
@@ -574,4 +597,30 @@
 .scroll-timeline-container.light-theme .premium-badge {
   background: rgba(0, 0, 0, 0.08);
   color: #1a1a1a;
+}
+
+/* Status Indicator Dot */
+.timeline-status-indicator {
+  width: 10px;
+  height: 10px;
+  min-width: 10px;
+  border-radius: 50%;
+  margin-left: 12px;
+  background-color: #9ca3af;
+  box-shadow: none;
+}
+
+.timeline-status-indicator.pending {
+  background-color: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+}
+
+.timeline-status-indicator.in-progress {
+  background-color: #eab308;
+  box-shadow: 0 0 8px rgba(234, 179, 8, 0.6);
+}
+
+.timeline-status-indicator.completed {
+  background-color: #22c55e;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
 }

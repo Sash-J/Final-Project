@@ -140,12 +140,7 @@ const SuiTimeline = ({
             : "Client",
       description: activeViewMode === "simple" ? "" : m.description || "",
       note: activeViewMode === "simple" ? "" : m.client_note || "",
-      color:
-        m.status === "completed"
-          ? projectColor
-          : m.status === "in_progress"
-            ? "#00c6e6"
-            : "rgba(255,255,255,0.5)",
+      color: "",
       originalMilestone: m,
     };
   });

@@ -12,11 +12,18 @@ const CardContent = ({ className, children }) => (
   <div className={cn("p-6 pt-0", className)}>{children}</div>
 );
 
-const PulsingDot = ({ preview, activeIndex, dotPercentages, svgPath, scrollYProgress, scrollData }) => {
+const PulsingDot = ({
+  preview,
+  activeIndex,
+  dotPercentages,
+  svgPath,
+  scrollYProgress,
+  scrollData,
+}) => {
   const rawPathProgress = useTransform(
     scrollYProgress,
     scrollData.input.length > 1 ? scrollData.input : [0, 1],
-    scrollData.output.length > 1 ? scrollData.output : [1, 0]
+    scrollData.output.length > 1 ? scrollData.output : [1, 0],
   );
 
   const smoothPathProgress = useSpring(rawPathProgress, {
@@ -25,7 +32,10 @@ const PulsingDot = ({ preview, activeIndex, dotPercentages, svgPath, scrollYProg
     restDelta: 0.001,
   });
 
-  const pathProgressPercent = useTransform(smoothPathProgress, (v) => `${v * 100}%`);
+  const pathProgressPercent = useTransform(
+    smoothPathProgress,
+    (v) => `${v * 100}%`,
+  );
 
   return (
     <motion.div
@@ -44,12 +54,15 @@ const PulsingDot = ({ preview, activeIndex, dotPercentages, svgPath, scrollYProg
             }
           : undefined
       }
-      transition={preview ? { type: "spring", stiffness: 100, damping: 20 } : undefined}
+      transition={
+        preview ? { type: "spring", stiffness: 100, damping: 20 } : undefined
+      }
     >
       <div className="w-5 h-5 rounded-full timeline-progress-dot" />
     </motion.div>
   );
 };
+
 
 
 export const ScrollTimeline = ({
@@ -116,7 +129,6 @@ export const ScrollTimeline = ({
     }
   }, [events, hasScrolled, preview]);
 
-
   const [activeScrollContainer, setActiveScrollContainer] = useState(undefined);
 
   useEffect(() => {
@@ -124,7 +136,11 @@ export const ScrollTimeline = ({
       let parent = scrollRef.current.parentElement;
       while (parent && parent !== document.body) {
         const style = window.getComputedStyle(parent);
-        if (style.overflowY === 'auto' || style.overflowY === 'scroll' || style.overflow === 'auto') {
+        if (
+          style.overflowY === "auto" ||
+          style.overflowY === "scroll" ||
+          style.overflow === "auto"
+        ) {
           setActiveScrollContainer({ current: parent });
           return;
         }
@@ -156,7 +172,10 @@ export const ScrollTimeline = ({
   const pathRef = useRef(null);
   const [dotCoords, setDotCoords] = useState([]);
   const [dotPercentages, setDotPercentages] = useState([]);
-  const [scrollData, setScrollData] = useState({ input: [0, 1], output: [1, 0] });
+  const [scrollData, setScrollData] = useState({
+    input: [0, 1],
+    output: [1, 0],
+  });
 
   useEffect(() => {
     const updateHeights = () => {
@@ -308,10 +327,16 @@ export const ScrollTimeline = ({
           const containerHeight = activeScrollContainer?.current
             ? activeScrollContainer.current.clientHeight
             : window.innerHeight;
-            
+
           const maxScroll = activeScrollContainer?.current
-            ? Math.max(1, activeScrollContainer.current.scrollHeight - containerHeight)
-            : Math.max(1, (scrollRef.current?.offsetHeight || 1) - containerHeight);
+            ? Math.max(
+                1,
+                activeScrollContainer.current.scrollHeight - containerHeight,
+              )
+            : Math.max(
+                1,
+                (scrollRef.current?.offsetHeight || 1) - containerHeight,
+              );
 
           let input = [];
           let output = [];
@@ -319,7 +344,7 @@ export const ScrollTimeline = ({
           dotCoords.forEach((d, i) => {
             let v_i = (d.y - containerHeight / 2) / maxScroll;
             v_i = Math.max(0, Math.min(1, v_i));
-            
+
             if (input.length === 0 || v_i > input[input.length - 1] + 0.001) {
               input.push(v_i);
               output.push(percentages[i]);
@@ -363,7 +388,10 @@ export const ScrollTimeline = ({
         dotPathPercent = 1 - v; // fallback linear
       } else {
         // Clamp v to input range
-        const clampedV = Math.max(input[0], Math.min(input[input.length - 1], v));
+        const clampedV = Math.max(
+          input[0],
+          Math.min(input[input.length - 1], v),
+        );
         // Find segment
         let segIdx = 0;
         for (let i = 0; i < input.length - 1; i++) {
@@ -372,8 +400,10 @@ export const ScrollTimeline = ({
             break;
           }
         }
-        const t = (clampedV - input[segIdx]) / (input[segIdx + 1] - input[segIdx] || 1);
-        dotPathPercent = output[segIdx] + t * (output[segIdx + 1] - output[segIdx]);
+        const t =
+          (clampedV - input[segIdx]) / (input[segIdx + 1] - input[segIdx] || 1);
+        dotPathPercent =
+          output[segIdx] + t * (output[segIdx + 1] - output[segIdx]);
       }
 
       // dotPercentages: each milestone's position along the path (0 = bottom, 1 = top).
@@ -396,7 +426,15 @@ export const ScrollTimeline = ({
     // Subscribe to future changes
     const unsubscribe = scrollYProgress.onChange(evaluateActiveIndex);
     return () => unsubscribe();
-  }, [scrollYProgress, events, preview, dotCoords, dotPercentages, scrollData, hasScrolled]);
+  }, [
+    scrollYProgress,
+    events,
+    preview,
+    dotCoords,
+    dotPercentages,
+    scrollData,
+    hasScrolled,
+  ]);
 
   const getCardVariants = (index) => {
     const baseDelay =
@@ -513,7 +551,9 @@ export const ScrollTimeline = ({
                     ref={pathRef}
                     animate={{ d: svgPath }}
                     transition={{ type: "spring", stiffness: 100, damping: 20 }}
-                    stroke={darkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"}
+                    stroke={
+                      darkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"
+                    }
                     strokeWidth="4"
                     fill="none"
                   />
@@ -549,7 +589,7 @@ export const ScrollTimeline = ({
                   </defs>
                 </svg>
                 <PulsingDot
-                  key={`${viewMode}-${scrollData.input.join(',')}`}
+                  key={`${viewMode}-${scrollData.input.join(",")}`}
                   preview={preview}
                   activeIndex={activeIndex}
                   dotPercentages={dotPercentages}
@@ -600,7 +640,9 @@ export const ScrollTimeline = ({
                         <div
                           className={cn(
                             "timeline-dot",
-                            index >= activeIndex && activeIndex >= 0 ? "active" : "inactive",
+                            index >= activeIndex && activeIndex >= 0
+                              ? "active"
+                              : "inactive",
                           )}
                         />
                       </div>
@@ -651,20 +693,31 @@ export const ScrollTimeline = ({
                       </div>
                       <CardContent className="premium-glass-content">
                         {dateFormat === "badge" ? (
-                          <div className="premium-badge">
-                            {event.icon || (
-                              <Calendar className="h-4 w-4 mr-2 text-primary" />
+                          <div className="flex items-center" style={{ marginBottom: "8px" }}>
+                            <div className="premium-badge" style={{ marginBottom: 0 }}>
+                              {event.icon || (
+                                <Calendar className="h-4 w-4 mr-2 text-primary" />
+                              )}
+                              <span
+                                className={event.color}
+                                style={
+                                  event.color && event.color.startsWith("#")
+                                    ? { color: event.color }
+                                    : {}
+                                }
+                              >
+                                {event.year}
+                              </span>
+                            </div>
+                            {event.originalMilestone?.status && (
+                              <div
+                                className={cn(
+                                  "timeline-status-indicator",
+                                  event.originalMilestone.status.toLowerCase().replace(/_/g, '-').replace(/\s+/g, '-')
+                                )}
+                                title={event.originalMilestone.status}
+                              />
                             )}
-                            <span
-                              className={event.color}
-                              style={
-                                event.color && event.color.startsWith("#")
-                                  ? { color: event.color }
-                                  : {}
-                              }
-                            >
-                              {event.year}
-                            </span>
                           </div>
                         ) : null}
                         <h3 className="premium-title">{event.title}</h3>

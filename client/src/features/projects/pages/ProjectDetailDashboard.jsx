@@ -19,27 +19,68 @@ const ProjectDetailSkeleton = ({ projectId }) => (
   <div className="project-detail-root">
     <div className="project-detail-header-wrap">
       <div className="pd-top-row">
-        <div className="skeleton-base" style={{ width: "80px", height: "30px" }}></div>
-        <div className="skeleton-base" style={{ width: "40px", height: "40px", borderRadius: "12px" }}></div>
+        <div
+          className="skeleton-base"
+          style={{ width: "80px", height: "30px" }}
+        ></div>
+        <div
+          className="skeleton-base"
+          style={{ width: "40px", height: "40px", borderRadius: "12px" }}
+        ></div>
       </div>
       <div className="project-main-info">
-        <div className="project-hero-area" style={{ borderLeft: "8px solid rgba(255,255,255,0.1)" }}>
+        <div
+          className="project-hero-area"
+          style={{ borderLeft: "8px solid rgba(255,255,255,0.1)" }}
+        >
           <div className="project-title-stack" style={{ width: "100%" }}>
-            <div className="skeleton-base" style={{ width: "120px", height: "14px", opacity: 0.5, marginBottom: "5px" }}></div>
+            <div
+              className="skeleton-base"
+              style={{
+                width: "120px",
+                height: "14px",
+                opacity: 0.5,
+                marginBottom: "5px",
+              }}
+            ></div>
             <div className="project-name-group">
-              <div className="skeleton-base" style={{ width: "400px", height: "48px" }}></div>
+              <div
+                className="skeleton-base"
+                style={{ width: "400px", height: "48px" }}
+              ></div>
             </div>
             <div className="project-metadata-row" style={{ marginTop: "15px" }}>
-              <div className="skeleton-base" style={{ width: "150px", height: "18px" }}></div>
-              <div className="skeleton-base" style={{ width: "180px", height: "18px" }}></div>
-              <div className="skeleton-base" style={{ width: "180px", height: "18px" }}></div>
+              <div
+                className="skeleton-base"
+                style={{ width: "150px", height: "18px" }}
+              ></div>
+              <div
+                className="skeleton-base"
+                style={{ width: "180px", height: "18px" }}
+              ></div>
+              <div
+                className="skeleton-base"
+                style={{ width: "180px", height: "18px" }}
+              ></div>
             </div>
           </div>
           <div className="project-hero-stats" style={{ gap: "40px" }}>
-            <div className="skeleton-base" style={{ width: "100px", height: "55px", borderRadius: "8px" }}></div>
-            <div className="skeleton-base" style={{ width: "100px", height: "55px", borderRadius: "8px" }}></div>
-            <div className="skeleton-base" style={{ width: "120px", height: "55px", borderRadius: "8px" }}></div>
-            <div className="skeleton-base" style={{ width: "120px", height: "55px", borderRadius: "8px" }}></div>
+            <div
+              className="skeleton-base"
+              style={{ width: "100px", height: "55px", borderRadius: "8px" }}
+            ></div>
+            <div
+              className="skeleton-base"
+              style={{ width: "100px", height: "55px", borderRadius: "8px" }}
+            ></div>
+            <div
+              className="skeleton-base"
+              style={{ width: "120px", height: "55px", borderRadius: "8px" }}
+            ></div>
+            <div
+              className="skeleton-base"
+              style={{ width: "120px", height: "55px", borderRadius: "8px" }}
+            ></div>
           </div>
         </div>
       </div>
@@ -50,10 +91,17 @@ const ProjectDetailSkeleton = ({ projectId }) => (
         <div className="bento-item lg-rect glass-card no-padding overflow-hidden">
           {projectId ? (
             <div className="project-timeline-preview">
-              <SuiTimeline projectId={projectId} userRole="admin" preview={true} />
+              <SuiTimeline
+                projectId={projectId}
+                userRole="admin"
+                preview={true}
+              />
             </div>
           ) : (
-            <div className="skeleton-base" style={{ width: "100%", height: "100%" }}></div>
+            <div
+              className="skeleton-base"
+              style={{ width: "100%", height: "100%" }}
+            ></div>
           )}
         </div>
         <div className="bento-item sm-square glass-card skeleton-base"></div>
@@ -121,13 +169,13 @@ const ProjectDetailDashboard = () => {
       "Are you sure you want to delete this project? All associated data will be permanently removed.",
     );
     if (!ok) return;
-      try {
-        await projectService.deleteProject(projectId);
-        invalidateCache();
-        navigate("/admin");
-      } catch (err) {
-        alert(err.message || "Failed to delete");
-      }
+    try {
+      await projectService.deleteProject(projectId);
+      invalidateCache();
+      navigate("/admin");
+    } catch (err) {
+      alert(err.message || "Failed to delete");
+    }
   };
 
   const handleProjectUpdated = () => {
@@ -136,9 +184,8 @@ const ProjectDetailDashboard = () => {
     setShowEditModal(false);
   };
 
-
-
-  if (detailsLoading && !project) return <ProjectDetailSkeleton projectId={projectId} />;
+  if (detailsLoading && !project)
+    return <ProjectDetailSkeleton projectId={projectId} />;
   if (!project) return null;
 
   return (
@@ -230,17 +277,23 @@ const ProjectDetailDashboard = () => {
       </div>
 
       <div className="dashboard-content-grid">
-
         <>
           {activeTab === "overview" && (
             <div className="bento-layout fade-in">
               <div className="bento-item lg-rect glass-card no-padding overflow-hidden">
-                <div className="project-timeline-preview" onClick={() => setShowTimelineModal(true)}>
-                  <SuiTimeline projectId={projectId} userRole="admin" preview={true} />
+                <div
+                  className="project-timeline-preview"
+                  onClick={() => setShowTimelineModal(true)}
+                >
+                  <SuiTimeline
+                    projectId={projectId}
+                    userRole="admin"
+                    preview={true}
+                  />
                 </div>
               </div>
 
-              <div 
+              <div
                 className="bento-item sm-square glass-card"
                 onClick={() => setShowProductionModal(true)}
                 style={{ cursor: "pointer" }}
@@ -270,7 +323,7 @@ const ProjectDetailDashboard = () => {
                 </div>
               </div>
 
-              <div 
+              <div
                 className="bento-item sm-square glass-card"
                 onClick={() => setShowFinanceModal(true)}
                 style={{ cursor: "pointer" }}
@@ -301,7 +354,7 @@ const ProjectDetailDashboard = () => {
           )}
 
           {showTimelineModal && (
-            <ModalPortal 
+            <ModalPortal
               onClose={() => setShowTimelineModal(false)}
               size="large"
               className="profile-modal-glass timeline-glass-override"
@@ -322,10 +375,10 @@ const ProjectDetailDashboard = () => {
                         <span>Add Milestone</span>
                       </button>
                     </div>
-                    
+
                     <div className="sui-view-toggle">
                       <HoverTooltip text="Detailed View">
-                        <button 
+                        <button
                           className={`sui-view-toggle-btn ${timelineViewMode === "detailed" ? "active" : ""}`}
                           onClick={() => setTimelineViewMode("detailed")}
                         >
@@ -333,7 +386,7 @@ const ProjectDetailDashboard = () => {
                         </button>
                       </HoverTooltip>
                       <HoverTooltip text="Simple View">
-                        <button 
+                        <button
                           className={`sui-view-toggle-btn ${timelineViewMode === "simple" ? "active" : ""}`}
                           onClick={() => setTimelineViewMode("simple")}
                         >
@@ -342,16 +395,39 @@ const ProjectDetailDashboard = () => {
                       </HoverTooltip>
                     </div>
                   </div>
+                  
+                  <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "-8px" }}>
+                    <div className="timeline-status-legend">
+                      <div className="timeline-legend-item">
+                        <div className="timeline-legend-dot pending" />
+                        <span className="timeline-legend-label">
+                          Pending
+                        </span>
+                      </div>
+                      <div className="timeline-legend-item">
+                        <div className="timeline-legend-dot in-progress" />
+                        <span className="timeline-legend-label">
+                          In Progress
+                        </span>
+                      </div>
+                      <div className="timeline-legend-item">
+                        <div className="timeline-legend-dot completed" />
+                        <span className="timeline-legend-label">
+                          Completed
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                
+
                 {showAddMilestone && (
                   <ModalPortal
                     onClose={() => setShowAddMilestone(false)}
                     size="medium"
                     className="profile-modal-glass"
                   >
-                    <AddMilestonePanel 
-                      projectId={projectId} 
+                    <AddMilestonePanel
+                      projectId={projectId}
                       onSuccess={() => {
                         setTimelineTrigger((prev) => prev + 1);
                         setShowAddMilestone(false);
@@ -374,7 +450,7 @@ const ProjectDetailDashboard = () => {
           )}
 
           {showFinanceModal && (
-            <ProjectDashboardFinance 
+            <ProjectDashboardFinance
               projectId={projectId}
               onClose={() => setShowFinanceModal(false)}
               projectTotalPaid={project.total_paid}
@@ -382,7 +458,7 @@ const ProjectDetailDashboard = () => {
           )}
 
           {showProductionModal && (
-            <ProjectDashboardProduction 
+            <ProjectDashboardProduction
               project={project}
               onClose={() => setShowProductionModal(false)}
             />
