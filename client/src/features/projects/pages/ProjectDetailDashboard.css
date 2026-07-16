@@ -395,7 +395,7 @@
 }
 
 .project-timeline-embedded-wrap {
-  height: 600px;
+  height: 800px;
   background: rgba(13, 15, 23, 0.65);
   backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -641,4 +641,70 @@ body.light-theme .project-tab-btn.active {
 
 body.light-theme .project-tab-btn.active::after {
   background: #0099b3;
+}
+
+/* Timeline Legend CSS */
+.timeline-toggle-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.timeline-status-legend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: rgba(255, 255, 255, 0.85);
+  padding: 5px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: none;
+}
+
+body.light-theme .timeline-status-legend {
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: none;
+  color: #333;
+}
+
+.timeline-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.timeline-legend-dot {
+  width: 8px;
+  height: 8px;
+  min-width: 8px;
+  border-radius: 50%;
+}
+
+.timeline-legend-dot.pending {
+  background-color: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+}
+
+.timeline-legend-dot.in-progress {
+  background-color: #eab308;
+  box-shadow: 0 0 8px rgba(234, 179, 8, 0.6);
+}
+
+.timeline-legend-dot.completed {
+  background-color: #22c55e;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
+}
+
+.timeline-legend-label {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.75rem;
+  font-weight: 400;
+  text-transform: capitalize;
+}
+
+body.light-theme .timeline-legend-label {
+  color: #57606a;
 }
