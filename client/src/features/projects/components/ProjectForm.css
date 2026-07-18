@@ -101,7 +101,7 @@
 
 .project-image-upload-panel:hover {
   transform: translateY(-10px) rotate(2deg);
-  border-color: #00c6e6;
+  border-color: var(--accent-color);
   background: rgba(0, 199, 230, 0);
 }
 

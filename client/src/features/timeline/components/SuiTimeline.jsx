@@ -20,7 +20,7 @@ const SuiTimeline = ({
   const { getProjectMilestones, milestonesCache, detailsCache } = useProjects();
   const milestones = milestonesCache[projectId] || [];
   const project = detailsCache ? detailsCache[projectId] || {} : {};
-  const projectColor = project.color || "#00c6e6";
+  const projectColor = project.color || "var(--accent-color)";
   const [loading, setLoading] = useState(true);
   const [selectedMilestone, setSelectedMilestone] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -29,14 +29,17 @@ const SuiTimeline = ({
   const containerRef = useRef(null);
   const [dynamicScale, setDynamicScale] = useState(1);
   const [isGlobalDarkMode, setIsGlobalDarkMode] = useState(
-    !document.body.classList.contains("light-theme")
+    !document.body.classList.contains("light-theme"),
   );
 
   useEffect(() => {
     const observer = new MutationObserver(() => {
       setIsGlobalDarkMode(!document.body.classList.contains("light-theme"));
     });
-    observer.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
     return () => observer.disconnect();
   }, []);
 

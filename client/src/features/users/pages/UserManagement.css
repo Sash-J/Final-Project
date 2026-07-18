@@ -77,7 +77,7 @@
   color: #f87171;
 }
 .role-pill.manager {
-  color: #00c6e6;
+  color: var(--accent-color);
 }
 .role-pill.client {
   color: #60a5fa;
@@ -125,7 +125,7 @@
 }
 
 .role-select-compact.manager {
-  color: #00c6e6;
+  color: var(--accent-color);
   border-color: rgba(0, 198, 230, 0.3);
 }
 
@@ -145,7 +145,7 @@
 
 .approve-btn {
   background: rgba(0, 198, 230, 0.1) !important;
-  color: #00c6e6 !important;
+  color: var(--accent-color) !important;
   border: 1px solid rgba(0, 198, 230, 0.2) !important;
   padding: 6px 16px !important;
   border-radius: 8px !important;
@@ -157,7 +157,7 @@
 
 .approve-btn:hover {
   background: rgba(0, 198, 230, 0.2) !important;
-  border-color: #00c6e6 !important;
+  border-color: var(--accent-color) !important;
   transform: translateY(-1px);
 }
 

@@ -34,7 +34,7 @@
 
 .stat-icon-wrap.budget {
   background: rgba(0, 198, 230, 0.1);
-  color: #00c6e6;
+  color: var(--accent-color);
 }
 
 .stat-icon-wrap.received {
@@ -97,7 +97,7 @@
 }
 
 .phase-row td {
-  color: #00c6e6;
+  color: var(--accent-color);
   font-weight: 600;
   font-size: 0.9rem;
 }

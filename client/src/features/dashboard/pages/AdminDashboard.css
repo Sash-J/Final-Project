@@ -42,7 +42,7 @@
 
 .new-project-btn:hover {
   background: rgba(0, 198, 230, 0.2);
-  color: #00c6e6;
+  color: var(--accent-color);
 }
 
 /*Warning Tags */

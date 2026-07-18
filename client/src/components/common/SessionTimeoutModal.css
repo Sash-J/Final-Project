@@ -33,3 +33,15 @@
   margin: 0 auto;
   width: 60%;
 }
+
+body.light-theme .session-timeout-modal-text {
+  color: #57606a;
+}
+
+body.light-theme .session-timeout-modal-icon span {
+  color: #0969da;
+}
+
+body.light-theme .session-timeout-modal-icon .icon-root {
+  color: #0969da !important;
+}

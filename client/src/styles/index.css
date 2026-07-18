@@ -17,6 +17,7 @@
   --text-primary: #e0e0e0;
   --text-secondary: #a0a0a0;
   --accent-color: #00c6e6;
+  --accent-color-rgb: 0, 198, 230;
   --font-main: "Funnel Sans";
 }
 
@@ -174,4 +175,40 @@ body.light-theme .btn-neo-solid:hover {
   background: #1f883d !important;
   border-color: #1f883d !important;
   box-shadow: 0 15px 40px rgba(31, 136, 61, 0.3), inset 0 1px 3px rgba(255, 255, 255, 0.3) !important;
+}
+
+/* ==========================================================================
+   Global Transparent Glass Effect Utility
+   ========================================================================== */
+.global-glass-effect {
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  
+  box-shadow:
+    0 10px 30px -10px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+
+  transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+}
+
+.global-glass-effect:hover {
+  box-shadow:
+    0 15px 35px -10px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+body.light-theme .global-glass-effect {
+  box-shadow:
+    0 12px 35px rgba(0, 0, 0, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 1);
+  border: 1px solid rgba(0, 0, 0, 0.18);
+}
+
+body.light-theme .global-glass-effect:hover {
+  box-shadow:
+    0 20px 45px rgba(0, 0, 0, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 1);
+  border-color: rgba(9, 105, 218, 0.3);
 }

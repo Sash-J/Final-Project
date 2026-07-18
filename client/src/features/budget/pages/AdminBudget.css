@@ -203,7 +203,7 @@ body.light-theme .admin-content-animated {
 
 .approve-btn {
   background: rgba(0, 198, 230, 0.1) !important;
-  color: #00c6e6 !important;
+  color: var(--accent-color) !important;
   border: 1px solid rgba(0, 198, 230, 0.2) !important;
   padding: 4px 10px !important;
   border-radius: 6px !important;
@@ -214,7 +214,7 @@ body.light-theme .admin-content-animated {
 
 .approve-btn:hover {
   background: rgba(0, 198, 230, 0.2) !important;
-  border-color: #00c6e6 !important;
+  border-color: var(--accent-color) !important;
 }
 
 .no-pending {
@@ -478,7 +478,7 @@ label.switch {
 }
 
 input:checked + .slider {
-  background-color: #00c6e6;
+  background-color: var(--accent-color);
 }
 
 input:checked + .slider:before {
@@ -492,7 +492,7 @@ input:checked + .slider:before {
   justify-content: center;
   background: rgba(0, 198, 230, 0.1) !important;
   border: 1px solid rgba(0, 198, 230, 0.3) !important;
-  color: #00c6e6 !important;
+  color: var(--accent-color) !important;
   border-radius: 8px;
   padding: 8px 12px;
   font-size: 0.85rem;
@@ -586,7 +586,7 @@ input:checked + .slider:before {
 }
 
 .publish-modal-footer .btn-save {
-  background: #00c6e6;
+  background: var(--accent-color);
   border: none;
   color: #0b0c10;
   border-radius: 8px;
@@ -622,7 +622,7 @@ input:checked + .slider:before {
 .publish-checkbox-input {
   width: 18px;
   height: 18px;
-  accent-color: #00c6e6;
+  accent-color: var(--accent-color);
 }
 
 .publish-modal-footer {

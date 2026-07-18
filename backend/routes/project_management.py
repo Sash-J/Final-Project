@@ -176,6 +176,40 @@ def projects_delete(project_id):
         return jsonify({"error": str(e)}), 500
 
 
+@project_bp.route("/api/projects/<int:project_id>/hierarchy", methods=["PUT"])
+@roles_required("admin", "manager")
+@cross_origin(supports_credentials=True)
+def update_project_hierarchy_endpoint(project_id):
+    import json
+    data = request.get_json()
+    hierarchy_data = data.get("hierarchyData")
+    try:
+        hierarchy_str = json.dumps(hierarchy_data) if hierarchy_data else None
+        db.update_project_crew_hierarchy(project_id, hierarchy_str)
+        return jsonify({"message": "Hierarchy updated successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@project_bp.route("/api/projects/<int:project_id>/equipment", methods=["PUT"])
+@login_required
+@cross_origin(supports_credentials=True)
+def update_project_equipment_endpoint(project_id):
+    import json
+    data = request.get_json()
+    equipment_data = data.get("equipmentData")
+    try:
+        equipment_str = json.dumps(equipment_data) if equipment_data else None
+        db.update_project_equipment(project_id, equipment_str)
+        return jsonify({"message": "Equipment updated successfully"}), 200
+    except Exception as e:
+        with open('api_error.log', 'a') as f:
+            f.write(f"ERROR: {str(e)}\\n")
+            import traceback
+            f.write(traceback.format_exc())
+        return jsonify({"error": str(e)}), 500
+
+
 # Payments
 @project_bp.route("/api/projects/<int:project_id>/payments", methods=["GET"])
 @login_required
@@ -224,3 +258,79 @@ def get_project_crew_members(project_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# --- EQUIPMENT RELATIONAL DB ENDPOINTS ---
+
+@project_bp.route("/api/projects/<int:project_id>/equipment_full", methods=["GET"])
+@login_required
+def get_project_equipment_full(project_id):
+    try:
+        data = db.get_project_equipment_full(project_id)
+        return jsonify(data), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@project_bp.route("/api/projects/<int:project_id>/departments", methods=["POST"])
+@login_required
+def create_equipment_department(project_id):
+    data = request.get_json()
+    name = data.get('name', 'New Department')
+    try:
+        dept = db.create_equipment_department(project_id, name)
+        return jsonify(dept), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@project_bp.route("/api/departments/<int:department_id>", methods=["PUT"])
+@login_required
+def update_equipment_department(department_id):
+    data = request.get_json()
+    name = data.get('name')
+    if not name:
+        return jsonify({"error": "Name required"}), 400
+    try:
+        db.update_equipment_department(department_id, name)
+        return jsonify({"success": True}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@project_bp.route("/api/departments/<int:department_id>", methods=["DELETE"])
+@login_required
+def delete_equipment_department(department_id):
+    try:
+        db.delete_equipment_department(department_id)
+        return jsonify({"success": True}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@project_bp.route("/api/departments/<int:department_id>/items", methods=["POST"])
+@login_required
+def create_equipment_item(department_id):
+    data = request.get_json()
+    name = data.get('name', 'New Equipment')
+    qty = data.get('qty', 1)
+    try:
+        item = db.create_equipment_item(department_id, name, qty)
+        return jsonify(item), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@project_bp.route("/api/equipment/<int:item_id>", methods=["PUT"])
+@login_required
+def update_equipment_item(item_id):
+    data = request.get_json()
+    name = data.get('name')
+    qty = data.get('qty')
+    try:
+        db.update_equipment_item(item_id, name, qty)
+        return jsonify({"success": True}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@project_bp.route("/api/equipment/<int:item_id>", methods=["DELETE"])
+@login_required
+def delete_equipment_item(item_id):
+    try:
+        db.delete_equipment_item(item_id)
+        return jsonify({"success": True}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

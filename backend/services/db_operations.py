@@ -62,8 +62,19 @@ def insert_project(
            VALUES (%s, %s, %s, %s, %s, %s, %s)""",
         (project_name, code_name, start_date, end_date, location, color, project_image),
     )
-    conn.commit()
     new_id = cursor.lastrowid
+    
+    # Add default equipment departments
+    cursor.execute(
+        "INSERT INTO project_equipment_departments (project_id, name) VALUES (%s, %s)",
+        (new_id, "Lighting")
+    )
+    cursor.execute(
+        "INSERT INTO project_equipment_departments (project_id, name) VALUES (%s, %s)",
+        (new_id, "Art")
+    )
+    
+    conn.commit()
     cursor.close()
     conn.close()
     return new_id
@@ -106,6 +117,41 @@ def update_project(
     conn.commit()
     cursor.close()
     conn.close()
+    return True
+
+
+def update_project_equipment(project_id, equipment_json_str):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "UPDATE projects SET equipment_data = %s WHERE id = %s",
+            (equipment_json_str, project_id),
+        )
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def update_project_crew_hierarchy(project_id, hierarchy_json_str):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "UPDATE projects SET crew_hierarchy_data = %s WHERE id = %s",
+            (hierarchy_json_str, project_id),
+        )
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        cursor.close()
+        conn.close()
     return True
 
 
@@ -1327,3 +1373,120 @@ def update_project_budget_item_crew(project_id, budget_item_id, user_ids):
         conn.close()
 
 
+
+
+# --- EQUIPMENT RELATIONAL DB OPERATIONS ---
+
+def get_project_equipment_full(project_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    # Get hero data from projects table
+    cursor.execute('SELECT equipment_data FROM projects WHERE id = %s', (project_id,))
+    project = cursor.fetchone()
+    
+    import json
+    hero_data = None
+    hero_secondary_data = None
+    if project and project.get('equipment_data'):
+        try:
+            parsed = json.loads(project['equipment_data'])
+            if isinstance(parsed, dict):
+                hero_data = parsed.get('hero', parsed)
+                hero_secondary_data = parsed.get('heroSecondary', None)
+            else:
+                hero_data = parsed
+        except Exception:
+            pass
+
+    # Get departments
+    cursor.execute('SELECT * FROM project_equipment_departments WHERE project_id = %s ORDER BY created_at', (project_id,))
+    departments = cursor.fetchall()
+    
+    # Get items for these departments
+    if departments:
+        dept_ids = tuple([d['id'] for d in departments])
+        if len(dept_ids) == 1:
+            cursor.execute('SELECT * FROM project_equipment_items WHERE department_id = %s ORDER BY created_at', (dept_ids[0],))
+        else:
+            format_strings = ','.join(['%s'] * len(dept_ids))
+            cursor.execute(f'SELECT * FROM project_equipment_items WHERE department_id IN ({format_strings}) ORDER BY created_at', dept_ids)
+        items = cursor.fetchall()
+        
+        # Group items by department
+        for d in departments:
+            d['items'] = [i for i in items if i['department_id'] == d['id']]
+            # Format IDs as strings for frontend
+            d['id'] = str(d['id'])
+            for item in d['items']:
+                item['id'] = str(item['id'])
+    
+    cursor.close()
+    conn.close()
+    
+    return {
+        'hero': hero_data,
+        'heroSecondary': hero_secondary_data,
+        'departments': departments
+    }
+
+def create_equipment_department(project_id, name):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('INSERT INTO project_equipment_departments (project_id, name) VALUES (%s, %s)', (project_id, name))
+    conn.commit()
+    new_id = cursor.lastrowid
+    cursor.close()
+    conn.close()
+    return {'id': str(new_id), 'name': name, 'items': []}
+
+def update_equipment_department(department_id, name):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('UPDATE project_equipment_departments SET name = %s WHERE id = %s', (name, department_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return True
+
+def delete_equipment_department(department_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM project_equipment_departments WHERE id = %s', (department_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return True
+
+def create_equipment_item(department_id, name, qty=1):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('INSERT INTO project_equipment_items (department_id, name, qty) VALUES (%s, %s, %s)', (department_id, name, qty))
+    conn.commit()
+    new_id = cursor.lastrowid
+    cursor.close()
+    conn.close()
+    return {'id': str(new_id), 'name': name, 'qty': qty}
+
+def update_equipment_item(item_id, name=None, qty=None):
+    conn = get_connection()
+    cursor = conn.cursor()
+    if name is not None and qty is not None:
+        cursor.execute('UPDATE project_equipment_items SET name = %s, qty = %s WHERE id = %s', (name, qty, item_id))
+    elif name is not None:
+        cursor.execute('UPDATE project_equipment_items SET name = %s WHERE id = %s', (name, item_id))
+    elif qty is not None:
+        cursor.execute('UPDATE project_equipment_items SET qty = %s WHERE id = %s', (qty, item_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return True
+
+def delete_equipment_item(item_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM project_equipment_items WHERE id = %s', (item_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return True

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Icon from "../../../components/common/Icon";
 import ModalPortal from "../../../components/common/ModalPortal";
 import CrewHierarchy from "./CrewHierarchy";
@@ -6,14 +6,15 @@ import EquipmentVisualization from "./EquipmentVisualization";
 import { useAuth } from "../../auth/context/AuthContext";
 import "./ProjectDashboardProduction.css";
 
-const ProjectDashboardProduction = ({ project, onClose }) => {
-  const [activeTab, setActiveTab] = useState("hierarchy");
+const ProjectDashboardProduction = ({ project, onClose, viewMode = "hierarchy" }) => {
   const { user } = useAuth();
   
   const [lastUpdated, setLastUpdated] = useState({
     date: new Date(),
     user: user ? user.username : 'System'
   });
+  const [saveStatus, setSaveStatus] = useState(''); // '', 'saving', 'saved'
+  const equipmentRef = useRef();
 
   const updateLastModified = () => {
     setLastUpdated({
@@ -30,44 +31,58 @@ const ProjectDashboardProduction = ({ project, onClose }) => {
     >
       <div className="production-modal-container">
         <div className="modal-header-section">
-          <h2>Production Status</h2>
-          <p>Manage crew hierarchy and equipment</p>
+          <div className="timeline-header-top-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+            <div className="timeline-header-title-group">
+              <div>
+                <h2>{viewMode === "hierarchy" ? "Crew Hierarchy" : "Equipment"}</h2>
+                <p>{viewMode === "hierarchy" ? "Manage project crew structure and roles" : "Manage production equipment and inventory"}</p>
+              </div>
+              
+              {viewMode === "equipment" && (
+                <button 
+                  className="btn-neo btn-neo-solid" 
+                  onClick={() => equipmentRef.current?.addDepartment()}
+                >
+                  <Icon name="add" modifiers="sm" />
+                  <span>Add Department</span>
+                </button>
+              )}
+            </div>
+          </div>
         </div>
 
-        <div className="integrated-budget-section fade-in" style={{ marginTop: '20px', flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-          <div className="production-sub-nav" style={{ display: 'flex', alignItems: 'center' }}>
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <button
-                className={`btn-neo ${activeTab === "hierarchy" ? "btn-neo-solid" : ""}`}
-                onClick={() => setActiveTab("hierarchy")}
-                style={{ gap: '8px' }}
-              >
-                <Icon name="account_tree" modifiers="md" />
-                <span>Crew Hierarchy</span>
-              </button>
-              <button
-                className={`btn-neo ${activeTab === "equipment" ? "btn-neo-solid" : ""}`}
-                onClick={() => setActiveTab("equipment")}
-                style={{ gap: '8px' }}
-              >
-                <Icon name="handyman" modifiers="md" />
-                <span>Equipment</span>
-              </button>
-            </div>
-            
-            {activeTab === "hierarchy" && (
-              <div className="org-metadata-nav" style={{ marginLeft: 'auto' }}>
-                Last updated: {lastUpdated.date.toLocaleDateString()} {lastUpdated.date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} by <strong>{lastUpdated.user}</strong>
+        <div className="integrated-budget-section production-integrated-budget fade-in">
+          <div className="production-sub-nav">
+            {viewMode === "hierarchy" && (
+              <div className="org-metadata-container">
+                {saveStatus && (
+                  <div className={`org-metadata-nav save-status-indicator ${saveStatus !== 'hiding' ? 'fade-in' : ''} ${saveStatus}`}>
+                    <Icon name={saveStatus === 'saving' ? 'sync' : 'check_circle'} modifiers={saveStatus === 'saving' ? 'spin sm' : 'sm'} />
+                    {saveStatus === 'saving' ? 'Saving...' : 'Saved'}
+                  </div>
+                )}
+                <div className="org-metadata-nav">
+                  Last updated: {lastUpdated.date.toLocaleDateString()} {lastUpdated.date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} by <strong>{lastUpdated.user}</strong>
+                </div>
               </div>
             )}
           </div>
 
           <div className="production-tab-content">
-            <div key={activeTab} className="tab-content-animator">
-              {activeTab === "hierarchy" ? (
-                <CrewHierarchy project={project} onUpdateHierarchy={updateLastModified} />
+            <div key={viewMode} className="tab-content-animator">
+              {viewMode === "hierarchy" ? (
+                <CrewHierarchy 
+                  project={project} 
+                  onUpdateHierarchy={updateLastModified} 
+                  onSaveStatusChange={setSaveStatus}
+                />
               ) : (
-                <EquipmentVisualization />
+                <EquipmentVisualization 
+                  ref={equipmentRef}
+                  project={project}
+                  onUpdateEquipment={updateLastModified}
+                  onSaveStatusChange={setSaveStatus}
+                />
               )}
             </div>
           </div>

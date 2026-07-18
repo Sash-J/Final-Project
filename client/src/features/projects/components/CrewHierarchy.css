@@ -88,7 +88,7 @@
 .org-node-card {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-top: 4px solid #00c6e6;
+  border-top: 4px solid var(--accent-color);
   border-radius: 12px;
   padding: 16px;
   display: inline-flex;
@@ -153,15 +153,15 @@
 
 .org-member-role {
   font-size: 0.75rem;
-  color: #00c6e6;
+  color: var(--accent-color);
 }
 
 .org-tree-wrapper {
   overflow: hidden;
-  position: relative; 
+  position: relative;
   width: 100%;
   flex: 1;
-  padding: 40px; 
+  padding: 20px;
   box-sizing: border-box;
 }
 
@@ -170,7 +170,7 @@
   top: 50%;
   left: 50%;
   width: max-content; /* Prevents the tree from squishing into the container width */
-  transform-origin: center center; 
+  transform-origin: center center;
 }
 
 /* Drag and Drop / Interaction Styles */
@@ -185,7 +185,7 @@
 .add-node-btn {
   background: rgba(0, 198, 230, 0.1);
   border: 1px solid rgba(0, 198, 230, 0.3);
-  color: #00c6e6;
+  color: var(--accent-color);
   width: 24px;
   height: 24px;
   border-radius: 50%;
@@ -201,7 +201,7 @@
 }
 
 .add-node-btn:hover {
-  background: #00c6e6;
+  background: var(--accent-color);
   color: #12161b;
   transform: scale(1.1);
 }
@@ -225,6 +225,7 @@ body.light-theme .org-tree ul::before {
 body.light-theme .org-node-card {
   background: rgba(255, 255, 255, 0.8);
   border-color: rgba(0, 0, 0, 0.1);
+  border-top-color: #0969da;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
@@ -266,7 +267,10 @@ body.light-theme .add-node-btn:hover {
 /* Mini Modal Styles */
 .mm-overlay {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: transparent; /* No blur, let user see entire hierarchy */
   z-index: 99999;
 }
@@ -423,7 +427,7 @@ body.light-theme .add-node-btn:hover {
 }
 
 .mm-input:focus {
-  border-color: #00c6e6;
+  border-color: var(--accent-color);
   background: rgba(0, 198, 230, 0.05);
 }
 
@@ -443,8 +447,12 @@ body.light-theme .add-node-btn:hover {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* Light Theme overrides for mini modal */
@@ -509,6 +517,7 @@ body.light-theme .mm-delete-btn:hover {
 
 body.light-theme .mm-input:focus {
   border-color: #0969da;
+  background: rgba(9, 105, 218, 0.05);
 }
 
 /* Zoom and Pan Controls */
@@ -522,7 +531,7 @@ body.light-theme .mm-input:focus {
   padding: 8px;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   z-index: 50;
 }
 
@@ -546,7 +555,7 @@ body.light-theme .mm-input:focus {
 body.light-theme .org-zoom-controls {
   background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
 }
 
 body.light-theme .org-zoom-controls button {

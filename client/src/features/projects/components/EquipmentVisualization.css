@@ -1,3 +1,6 @@
+/* =========================================
+   1. CONTAINER & LAYOUT
+   ========================================= */
 .equipment-viz-container {
   display: flex;
   flex-direction: column;
@@ -8,39 +11,126 @@
   padding-right: 5px;
 }
 
+.equipment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.equipment-category {
+  padding: 20px;
+}
+
+/* =========================================
+   2. HERO CARD (PRIMARY & SECONDARY)
+   ========================================= */
 .equipment-hero-card {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 24px;
   padding: 30px;
-  background: linear-gradient(135deg, rgba(0, 198, 230, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%);
+  min-height: 150px;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 198, 230, 0.1) 0%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
   border: 1px solid rgba(0, 198, 230, 0.3);
+  box-shadow: none !important;
+}
+
+.equipment-hero-card:hover {
+  transform: none !important;
+}
+
+.hero-divider {
+  width: 1px;
+  align-self: stretch;
+  background-color: rgba(255, 255, 255, 0.2);
+  margin: 0 24px;
+}
+
+.hero-camera-section {
+  display: flex;
+  flex: 1;
+  gap: 24px;
+  align-items: center;
+  min-width: 400px;
 }
 
 .hero-camera-image {
-  width: 100px;
-  height: 100px;
+  flex-shrink: 0;
+  width: 140px;
+  height: 140px;
   border-radius: 16px;
-  background: rgba(0, 0, 0, 0.4);
+  background:
+    radial-gradient(
+      circle at 85% 40%,
+      rgba(0, 198, 230, 0.6) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 15% 85%,
+      rgba(0, 150, 200, 0.5) 0%,
+      transparent 70%
+    ),
+    linear-gradient(135deg, #001622 0%, #00040a 100%) !important;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #00c6e6;
-  border: 1px solid rgba(0, 198, 230, 0.4);
+  color: var(--accent-color);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-camera-image::after {
+  content: "";
+  position: absolute;
+  bottom: -20px;
+  left: 20%;
+  right: 20%;
+  height: 60px;
+  background: var(--accent-color);
+  filter: blur(25px);
+  opacity: 0.35;
+  z-index: 0;
+  border-radius: 50%;
+  transition: opacity 0.3s ease;
+}
+
+.hero-camera-image:hover::after {
+  opacity: 0.55;
+}
+
+.hero-camera-image img,
+.hero-camera-image .icon {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-camera-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 10px;
+  filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.5));
 }
 
 .hero-camera-details {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
 }
 
 .hero-label {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  color: #00c6e6;
-  font-weight: 600;
+  color: var(--accent-color);
+  font-weight: 500;
 }
 
 .hero-camera-details h2 {
@@ -64,16 +154,171 @@
   color: #10b981;
 }
 
-.equipment-grid {
+/* Secondary Camera Scaled Down */
+.hero-camera-section.secondary {
+  min-width: 300px;
+  gap: 16px;
+}
+
+.hero-camera-section.secondary .hero-camera-image {
+  width: 100px;
+  height: 100px;
+  border-radius: 12px;
+}
+
+.hero-camera-section.secondary .hero-camera-image::after {
+  bottom: -15px;
+  height: 40px;
+  filter: blur(15px);
+}
+
+.hero-camera-section.secondary h2 {
+  font-size: 1.2rem;
+}
+
+.hero-camera-section.secondary .hero-inline-input.h2-input {
+  font-size: 1.2rem;
+}
+
+/* =========================================
+   3. HERO EDITING & FORMATS
+   ========================================= */
+.hero-label-row {
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+}
+
+.hero-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.hero-inline-input {
+  background: transparent;
+  border: 1px dashed rgba(255, 255, 255, 0.3);
+  font-family: inherit;
+  outline: none;
+  border-radius: 4px;
+  padding: 2px 4px;
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.hero-inline-input:focus {
+  border-color: var(--accent-color);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.hero-inline-input.hero-label {
+  width: auto;
+}
+
+.hero-inline-input.h2-input {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.hero-inline-input.p-input {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+.hero-status-input {
+  color: #10b981;
+  font-size: 0.85rem;
+  width: 200px;
+}
+
+.hero-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.hero-edit-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.hero-action-buttons {
+  display: flex;
+  gap: 5px;
+}
+
+.hero-action-btn-save {
+  color: #10b981 !important;
+}
+
+.project-hero-btn.add-secondary {
+  margin-left: -10px;
+}
+
+/* Hero Format & Resolution Display/Edit */
+.hero-format-edit-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 8px;
+  row-gap: 3px;
+  margin-top: 5px;
 }
 
-.equipment-category {
-  padding: 20px;
+.hero-format-label {
+  font-size: 0.85rem;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.5);
+  white-space: nowrap;
 }
 
+.hero-format-label.spacing {
+  margin-left: 0;
+}
+
+.hero-inline-input.format-input {
+  width: 100px;
+  padding: 2px 6px;
+}
+
+.hero-format-display-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+}
+
+.hero-format-text {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.hero-format-value {
+  color: #fff;
+  font-weight: 500;
+}
+
+.hero-format-divider {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+/* =========================================
+   4. EQUIPMENT LIST & DEPARTMENTS
+   ========================================= */
 .cat-header {
   display: flex;
   align-items: center;
@@ -106,6 +351,20 @@
   color: rgba(255, 255, 255, 0.8);
 }
 
+.equipment-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.eq-item-content {
+  display: flex;
+  flex: 1;
+  gap: 10px;
+  align-items: center;
+}
+
 .eq-qty {
   background: rgba(255, 255, 255, 0.1);
   padding: 2px 8px;
@@ -114,19 +373,230 @@
   color: #fff;
 }
 
-/* Light Theme Overrides */
+.eq-qty-wrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+}
+
+/* =========================================
+   5. EQUIPMENT EDITING (INPUTS & BUTTONS)
+   ========================================= */
+.equipment-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -5px;
+  margin-bottom: 5px;
+}
+
+.editable-cat-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 10px;
+}
+
+.dept-name-input {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  flex: 1;
+  outline: none;
+  border-radius: 4px;
+  padding: 2px 5px;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.dept-name-input:hover,
+.dept-name-input:focus {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.eq-item-name-input {
+  flex: 1;
+  background: transparent;
+  border: 1px dashed transparent;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  outline: none;
+  border-radius: 4px;
+  padding: 4px 6px;
+  transition: all 0.2s ease;
+}
+
+.eq-item-name-input:hover,
+.eq-item-name-input:focus {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.eq-qty-input {
+  background: transparent;
+  border: none;
+  color: #fff;
+  width: 30px;
+  text-align: center;
+  outline: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.eq-qty-input::-webkit-outer-spin-button,
+.eq-qty-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.eq-input-sm,
+.eq-input-md {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-radius: 6px;
+  padding: 6px 10px;
+  outline: none;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.eq-input-sm {
+  font-size: 0.8rem;
+}
+
+.eq-input-md {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.eq-input-sm:focus,
+.eq-input-md:focus {
+  border-color: var(--accent-color);
+  background: rgba(var(--accent-color-rgb), 0.05);
+}
+
+.add-item-wrap {
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+}
+
+.add-item-btn {
+  background: transparent;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  justify-content: center;
+}
+
+.add-item-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.delete-btn {
+  opacity: 0.3;
+  transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+  opacity: 1;
+  color: #ff4d4f;
+}
+
+.remove-item-btn {
+  opacity: 0;
+  transition: all 0.2s ease;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.equipment-item:hover .remove-item-btn {
+  opacity: 1;
+}
+
+.remove-item-btn:hover {
+  color: #ff4d4f;
+  background: rgba(255, 77, 79, 0.1);
+}
+
+/* =========================================
+   6. UTILITIES & EMPTY STATES
+   ========================================= */
+.empty-state-equipment {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px;
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.skeleton-pulse {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 25%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.05) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite linear;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* =========================================
+   7. LIGHT THEME OVERRIDES
+   ========================================= */
 body.light-theme .equipment-hero-card {
-  background: linear-gradient(135deg, rgba(9, 105, 218, 0.05) 0%, rgba(255, 255, 255, 0.8) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(9, 105, 218, 0.05) 0%,
+    rgba(255, 255, 255, 0.8) 100%
+  );
   border-color: rgba(9, 105, 218, 0.2);
 }
 
 body.light-theme .hero-camera-image {
-  background: rgba(9, 105, 218, 0.05);
-  border-color: rgba(9, 105, 218, 0.2);
+  background:
+    radial-gradient(
+      circle at 85% 40%,
+      rgba(0, 198, 255, 0.15) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 15% 85%,
+      rgba(9, 105, 218, 0.15) 0%,
+      transparent 70%
+    ),
+    linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%) !important;
   color: #0969da;
 }
 
-body.light-theme .hero-label {
+body.light-theme .hero-camera-image img {
   color: #0969da;
 }
 
@@ -136,6 +606,22 @@ body.light-theme .hero-camera-details h2 {
 
 body.light-theme .hero-camera-details p {
   color: #57606a;
+}
+
+body.light-theme .hero-format-label {
+  color: #57606a;
+}
+
+body.light-theme .hero-format-text {
+  color: #57606a;
+}
+
+body.light-theme .hero-format-value {
+  color: #24292f;
+}
+
+body.light-theme .hero-format-divider {
+  color: rgba(0, 0, 0, 0.2);
 }
 
 body.light-theme .hero-status {
@@ -154,4 +640,94 @@ body.light-theme .equipment-list li {
 body.light-theme .eq-qty {
   background: rgba(0, 0, 0, 0.05);
   color: #24292f;
+}
+
+body.light-theme .hero-inline-input {
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+body.light-theme .hero-inline-input:focus {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: var(--accent-color);
+}
+
+body.light-theme .hero-inline-input.h2-input {
+  color: #24292f;
+}
+
+body.light-theme .hero-inline-input.p-input {
+  color: #57606a;
+}
+
+body.light-theme .dept-name-input {
+  color: #24292f;
+}
+
+body.light-theme .dept-name-input:hover,
+body.light-theme .dept-name-input:focus {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .eq-item-name-input {
+  color: #57606a;
+}
+
+body.light-theme .eq-item-name-input:hover,
+body.light-theme .eq-item-name-input:focus {
+  border-color: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.03);
+}
+
+body.light-theme .eq-qty-wrap {
+  background: rgba(0, 0, 0, 0.05);
+  color: #24292f;
+}
+
+body.light-theme .eq-qty-input {
+  color: #24292f;
+}
+
+body.light-theme .eq-input-sm,
+body.light-theme .eq-input-md {
+  background: #f6f8fa;
+  border-color: #d0d7de;
+  color: #24292f;
+}
+
+body.light-theme .eq-input-sm:focus,
+body.light-theme .eq-input-md:focus {
+  border-color: var(--accent-color);
+  background: rgba(var(--accent-color-rgb), 0.05);
+}
+
+body.light-theme .add-item-btn {
+  border-color: rgba(0, 0, 0, 0.15);
+  color: rgba(0, 0, 0, 0.6);
+}
+
+body.light-theme .add-item-btn:hover {
+  background: rgba(0, 0, 0, 0.03);
+  color: #24292f;
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
+body.light-theme .remove-item-btn {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+body.light-theme .empty-state-equipment {
+  color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .skeleton-pulse {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.05) 25%,
+    rgba(0, 0, 0, 0.15) 50%,
+    rgba(0, 0, 0, 0.05) 75%
+  );
+  background-size: 200% 100%;
 }

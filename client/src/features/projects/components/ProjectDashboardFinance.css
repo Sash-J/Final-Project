@@ -49,7 +49,7 @@
 }
 
 .bvb-pill.active {
-  background: linear-gradient(135deg, var(--accent-color, #00c6e6), #00b8d4);
+  background: linear-gradient(135deg, var(--accent-color), #00b8d4);
   border-color: transparent;
   color: #fff;
   box-shadow: 0 0 14px rgba(0, 198, 230, 0.35);

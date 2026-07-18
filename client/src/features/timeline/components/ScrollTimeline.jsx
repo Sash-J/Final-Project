@@ -579,10 +579,10 @@ export const ScrollTimeline = ({
                       x2="0"
                       y2="1"
                     >
-                      <stop offset="0%" stopColor="#00c6e6" />
+                      <stop offset="0%" stopColor={darkMode ? "var(--accent-color)" : "#0969da"} />
                       <stop
                         offset="100%"
-                        stopColor="#00c6e6"
+                        stopColor={darkMode ? "var(--accent-color)" : "#0969da"}
                         stopOpacity="0.1"
                       />
                     </linearGradient>
