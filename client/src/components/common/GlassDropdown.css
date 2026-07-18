@@ -68,7 +68,7 @@
 }
 
 .glass-dropdown-trigger.active {
-  border-color: #00c6e6;
+  border-color: var(--accent-color);
   background: rgba(0, 198, 230, 0.15);
   box-shadow: 0 0 15px rgba(0, 198, 230, 0.3);
 }
@@ -83,7 +83,7 @@
 
 .trigger-arrow {
   font-size: 0.75rem;
-  color: #00c6e6;
+  color: var(--accent-color);
   transition: transform 0.3s ease;
 }
 
@@ -181,8 +181,8 @@
 }
 
 .glass-checkbox.checked {
-  background: #00c6e6;
-  border-color: #00c6e6;
+  background: var(--accent-color);
+  border-color: var(--accent-color);
 }
 
 .check-mark {

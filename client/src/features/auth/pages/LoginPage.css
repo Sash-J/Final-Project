@@ -110,7 +110,7 @@ body.light-theme .error-msg {
 }
 
 .login-hint code {
-  color: #00c6e6;
+  color: var(--accent-color);
 }
 
 /* Footer - Matches modal subtexts */
@@ -126,7 +126,7 @@ body.light-theme .login-footer {
 }
 
 .login-footer a {
-  color: #00c6e6;
+  color: var(--accent-color);
   text-decoration: none;
   font-weight: 500;
   margin-left: 5px;
@@ -148,7 +148,7 @@ body.light-theme .login-footer a {
 }
 
 .user-icon-hero {
-  color: #00c6e6;
+  color: var(--accent-color);
   margin-bottom: 20px;
   filter: drop-shadow(0 0 10px rgba(0, 198, 230, 0.3));
 }
@@ -211,7 +211,7 @@ body.light-theme .login-loading-glass {
   width: 40px;
   height: 40px;
   border: 3px solid rgba(0, 198, 230, 0.1);
-  border-top-color: #00c6e6;
+  border-top-color: var(--accent-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }

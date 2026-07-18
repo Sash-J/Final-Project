@@ -52,7 +52,7 @@
 .sub-nav-btn.btn-publish {
   background: rgba(0, 198, 230, 0.1);
   border: 1px solid rgba(0, 198, 230, 0.3);
-  color: #00c6e6;
+  color: var(--accent-color);
   margin-right: 10px;
 }
 
@@ -102,7 +102,7 @@
 }
 
 .publish-version-select:focus {
-  border-color: #00c6e6;
+  border-color: var(--accent-color);
 }
 
 .publish-version-details {
@@ -133,7 +133,7 @@
 }
 
 .detail-value.active-highlight {
-  color: #00c6e6;
+  color: var(--accent-color);
   background: rgba(0, 198, 230, 0.15);
   padding: 2px 8px;
   border-radius: 4px;

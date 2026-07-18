@@ -93,9 +93,9 @@
 }
 
 .modal-close-btn:hover {
-  background: rgba(239, 68, 68, 0.2);
-  color: #ff9898;
-  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(213, 1, 1, 1);
+  color: #feeeee;
+  border-color: rgba(239, 68, 68, 0.8);
   transform: rotate(90deg);
 }
 
@@ -118,8 +118,9 @@
 
 .modal-header-section p {
   color: rgba(255, 255, 255, 0.4);
-  font-size: 0.9rem;
-  margin-top: 5px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-top: 10x;
 }
 
 /* Custom Override for Edit Profile Modal Glass */
@@ -211,4 +212,12 @@ body.light-theme .modal-header-section p {
   color: #57606a;
 }
 
+body.light-theme .modal-portal-overlay {
+  background: rgba(255, 255, 255, 0.4);
+}
 
+body.light-theme .modal-glass-container {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.1);
+}

@@ -22,7 +22,7 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
     project_image: "",
     client_ids: [],
     crew_ids: [],
-    color: "#00c6e6",
+    color: "var(--accent-color)",
   });
 
   const [clients, setClients] = useState([]);
@@ -83,7 +83,7 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
               .filter(Boolean)
               .map(Number)
           : [],
-        color: editingProject.color || "#00c6e6",
+        color: editingProject.color || "var(--accent-color)",
       });
     } else {
       setFormData({
@@ -95,7 +95,7 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
         project_image: "",
         client_ids: [],
         crew_ids: [],
-        color: "#00c6e6",
+        color: "var(--accent-color)",
       });
     }
   }, [editingProject]);

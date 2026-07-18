@@ -118,8 +118,8 @@ body.light-theme .btn-milestone-delete:hover {
   align-items: center;
   justify-content: center;
   background: transparent;
-  border: 1px solid var(--accent-color, #00c6e6);
-  color: var(--accent-color, #00c6e6);
+  border: 1px solid var(--accent-color);
+  color: var(--accent-color);
   padding: 10px;
   border-radius: 50%;
   cursor: pointer;
@@ -134,8 +134,8 @@ body.light-theme .btn-milestone-delete:hover {
 }
 
 .btn-morph-sync.synced {
-  background: var(--accent-color, #00c6e6);
-  border-color: var(--accent-color, #00c6e6);
+  background: var(--accent-color);
+  border-color: var(--accent-color);
   color: #fff;
   box-shadow: 0 0 8px var(--accent-color, rgba(0, 198, 230, 0.85));
 }

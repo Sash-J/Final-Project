@@ -75,7 +75,7 @@
 
 .avatar-text-preview {
   font-size: 2.2rem;
-  color: #00c6e6;
+  color: var(--accent-color);
   font-weight: 600;
 }
 
@@ -83,7 +83,7 @@
   position: absolute;
   bottom: 0;
   right: 0;
-  background: #00c6e6;
+  background: var(--accent-color);
   color: #0b0c10;
   width: 28px;
   height: 28px;
@@ -162,8 +162,8 @@
 
 .theme-mode-btn.active {
   background: rgba(0, 198, 230, 0.1);
-  border-color: #00c6e6;
-  color: #00c6e6;
+  border-color: var(--accent-color);
+  color: var(--accent-color);
   box-shadow: 0 0 10px rgba(0, 198, 230, 0.15);
 }
 
@@ -213,8 +213,8 @@
 }
 
 .toggle-label-wrapper input[type="checkbox"]:checked + .toggle-custom-checkbox {
-  background: #00c6e6;
-  border-color: #00c6e6;
+  background: var(--accent-color);
+  border-color: var(--accent-color);
 }
 
 .toggle-label-wrapper input[type="checkbox"]:checked + .toggle-custom-checkbox::after {

@@ -364,7 +364,7 @@
 
 .theme-toggle-nav-btn:hover {
   background: rgba(255, 255, 255, 0.08);
-  color: var(--accent-color, #00c6e6);
+  color: var(--accent-color);
   transform: rotate(15deg) scale(1.05);
 }
 

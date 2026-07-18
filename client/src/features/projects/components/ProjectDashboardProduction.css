@@ -25,6 +25,7 @@
 
 .production-sub-nav {
   display: flex;
+  align-items: center;
   gap: 15px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   padding-bottom: 12px;
@@ -51,7 +52,7 @@
 
 .sub-nav-btn.active {
   background: rgba(0, 198, 230, 0.15);
-  color: #00c6e6;
+  color: var(--accent-color);
 }
 
 /* ==========================================================================
@@ -69,8 +70,62 @@
 }
 
 .org-metadata-nav strong {
-  color: #00c6e6;
+  color: var(--accent-color);
   font-weight: 600;
+}
+
+.production-integrated-budget {
+  margin-top: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.production-sub-nav-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.production-sub-nav .btn-neo {
+  gap: 8px;
+}
+
+.org-metadata-container {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.save-status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+.save-status-indicator.saving {
+  color: #eab308;
+}
+
+.save-status-indicator.saved {
+  color: #22c55e;
+}
+
+.save-status-indicator.hiding {
+  animation: toastFadeOut 0.4s ease-in forwards;
+}
+
+@keyframes toastFadeOut {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
 }
 
 /* ==========================================================================

@@ -55,6 +55,15 @@ export const projectService = {
     }
   },
 
+  updateCrewHierarchy: async (id, hierarchyData) => {
+    try {
+      const response = await api.put(`/api/projects/${id}/hierarchy`, { hierarchyData });
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  },
+
   getProjectPayments: async (id) => {
     try {
       const response = await api.get(`/api/projects/${id}/payments`);

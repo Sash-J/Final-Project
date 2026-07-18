@@ -263,7 +263,7 @@ const Schedule = () => {
         title: taskToEdit.title,
         description: taskToEdit.description || "",
         project_id: taskToEdit.project_id || "",
-        task_color: taskToEdit.task_color || "#00c6e6",
+        task_color: taskToEdit.task_color || "var(--accent-color)",
       });
     } else {
       setTaskForm({

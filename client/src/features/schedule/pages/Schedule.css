@@ -18,7 +18,7 @@
 }
 
 .schedule-header p {
-  color: #00c6e6;
+  color: var(--accent-color);
   font-size: 1.1rem;
 }
 
@@ -67,7 +67,7 @@
 
 .cal-nav-btn:hover {
   background: rgba(0, 198, 230, 0.2);
-  border-color: #00c6e6;
+  border-color: var(--accent-color);
 }
 
 .today-btn {
@@ -83,7 +83,7 @@
 }
 
 .today-btn:hover {
-  background: #00c6e6;
+  background: var(--accent-color);
   color: #000;
 }
 
@@ -114,7 +114,7 @@
 .calendar-day-label {
   text-align: center;
   font-weight: 700;
-  color: #00c6e6;
+  color: var(--accent-color);
   padding: 10px;
   text-transform: uppercase;
   font-size: 0.9rem;
@@ -146,13 +146,13 @@
 }
 
 .calendar-cell.today {
-  border-color: #00c6e6;
+  border-color: var(--accent-color);
   box-shadow: 0 0 15px rgba(0, 198, 230, 0.2);
   background: rgba(0, 198, 230, 0.05);
 }
 
 .calendar-cell.today .day-number {
-  background: #00c6e6;
+  background: var(--accent-color);
   color: #000;
   width: 28px;
   height: 28px;
@@ -198,7 +198,7 @@
   margin-top: 5px;
   margin-bottom: 20px;
   font-size: 1.3rem;
-  color: #00c6e6;
+  color: var(--accent-color);
 }
 
 .holiday-list {
@@ -216,7 +216,7 @@
 }
 
 .holiday-date {
-  color: #00c6e6;
+  color: var(--accent-color);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -246,7 +246,7 @@
 
 .task-item {
   background: rgba(0, 198, 230, 0.2);
-  border-left: 3px solid #00c6e6;
+  border-left: 3px solid var(--accent-color);
   padding: 4px 10px;
   border-radius: 6px;
   font-size: 0.8rem;
@@ -295,7 +295,7 @@
 }
 
 .add-task-btn:hover {
-  background: #00c6e6;
+  background: var(--accent-color);
   color: #000;
   transform: scale(1.1);
 }
@@ -352,7 +352,7 @@
 
 .note-author {
   font-weight: 600;
-  color: #00c6e6;
+  color: var(--accent-color);
   font-size: 0.95rem;
 }
 
@@ -405,7 +405,7 @@
 }
 
 .task-meta-item i {
-  color: #00c6e6;
+  color: var(--accent-color);
   margin-right: 5px;
 }
 
@@ -417,7 +417,7 @@
 .add-note-section h4 {
   margin-bottom: 15px;
   font-size: 1.1rem;
-  color: #00c6e6;
+  color: var(--accent-color);
 }
 
 @media (max-width: 1200px) {
@@ -448,7 +448,7 @@
 
 .sidebar-header h3 {
   font-size: 1.4rem;
-  color: #00c6e6;
+  color: var(--accent-color);
   margin: 0;
 }
 
@@ -714,7 +714,7 @@
 }
 
 .save-all-btn {
-  background: #00c6e6;
+  background: var(--accent-color);
   color: #000;
   border: none;
   font-weight: 700;

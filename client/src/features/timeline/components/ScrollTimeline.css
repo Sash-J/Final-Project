@@ -242,7 +242,8 @@
   transform: translateY(-50%);
   font-size: 4rem;
   font-weight: 900;
-  color: rgba(255, 255, 255, 0.15);
+  color: #8b8b8b;
+  opacity: 0.5;
   text-shadow:
     0 0 10px #0d0f17,
     0 0 20px #0d0f17;
@@ -290,7 +291,6 @@
   letter-spacing: 0.5px;
   color: rgba(255, 255, 255, 0.9);
   margin-bottom: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .premium-title {
@@ -343,10 +343,10 @@
   color: #ffffff;
 }
 .text-primary {
-  color: #00c6e6;
+  color: var(--accent-color);
 }
 .border-primary {
-  border-color: #00c6e6;
+  border-color: var(--accent-color);
 }
 .border-border {
   border-color: rgba(255, 255, 255, 0.1);
@@ -399,7 +399,7 @@
 }
 
 .timeline-dot.active {
-  border-color: #00c6e6;
+  border-color: var(--accent-color);
   background-color: #0d0f17;
   box-shadow:
     0 0 8px rgba(0, 198, 230, 0.6),
@@ -416,7 +416,7 @@
 .timeline-progress-line {
   left: 50%;
   transform: translateX(-50%);
-  background: linear-gradient(to bottom, #22d3ee, #00c6e6, #0099b3);
+  background: linear-gradient(to bottom, #22d3ee, var(--accent-color), #0099b3);
   box-shadow:
     0 0 15px rgba(0, 198, 230, 0.5),
     0 0 25px rgba(0, 153, 179, 0.3);
@@ -556,11 +556,11 @@
   box-shadow:
     0 20px 45px rgba(0, 0, 0, 0.12),
     inset 0 0 0 1px rgba(255, 255, 255, 1);
-  border-color: rgba(0, 198, 230, 0.3);
+  border-color: rgba(9, 105, 218, 0.3);
 }
 
 .scroll-timeline-container.light-theme .premium-title {
-  color: #1a1a1a;
+  color: #24292f;
 }
 
 .scroll-timeline-container.light-theme .premium-description {
@@ -568,14 +568,14 @@
 }
 
 .scroll-timeline-container.light-theme .premium-card-number {
-  color: #000052;
-  opacity: 0.6;
+  color: #0969da;
+  opacity: 1;
   text-shadow: none;
 }
 
 .scroll-timeline-container.light-theme .premium-note-container {
   background: rgba(0, 0, 0, 0.03);
-  border-left-color: rgba(0, 198, 230, 0.6);
+  border-left-color: rgba(9, 105, 218, 0.6);
 }
 
 .scroll-timeline-container.light-theme .premium-note-text {
@@ -589,6 +589,21 @@
 
 .scroll-timeline-container.light-theme .timeline-dot.active {
   background-color: #ffffff;
+  border-color: #0969da;
+  box-shadow:
+    0 0 8px rgba(9, 105, 218, 1),
+    0 0 16px rgba(9, 105, 218, 1),
+    0 0 24px rgba(3, 102, 214, 1);
+}
+
+.scroll-timeline-container.light-theme .timeline-progress-dot {
+  background: radial-gradient(
+    circle,
+    rgba(9, 105, 218, 1) 0%,
+    rgba(3, 102, 214, 0.5) 40%,
+    rgba(3, 102, 214, 0.5) 70%
+  );
+  box-shadow: 0 0 15px rgba(9, 105, 218, 1);
 }
 
 .scroll-timeline-container.light-theme .premium-glass-card::before {
@@ -597,6 +612,12 @@
 .scroll-timeline-container.light-theme .premium-badge {
   background: rgba(0, 0, 0, 0.08);
   color: #1a1a1a;
+}
+
+.scroll-timeline-container.light-theme .premium-badge svg,
+.scroll-timeline-container.light-theme .text-primary,
+.scroll-timeline-container.light-theme .premium-note-tag {
+  color: #0969da !important;
 }
 
 /* Status Indicator Dot */

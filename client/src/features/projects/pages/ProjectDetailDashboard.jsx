@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { projectService } from "../../../services/projectService";
 import { useModal } from "../../../context/ModalContext";
@@ -14,73 +14,33 @@ import ProjectForm from "../components/ProjectForm";
 import AddMilestonePanel from "../../timeline/components/AddMilestonePanel";
 import SuiTimeline from "../../timeline/components/SuiTimeline";
 import HoverTooltip from "../../../components/common/HoverTooltip";
+import CompositeBentoCard from "../../../components/common/CompositeBentoCard";
 
 const ProjectDetailSkeleton = ({ projectId }) => (
   <div className="project-detail-root">
     <div className="project-detail-header-wrap">
       <div className="pd-top-row">
-        <div
-          className="skeleton-base"
-          style={{ width: "80px", height: "30px" }}
-        ></div>
-        <div
-          className="skeleton-base"
-          style={{ width: "40px", height: "40px", borderRadius: "12px" }}
-        ></div>
+        <div className="skeleton-base skeleton-title-badge"></div>
+        <div className="skeleton-base skeleton-avatar"></div>
       </div>
       <div className="project-main-info">
-        <div
-          className="project-hero-area"
-          style={{ borderLeft: "8px solid rgba(255,255,255,0.1)" }}
-        >
-          <div className="project-title-stack" style={{ width: "100%" }}>
-            <div
-              className="skeleton-base"
-              style={{
-                width: "120px",
-                height: "14px",
-                opacity: 0.5,
-                marginBottom: "5px",
-              }}
-            ></div>
+        <div className="project-hero-area skeleton-hero-area">
+          <div className="project-title-stack skeleton-title-stack">
+            <div className="skeleton-base skeleton-code-tag"></div>
             <div className="project-name-group">
-              <div
-                className="skeleton-base"
-                style={{ width: "400px", height: "48px" }}
-              ></div>
+              <div className="skeleton-base skeleton-project-name"></div>
             </div>
-            <div className="project-metadata-row" style={{ marginTop: "15px" }}>
-              <div
-                className="skeleton-base"
-                style={{ width: "150px", height: "18px" }}
-              ></div>
-              <div
-                className="skeleton-base"
-                style={{ width: "180px", height: "18px" }}
-              ></div>
-              <div
-                className="skeleton-base"
-                style={{ width: "180px", height: "18px" }}
-              ></div>
+            <div className="project-metadata-row skeleton-metadata-row">
+              <div className="skeleton-base skeleton-metadata-item-1"></div>
+              <div className="skeleton-base skeleton-metadata-item-2"></div>
+              <div className="skeleton-base skeleton-metadata-item-2"></div>
             </div>
           </div>
-          <div className="project-hero-stats" style={{ gap: "40px" }}>
-            <div
-              className="skeleton-base"
-              style={{ width: "100px", height: "55px", borderRadius: "8px" }}
-            ></div>
-            <div
-              className="skeleton-base"
-              style={{ width: "100px", height: "55px", borderRadius: "8px" }}
-            ></div>
-            <div
-              className="skeleton-base"
-              style={{ width: "120px", height: "55px", borderRadius: "8px" }}
-            ></div>
-            <div
-              className="skeleton-base"
-              style={{ width: "120px", height: "55px", borderRadius: "8px" }}
-            ></div>
+          <div className="project-hero-stats skeleton-hero-stats">
+            <div className="skeleton-base skeleton-stat-box-sm"></div>
+            <div className="skeleton-base skeleton-stat-box-sm"></div>
+            <div className="skeleton-base skeleton-stat-box-lg"></div>
+            <div className="skeleton-base skeleton-stat-box-lg"></div>
           </div>
         </div>
       </div>
@@ -88,7 +48,7 @@ const ProjectDetailSkeleton = ({ projectId }) => (
 
     <div className="dashboard-content-grid">
       <div className="bento-layout">
-        <div className="bento-item lg-rect glass-card no-padding overflow-hidden">
+        <div className="bento-item lg-rect summary-bento-card no-padding overflow-hidden">
           {projectId ? (
             <div className="project-timeline-preview">
               <SuiTimeline
@@ -98,10 +58,7 @@ const ProjectDetailSkeleton = ({ projectId }) => (
               />
             </div>
           ) : (
-            <div
-              className="skeleton-base"
-              style={{ width: "100%", height: "100%" }}
-            ></div>
+            <div className="skeleton-base skeleton-timeline-preview"></div>
           )}
         </div>
         <div className="bento-item sm-square glass-card skeleton-base"></div>
@@ -133,6 +90,7 @@ const ProjectDetailDashboard = () => {
   const [showTimelineModal, setShowTimelineModal] = useState(false);
   const [showFinanceModal, setShowFinanceModal] = useState(false);
   const [showProductionModal, setShowProductionModal] = useState(false);
+  const [productionViewMode, setProductionViewMode] = useState("hierarchy");
   const [timelineTrigger, setTimelineTrigger] = useState(0);
   const [timelineViewMode, setTimelineViewMode] = useState("detailed");
   const [showTimelineSettings, setShowTimelineSettings] = useState(false);
@@ -144,6 +102,66 @@ const ProjectDetailDashboard = () => {
     (m) => m.status === "completed",
   ).length;
   const remainingCount = projectMilestones.length - completedCount;
+
+  const crewStats = useMemo(() => {
+    let deptCount = 0;
+    let memberCount = 0;
+    let memberNames = [];
+    let leadName = null;
+    let leadRole = null;
+    let maxLevel = 0;
+
+    if (project?.crew_hierarchy_data) {
+      try {
+        const parsed =
+          typeof project.crew_hierarchy_data === "string"
+            ? JSON.parse(project.crew_hierarchy_data)
+            : project.crew_hierarchy_data;
+
+        const traverse = (node, currentDepth) => {
+          if (!node) return;
+          if (currentDepth > maxLevel) maxLevel = currentDepth;
+          if (node.department) deptCount++;
+          if (node.members && Array.isArray(node.members)) {
+            node.members.forEach((m) => {
+              if (m.name?.trim() || m.role?.trim()) {
+                memberCount++;
+                if (m.name?.trim()) {
+                  memberNames.push(m.name.trim());
+                  // Extract the first prominent lead if not already found
+                  if (
+                    !leadName &&
+                    m.role &&
+                    (m.role.toLowerCase().includes("producer") ||
+                      m.role.toLowerCase().includes("director"))
+                  ) {
+                    leadName = m.name.trim();
+                    leadRole = m.role.trim();
+                  }
+                }
+              }
+            });
+          }
+          if (node.children && Array.isArray(node.children)) {
+            node.children.forEach((child) => traverse(child, currentDepth + 1));
+          }
+        };
+
+        traverse(parsed, 1);
+      } catch (err) {
+        console.error("Failed to parse crew hierarchy for summary", err);
+      }
+    }
+
+    return {
+      deptCount,
+      memberCount,
+      memberNames,
+      leadName,
+      leadRole,
+      maxLevel,
+    };
+  }, [project?.crew_hierarchy_data]);
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "TBD";
@@ -280,7 +298,7 @@ const ProjectDetailDashboard = () => {
         <>
           {activeTab === "overview" && (
             <div className="bento-layout fade-in">
-              <div className="bento-item lg-rect glass-card no-padding overflow-hidden">
+              <div className="bento-item lg-rect summary-bento-card no-padding overflow-hidden">
                 <div
                   className="project-timeline-preview"
                   onClick={() => setShowTimelineModal(true)}
@@ -293,40 +311,159 @@ const ProjectDetailDashboard = () => {
                 </div>
               </div>
 
+              <CompositeBentoCard
+                className="summary-bento-card"
+                onClick={() => {
+                  setProductionViewMode("hierarchy");
+                  setShowProductionModal(true);
+                }}
+                pillContent={
+                  <div className="summary-lead-container">
+                    <div className="summary-avatar">
+                      <span className="summary-avatar-initial">
+                        {crewStats.leadName && crewStats.leadName !== "TBD"
+                          ? crewStats.leadName.charAt(0)
+                          : "?"}
+                      </span>
+                    </div>
+                    <div className="summary-lead-text">
+                      <span className="summary-lead-name">
+                        {crewStats.leadName}
+                      </span>
+                      <span className="summary-lead-role">
+                        {crewStats.leadRole}
+                      </span>
+                    </div>
+                  </div>
+                }
+                bottomContent={
+                  <div className="summary-bento-middle">
+                    <h3 className="summary-bento-title">Crew Hierarchy</h3>
+                    <span className="summary-bento-subtitle">
+                      Nodes: <strong>{crewStats.deptCount}</strong>{" "}
+                      <span style={{ margin: "0 10px" }}></span> Levels:{" "}
+                      <strong>{crewStats.maxLevel}</strong>
+                    </span>
+                    <div className="summary-progress-container">
+                      <div className="summary-progress-bar">
+                        <div
+                          className="summary-progress-fill"
+                          style={{ width: "34%" }}
+                        ></div>
+                      </div>
+                      <div className="summary-progress-labels">
+                        <span>Production Crew Allocation</span>
+                        <span className="summary-progress-value">34%</span>
+                      </div>
+                    </div>
+                  </div>
+                }
+                rightContent={
+                  <div className="summary-bento-top-right">
+                    <div className="summary-selector global-glass-effect">
+                      <div className="summary-selector-icon">
+                        <Icon name="groups" modifiers="sm" />
+                      </div>
+                      <span>{crewStats.memberCount} Crew</span>
+                      <Icon name="expand_more" modifiers="sm" />
+                    </div>
+                  </div>
+                }
+              />
+
               <div
-                className="bento-item sm-square glass-card"
-                onClick={() => setShowProductionModal(true)}
-                style={{ cursor: "pointer" }}
+                className="bento-item sm-square glass-card summary-bento-card equipment-bento-card clickable-bento-card"
+                onClick={() => {
+                  setProductionViewMode("equipment");
+                  setShowProductionModal(true);
+                }}
               >
-                <h3>Production Status</h3>
-                <div className="status-indicator">
-                  <div
-                    className="status-dot pulse"
-                    style={{
-                      backgroundColor:
-                        project.status === "completed" ? "#10b981" : "#3b82f6",
-                    }}
-                  />
-                  <span>
-                    {project.status === "completed"
-                      ? "Completed"
-                      : "In Production"}
+                <div className="summary-bento-top">
+                  {(() => {
+                    let heroImg = null;
+                    let heroTitle = "ARRI Alexa";
+                    let heroSubtitle = "Camera A";
+                    try {
+                      if (project?.equipment_data) {
+                        const parsed =
+                          typeof project.equipment_data === "string"
+                            ? JSON.parse(project.equipment_data)
+                            : project.equipment_data;
+                        if (parsed?.hero) {
+                          if (parsed.hero.image) heroImg = parsed.hero.image;
+                          if (parsed.hero.name) heroTitle = parsed.hero.name;
+                          if (parsed.hero.label)
+                            heroSubtitle = parsed.hero.label;
+                        }
+                      }
+                    } catch (e) {}
+
+                    return (
+                      <div className="equipment-preview global-glass-effect">
+                        <div
+                          className="hero-camera-image"
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            borderRadius: 0,
+                            border: "none",
+                            boxShadow: "none",
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                          }}
+                        >
+                          {heroImg ? (
+                            <img src={heroImg} alt={heroTitle} />
+                          ) : (
+                            <Icon
+                              name="videocam"
+                              modifiers="xl"
+                              className="equipment-icon-opacity"
+                            />
+                          )}
+                        </div>
+                        <div className="equipment-preview-overlay">
+                          <span className="equipment-preview-title">
+                            {heroTitle}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                  <div className="summary-selector global-glass-effect">
+                    <div className="summary-selector-icon">
+                      <Icon name="inventory" modifiers="sm" />
+                    </div>
+                    <span>12 Active</span>
+                    <Icon name="expand_more" modifiers="sm" />
+                  </div>
+                </div>
+
+                <div className="summary-bento-middle">
+                  <h3 className="summary-bento-title">Equipment</h3>
+                  <span className="summary-bento-subtitle">
+                    Allocated: <strong>85%</strong>
                   </span>
                 </div>
-                <div className="date-range-summary">
-                  <p>
-                    Started: {new Date(project.start_date).toLocaleDateString()}
-                  </p>
-                  <p>
-                    Deadline: {new Date(project.end_date).toLocaleDateString()}
-                  </p>
+
+                <div className="summary-progress-container">
+                  <div className="summary-progress-bar">
+                    <div
+                      className="summary-progress-fill"
+                      style={{ width: "85%" }}
+                    ></div>
+                  </div>
+                  <div className="summary-progress-labels">
+                    <span>Utilization</span>
+                    <span>85%</span>
+                  </div>
                 </div>
               </div>
 
               <div
-                className="bento-item sm-square glass-card"
+                className="bento-item sm-square glass-card clickable-bento-card"
                 onClick={() => setShowFinanceModal(true)}
-                style={{ cursor: "pointer" }}
               >
                 <h3>Financial Snapshot</h3>
                 <div className="mini-chart">
@@ -395,14 +532,12 @@ const ProjectDetailDashboard = () => {
                       </HoverTooltip>
                     </div>
                   </div>
-                  
-                  <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "-8px" }}>
+
+                  <div className="timeline-legend-wrapper">
                     <div className="timeline-status-legend">
                       <div className="timeline-legend-item">
                         <div className="timeline-legend-dot pending" />
-                        <span className="timeline-legend-label">
-                          Pending
-                        </span>
+                        <span className="timeline-legend-label">Pending</span>
                       </div>
                       <div className="timeline-legend-item">
                         <div className="timeline-legend-dot in-progress" />
@@ -412,9 +547,7 @@ const ProjectDetailDashboard = () => {
                       </div>
                       <div className="timeline-legend-item">
                         <div className="timeline-legend-dot completed" />
-                        <span className="timeline-legend-label">
-                          Completed
-                        </span>
+                        <span className="timeline-legend-label">Completed</span>
                       </div>
                     </div>
                   </div>
@@ -461,6 +594,7 @@ const ProjectDetailDashboard = () => {
             <ProjectDashboardProduction
               project={project}
               onClose={() => setShowProductionModal(false)}
+              viewMode={productionViewMode}
             />
           )}
         </>
