@@ -63,6 +63,7 @@ const EditProfile = ({ onClose }) => {
     };
 
     fetchProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleChange = (field, val) => {

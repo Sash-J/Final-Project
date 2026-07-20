@@ -40,6 +40,7 @@ textarea {
 }
 
 body {
+  color-scheme: dark;
   background: transparent !important;
   color: var(--text-primary);
   min-height: 100vh;
@@ -151,11 +152,17 @@ code {
 }
 
 /* Global Light Theme for Neo Buttons */
+body.light-theme {
+  color-scheme: light;
+}
+
 body.light-theme .btn-neo {
   background: rgba(0, 0, 0, 0.05) !important;
   border: 1px solid rgba(0, 0, 0, 0.1) !important;
   color: #24292f !important;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.5) !important;
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.05),
+    inset 0 1px 1px rgba(255, 255, 255, 0.5) !important;
 }
 
 body.light-theme .btn-neo:hover {
@@ -168,13 +175,17 @@ body.light-theme .btn-neo-solid {
   background: #0969da !important;
   border-color: #0969da !important;
   color: #fff !important;
-  box-shadow: 0 10px 30px rgba(9, 105, 218, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.2) !important;
+  box-shadow:
+    0 10px 30px rgba(9, 105, 218, 0.2),
+    inset 0 1px 2px rgba(255, 255, 255, 0.2) !important;
 }
 
 body.light-theme .btn-neo-solid:hover {
   background: #1f883d !important;
   border-color: #1f883d !important;
-  box-shadow: 0 15px 40px rgba(31, 136, 61, 0.3), inset 0 1px 3px rgba(255, 255, 255, 0.3) !important;
+  box-shadow:
+    0 15px 40px rgba(31, 136, 61, 0.3),
+    inset 0 1px 3px rgba(255, 255, 255, 0.3) !important;
 }
 
 /* ==========================================================================
@@ -183,32 +194,28 @@ body.light-theme .btn-neo-solid:hover {
 .global-glass-effect {
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
-  
+
   box-shadow:
     0 10px 30px -10px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    inset 0 0 5px rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.15);
 
-  transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
-}
-
-.global-glass-effect:hover {
-  box-shadow:
-    0 15px 35px -10px rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.2);
+  transition:
+    box-shadow 0.3s ease,
+    border-color 0.3s ease,
+    transform 0.3s ease;
 }
 
 body.light-theme .global-glass-effect {
   box-shadow:
-    0 12px 35px rgba(0, 0, 0, 0.12),
-    inset 0 0 0 1px rgba(255, 255, 255, 1);
-  border: 1px solid rgba(0, 0, 0, 0.18);
+    0 8px 30px rgba(0, 0, 0, 0.08),
+    inset 0 1px 1px rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 body.light-theme .global-glass-effect:hover {
   box-shadow:
-    0 20px 45px rgba(0, 0, 0, 0.12),
-    inset 0 0 0 1px rgba(255, 255, 255, 1);
-  border-color: rgba(9, 105, 218, 0.3);
+    0 12px 40px rgba(0, 0, 0, 0.12),
+    inset 0 1px 1px rgba(255, 255, 255, 0.9);
+  border-color: rgba(9, 105, 218, 0.2);
 }

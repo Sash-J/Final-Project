@@ -31,8 +31,7 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
   const colorInputRef = useRef(null);
-  const startDateRef = useRef(null);
-  const endDateRef = useRef(null);
+
 
   const formatDateForInput = (dateStr) => {
     if (!dateStr) return "";
@@ -120,11 +119,10 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
     setLoading(true);
     setMsg("");
     try {
-      let data;
       if (editingProject) {
-        data = await projectService.updateProject(editingProject.id, formData);
+        await projectService.updateProject(editingProject.id, formData);
       } else {
-        data = await projectService.createProject(formData);
+        await projectService.createProject(formData);
       }
       
       setMsg(

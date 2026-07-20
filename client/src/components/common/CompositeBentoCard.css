@@ -36,7 +36,6 @@
 
 .composite-bento-card:hover {
   transform: translateY(-5px);
-  filter: drop-shadow(0 20px 40px rgba(var(--accent-color-rgb), 0.2));
 }
 
 .composite-bento-card:hover .composite-shape-1,
@@ -56,7 +55,6 @@
   width: 100%;
   height: 100%;
   z-index: 0;
-  pointer-events: none;
   display: grid;
   grid-template-columns: 1fr var(--gap) var(--right-width);
   grid-template-rows: var(--pill-height) var(--gap) 1fr;
@@ -73,11 +71,13 @@
   background: rgba(13, 15, 23, 0.65);
   transition:
     border-color 0.3s ease,
-    background-color 0.3s ease, box-shadow 0.3s ease;
+    background-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 /* Shape 1: Bottom Left Block */
 .composite-shape-1 {
+  position: relative;
   grid-column: 1 / span 2;
   grid-row: 3;
   border-radius: var(--corner-radius) 0px 0px var(--corner-radius);
@@ -88,20 +88,24 @@
   background: rgba(13, 15, 23, 0.65);
   transition:
     border-color 0.3s ease,
-    background-color 0.3s ease, box-shadow 0.3s ease;
+    background-color 0.3s ease,
+    box-shadow 0.3s ease;
+  pointer-events: auto;
 }
 
-.composite-shape-1::before {
+.composite-shape-1::after {
   content: "";
   position: absolute;
   left: 0;
   top: 0;
   width: calc(100% - var(--bridge-radius));
   background: rgba(255, 255, 255, 0.1);
+  z-index: 2;
 }
 
 /* Shape 2: Right Block */
 .composite-shape-2 {
+  position: relative;
   grid-column: 3;
   grid-row: 1 / span 3;
   border-radius: var(--corner-radius) var(--corner-radius) var(--corner-radius)
@@ -114,20 +118,99 @@
   background: rgba(13, 15, 23, 0.65);
   transition:
     border-color 0.3s ease,
-    background-color 0.3s ease, box-shadow 0.3s ease;
+    background-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
-.composite-shape-2::before {
+.composite-shape-2::after {
   content: "";
   position: absolute;
   left: 0;
   top: 0;
   height: calc(var(--pill-height) + var(--gap) - var(--bridge-radius));
   background: rgba(255, 255, 255, 0.1);
+  z-index: 2;
 }
 
-/* Inner Fillet / Bridge */
-.composite-svg-bridge {
+.spotlight-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  pointer-events: auto;
+  z-index: 1;
+}
+
+/* Flattened opacity group to prevent overlapping alpha seams during transition */
+.grainient-group {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.composite-bento-card:hover .grainient-group {
+  opacity: 1;
+}
+
+.grainient-mask {
+  position: relative;
+  overflow: hidden;
+}
+
+.grainient-mask-1 {
+  grid-column: 1 / span 2;
+  grid-row: 3;
+  border-radius: var(--corner-radius) 0px 0px var(--corner-radius);
+  border-left: 1px solid transparent;
+  border-bottom: 1px solid transparent;
+}
+
+.grainient-mask-2 {
+  grid-column: 3;
+  grid-row: 1 / span 3;
+  border-radius: var(--corner-radius) var(--corner-radius) var(--corner-radius)
+    0px;
+  border-top: 1px solid transparent;
+  border-right: 1px solid transparent;
+  border-bottom: 1px solid transparent;
+}
+
+.grainient-mask-bridge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  mask-image: url("data:image/svg+xml,%3Csvg viewBox='-32 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M 0 0 C 0 24 -6.4 32 -32 32 H 0 Z' fill='black'/%3E%3C/svg%3E");
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='-32 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M 0 0 C 0 24 -6.4 32 -32 32 H 0 Z' fill='black'/%3E%3C/svg%3E");
+  mask-size: 100% 100%;
+  -webkit-mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+}
+
+/* Eliminate sub-pixel grid gaps by stretching the overlays slightly over the seams */
+.grainient-mask-1 .spotlight-overlay {
+  width: calc(100% + 1.5px);
+  height: calc(100% + 1.5px);
+  top: -1.5px;
+}
+
+.grainient-mask-2 .spotlight-overlay {
+  width: calc(100% + 1.5px);
+  left: -1.5px;
+}
+
+.grainient-mask-bridge .spotlight-overlay {
+  width: calc(100% + 1.5px);
+  height: calc(100% + 1.5px);
+}
+
+/* Inner Fillet / Bridge Wrapper */
+.composite-bridge-wrapper {
   position: absolute;
   /* Bridge is pinned perfectly to the right edge of Shape 1 and bottom edge of Shape 2's empty space */
   right: var(--right-width);
@@ -136,6 +219,29 @@
   height: var(--bridge-radius);
   pointer-events: none;
   z-index: 10;
+}
+
+.composite-bridge-shape {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(13, 15, 23, 0.65);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  mask-image: url("data:image/svg+xml,%3Csvg viewBox='-32 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M 0 0 C 0 24 -6.4 32 -32 32 H 0 Z' fill='black'/%3E%3C/svg%3E");
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='-32 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M 0 0 C 0 24 -6.4 32 -32 32 H 0 Z' fill='black'/%3E%3C/svg%3E");
+  mask-size: 100% 100%;
+  -webkit-mask-size: 100% 100%;
+}
+
+.composite-svg-bridge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .composite-bridge-stroke {
@@ -149,9 +255,14 @@ body.light-theme .composite-bento-card {
 
 body.light-theme .composite-shape-1,
 body.light-theme .composite-shape-2,
-body.light-theme .composite-shape-3 {
+body.light-theme .composite-shape-3,
+body.light-theme .composite-bridge-shape {
   background: rgba(0, 0, 0, 0.08);
   border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .composite-bridge-stroke {
+  stroke: rgba(0, 0, 0, 0.1);
 }
 
 /* Foreground Content layer */
@@ -162,6 +273,7 @@ body.light-theme .composite-shape-3 {
   height: 100%;
   display: flex;
   flex-direction: column;
+  pointer-events: none;
 }
 
 .composite-pill-content {
@@ -170,6 +282,7 @@ body.light-theme .composite-shape-3 {
   top: 0;
   width: calc(100% - var(--right-width) - var(--gap));
   height: var(--pill-height);
+  pointer-events: auto;
   display: flex;
   align-items: center;
   justify-content: center;

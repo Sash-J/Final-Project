@@ -522,17 +522,16 @@ body.light-theme .mm-input:focus {
 
 /* Zoom and Pan Controls */
 .org-zoom-controls {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
+  position: absolute !important;
+  bottom: 20px !important;
+  right: 20px !important;
+  z-index: 50 !important;
+}
+
+.org-zoom-controls .glass-surface__content {
   display: flex;
   gap: 8px;
-  background: rgba(18, 19, 26, 0.98); /* Opaque to match mm-card */
   padding: 8px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-  z-index: 50;
 }
 
 .org-zoom-controls button {
@@ -550,12 +549,6 @@ body.light-theme .mm-input:focus {
 
 .org-zoom-controls button:hover {
   background: rgba(255, 255, 255, 0.1);
-}
-
-body.light-theme .org-zoom-controls {
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
 }
 
 body.light-theme .org-zoom-controls button {

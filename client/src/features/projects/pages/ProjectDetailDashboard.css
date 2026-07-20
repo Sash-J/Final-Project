@@ -1,6 +1,6 @@
 .project-detail-root {
   max-width: 1400px;
-  margin: 50px auto;
+  margin: 10px auto;
   padding: 30px;
   min-height: 80vh;
   background: rgba(13, 15, 23, 0.4);
@@ -215,7 +215,6 @@
 
 .glass-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 20px 40px rgba(var(--accent-color-rgb), 0.2);
   border-color: rgba(var(--accent-color-rgb), 0.3);
 }
 
@@ -630,7 +629,6 @@ body.light-theme .timeline-legend-label {
 
 .summary-bento-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 20px 40px rgba(var(--accent-color-rgb), 0.2) !important;
   border-color: rgba(var(--accent-color-rgb), 0.3) !important;
 }
 
@@ -651,7 +649,7 @@ body.light-theme .timeline-legend-label {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
 }
 
@@ -663,7 +661,6 @@ body.light-theme .timeline-legend-label {
   flex-shrink: 0;
   border-radius: 50%;
   background: rgba(var(--accent-color-rgb), 0.1);
-  border: 1px solid rgba(var(--accent-color-rgb), 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -671,6 +668,7 @@ body.light-theme .timeline-legend-label {
   font-size: 1.2rem;
   color: var(--accent-color);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 .summary-lead-text {
@@ -691,18 +689,6 @@ body.light-theme .timeline-legend-label {
   width: 120px;
   height: 120px;
   border-radius: 16px;
-  background:
-    radial-gradient(
-      circle at 85% 40%,
-      rgba(0, 198, 230, 0.6) 0%,
-      transparent 60%
-    ),
-    radial-gradient(
-      circle at 15% 85%,
-      rgba(0, 150, 200, 0.5) 0%,
-      transparent 70%
-    ),
-    linear-gradient(135deg, #001622 0%, #00040a 100%) !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -724,7 +710,6 @@ body.light-theme .timeline-legend-label {
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
   padding: 24px 6px 6px 6px;
   display: flex;
   flex-direction: column;
@@ -735,14 +720,14 @@ body.light-theme .timeline-legend-label {
 .equipment-preview-title {
   font-size: 0.75rem;
   font-weight: 700;
-  color: #fff;
+  color: light-dark(#24292f, #fff);
   line-height: 1.1;
   text-align: center;
 }
 
 .equipment-preview-subtitle {
   font-size: 0.65rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: light-dark(#57606a, rgba(255, 255, 255, 0.6));
   text-align: center;
   margin-top: 2px;
 }
@@ -838,9 +823,7 @@ body.light-theme .timeline-legend-label {
   transform-origin: top right;
   cursor: pointer;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.summary-selector.global-glass-effect:hover {
-  transform: scale(0.9) translateY(-2px);
+  border: 1.5px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 /* Remove premium-glass-card matrix animations from the selector */
@@ -860,6 +843,7 @@ body.light-theme .timeline-legend-label {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-right: 8px;
 }
 .summary-selector-icon .material-icons,
 .summary-selector-icon .icon-root {
@@ -918,14 +902,12 @@ body.light-theme .summary-bento-card {
 }
 
 body.light-theme .summary-lead-name,
-body.light-theme .summary-bento-title,
-body.light-theme .equipment-preview-title {
+body.light-theme .summary-bento-title {
   color: #24292f;
 }
 
 body.light-theme .summary-lead-role,
-body.light-theme .summary-bento-subtitle,
-body.light-theme .equipment-preview-subtitle {
+body.light-theme .summary-bento-subtitle {
   color: #57606a;
 }
 
@@ -966,21 +948,6 @@ body.light-theme .summary-progress-labels {
 
 body.light-theme .summary-progress-labels span:last-child {
   color: #0969da;
-}
-
-body.light-theme .equipment-preview {
-  background:
-    radial-gradient(
-      circle at 85% 40%,
-      rgba(0, 198, 255, 0.15) 0%,
-      transparent 60%
-    ),
-    radial-gradient(
-      circle at 15% 85%,
-      rgba(9, 105, 218, 0.15) 0%,
-      transparent 70%
-    ),
-    linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%) !important;
 }
 
 body.light-theme .equipment-preview-overlay {
@@ -1070,4 +1037,14 @@ body.light-theme .summary-avatar {
 
 .equipment-icon-opacity {
   opacity: 0.4;
+}
+
+/* Equipment Grainient Hover Effect */
+.equipment-grainient-wrapper {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.equipment-bento-card:hover .equipment-grainient-wrapper {
+  opacity: 1;
 }

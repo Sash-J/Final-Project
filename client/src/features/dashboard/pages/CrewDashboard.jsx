@@ -1,4 +1,4 @@
-import axios from "axios";
+
 import html2pdf from "html2pdf.js/dist/html2pdf.bundle.min.js";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../auth/context/AuthContext";

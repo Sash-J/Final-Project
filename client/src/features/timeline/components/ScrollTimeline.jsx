@@ -87,7 +87,7 @@ export const ScrollTimeline = ({
 }) => {
   const events = useMemo(() => [...initialEvents].reverse(), [initialEvents]);
   const scrollRef = useRef(null);
-  const containerRef = useRef(null);
+
   const [hasScrolled, setHasScrolled] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const timelineRefs = useRef([]);
@@ -480,22 +480,7 @@ export const ScrollTimeline = ({
     };
   };
 
-  const getConnectorClasses = () => {
-    const baseClasses = cn(
-      "absolute left-1/2 transform -translate-x-1/2",
-      lineColor,
-    );
-    const widthStyle = `w-[${progressLineWidth}px]`;
-    switch (connectorStyle) {
-      case "dots":
-        return cn(baseClasses, "w-1 rounded-full");
-      case "dashed":
-        return cn(baseClasses, widthStyle, `mask-gradient-dashed`);
-      case "line":
-      default:
-        return cn(baseClasses, widthStyle);
-    }
-  };
+
 
   const getCardClasses = (index) => {
     const baseClasses = "relative z-30";

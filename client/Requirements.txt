@@ -118,7 +118,7 @@ Back End
         - released projects (done cards)
         - profile
         - user payments (payment history + pending payments - project based --> must include to nav bar)
-        - live client project count down  + release countdown (floating modal)
+        - live client project count down  + release countdoawn (floating modal)
         - Live client shedule (project based schedule summary) floating modal
         - Online meeting popup display (like live coundown - client + all interanl project users)
         - Deadline popup for clients for budget deadlines and payments and etc...
