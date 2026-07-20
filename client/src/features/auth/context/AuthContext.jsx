@@ -164,6 +164,7 @@ export const AuthProvider = ({ children }) => {
         window.removeEventListener(event, handleActivity),
       );
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   return (

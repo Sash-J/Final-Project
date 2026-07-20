@@ -15,6 +15,8 @@ import AddMilestonePanel from "../../timeline/components/AddMilestonePanel";
 import SuiTimeline from "../../timeline/components/SuiTimeline";
 import HoverTooltip from "../../../components/common/HoverTooltip";
 import CompositeBentoCard from "../../../components/common/CompositeBentoCard";
+import GlassSurface from "../../../components/common/GlassSurface";
+import Grainient from "../../../components/common/Grainient";
 
 const ProjectDetailSkeleton = ({ projectId }) => (
   <div className="project-detail-root">
@@ -80,7 +82,7 @@ const ProjectDetailDashboard = () => {
     milestonesCache,
   } = useProjects();
 
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab] = useState("overview");
   const [showEditModal, setShowEditModal] = useState(false);
   const { showConfirm } = useModal();
 
@@ -93,7 +95,10 @@ const ProjectDetailDashboard = () => {
   const [productionViewMode, setProductionViewMode] = useState("hierarchy");
   const [timelineTrigger, setTimelineTrigger] = useState(0);
   const [timelineViewMode, setTimelineViewMode] = useState("detailed");
-  const [showTimelineSettings, setShowTimelineSettings] = useState(false);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const project = detailsCache[projectId];
 
@@ -214,7 +219,10 @@ const ProjectDetailDashboard = () => {
             <Icon name="arrow_back" modifiers="md" />
             <span>Back</span>
           </button>
-          <button className="project-hero-btn delete" onClick={handleDelete}>
+          <button
+            className="project-hero-btn delete global-glass-effect"
+            onClick={handleDelete}
+          >
             <Icon name="delete" modifiers="md" />
           </button>
         </div>
@@ -244,7 +252,7 @@ const ProjectDetailDashboard = () => {
               <div className="project-name-group">
                 <ScrambleText as="h1" text={project.project_name} />
                 <button
-                  className="project-hero-btn edit"
+                  className="project-hero-btn edit global-glass-effect"
                   onClick={() => setShowEditModal(true)}
                 >
                   <Icon name="edit" modifiers="md" />
@@ -319,13 +327,21 @@ const ProjectDetailDashboard = () => {
                 }}
                 pillContent={
                   <div className="summary-lead-container">
-                    <div className="summary-avatar">
+                    <GlassSurface
+                      className="summary-avatar"
+                      width="44px"
+                      height="44px"
+                      borderRadius="50%"
+                      blur={6}
+                      opacity={0.4}
+                      backgroundOpacity={0}
+                    >
                       <span className="summary-avatar-initial">
                         {crewStats.leadName && crewStats.leadName !== "TBD"
                           ? crewStats.leadName.charAt(0)
                           : "?"}
                       </span>
-                    </div>
+                    </GlassSurface>
                     <div className="summary-lead-text">
                       <span className="summary-lead-name">
                         {crewStats.leadName}
@@ -360,13 +376,25 @@ const ProjectDetailDashboard = () => {
                 }
                 rightContent={
                   <div className="summary-bento-top-right">
-                    <div className="summary-selector global-glass-effect">
+                    <GlassSurface
+                      className="summary-selector"
+                      width="max-content"
+                      height="auto"
+                      borderRadius="30px"
+                      blur={10}
+                      opacity={0}
+                      backgroundOpacity={0}
+                    >
                       <div className="summary-selector-icon">
                         <Icon name="groups" modifiers="sm" />
                       </div>
                       <span>{crewStats.memberCount} Crew</span>
-                      <Icon name="expand_more" modifiers="sm" />
-                    </div>
+                      <Icon
+                        name="expand_more"
+                        modifiers="sm"
+                        style={{ marginLeft: "5px" }}
+                      />
+                    </GlassSurface>
                   </div>
                 }
               />
@@ -377,86 +405,137 @@ const ProjectDetailDashboard = () => {
                   setProductionViewMode("equipment");
                   setShowProductionModal(true);
                 }}
+                style={{ position: "relative", overflow: "hidden" }}
               >
-                <div className="summary-bento-top">
-                  {(() => {
-                    let heroImg = null;
-                    let heroTitle = "ARRI Alexa";
-                    let heroSubtitle = "Camera A";
-                    try {
-                      if (project?.equipment_data) {
-                        const parsed =
-                          typeof project.equipment_data === "string"
-                            ? JSON.parse(project.equipment_data)
-                            : project.equipment_data;
-                        if (parsed?.hero) {
-                          if (parsed.hero.image) heroImg = parsed.hero.image;
-                          if (parsed.hero.name) heroTitle = parsed.hero.name;
-                          if (parsed.hero.label)
-                            heroSubtitle = parsed.hero.label;
+                <div
+                  className="equipment-grainient-wrapper"
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    zIndex: 0,
+                    pointerEvents: "none",
+                    borderRadius: "inherit",
+                  }}
+                >
+                  <Grainient
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: "inherit",
+                    }}
+                  />
+                </div>
+                <div
+                  style={{
+                    position: "relative",
+                    zIndex: 1,
+                    width: "100%",
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <div className="summary-bento-top">
+                    {(() => {
+                      let heroImg = null;
+                      let heroTitle = "ARRI Alexa";
+
+                      try {
+                        if (project?.equipment_data) {
+                          const parsed =
+                            typeof project.equipment_data === "string"
+                              ? JSON.parse(project.equipment_data)
+                              : project.equipment_data;
+                          if (parsed?.hero) {
+                            if (parsed.hero.image) heroImg = parsed.hero.image;
+                            if (parsed.hero.name) heroTitle = parsed.hero.name;
+                          }
                         }
-                      }
-                    } catch (e) {}
+                      } catch (e) {}
 
-                    return (
-                      <div className="equipment-preview global-glass-effect">
-                        <div
-                          className="hero-camera-image"
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            borderRadius: 0,
-                            border: "none",
-                            boxShadow: "none",
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                          }}
+                      return (
+                        <GlassSurface
+                          className="equipment-preview"
+                          width="120px"
+                          height="120px"
+                          borderRadius="16px"
+                          blur={10}
+                          opacity={0}
+                          backgroundOpacity={0}
                         >
-                          {heroImg ? (
-                            <img src={heroImg} alt={heroTitle} />
-                          ) : (
-                            <Icon
-                              name="videocam"
-                              modifiers="xl"
-                              className="equipment-icon-opacity"
-                            />
-                          )}
-                        </div>
-                        <div className="equipment-preview-overlay">
-                          <span className="equipment-preview-title">
-                            {heroTitle}
-                          </span>
-                        </div>
+                          <div
+                            className="hero-camera-image"
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              borderRadius: 0,
+                              border: "none",
+                              boxShadow: "none",
+                              position: "absolute",
+                              top: 0,
+                              left: 0,
+                            }}
+                          >
+                            {heroImg ? (
+                              <img src={heroImg} alt={heroTitle} />
+                            ) : (
+                              <Icon
+                                name="videocam"
+                                modifiers="xl"
+                                className="equipment-icon-opacity"
+                              />
+                            )}
+                          </div>
+                          <div className="equipment-preview-overlay">
+                            <span className="equipment-preview-title">
+                              {heroTitle}
+                            </span>
+                          </div>
+                        </GlassSurface>
+                      );
+                    })()}
+                    <GlassSurface
+                      className="summary-selector"
+                      width="max-content"
+                      height="auto"
+                      borderRadius="30px"
+                      blur={10}
+                      opacity={0.1}
+                      backgroundOpacity={0}
+                    >
+                      <div className="summary-selector-icon">
+                        <Icon name="inventory" modifiers="sm" />
                       </div>
-                    );
-                  })()}
-                  <div className="summary-selector global-glass-effect">
-                    <div className="summary-selector-icon">
-                      <Icon name="inventory" modifiers="sm" />
+                      <span>12 Active</span>
+                      <Icon
+                        name="expand_more"
+                        modifiers="sm"
+                        style={{ marginLeft: "5px" }}
+                      />
+                    </GlassSurface>
+                  </div>
+
+                  <div className="summary-bento-middle">
+                    <h3 className="summary-bento-title">Equipment</h3>
+                    <span className="summary-bento-subtitle">
+                      Allocated: <strong>85%</strong>
+                    </span>
+                  </div>
+
+                  <div className="summary-progress-container">
+                    <div className="summary-progress-bar">
+                      <div
+                        className="summary-progress-fill"
+                        style={{ width: "85%" }}
+                      ></div>
                     </div>
-                    <span>12 Active</span>
-                    <Icon name="expand_more" modifiers="sm" />
-                  </div>
-                </div>
-
-                <div className="summary-bento-middle">
-                  <h3 className="summary-bento-title">Equipment</h3>
-                  <span className="summary-bento-subtitle">
-                    Allocated: <strong>85%</strong>
-                  </span>
-                </div>
-
-                <div className="summary-progress-container">
-                  <div className="summary-progress-bar">
-                    <div
-                      className="summary-progress-fill"
-                      style={{ width: "85%" }}
-                    ></div>
-                  </div>
-                  <div className="summary-progress-labels">
-                    <span>Utilization</span>
-                    <span>85%</span>
+                    <div className="summary-progress-labels">
+                      <span>Utilization</span>
+                      <span>85%</span>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Icon from "../../../components/common/Icon";
 import HoverTooltip from "../../../components/common/HoverTooltip";
+import GlassSurface from "../../../components/common/GlassSurface";
 import { projectService } from "../../../services/projectService";
 import "./CrewHierarchy.css";
 
@@ -251,6 +252,7 @@ const CrewHierarchy = ({ project, onUpdateHierarchy, onSaveStatusChange }) => {
     }, 1500);
 
     return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [treeData, project?.id, onSaveStatusChange]);
 
   // Save immediately on unmount if there are unsaved changes
@@ -271,6 +273,7 @@ const CrewHierarchy = ({ project, onUpdateHierarchy, onSaveStatusChange }) => {
           });
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [project?.id]);
 
   // Helper to deep clone and modify tree
@@ -649,7 +652,17 @@ const CrewHierarchy = ({ project, onUpdateHierarchy, onSaveStatusChange }) => {
         </ul>
       </div>
 
-      <div className="org-zoom-controls">
+      <GlassSurface
+        className="org-zoom-controls"
+        width="max-content"
+        height="max-content"
+        borderRadius={12}
+        blur={8}
+        opacity={0.5}
+        backgroundOpacity={0.2}
+        distortionScale={80}
+        displace={1.9}
+      >
         <HoverTooltip text="Zoom Out">
           <button onClick={handleZoomOut}>
             <Icon name="remove" modifiers="sm" />
@@ -665,7 +678,7 @@ const CrewHierarchy = ({ project, onUpdateHierarchy, onSaveStatusChange }) => {
             <Icon name="add" modifiers="sm" />
           </button>
         </HoverTooltip>
-      </div>
+      </GlassSurface>
 
       {addModalVisible &&
         createPortal(

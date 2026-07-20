@@ -30,6 +30,7 @@ const EquipmentVisualization = forwardRef(
 
     useEffect(() => {
       fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [project]);
 
     const fetchData = async () => {

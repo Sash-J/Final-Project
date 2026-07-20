@@ -9,7 +9,8 @@ const NotificationBell = () => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showDropdown, setShowDropdown] = useState(false);
-  const dropdownRef = useRef(null);
+  const bellContainerRef = useRef(null);
+  const dropdownWrapperRef = useRef(null);
 
   useEffect(() => {
     fetchUnreadCount();
@@ -19,7 +20,10 @@ const NotificationBell = () => {
 
   useEffect(() => {
     const handleOutsideClick = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+      const clickedOutsideBell = bellContainerRef.current && !bellContainerRef.current.contains(e.target);
+      const clickedOutsideDropdown = dropdownWrapperRef.current && !dropdownWrapperRef.current.contains(e.target);
+      
+      if (clickedOutsideBell && clickedOutsideDropdown) {
         setShowDropdown(false);
       }
     };
@@ -109,7 +113,7 @@ const NotificationBell = () => {
   );
 
   return (
-    <div className="notification-bell-container" ref={dropdownRef}>
+    <div className="notification-bell-container" ref={bellContainerRef}>
       <div
         className={`bell-icon ${showDropdown ? "active" : ""}`}
         onClick={() => setShowDropdown(!showDropdown)}
@@ -120,40 +124,39 @@ const NotificationBell = () => {
 
       {showDropdown &&
         createPortal(
-          <div
-            className={`notifications-dropdown glass-panel show`}
-            ref={dropdownRef}
-          >
-            <div className="dropdown-header">
-              <div className="dropdown-title-wrap">
-                <BellIcon className="dropdown-header-icon" />
-                <h3>Notifications</h3>
-              </div>
-              {unreadCount > 0 && (
-                <button className="mark-all-btn" onClick={handleMarkAllRead}>
-                  Mark all as read
-                </button>
-              )}
-            </div>
-            <div className="notifications-list">
-              {notifications.length === 0 ? (
-                <div className="empty-notifications">
-                  No notifications found
+          <div ref={dropdownWrapperRef} className="notifications-dropdown-wrapper">
+            <div className={`notifications-dropdown glass-panel show`}>
+              <div className="dropdown-header">
+                <div className="dropdown-title-wrap">
+                  <BellIcon className="dropdown-header-icon" />
+                  <h3>Notifications</h3>
                 </div>
-              ) : (
-                notifications.slice(0, 20).map((note) => (
-                  <div
-                    key={note.id}
-                    className={`notification-item ${!note.is_read ? "unread" : ""}`}
-                    onClick={() => handleMarkAsRead(note.id, note.is_read)}
-                  >
-                    <span className="notification-message">{note.message}</span>
-                    <span className="notification-time">
-                      {formatTime(note.created_at)}
-                    </span>
+                {unreadCount > 0 && (
+                  <button className="mark-all-btn" onClick={handleMarkAllRead}>
+                    Mark all as read
+                  </button>
+                )}
+              </div>
+              <div className="notifications-list">
+                {notifications.length === 0 ? (
+                  <div className="empty-notifications">
+                    No notifications found
                   </div>
-                ))
-              )}
+                ) : (
+                  notifications.slice(0, 20).map((note) => (
+                    <div
+                      key={note.id}
+                      className={`notification-item ${!note.is_read ? "unread" : ""}`}
+                      onClick={() => handleMarkAsRead(note.id, note.is_read)}
+                    >
+                      <span className="notification-message">{note.message}</span>
+                      <span className="notification-time">
+                        {formatTime(note.created_at)}
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </div>,
           document.body,

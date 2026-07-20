@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import ConfirmationModal from "../../../components/common/ConfirmationModal";
 import ModalPortal from "../../../components/common/ModalPortal";
 import { projectService } from "../../../services/projectService";
@@ -17,10 +17,9 @@ const SuiTimeline = ({
   onMilestonesChange,
   onClick,
 }) => {
-  const { getProjectMilestones, milestonesCache, detailsCache } = useProjects();
-  const milestones = milestonesCache[projectId] || [];
-  const project = detailsCache ? detailsCache[projectId] || {} : {};
-  const projectColor = project.color || "var(--accent-color)";
+  const { getProjectMilestones, milestonesCache } = useProjects();
+  const milestones = useMemo(() => milestonesCache[projectId] || [], [milestonesCache, projectId]);
+  
   const [loading, setLoading] = useState(true);
   const [selectedMilestone, setSelectedMilestone] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);

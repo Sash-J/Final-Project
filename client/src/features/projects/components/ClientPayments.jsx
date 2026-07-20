@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useProjects } from "../context/ProjectContext";
 import { useAuth } from "../../auth/context/AuthContext";
 import Icon from "../../../components/common/Icon";
-import HoverTooltip from "../../../components/common/HoverTooltip";
 import GlassDatePicker from "../../../components/common/GlassDatePicker";
 import "./ClientPayments.css";
 import { formatCurrency, getCurrencySymbol } from "../../../utils/currencyUtils";
@@ -22,7 +21,6 @@ const ClientPayments = ({ projectId }) => {
   const [notes, setNotes] = useState("");
   const [recording, setRecording] = useState(false);
   const [msg, setMsg] = useState(null);
-  const dateRef = useRef(null);
 
   const payments = paymentsCache[projectId] || [];
   const project = detailsCache[projectId] || {};
