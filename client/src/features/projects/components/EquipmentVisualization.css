@@ -15,10 +15,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
-}
-
-.equipment-category {
-  padding: 20px;
+  align-items: start;
 }
 
 /* =========================================
@@ -133,6 +130,10 @@
   font-weight: 500;
 }
 
+body.light-theme .hero-label {
+  color: #0969da;
+}
+
 .hero-camera-details h2 {
   margin: 0;
   font-size: 1.8rem;
@@ -195,7 +196,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .hero-inline-input {
@@ -219,6 +220,8 @@
 }
 
 .hero-inline-input.h2-input {
+  flex: 1;
+  min-width: 0;
   font-size: 1.8rem;
   font-weight: 700;
   color: #fff;
@@ -271,11 +274,10 @@
 
 /* Hero Format & Resolution Display/Edit */
 .hero-format-edit-row {
-  display: grid;
-  grid-template-columns: auto 1fr;
+  display: flex;
   align-items: center;
   gap: 8px;
-  row-gap: 3px;
+  flex-wrap: wrap;
   margin-top: 5px;
 }
 
@@ -319,20 +321,6 @@
 /* =========================================
    4. EQUIPMENT LIST & DEPARTMENTS
    ========================================= */
-.cat-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 15px;
-  color: #fff;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 10px;
-}
-
-.cat-header h3 {
-  margin: 0;
-  font-size: 1.1rem;
-}
 
 .equipment-list {
   list-style: none;
@@ -340,7 +328,7 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 4px;
 }
 
 .equipment-list li {
@@ -386,39 +374,6 @@
 /* =========================================
    5. EQUIPMENT EDITING (INPUTS & BUTTONS)
    ========================================= */
-.equipment-toolbar {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: -5px;
-  margin-bottom: 5px;
-}
-
-.editable-cat-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding-bottom: 10px;
-}
-
-.dept-name-input {
-  background: transparent;
-  border: 1px solid transparent;
-  color: #fff;
-  font-size: 1.1rem;
-  font-weight: 600;
-  flex: 1;
-  outline: none;
-  border-radius: 4px;
-  padding: 2px 5px;
-  transition: all 0.2s ease;
-  font-family: inherit;
-}
-
-.dept-name-input:hover,
-.dept-name-input:focus {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.2);
-}
 
 .eq-item-name-input {
   flex: 1;
@@ -455,99 +410,9 @@
   margin: 0;
 }
 
-.eq-input-sm,
-.eq-input-md {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #fff;
-  border-radius: 6px;
-  padding: 6px 10px;
-  outline: none;
-  font-family: inherit;
-  transition: all 0.2s ease;
-}
-
-.eq-input-sm {
-  font-size: 0.8rem;
-}
-
-.eq-input-md {
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.eq-input-sm:focus,
-.eq-input-md:focus {
-  border-color: var(--accent-color);
-  background: rgba(var(--accent-color-rgb), 0.05);
-}
-
-.add-item-wrap {
-  margin-top: 15px;
-  display: flex;
-  justify-content: center;
-}
-
-.add-item-btn {
-  background: transparent;
-  border: 1px dashed rgba(255, 255, 255, 0.2);
-  color: rgba(255, 255, 255, 0.6);
-  border-radius: 8px;
-  padding: 6px 12px;
-  font-size: 0.8rem;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  width: 100%;
-  justify-content: center;
-}
-
-.add-item-btn:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.4);
-}
-
-.delete-btn {
-  opacity: 0.3;
-  transition: all 0.2s ease;
-}
-
-.delete-btn:hover {
-  opacity: 1;
-  color: #ff4d4f;
-}
-
-.remove-item-btn {
-  opacity: 0;
-  transition: all 0.2s ease;
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.equipment-item:hover .remove-item-btn {
-  opacity: 1;
-}
-
-.remove-item-btn:hover {
-  color: #ff4d4f;
-  background: rgba(255, 77, 79, 0.1);
-}
-
 /* =========================================
    6. UTILITIES & EMPTY STATES
    ========================================= */
-.empty-state-equipment {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 40px;
-  color: rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 12px;
-  border: 1px dashed rgba(255, 255, 255, 0.1);
-}
-
 .skeleton-pulse {
   background: linear-gradient(
     90deg,
@@ -628,12 +493,7 @@ body.light-theme .hero-status {
   color: #1a7f37;
 }
 
-body.light-theme .cat-header {
-  color: #24292f;
-  border-bottom-color: rgba(0, 0, 0, 0.1);
-}
-
-body.light-theme .equipment-list li {
+body.light-theme body.light-theme .equipment-list li {
   color: #57606a;
 }
 
@@ -659,11 +519,7 @@ body.light-theme .hero-inline-input.p-input {
   color: #57606a;
 }
 
-body.light-theme .dept-name-input {
-  color: #24292f;
-}
-
-body.light-theme .dept-name-input:hover,
+body.light-theme body.light-theme .dept-name-input:hover,
 body.light-theme .dept-name-input:focus {
   background: rgba(0, 0, 0, 0.03);
   border-color: rgba(0, 0, 0, 0.1);
@@ -688,40 +544,6 @@ body.light-theme .eq-qty-input {
   color: #24292f;
 }
 
-body.light-theme .eq-input-sm,
-body.light-theme .eq-input-md {
-  background: #f6f8fa;
-  border-color: #d0d7de;
-  color: #24292f;
-}
-
-body.light-theme .eq-input-sm:focus,
-body.light-theme .eq-input-md:focus {
-  border-color: var(--accent-color);
-  background: rgba(var(--accent-color-rgb), 0.05);
-}
-
-body.light-theme .add-item-btn {
-  border-color: rgba(0, 0, 0, 0.15);
-  color: rgba(0, 0, 0, 0.6);
-}
-
-body.light-theme .add-item-btn:hover {
-  background: rgba(0, 0, 0, 0.03);
-  color: #24292f;
-  border-color: rgba(0, 0, 0, 0.3);
-}
-
-body.light-theme .remove-item-btn {
-  color: rgba(0, 0, 0, 0.4);
-}
-
-body.light-theme .empty-state-equipment {
-  color: rgba(0, 0, 0, 0.5);
-  background: rgba(0, 0, 0, 0.02);
-  border-color: rgba(0, 0, 0, 0.1);
-}
-
 body.light-theme .skeleton-pulse {
   background: linear-gradient(
     90deg,
@@ -730,4 +552,193 @@ body.light-theme .skeleton-pulse {
     rgba(0, 0, 0, 0.05) 75%
   );
   background-size: 200% 100%;
+}
+
+/* Ensure the background group is visible */
+.dept-bento-wrapper .grainient-group {
+  display: grid !important;
+  opacity: 1 !important;
+}
+
+/* Force Safari/Chrome to respect the asymmetric border-radius clips on the DarkVeil canvas layer */
+.dept-bento-wrapper .grainient-mask {
+  transform: translateZ(0) !important;
+  isolation: isolate !important;
+}
+
+/* Reset the inner canvas to inherit the exact border-radius of the mask, instead of uniformly rounding */
+.dept-bento-wrapper .grainient-mask .spotlight-overlay {
+  border-radius: inherit !important;
+}
+
+.dept-title-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.5;
+}
+
+.dept-title-main {
+  font-size: 1rem;
+  font-weight: 700;
+  color: white;
+}
+
+body.light-theme .dept-title-main {
+  color: #24292f;
+}
+
+.dept-title-sub {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+body.light-theme .dept-title-sub {
+  color: #57606a;
+}
+
+.dept-title-container {
+  position: relative;
+  z-index: 1;
+}
+
+.dept-bento-content-scroll,
+.summary-bento-top-right {
+  position: relative;
+  z-index: 1;
+}
+
+.eq-summary-lead-text {
+  margin-right: 10px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.eq-summary-lead-name {
+  font-size: 0.95rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.eq-summary-lead-role {
+  font-size: 0.75rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Disable the accent border highlight on hover for bentos in the equipment modal */
+.dept-bento-wrapper .composite-bento-card:hover .composite-shape-1,
+.dept-bento-wrapper .composite-bento-card:hover .composite-shape-2,
+.dept-bento-wrapper .composite-bento-card:hover .composite-shape-3 {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dept-bento-wrapper .composite-bento-card:hover .composite-bridge-stroke {
+  stroke: rgba(255, 255, 255, 0.05);
+}
+
+body.light-theme
+  .dept-bento-wrapper
+  .composite-bento-card:hover
+  .composite-shape-1,
+body.light-theme
+  .dept-bento-wrapper
+  .composite-bento-card:hover
+  .composite-shape-2,
+body.light-theme
+  .dept-bento-wrapper
+  .composite-bento-card:hover
+  .composite-shape-3 {
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme
+  .dept-bento-wrapper
+  .composite-bento-card:hover
+  .composite-bridge-stroke {
+  stroke: rgba(0, 0, 0, 0.1);
+}
+
+.eq-item-name-text {
+  flex: 1;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  padding: 4px 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+body.light-theme .eq-item-name-text {
+  color: #57606a;
+}
+
+.eq-qty-text {
+  color: #fff;
+  width: 30px;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+body.light-theme .eq-qty-text {
+  color: #24292f;
+}
+
+.equipment-item {
+  border-radius: 30px;
+  padding: 2px 6px 2px 6px;
+  transition: background 0.2s ease;
+}
+
+.clickable-item {
+  cursor: pointer;
+}
+
+.equipment-item:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+body.light-theme .equipment-item:hover {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+/* =========================================
+   RESPONSIVE DESIGN (MOBILE)
+   ========================================= */
+@media (max-width: 768px) {
+  .equipment-hero-card {
+    flex-direction: column;
+    padding: 20px;
+    gap: 20px;
+    flex-shrink: 0;
+  }
+  
+  .hero-camera-section,
+  .hero-camera-section.secondary {
+    flex: none;
+    width: 100%;
+    min-width: 0;
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+  
+  .hero-divider {
+    width: 100%;
+    height: 1px;
+    margin: 10px 0;
+  }
+
+  .hero-name-row {
+    justify-content: center;
+  }
+  
+  .hero-status {
+    justify-content: center;
+  }
 }

@@ -534,6 +534,8 @@ export const ScrollTimeline = ({
                 >
                   <motion.path
                     ref={pathRef}
+                    d={svgPath}
+                    initial={{ d: svgPath }}
                     animate={{ d: svgPath }}
                     transition={{ type: "spring", stiffness: 100, damping: 20 }}
                     stroke={
@@ -543,6 +545,8 @@ export const ScrollTimeline = ({
                     fill="none"
                   />
                   <motion.path
+                    d={svgPath}
+                    initial={{ d: svgPath }}
                     stroke="url(#timeline-gradient)"
                     strokeWidth={progressLineWidth * 1.5}
                     fill="none"

@@ -683,6 +683,7 @@ body.light-theme .timeline-legend-label {
   margin-bottom: 3px;
   color: #fff;
   letter-spacing: -0.2px;
+  line-height: 1.2;
 }
 
 .equipment-preview {
@@ -715,6 +716,11 @@ body.light-theme .timeline-legend-label {
   flex-direction: column;
   align-items: center;
   z-index: 2;
+  background: linear-gradient(
+    to top,
+    rgba(15, 17, 26, 0.95),
+    rgba(15, 17, 26, 0)
+  );
 }
 
 .equipment-preview-title {
@@ -804,11 +810,6 @@ body.light-theme .timeline-legend-label {
 .summary-selector {
   display: flex;
   align-items: center;
-  background: linear-gradient(
-    135deg,
-    rgba(40, 50, 75, 0.8) 0%,
-    rgba(20, 25, 40, 0.7) 100%
-  );
   padding: 6px 6px 6px 6px;
   width: max-content;
   flex: 0 0 auto;

@@ -143,7 +143,7 @@ const AddCategory = ({ departments, onAdded, onDeptSelect }) => {
         <input
           className="neo-input"
           type="text"
-          placeholder="e.g. Lighting"
+          placeholder="e.g. Electrical"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
