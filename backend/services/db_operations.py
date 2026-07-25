@@ -67,7 +67,7 @@ def insert_project(
     # Add default equipment departments
     cursor.execute(
         "INSERT INTO project_equipment_departments (project_id, name) VALUES (%s, %s)",
-        (new_id, "Lighting")
+        (new_id, "Electrical")
     )
     cursor.execute(
         "INSERT INTO project_equipment_departments (project_id, name) VALUES (%s, %s)",

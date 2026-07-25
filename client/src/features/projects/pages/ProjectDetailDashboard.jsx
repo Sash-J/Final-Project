@@ -8,6 +8,7 @@ import Icon from "../../../components/common/Icon";
 import ModalPortal from "../../../components/common/ModalPortal";
 import ProjectDashboardFinance from "../components/ProjectDashboardFinance";
 import ProjectDashboardProduction from "../components/ProjectDashboardProduction";
+import { prefetchEquipment } from "../components/EquipmentVisualization";
 import "./ProjectDetailDashboard.css";
 import ScrambleText from "../../../components/common/ScrambleText";
 import ProjectForm from "../components/ProjectForm";
@@ -110,8 +111,8 @@ const ProjectDetailDashboard = () => {
 
   const crewStats = useMemo(() => {
     let deptCount = 0;
-    let memberCount = 0;
-    let memberNames = [];
+    let memberNamesSet = new Set();
+    let anonymousCount = 0;
     let leadName = null;
     let leadRole = null;
     let maxLevel = 0;
@@ -129,21 +130,21 @@ const ProjectDetailDashboard = () => {
           if (node.department) deptCount++;
           if (node.members && Array.isArray(node.members)) {
             node.members.forEach((m) => {
-              if (m.name?.trim() || m.role?.trim()) {
-                memberCount++;
-                if (m.name?.trim()) {
-                  memberNames.push(m.name.trim());
-                  // Extract the first prominent lead if not already found
-                  if (
-                    !leadName &&
-                    m.role &&
-                    (m.role.toLowerCase().includes("producer") ||
-                      m.role.toLowerCase().includes("director"))
-                  ) {
-                    leadName = m.name.trim();
-                    leadRole = m.role.trim();
-                  }
+              const trimmedName = m.name?.trim();
+              if (trimmedName) {
+                memberNamesSet.add(trimmedName);
+                // Extract the first prominent lead if not already found
+                if (
+                  !leadName &&
+                  m.role &&
+                  (m.role.toLowerCase().includes("producer") ||
+                    m.role.toLowerCase().includes("director"))
+                ) {
+                  leadName = trimmedName;
+                  leadRole = m.role.trim();
                 }
+              } else if (m.role?.trim()) {
+                anonymousCount++;
               }
             });
           }
@@ -160,8 +161,8 @@ const ProjectDetailDashboard = () => {
 
     return {
       deptCount,
-      memberCount,
-      memberNames,
+      memberCount: memberNamesSet.size + anonymousCount,
+      memberNames: Array.from(memberNamesSet),
       leadName,
       leadRole,
       maxLevel,
@@ -180,6 +181,7 @@ const ProjectDetailDashboard = () => {
   useEffect(() => {
     if (!projectId) return;
     getProjectMilestones(projectId);
+    prefetchEquipment(projectId);
   }, [projectId, getProjectMilestones, timelineTrigger]);
 
   useEffect(() => {
@@ -333,7 +335,7 @@ const ProjectDetailDashboard = () => {
                       height="44px"
                       borderRadius="50%"
                       blur={6}
-                      opacity={0.4}
+                      opacity={0}
                       backgroundOpacity={0}
                     >
                       <span className="summary-avatar-initial">
@@ -382,8 +384,8 @@ const ProjectDetailDashboard = () => {
                       height="auto"
                       borderRadius="30px"
                       blur={10}
-                      opacity={0}
-                      backgroundOpacity={0}
+                      opacity={0.4}
+                      backgroundOpacity={0.2}
                     >
                       <div className="summary-selector-icon">
                         <Icon name="groups" modifiers="sm" />
@@ -442,6 +444,7 @@ const ProjectDetailDashboard = () => {
                     {(() => {
                       let heroImg = null;
                       let heroTitle = "ARRI Alexa";
+                      let activeDeptsCount = 0;
 
                       try {
                         if (project?.equipment_data) {
@@ -453,69 +456,76 @@ const ProjectDetailDashboard = () => {
                             if (parsed.hero.image) heroImg = parsed.hero.image;
                             if (parsed.hero.name) heroTitle = parsed.hero.name;
                           }
+                          if (parsed?.departments) {
+                            activeDeptsCount = parsed.departments.filter(
+                              (d) => d.items && d.items.length > 0,
+                            ).length;
+                          }
                         }
                       } catch (e) {}
 
                       return (
-                        <GlassSurface
-                          className="equipment-preview"
-                          width="120px"
-                          height="120px"
-                          borderRadius="16px"
-                          blur={10}
-                          opacity={0}
-                          backgroundOpacity={0}
-                        >
-                          <div
-                            className="hero-camera-image"
-                            style={{
-                              width: "100%",
-                              height: "100%",
-                              borderRadius: 0,
-                              border: "none",
-                              boxShadow: "none",
-                              position: "absolute",
-                              top: 0,
-                              left: 0,
-                            }}
+                        <>
+                          <GlassSurface
+                            className="equipment-preview"
+                            width="120px"
+                            height="120px"
+                            borderRadius="16px"
+                            blur={10}
+                            opacity={0}
+                            backgroundOpacity={0}
                           >
-                            {heroImg ? (
-                              <img src={heroImg} alt={heroTitle} />
-                            ) : (
-                              <Icon
-                                name="videocam"
-                                modifiers="xl"
-                                className="equipment-icon-opacity"
-                              />
-                            )}
-                          </div>
-                          <div className="equipment-preview-overlay">
-                            <span className="equipment-preview-title">
-                              {heroTitle}
-                            </span>
-                          </div>
-                        </GlassSurface>
+                            <div
+                              className="hero-camera-image"
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                borderRadius: 0,
+                                border: "none",
+                                boxShadow: "none",
+                                position: "absolute",
+                                top: 0,
+                                left: 0,
+                              }}
+                            >
+                              {heroImg ? (
+                                <img src={heroImg} alt={heroTitle} />
+                              ) : (
+                                <Icon
+                                  name="videocam"
+                                  modifiers="xl"
+                                  className="equipment-icon-opacity"
+                                />
+                              )}
+                            </div>
+                            <div className="equipment-preview-overlay">
+                              <span className="equipment-preview-title">
+                                {heroTitle}
+                              </span>
+                            </div>
+                          </GlassSurface>
+                          <GlassSurface
+                            className="summary-selector"
+                            width="max-content"
+                            height="auto"
+                            borderRadius="30px"
+                            blur={10}
+                            opacity={0.4}
+                            backgroundOpacity={0.2}
+                          >
+                            <div className="summary-selector-icon">
+                              <Icon name="inventory" modifiers="sm" />
+                            </div>
+                            <span>{activeDeptsCount} Departments</span>
+                            <Icon
+                              name="expand_more"
+                              modifiers="sm"
+                              style={{ marginLeft: "5px" }}
+                            />
+                          </GlassSurface>
+                        </>
                       );
                     })()}
-                    <GlassSurface
-                      className="summary-selector"
-                      width="max-content"
-                      height="auto"
-                      borderRadius="30px"
-                      blur={10}
-                      opacity={0.1}
-                      backgroundOpacity={0}
-                    >
-                      <div className="summary-selector-icon">
-                        <Icon name="inventory" modifiers="sm" />
-                      </div>
-                      <span>12 Active</span>
-                      <Icon
-                        name="expand_more"
-                        modifiers="sm"
-                        style={{ marginLeft: "5px" }}
-                      />
-                    </GlassSurface>
                   </div>
 
                   <div className="summary-bento-middle">

@@ -12,13 +12,13 @@
   position: relative;
   width: 100%;
   height: 100%;
-  min-height: 240px;
+  min-height: 120px;
   /* Responsive configuration */
   --pill-height: 70px;
   --gap: 10px;
   --right-width: 45%; /* Right L-shape takes up 45% of width */
   --corner-radius: 32px;
-  --pill-corner-radius: 16px; /* Reduced corner radius for the pill */
+  --pill-corner-radius: 100px; /* Fully rounded pill */
   --bridge-radius: 52px; /* Increased radius for the inner curve */
 
   cursor: pointer;
@@ -64,7 +64,7 @@
 .composite-shape-3 {
   grid-column: 1;
   grid-row: 1;
-  border-radius: var(--corner-radius);
+  border-radius: var(--pill-corner-radius);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -73,6 +73,22 @@
     border-color 0.3s ease,
     background-color 0.3s ease,
     box-shadow 0.3s ease;
+}
+
+.composite-bento-card.single-overlay .composite-shape-3 {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+}
+
+.composite-bento-card.single-overlay .composite-pill-content {
+  background: transparent !important;
+}
+
+.composite-bento-card.single-overlay .composite-bottom-content {
+  justify-content: flex-start;
+  padding-bottom: 12px;
 }
 
 /* Shape 1: Bottom Left Block */
@@ -151,6 +167,10 @@
   z-index: 1;
 }
 
+body.light-theme .grainient-group {
+  mix-blend-mode: multiply;
+}
+
 .composite-bento-card:hover .grainient-group {
   opacity: 1;
 }
@@ -160,6 +180,16 @@
   overflow: hidden;
 }
 
+.grainient-mask-3 {
+  grid-column: 1;
+  grid-row: 1;
+  border-radius: var(--corner-radius);
+  border: 1px solid transparent;
+}
+.grainient-mask-3 .spotlight-overlay {
+  width: calc(100% + 1.5px);
+  height: calc(100% + 1.5px);
+}
 .grainient-mask-1 {
   grid-column: 1 / span 2;
   grid-row: 3;
@@ -257,8 +287,9 @@ body.light-theme .composite-shape-1,
 body.light-theme .composite-shape-2,
 body.light-theme .composite-shape-3,
 body.light-theme .composite-bridge-shape {
-  background: rgba(0, 0, 0, 0.08);
-  border-color: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.08) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.06) !important;
 }
 
 body.light-theme .composite-bridge-stroke {
@@ -302,6 +333,7 @@ body.light-theme .composite-bridge-stroke {
     ),
     linear-gradient(135deg, #001622 0%, #00040a 100%) !important;
   border-radius: var(--corner-radius);
+  overflow: hidden;
 }
 
 body.light-theme .composite-pill-content {
@@ -321,6 +353,7 @@ body.light-theme .composite-pill-content {
       rgba(255, 255, 255, 0.9) 0%,
       rgba(240, 248, 255, 0.8) 100%
     ) !important;
+  overflow: hidden;
 }
 
 .composite-bottom-content {
@@ -335,6 +368,7 @@ body.light-theme .composite-pill-content {
   flex-direction: column;
   justify-content: flex-end;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .composite-bottom-content > * {

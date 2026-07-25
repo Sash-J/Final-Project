@@ -724,7 +724,7 @@ const CrewHierarchy = ({ project, onUpdateHierarchy, onSaveStatusChange }) => {
               <input
                 type="text"
                 className="mm-input"
-                placeholder="Department Name (e.g. Lighting)"
+                placeholder="Department Name (e.g. Electrical)"
                 value={newNodeData.department}
                 onChange={(e) =>
                   setNewNodeData({ ...newNodeData, department: e.target.value })

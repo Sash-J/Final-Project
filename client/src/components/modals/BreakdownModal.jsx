@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
-import { createPortal } from "react-dom";
-import "./BreakdownModal";
+import { useEffect, useState } from "react";
 import { formatCurrency } from "../../utils/currencyUtils";
+import Icon from "../common/Icon";
+import ModalPortal from "../common/ModalPortal";
+import "./BreakdownModal.css";
 
 const BreakdownModal = ({
   isOpen,
@@ -115,158 +116,142 @@ const BreakdownModal = ({
 
   if (!isOpen) return null;
 
-  return createPortal(
-    <div className="bdm-overlay">
-      <div className="bdm-content fade-in">
-        <div className="bdm-header">
-          <div className="bdm-header-left">
-            <h3>Itemization Breakdown</h3>
-            <p>
-              Sub-items for: <strong>{itemName}</strong>
-            </p>
-          </div>
-          <button className="bdm-close" onClick={onClose}>
-            &times;
-          </button>
-        </div>
+  return (
+    <ModalPortal onClose={onClose} className="breakdown-modal-container">
+      <div className="modal-header-section">
+        <h2>Itemization Breakdown</h2>
+        <p>
+          Sub-items for: <strong>{itemName}</strong>
+        </p>
+      </div>
 
-        <div className="bdm-body">
-          <table className="bdm-table">
-            <thead>
-              <tr>
-                <th style={{ width: "24%" }}>Sub-Item Name</th>
-                <th style={{ width: "7%" }}>Qty</th>
-                <th style={{ width: "13%" }}>Type</th>
-                <th style={{ width: "7%" }}>Mult.</th>
-                <th style={{ width: "11%" }}>Rate</th>
-                <th style={{ width: "11%" }}>Gross</th>
-                <th style={{ width: "11%" }}>Add.</th>
-                <th style={{ width: "11%" }}>Total</th>
-                <th style={{ width: "40px" }}></th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item) => (
-                <tr key={item.id} className="bdm-row">
-                  <td>
-                    <input
-                      type="text"
-                      placeholder="e.g. 2K Fresnel"
-                      value={item.description}
-                      onChange={(e) =>
-                        handleRowChange(item.id, "description", e.target.value)
-                      }
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="number"
-                      placeholder="0"
-                      value={item.quantity}
-                      onChange={(e) =>
-                        handleRowChange(item.id, "quantity", e.target.value)
-                      }
-                    />
-                  </td>
-                  <td>
-                    <select
-                      className="bdm-select"
-                      value={item.rate_type}
-                      onChange={(e) =>
-                        handleRowChange(item.id, "rate_type", e.target.value)
-                      }
-                    >
-                      <option value="day">Day</option>
-                      <option value="cs">Call Sheet</option>
-                    </select>
-                  </td>
-                  <td>
-                    <input
-                      type="number"
-                      placeholder="1"
-                      value={item.rate_multiplier}
-                      onChange={(e) =>
-                        handleRowChange(
-                          item.id,
-                          "rate_multiplier",
-                          e.target.value,
-                        )
-                      }
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="number"
-                      placeholder="0.00"
-                      value={item.rate}
-                      onChange={(e) =>
-                        handleRowChange(item.id, "rate", e.target.value)
-                      }
-                    />
-                  </td>
-                  <td className="bdm-readonly">
-                    {formatCurrency(item.gross_revenue, false)}
-                  </td>
-                  <td>
-                    <input
-                      type="number"
-                      placeholder="0.00"
-                      value={item.additional1}
-                      onChange={(e) =>
-                        handleRowChange(item.id, "additional1", e.target.value)
-                      }
-                    />
-                  </td>
-                  <td className="bdm-total-cell">
-                    {formatCurrency(item.total, false)}
-                  </td>
-                  <td>
+      <div className="bdm-body">
+        <table className="bdm-table">
+          <thead>
+            <tr>
+              <th className="col-desc">Sub-Item Name</th>
+              <th className="col-qty">Qty</th>
+              <th className="col-type">Type</th>
+              <th className="col-mult">Mult.</th>
+              <th className="col-rate">Rate</th>
+              <th className="col-gross">Gross</th>
+              <th className="col-add">Add.</th>
+              <th className="col-total">Total</th>
+              <th className="col-action"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((item, index) => (
+              <tr key={item.id} className="bdm-row">
+                <td>
+                  <input
+                    type="text"
+                    placeholder="e.g. 2K Fresnel"
+                    value={item.description}
+                    onChange={(e) =>
+                      handleRowChange(item.id, "description", e.target.value)
+                    }
+                  />
+                </td>
+                <td>
+                  <input
+                    type="number"
+                    placeholder="0"
+                    value={item.quantity}
+                    onChange={(e) =>
+                      handleRowChange(item.id, "quantity", e.target.value)
+                    }
+                  />
+                </td>
+                <td>
+                  <select
+                    className="bdm-select"
+                    value={item.rate_type}
+                    onChange={(e) =>
+                      handleRowChange(item.id, "rate_type", e.target.value)
+                    }
+                  >
+                    <option value="day">Day</option>
+                    <option value="cs">Call Sheet</option>
+                  </select>
+                </td>
+                <td>
+                  <input
+                    type="number"
+                    placeholder="1"
+                    value={item.rate_multiplier}
+                    onChange={(e) =>
+                      handleRowChange(
+                        item.id,
+                        "rate_multiplier",
+                        e.target.value,
+                      )
+                    }
+                  />
+                </td>
+                <td>
+                  <input
+                    type="number"
+                    placeholder="0.00"
+                    value={item.rate}
+                    onChange={(e) =>
+                      handleRowChange(item.id, "rate", e.target.value)
+                    }
+                  />
+                </td>
+                <td className="bdm-readonly">
+                  {formatCurrency(item.gross_revenue, false)}
+                </td>
+                <td>
+                  <input
+                    type="number"
+                    placeholder="0.00"
+                    value={item.additional1}
+                    onChange={(e) =>
+                      handleRowChange(item.id, "additional1", e.target.value)
+                    }
+                  />
+                </td>
+                <td className="bdm-total-cell">
+                  {formatCurrency(item.total, false)}
+                </td>
+                <td>
+                  {index > 0 && (
                     <button
-                      className="bdm-remove-btn"
+                      className="project-hero-btn delete remove-item-btn"
                       onClick={() => removeRow(item.id)}
                       title="Remove Row"
                     >
-                      <svg
-                        viewBox="0 0 24 24"
-                        width="18"
-                        height="18"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" />
-                      </svg>
+                      <Icon name="delete" modifiers="sm" />
                     </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <button className="bdm-add-row" onClick={addRow}>
-            <span className="material-symbols-outlined">add</span> Add Another
-            Sub-Item
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="bdm-add-row-container">
+          <button className="btn-neo bdm-add-row-btn" onClick={addRow}>
+            <Icon name="add" modifiers="sm" /> <span>Add Another Sub-Item</span>
           </button>
         </div>
+      </div>
 
-        <div className="bdm-footer">
-          <div className="bdm-grand-total">
-            <span>Aggregated Total:</span>
-            <strong>{formatCurrency(grandTotal)}</strong>
-          </div>
-          <div className="bdm-actions">
-            <button className="bdm-cancel-btn" onClick={onClose}>
-              Cancel
-            </button>
-            <button className="bdm-save-btn" onClick={handleSave}>
-              Save & Apply
-            </button>
-          </div>
+      <div className="bdm-footer">
+        <div className="bdm-grand-total">
+          <span>Aggregated Total:</span>
+          <strong>{formatCurrency(grandTotal)}</strong>
+        </div>
+        <div className="bdm-actions">
+          <button className="btn-neo btn-neo-cancel" onClick={onClose}>
+            Cancel
+          </button>
+          <button className="btn-neo btn-neo-solid" onClick={handleSave}>
+            Save & Apply
+          </button>
         </div>
       </div>
-    </div>,
-    document.body,
+    </ModalPortal>
   );
 };
 
