@@ -179,5 +179,24 @@ export const projectService = {
     } catch (error) {
       handleApiError(error);
     }
-  }
+  },
+
+  updateProjectRoute: async (projectId, routeId, routeData) => {
+    try {
+      const response = await api.put(`/api/projects/${projectId}/routes/${routeId}`, routeData);
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  },
+
+  deleteProjectRoute: async (projectId, routeId) => {
+    try {
+      const response = await api.delete(`/api/projects/${projectId}/routes/${routeId}`);
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  },
+
 };

@@ -16,8 +16,8 @@ const GlassSurface = ({
   saturation = 1,
   distortionScale = -250,
   redOffset = 0,
-  greenOffset = 0,
-  blueOffset = 0,
+  greenOffset = 10,
+  blueOffset = 10,
   xChannel = "R",
   yChannel = "G",
   mixBlendMode = "difference",
@@ -30,7 +30,14 @@ const GlassSurface = ({
   const redGradId = `red-grad-${uniqueId}`;
   const blueGradId = `blue-grad-${uniqueId}`;
 
-  const [svgSupported, setSvgSupported] = useState(false);
+  const [svgSupported, setSvgSupported] = useState(() => {
+    if (typeof window === "undefined" || typeof navigator === "undefined") {
+      return false;
+    }
+    const isWebkit = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+    const isFirefox = /Firefox/.test(navigator.userAgent);
+    return !(isWebkit || isFirefox);
+  });
 
   const containerRef = useRef(null);
   const feImageRef = useRef(null);

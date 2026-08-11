@@ -171,7 +171,7 @@ const SuiTimeline = ({
         <ModalPortal
           onClose={closeModal}
           size="medium"
-          className="profile-modal-glass"
+          className="global-modal-glass"
         >
           <AddMilestonePanel
             projectId={projectId}

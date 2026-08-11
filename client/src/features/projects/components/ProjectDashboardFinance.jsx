@@ -40,7 +40,7 @@ const ProjectDashboardFinance = ({ projectId, onClose, projectTotalPaid }) => {
     <ModalPortal 
       onClose={onClose}
       size="large"
-      className="profile-modal-glass finance-glass-override"
+      className="global-modal-glass finance-glass-override"
     >
       <div className="finance-modal-container">
         <div className="modal-header-section">

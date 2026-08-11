@@ -83,7 +83,7 @@ const CompositeBentoCard = ({
 
   return (
     <div
-      className={`composite-bento-card ${className} ${singleOverlay ? 'single-overlay' : ''}`}
+      className={`composite-bento-card ${className} ${singleOverlay ? "single-overlay" : ""}`}
       onClick={onClick}
       ref={cardRef}
       onMouseMove={handleMouseMove}
@@ -197,7 +197,8 @@ const CompositeBentoCard = ({
               d="M 0 0 C 0 24 -6.4 32 -32 32"
               fill="none"
               stroke="rgba(255, 255, 255, 0.05)"
-              strokeWidth="1"
+              strokeWidth="0.75"
+              vectorEffect="non-scaling-stroke"
             />
           </svg>
         </div>
