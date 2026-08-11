@@ -23,6 +23,7 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
     client_ids: [],
     crew_ids: [],
     color: "var(--accent-color)",
+    route_locations: [],
   });
 
   const [clients, setClients] = useState([]);
@@ -31,7 +32,6 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
   const colorInputRef = useRef(null);
-
 
   const formatDateForInput = (dateStr) => {
     if (!dateStr) return "";
@@ -83,6 +83,11 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
               .map(Number)
           : [],
         color: editingProject.color || "var(--accent-color)",
+        route_locations: Array.isArray(editingProject.route_locations)
+          ? editingProject.route_locations
+          : editingProject.route_locations
+            ? JSON.parse(editingProject.route_locations)
+            : undefined, // undefined prevents sending an empty array if not loaded
       });
     } else {
       setFormData({
@@ -95,6 +100,7 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
         client_ids: [],
         crew_ids: [],
         color: "var(--accent-color)",
+        route_locations: [],
       });
     }
   }, [editingProject]);
@@ -124,7 +130,7 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
       } else {
         await projectService.createProject(formData);
       }
-      
+
       setMsg(
         editingProject
           ? "Project updated successfully!"
@@ -157,9 +163,7 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
 
       <div className="modal-split-layout">
         <div className="modal-side-panel">
-          <label className="project-side-label">
-            Cover Visual
-          </label>
+          <label className="project-side-label">Cover Visual</label>
           <div
             className="project-image-upload-panel"
             onClick={() => fileInputRef.current.click()}
@@ -191,9 +195,7 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
           </div>
 
           <div className="project-color-section">
-            <label className="project-side-label">
-              Project Identity
-            </label>
+            <label className="project-side-label">Project Identity</label>
             <div className="identity-sphere-wrapper">
               <div
                 className="identity-sphere"
@@ -202,18 +204,18 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
                 }}
                 onClick={() => colorInputRef.current.click()}
               />
-                <input
-                  type="color"
-                  ref={colorInputRef}
-                  value={formData.color}
-                  onChange={(e) =>
-                    setFormData({ ...formData, color: e.target.value })
-                  }
-                  className="hidden-color-input"
-                />
-                <span className="color-hex-label">
-                  {formData.color.toUpperCase()}
-                </span>
+              <input
+                type="color"
+                ref={colorInputRef}
+                value={formData.color}
+                onChange={(e) =>
+                  setFormData({ ...formData, color: e.target.value })
+                }
+                className="hidden-color-input"
+              />
+              <span className="color-hex-label">
+                {formData.color.toUpperCase()}
+              </span>
             </div>
           </div>
         </div>
@@ -259,7 +261,9 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
                   <label className="neo-label">Start Date</label>
                   <GlassDatePicker
                     value={formData.start_date}
-                    onChange={(val) => setFormData({ ...formData, start_date: val })}
+                    onChange={(val) =>
+                      setFormData({ ...formData, start_date: val })
+                    }
                     placeholder="YYYY-MM-DD"
                   />
                 </div>
@@ -269,25 +273,12 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
                   <label className="neo-label">Target Delivery</label>
                   <GlassDatePicker
                     value={formData.end_date}
-                    onChange={(val) => setFormData({ ...formData, end_date: val })}
+                    onChange={(val) =>
+                      setFormData({ ...formData, end_date: val })
+                    }
                     placeholder="YYYY-MM-DD"
                   />
                 </div>
-              </div>
-            </div>
-
-            <div className="project-form-group">
-              <label className="neo-label">Main Location</label>
-              <div className="icon-field-wrapper">
-                <Icon name="location_on" modifiers="md" />
-                <input
-                  type="text"
-                  className="neo-input"
-                  value={formData.location}
-                  onChange={(e) =>
-                    setFormData({ ...formData, location: e.target.value })
-                  }
-                />
               </div>
             </div>
 

@@ -9,6 +9,8 @@ import ModalPortal from "../../../components/common/ModalPortal";
 import ProjectDashboardFinance from "../components/ProjectDashboardFinance";
 import ProjectDashboardProduction from "../components/ProjectDashboardProduction";
 import { prefetchEquipment } from "../components/EquipmentVisualization";
+import DateTimeWidget from "./DateTimeWidget";
+import MapWidget from "./MapWidget";
 import "./ProjectDetailDashboard.css";
 import ScrambleText from "../../../components/common/ScrambleText";
 import ProjectForm from "../components/ProjectForm";
@@ -301,6 +303,19 @@ const ProjectDetailDashboard = () => {
               </div>
             </div>
           </div>
+          <div className="map-widget-wrapper">
+            <MapWidget
+              location={project.location}
+              routeLocations={project.route_locations}
+              dateStr={project.start_date}
+              projectId={projectId}
+              projectData={project}
+              onUpdate={handleProjectUpdated}
+            />
+          </div>
+          <div className="datetime-widget-wrapper">
+            <DateTimeWidget />
+          </div>
         </div>
       </div>
 
@@ -583,7 +598,7 @@ const ProjectDetailDashboard = () => {
             <ModalPortal
               onClose={() => setShowTimelineModal(false)}
               size="large"
-              className="profile-modal-glass timeline-glass-override"
+              className="global-modal-glass timeline-glass-override"
             >
               <div className="timeline-modal-container">
                 <div className="modal-header-section">
@@ -646,7 +661,7 @@ const ProjectDetailDashboard = () => {
                   <ModalPortal
                     onClose={() => setShowAddMilestone(false)}
                     size="medium"
-                    className="profile-modal-glass"
+                    className="global-modal-glass"
                   >
                     <AddMilestonePanel
                       projectId={projectId}
@@ -692,7 +707,7 @@ const ProjectDetailDashboard = () => {
       {showEditModal && (
         <ModalPortal
           onClose={() => setShowEditModal(false)}
-          className="profile-modal-glass"
+          className="global-modal-glass"
         >
           <ProjectForm
             editingProject={project}

@@ -1,5 +1,5 @@
 .project-detail-root {
-  max-width: 1400px;
+  max-width: 1450px;
   margin: 10px auto;
   padding: 30px;
   min-height: 80vh;
@@ -9,6 +9,11 @@
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 32px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    color 0.3s ease;
 }
 
 .pd-top-row {
@@ -16,6 +21,8 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
+  position: relative;
+  z-index: 100;
 }
 
 .back-to-admin {
@@ -40,6 +47,8 @@
 }
 
 .project-hero-area {
+  flex: 1;
+  min-width: 0;
   position: relative;
   overflow: hidden;
   padding: 20px 30px;
@@ -52,6 +61,10 @@
   justify-content: space-between;
   align-items: center;
   gap: 60px;
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .project-title-stack h1 {
@@ -84,15 +97,15 @@
   font-size: 0.85rem;
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin: 0;
+  margin-top: 3px;
 }
+
 .project-metadata-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 30px;
-  margin-top: 15px;
+  margin-top: 10px;
   align-items: center;
+  gap: 20px;
 }
 
 .project-hero-btn {
@@ -191,16 +204,12 @@
 .dashboard-content-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 30px;
+  gap: 12px;
   align-items: flex-start;
 }
 
 .glass-card {
-  background: linear-gradient(
-    135deg,
-    rgba(20, 22, 33, 0.6) 0%,
-    rgba(13, 15, 23, 0.4) 100%
-  );
+  background: rgba(255, 255, 255, 0.04);
   backdrop-filter: blur(8px) saturate(160%);
   -webkit-backdrop-filter: blur(8px) saturate(160%);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -210,7 +219,9 @@
   transition:
     transform 0.3s ease,
     box-shadow 0.3s ease,
-    border-color 0.3s ease;
+    border-color 0.3s ease,
+    background 0.3s ease,
+    color 0.3s ease;
 }
 
 .glass-card:hover {
@@ -245,18 +256,26 @@
   padding: 0 !important;
 }
 
-.project-timeline-preview {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
 .project-main-info {
   margin-bottom: 24px;
+  display: grid;
+  grid-template-columns: 1fr auto 220px;
+  gap: 24px;
+}
+
+.datetime-widget-wrapper {
+  flex: 0 0 220px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 12px;
+}
+
+.map-widget-wrapper {
+  display: flex;
+  min-width: 0;
+  height: 100%; /* Fill the grid cell height */
+  aspect-ratio: 1 / 1; /* Width will compute from the grid cell height */
 }
 
 .project-timeline-preview {
@@ -411,7 +430,7 @@
 @media (max-width: 1100px) {
   .dashboard-content-grid {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 12px;
   }
 }
 
@@ -448,11 +467,7 @@ body.light-theme .project-detail-root {
 }
 
 body.light-theme .glass-card {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(245, 248, 250, 0.8) 100%
-  );
+  background: rgba(0, 0, 0, 0.02);
   border: 1px solid rgba(0, 0, 0, 0.08);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
   color: #333;
@@ -516,18 +531,14 @@ body.light-theme .project-timeline-embedded-wrap {
   box-shadow: none;
 }
 
-body.light-theme .status-indicator span {
-  color: #333;
-}
+body.light-theme 
 
 body.light-theme
   body.light-theme
   body.light-theme
   body.light-theme
   body.light-theme
-  .project-tab-btn.active::after {
-  background: #0099b3;
-}
+  
 
 /* Timeline Legend CSS */
 .timeline-status-legend {
@@ -593,7 +604,7 @@ body.light-theme .timeline-legend-label {
 ------------------------------------- */
 
 .summary-bento-card {
-  background: rgba(13, 15, 23, 0.65) !important;
+  background: rgba(255, 255, 255, 0.04) !important;
   backdrop-filter: blur(24px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
@@ -609,22 +620,6 @@ body.light-theme .timeline-legend-label {
   transition:
     transform 0.3s ease,
     box-shadow 0.3s ease;
-}
-
-.composite-bento-card.summary-bento-card {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-.composite-bento-card.summary-bento-card:hover {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
 }
 
 .summary-bento-card:hover {
@@ -731,13 +726,6 @@ body.light-theme .timeline-legend-label {
   text-align: center;
 }
 
-.equipment-preview-subtitle {
-  font-size: 0.65rem;
-  color: light-dark(#57606a, rgba(255, 255, 255, 0.6));
-  text-align: center;
-  margin-top: 2px;
-}
-
 .summary-lead-role {
   font-size: 0.7rem;
   text-align: left;
@@ -802,6 +790,7 @@ body.light-theme .timeline-legend-label {
   font-weight: 600;
   color: rgba(255, 255, 255, 0.7);
 }
+
 .summary-progress-labels span:last-child {
   color: var(--accent-color);
   font-weight: 700;
@@ -846,19 +835,7 @@ body.light-theme .timeline-legend-label {
   justify-content: center;
   margin-right: 8px;
 }
-.summary-selector-icon .material-icons,
-.summary-selector-icon .icon-root {
-  font-size: 16px !important;
-  color: var(--accent-color);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  margin: 0;
-  padding: 0;
-}
-
-.timeline-legend-dot {
+.summary-selector-icon .timeline-legend-dot {
   width: 8px;
   height: 8px;
   min-width: 8px;
@@ -892,11 +869,6 @@ body.light-theme .timeline-legend-label {
 }
 
 /* Light Theme overrides for Summary Bento Cards */
-body.light-theme .summary-bento-card:not(.composite-bento-card) {
-  background: rgba(0, 0, 0, 0.08) !important;
-  box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.06) !important;
-  border-color: rgba(0, 0, 0, 0.1) !important;
-}
 
 body.light-theme .summary-bento-card {
   color: #24292f !important;
@@ -921,20 +893,11 @@ body.light-theme .summary-selector {
   color: #24292f;
 }
 
-body.light-theme .summary-selector > .icon-root {
-  color: #57606a;
-}
-
-body.light-theme .summary-selector-icon {
+body.light-theme .summary-selector > body.light-theme .summary-selector-icon {
   background: rgba(9, 105, 218, 0.1);
 }
 
-body.light-theme .summary-selector-icon .material-icons,
-body.light-theme .summary-selector-icon .icon-root {
-  color: #0969da;
-}
-
-body.light-theme .summary-progress-bar {
+body.light-theme .summary-selector-icon body.light-theme .summary-progress-bar {
   background: rgba(0, 0, 0, 0.08);
 }
 
@@ -1007,6 +970,29 @@ body.light-theme .summary-avatar {
 .skeleton-metadata-item-2 {
   width: 180px;
   height: 18px;
+}
+@media (max-width: 900px) {
+  .project-main-info {
+    display: flex;
+    flex-direction: column;
+  }
+  .datetime-widget-wrapper {
+    flex: 0 0 auto;
+    height: 260px;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+  }
+  .map-widget-wrapper {
+    flex: 0 0 auto;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    height: auto;
+    max-width: 260px; /* Prevent it from becoming excessively large on tablets */
+    margin: 0 auto; /* Center the square */
+  }
+  .project-hero-stats {
+    gap: 20px;
+  }
 }
 .skeleton-hero-stats {
   gap: 40px;

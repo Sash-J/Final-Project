@@ -191,7 +191,8 @@ export const ScrollTimeline = ({
         if (svgContainer) {
           const svgRect = svgContainer.getBoundingClientRect();
           const unscaledWidth = svgContainer.offsetWidth || 1;
-          const scale = svgRect.width / unscaledWidth;
+          let scale = svgRect.width / unscaledWidth;
+          if (!scale || isNaN(scale) || scale === 0) scale = 1;
 
           const containerWidth = unscaledWidth;
           const centerX = containerWidth / 2;

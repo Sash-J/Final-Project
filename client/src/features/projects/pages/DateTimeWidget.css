@@ -1,0 +1,260 @@
+.datetime-widget-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.datetime-widget-box {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.mod-weather {
+  grid-column: 1 / -1;
+}
+
+.mod-time-date > .datetime-widget-box > .glass-surface__content {
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  padding: 16px !important;
+  box-sizing: border-box !important;
+}
+
+.mod-sun-cycle > .datetime-widget-box > .glass-surface__content {
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 12px !important;
+  box-sizing: border-box !important;
+}
+
+.mod-weather > .datetime-widget-box > .glass-surface__content {
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 16px 16px !important;
+  box-sizing: border-box !important;
+}
+
+.widget-gradient {
+  position: absolute;
+  bottom: 0;
+  left: -15%;
+  width: 130%;
+  height: 120%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.9;
+  transform-origin: bottom center;
+}
+
+.weather-icon-material {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.weather-icon-material .icon-root {
+  font-size: 60px !important;
+  color: #fff;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+  font-variation-settings: "wght" 400 !important;
+}
+
+.weather-info-left {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.weather-temp {
+  font-size: 2.2rem;
+  font-weight: 500;
+  color: #fff;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.weather-cond {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.datetime-weather-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.datetime-time {
+  font-size: 2.2rem;
+  font-weight: 500;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  line-height: 1;
+  display: flex;
+  align-items: baseline;
+}
+
+.datetime-date {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+.datetime-timezone {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.5px;
+}
+
+.sun-cycle-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.sun-cycle-svg {
+  margin-bottom: 2px;
+  margin-top: 4px;
+}
+
+.sun-cycle-dot {
+  filter: drop-shadow(0 0 6px currentColor);
+}
+
+.sun-cycle-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  line-height: 1 !important;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.sun-cycle-text .icon {
+  font-size: 1rem;
+}
+
+body.light-theme .datetime-widget-box {
+  background: rgba(0, 0, 0, 0.02) !important;
+  box-shadow: inset 0 0 15px rgba(249, 248, 248, 0.5);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .datetime-time,
+body.light-theme .weather-temp {
+  color: #24292f;
+}
+
+body.light-theme .datetime-date {
+  color: #0969da;
+}
+
+body.light-theme .datetime-timezone,
+body.light-theme .weather-cond,
+body.light-theme .sun-cycle-text {
+  color: #57606a;
+}
+.weather-extras {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.weather-extra-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.weather-extra-item .icon {
+  font-size: 1rem;
+}
+
+/* Light Theme Overrides for DateTimeWidget */
+body.light-theme .weather-extra-item {
+  color: #57606a;
+}
+body.light-theme .sun-path-line {
+  stroke: rgba(0, 0, 0, 0.1);
+}
+body.light-theme .sun-path-active {
+  stroke: #0969da;
+}
+body.light-theme .sun-icon {
+  fill: #0969da;
+  filter: drop-shadow(0 0 4px rgba(9, 105, 218, 0.4));
+}
+body.light-theme .weather-icon-material .icon-root {
+  color: #24292f;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+}
+body.light-theme .mod-time-date .widget-gradient {
+  background: radial-gradient(
+    ellipse 180% 80% at 50% 100%,
+    rgba(0, 184, 212, 0.3) 0%,
+    transparent 70%
+  ) !important;
+}
+body.light-theme .mod-sun-cycle .widget-gradient {
+  background: radial-gradient(
+    ellipse 180% 80% at 50% 100%,
+    rgba(0, 230, 118, 0.25) 0%,
+    transparent 70%
+  ) !important;
+}
+body.light-theme .mod-weather .widget-gradient {
+  background: radial-gradient(
+    ellipse 180% 80% at 50% 100%,
+    rgba(41, 182, 246, 0.3) 0%,
+    transparent 70%
+  ) !important;
+}
+
+/* SVG Base Paths */
+.sun-path-line {
+  stroke: rgba(255, 255, 255, 0.15);
+}
+.sun-path-active {
+  stroke: #fff;
+}
+.sun-cycle-dot,
+.sun-start-dot {
+  fill: #fff;
+}
+.sun-end-dot {
+  fill: rgba(255, 255, 255, 0.3);
+}
+
+/* More Light Theme Overrides for Sun Cycle */
+body.light-theme .sun-cycle-dot,
+body.light-theme .sun-start-dot {
+  fill: #0969da;
+}
+body.light-theme .sun-end-dot {
+  fill: rgba(0, 0, 0, 0.2);
+}

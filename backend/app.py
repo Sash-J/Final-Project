@@ -17,9 +17,7 @@ is_production = os.getenv("FLASK_ENV") == "production"
 cookie_settings = {
     "SESSION_COOKIE_HTTPONLY": True,
     "SESSION_COOKIE_SECURE": is_production,
-    # SameSite=None + Secure=True is required for cross-origin production (HTTPS).
-    # SameSite=Lax + Secure=False is correct for local development (HTTP localhost).
-    "SESSION_COOKIE_SAMESITE": "None" if is_production else "Lax",
+    "SESSION_COOKIE_SAMESITE": "Lax",
 }
 
 if is_production:
@@ -40,6 +38,8 @@ def add_cors_headers(response):
             "localhost" in origin
             or "127.0.0.1" in origin
             or "visiondivision.lk" in origin
+            or "pinggy" in origin
+            or "loca.lt" in origin
         ):
             response.headers["Access-Control-Allow-Origin"] = origin
             response.headers["Access-Control-Allow-Credentials"] = "true"
@@ -83,9 +83,10 @@ app.register_blueprint(milestone_bp)
 app.register_blueprint(notifications_bp)
 
 try:
-    from services.db_operations import run_budget_migration
+    from services.db_operations import run_budget_migration, run_project_locations_migration
 
     run_budget_migration()
+    run_project_locations_migration()
 except Exception as e:
     print("Error running migrations on startup:", e)
 

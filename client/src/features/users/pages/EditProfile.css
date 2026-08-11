@@ -217,7 +217,9 @@
   border-color: var(--accent-color);
 }
 
-.toggle-label-wrapper input[type="checkbox"]:checked + .toggle-custom-checkbox::after {
+.toggle-label-wrapper
+  input[type="checkbox"]:checked
+  + .toggle-custom-checkbox::after {
   content: "";
   position: absolute;
   top: 50%;
@@ -353,12 +355,18 @@ body.light-theme .toggle-custom-checkbox {
   border-color: #8c959f;
 }
 
-body.light-theme .toggle-label-wrapper input[type="checkbox"]:checked + .toggle-custom-checkbox {
+body.light-theme
+  .toggle-label-wrapper
+  input[type="checkbox"]:checked
+  + .toggle-custom-checkbox {
   background: #0969da;
   border-color: #0969da;
 }
 
-body.light-theme .toggle-label-wrapper input[type="checkbox"]:checked + .toggle-custom-checkbox::after {
+body.light-theme
+  .toggle-label-wrapper
+  input[type="checkbox"]:checked
+  + .toggle-custom-checkbox::after {
   border-color: #fff;
 }
 
@@ -467,22 +475,6 @@ body.light-theme .theme-selection-panel {
   width: 100%;
 }
 
-
-
-.profile-modal-glass {
-  background: rgba(10, 12, 18, 0.05) !important;
-  backdrop-filter: blur(60px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(60px) saturate(180%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-}
-
-body.light-theme .profile-modal-glass {
-  background: rgba(255, 255, 255, 0.3) !important;
-  backdrop-filter: blur(60px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(60px) saturate(180%) !important;
-  border: 1px solid rgba(0, 0, 0, 0.08) !important;
-}
-
 @media (max-width: 850px) {
   .profile-modal-split {
     flex-direction: column;
@@ -491,7 +483,7 @@ body.light-theme .profile-modal-glass {
     width: 100%;
     box-sizing: border-box;
   }
-  
+
   .profile-modal-side {
     width: 100%;
     box-sizing: border-box;
@@ -640,5 +632,3 @@ body.light-theme .skeleton-button {
 body.light-theme .field-error-msg {
   color: #cf222e;
 }
-
-

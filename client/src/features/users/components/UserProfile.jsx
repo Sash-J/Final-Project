@@ -206,7 +206,7 @@ const UserProfile = () => {
         <ModalPortal
           onClose={() => setShowProfileModal(false)}
           size="large"
-          className="profile-modal-glass"
+          className="global-modal-glass"
         >
           <EditProfile onClose={() => setShowProfileModal(false)} />
         </ModalPortal>

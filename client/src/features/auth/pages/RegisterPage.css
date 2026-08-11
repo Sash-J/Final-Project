@@ -9,7 +9,7 @@
   background: transparent !important;
 }
 
-/* Glass Card - Matches profile-modal-glass */
+/* Glass Card - Matches global-modal-glass */
 .register-card {
   position: relative;
   z-index: 1;

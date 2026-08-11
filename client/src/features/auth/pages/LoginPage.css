@@ -55,7 +55,7 @@ body.light-theme .password-toggle-btn:hover {
   background: transparent !important;
 }
 
-/* Glass Card - Matches profile-modal-glass */
+/* Glass Card - Matches global-modal-glass */
 .login-card {
   position: relative;
   z-index: 1;

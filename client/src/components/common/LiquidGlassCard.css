@@ -1,0 +1,22 @@
+.liquid-glass-container {
+  /* Common liquid glass properties from user snippet */
+  border-radius: 25px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: transform 0.1s ease-out; /* Smooth parallax */
+}
+
+.liquid-glass-dark {
+  background: rgba(
+    0,
+    0,
+    0,
+    0.2
+  ); /* Slightly adjusted for better visibility over map */
+  border: 1px solid rgba(179, 179, 179, 0.3);
+}
+
+.liquid-glass-light {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}

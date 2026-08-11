@@ -1,0 +1,155 @@
+.glass-timepicker-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.glass-timepicker-tooltip {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  display: flex;
+}
+
+.glass-timepicker-icon {
+  cursor: pointer;
+  pointer-events: auto;
+  position: static;
+  transform: none;
+}
+
+/* Modal Portal Styling */
+.glass-timepicker-positioner {
+  position: fixed;
+  z-index: 999999;
+}
+
+.glass-timepicker-modal {
+  padding: 64px 24px 24px 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 12px;
+  animation: fadeInTimeModal 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  color: #fff;
+  font-family: inherit;
+}
+
+.glass-timepicker-modal.global-modal-glass {
+  backdrop-filter: blur(60px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(60px) saturate(180%) !important;
+}
+
+@keyframes fadeInTimeModal {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.glass-timepicker-icon-only-wrapper {
+  display: flex;
+  height: 100%;
+}
+
+.glass-timepicker-icon-only-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  width: 42px;
+  height: 42px;
+  cursor: pointer;
+  color: #fff;
+}
+
+/* Custom SVG Slider */
+.slider-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  width: 240px;
+  max-width: 100%;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.slider-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.slider-thumb {
+  --color: var(--accent-color, #00c6e6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  z-index: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  background-image: linear-gradient(to bottom, #f0f0f2, #d9dade);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.3);
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  touch-action: none;
+  cursor: pointer;
+}
+
+.slider-thumb::before {
+  content: "";
+  position: absolute;
+  border-radius: inherit;
+  width: 68%;
+  height: 68%;
+  background-color: var(--color);
+  box-shadow: inset 0 -4px 4px rgb(0 0 0 / 0.1);
+}
+
+.slider-value-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  column-gap: 0.5em;
+  position: absolute;
+  top: -45px;
+  transform: translateX(-50%);
+  left: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50px;
+  padding: 6px 12px;
+  background: rgba(18, 19, 26, 0.85);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+  color: #fff;
+}
+
+.slider-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.1));
+  overflow: visible;
+}
+
+.slider-svg-path {
+  touch-action: none;
+  cursor: pointer;
+}

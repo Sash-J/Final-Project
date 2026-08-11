@@ -51,33 +51,31 @@ def insert_project(
     code_name=None,
     start_date=None,
     end_date=None,
-    location=None,
     color="#00c6e6",
     project_image=None,
+    route_locations=None,
 ):
+    import json
     conn = get_connection()
     cursor = conn.cursor()
+    
     cursor.execute(
-        """INSERT INTO projects (project_name, code_name, start_date, end_date, location, color, project_image) 
-           VALUES (%s, %s, %s, %s, %s, %s, %s)""",
-        (project_name, code_name, start_date, end_date, location, color, project_image),
+        """INSERT INTO projects (project_name, code_name, start_date, end_date, color, project_image) 
+           VALUES (%s, %s, %s, %s, %s, %s)""",
+        (project_name, code_name, start_date, end_date, color, project_image),
     )
     new_id = cursor.lastrowid
-    
-    # Add default equipment departments
-    cursor.execute(
-        "INSERT INTO project_equipment_departments (project_id, name) VALUES (%s, %s)",
-        (new_id, "Electrical")
-    )
-    cursor.execute(
-        "INSERT INTO project_equipment_departments (project_id, name) VALUES (%s, %s)",
-        (new_id, "Art")
-    )
-    
+
+    if color:
+        cursor.execute(
+            """UPDATE schedule_tasks SET task_color = %s WHERE project_id = %s""",
+            (color, new_id),
+        )
+
     conn.commit()
     cursor.close()
     conn.close()
-    return new_id
+    return True
 
 
 def update_project(
@@ -86,26 +84,18 @@ def update_project(
     code_name=None,
     start_date=None,
     end_date=None,
-    location=None,
     color="#00c6e6",
     project_image=None,
+    route_locations=None,
 ):
     conn = get_connection()
     cursor = conn.cursor()
+
     cursor.execute(
         """UPDATE projects 
-           SET project_name = %s, code_name = %s, start_date = %s, end_date = %s, location = %s, color = %s, project_image = %s 
+           SET project_name = %s, code_name = %s, start_date = %s, end_date = %s, color = %s, project_image = %s 
            WHERE id = %s""",
-        (
-            project_name,
-            code_name,
-            start_date,
-            end_date,
-            location,
-            color,
-            project_image,
-            project_id,
-        ),
+        (project_name, code_name, start_date, end_date, color, project_image, project_id),
     )
 
     if color:
@@ -121,13 +111,31 @@ def update_project(
 
 
 def update_project_equipment(project_id, equipment_json_str):
+    import json
     conn = get_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute(
-            "UPDATE projects SET equipment_data = %s WHERE id = %s",
-            (equipment_json_str, project_id),
-        )
+
+        # Clear existing hero data
+        cursor.execute("DELETE FROM project_equipment_heroes WHERE project_id = %s", (project_id,))
+        
+        if equipment_json_str:
+            data = json.loads(equipment_json_str) if isinstance(equipment_json_str, str) else equipment_json_str
+            hero = data.get('hero') or {}
+            hero_secondary = data.get('heroSecondary') or {}
+            
+            cursor.execute(
+                """INSERT INTO project_equipment_heroes 
+                   (project_id, hero_label, hero_name, hero_details, hero_status, 
+                    secondary_label, secondary_name, secondary_details, secondary_status)
+                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                (
+                    project_id,
+                    hero.get('label', ''), hero.get('name', ''), hero.get('details', ''), hero.get('status', ''),
+                    hero_secondary.get('label', ''), hero_secondary.get('name', ''), hero_secondary.get('details', ''), hero_secondary.get('status', '')
+                )
+            )
+
         conn.commit()
     except Exception as e:
         conn.rollback()
@@ -138,13 +146,46 @@ def update_project_equipment(project_id, equipment_json_str):
 
 
 def update_project_crew_hierarchy(project_id, hierarchy_json_str):
+    import json
     conn = get_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute(
-            "UPDATE projects SET crew_hierarchy_data = %s WHERE id = %s",
-            (hierarchy_json_str, project_id),
-        )
+
+        # Clear existing relational hierarchy
+        cursor.execute("DELETE FROM project_crew_hierarchy_members WHERE node_id IN (SELECT id FROM project_crew_hierarchy_nodes WHERE project_id = %s)", (project_id,))
+        cursor.execute("DELETE FROM project_crew_hierarchy_nodes WHERE project_id = %s", (project_id,))
+
+        if hierarchy_json_str:
+            hierarchy = json.loads(hierarchy_json_str) if isinstance(hierarchy_json_str, str) else hierarchy_json_str
+            
+            def insert_node(node, parent_id=None):
+                if not node:
+                    return
+                node_id = str(node.get('id', ''))
+                dept = node.get('department', '')
+                if node_id:
+                    cursor.execute(
+                        "INSERT INTO project_crew_hierarchy_nodes (id, project_id, parent_id, department) VALUES (%s, %s, %s, %s)",
+                        (node_id, project_id, parent_id, dept)
+                    )
+                    members = node.get('members', [])
+                    seen_members = set()
+                    for mem in members:
+                        m_name = mem.get('name', '').strip()
+                        m_role = mem.get('role', '').strip()
+                        key = (m_name.lower(), m_role.lower())
+                        if key not in seen_members and m_name:
+                            cursor.execute(
+                                "INSERT INTO project_crew_hierarchy_members (node_id, name, role) VALUES (%s, %s, %s)",
+                                (node_id, m_name, m_role)
+                            )
+                            seen_members.add(key)
+                    children = node.get('children', [])
+                    for child in children:
+                        insert_node(child, node_id)
+            
+            insert_node(hierarchy)
+
         conn.commit()
     except Exception as e:
         conn.rollback()
@@ -238,6 +279,89 @@ def get_project_by_id(project_id):
         result["latest_budget_total"] = float(result["latest_budget_total"] or 0)
         result["total_paid"] = float(result["total_paid"] or 0)
         result["balance"] = result["latest_budget_total"] - result["total_paid"]
+
+        # Fetch Map Routes
+        cursor.execute("SELECT * FROM project_map_routes WHERE project_id = %s", (project_id,))
+        routes = cursor.fetchall()
+        route_locations = []
+        if routes:
+            route_ids = tuple([r['id'] for r in routes])
+            if len(route_ids) == 1:
+                cursor.execute("SELECT * FROM project_map_route_locations WHERE route_id = %s ORDER BY sequence", (route_ids[0],))
+            else:
+                format_strings = ','.join(['%s'] * len(route_ids))
+                cursor.execute(f"SELECT * FROM project_map_route_locations WHERE route_id IN ({format_strings}) ORDER BY sequence", route_ids)
+            locs = cursor.fetchall()
+            
+            for r in routes:
+                r_locs = [l for l in locs if l['route_id'] == r['id']]
+                route_locations.append({
+                    "id": r['id'],
+                    "title": r['title'],
+                    "color": r['color'],
+                    "startTime": r.get('start_time', '08:00'),
+                    "startDate": r.get('start_date', ''),
+                    "vehicleType": r.get('vehicle_type', 'sedan'),
+                    "locations": [{"id": l['id'], "name": l['name'], "address": l['address']} for l in r_locs]
+                })
+        result['route_locations'] = route_locations
+
+        # Fetch Crew Hierarchy
+        cursor.execute("SELECT * FROM project_crew_hierarchy_nodes WHERE project_id = %s", (project_id,))
+        nodes = cursor.fetchall()
+        if nodes:
+            node_ids = tuple([n['id'] for n in nodes])
+            if len(node_ids) == 1:
+                cursor.execute("SELECT * FROM project_crew_hierarchy_members WHERE node_id = %s", (node_ids[0],))
+            else:
+                format_strings = ','.join(['%s'] * len(node_ids))
+                cursor.execute(f"SELECT * FROM project_crew_hierarchy_members WHERE node_id IN ({format_strings})", node_ids)
+            members = cursor.fetchall()
+
+            node_dict = {}
+            for n in nodes:
+                node_dict[n['id']] = {
+                    "id": n['id'],
+                    "department": n['department'],
+                    "members": [{"name": m['name'], "role": m['role']} for m in members if m['node_id'] == n['id']],
+                    "children": []
+                }
+            
+            root_node = None
+            for n in nodes:
+                if n['parent_id']:
+                    parent = node_dict.get(n['parent_id'])
+                    if parent:
+                        parent['children'].append(node_dict[n['id']])
+                else:
+                    root_node = node_dict[n['id']]
+            result['crew_hierarchy_data'] = root_node
+        else:
+            result['crew_hierarchy_data'] = None
+            
+        # Fetch Equipment Hero Data
+        cursor.execute("SELECT * FROM project_equipment_heroes WHERE project_id = %s", (project_id,))
+        hero_data = cursor.fetchone()
+        
+        # In get_project_by_id, equipment_data historically contained hero and heroSecondary.
+        # The frontend parses it if it exists.
+        if hero_data:
+            import json
+            hero_payload = {
+                "hero": {
+                    "label": hero_data['hero_label'],
+                    "name": hero_data['hero_name'],
+                    "details": hero_data['hero_details'],
+                    "status": hero_data['hero_status']
+                },
+                "heroSecondary": {
+                    "label": hero_data['secondary_label'],
+                    "name": hero_data['secondary_name'],
+                    "details": hero_data['secondary_details'],
+                    "status": hero_data['secondary_status']
+                } if hero_data['secondary_name'] else None
+            }
+            result['equipment_data'] = json.dumps(hero_payload)
 
     cursor.close()
     conn.close()
@@ -1008,6 +1132,10 @@ def update_project_status(project_id, status):
     return True
 
 
+def run_project_locations_migration():
+    pass
+
+
 def run_budget_migration():
     print("Migration: Starting...")
     conn = get_connection()
@@ -1156,6 +1284,13 @@ def run_budget_migration():
         if not cursor.fetchone():
             print("Migration: Adding pause_notifications column to users...")
             cursor.execute("ALTER TABLE users ADD COLUMN pause_notifications TINYINT(1) DEFAULT 0")
+
+        try:
+            cursor.execute("ALTER TABLE project_map_routes ADD COLUMN start_time VARCHAR(10) DEFAULT '08:00'")
+            print("Migration: Added start_time to project_map_routes.")
+        except Exception as e:
+            if "Duplicate column name" not in str(e):
+                print(f"Migration error for project_map_routes: {e}")
 
         print("Migration: Creating department_crew_assignments table...")
         cursor.execute(
@@ -1381,23 +1516,27 @@ def get_project_equipment_full(project_id):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     
-    # Get hero data from projects table
-    cursor.execute('SELECT equipment_data FROM projects WHERE id = %s', (project_id,))
-    project = cursor.fetchone()
+    # Get hero data from new tables
+    cursor.execute('SELECT * FROM project_equipment_heroes WHERE project_id = %s', (project_id,))
+    hero_row = cursor.fetchone()
     
-    import json
     hero_data = None
     hero_secondary_data = None
-    if project and project.get('equipment_data'):
-        try:
-            parsed = json.loads(project['equipment_data'])
-            if isinstance(parsed, dict):
-                hero_data = parsed.get('hero', parsed)
-                hero_secondary_data = parsed.get('heroSecondary', None)
-            else:
-                hero_data = parsed
-        except Exception:
-            pass
+    
+    if hero_row:
+        hero_data = {
+            "label": hero_row['hero_label'],
+            "name": hero_row['hero_name'],
+            "details": hero_row['hero_details'],
+            "status": hero_row['hero_status']
+        }
+        if hero_row['secondary_name']:
+            hero_secondary_data = {
+                "label": hero_row['secondary_label'],
+                "name": hero_row['secondary_name'],
+                "details": hero_row['secondary_details'],
+                "status": hero_row['secondary_status']
+            }
 
     # Get departments
     cursor.execute('SELECT * FROM project_equipment_departments WHERE project_id = %s ORDER BY created_at', (project_id,))
@@ -1490,3 +1629,59 @@ def delete_equipment_item(item_id):
     cursor.close()
     conn.close()
     return True
+
+
+def update_project_route(project_id, route_id, route_data):
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    title = route_data.get('title', '')
+    route_color = route_data.get('color', '#ffffff')
+    start_time = route_data.get('startTime', '08:00')
+    start_date = route_data.get('startDate', '')
+    vehicle_type = route_data.get('vehicleType', 'sedan')
+
+    # Delete existing locations for this specific route
+    cursor.execute("DELETE FROM project_map_route_locations WHERE route_id = %s", (route_id,))
+    
+    # Check if route exists to UPSERT
+    cursor.execute("SELECT id FROM project_map_routes WHERE id = %s", (route_id,))
+    if cursor.fetchone():
+        cursor.execute(
+            "UPDATE project_map_routes SET title=%s, color=%s, start_time=%s, start_date=%s, vehicle_type=%s WHERE id=%s",
+            (title, route_color, start_time, start_date, vehicle_type, route_id)
+        )
+    else:
+        cursor.execute(
+            "INSERT INTO project_map_routes (id, project_id, title, color, start_time, start_date, vehicle_type) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+            (route_id, project_id, title, route_color, start_time, start_date, vehicle_type)
+        )
+        
+    locations = route_data.get('locations', [])
+    for i, loc in enumerate(locations):
+        loc_id = str(loc.get('id', ''))
+        loc_name = loc.get('name', '')
+        loc_address = loc.get('address', '')
+        if loc_id:
+            cursor.execute(
+                "INSERT INTO project_map_route_locations (id, route_id, name, address, sequence) VALUES (%s, %s, %s, %s, %s)",
+                (loc_id, route_id, loc_name, loc_address, i)
+            )
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+
+def delete_project_route(project_id, route_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    # Delete locations first
+    cursor.execute("DELETE FROM project_map_route_locations WHERE route_id = %s", (route_id,))
+    # Delete route
+    cursor.execute("DELETE FROM project_map_routes WHERE id = %s", (route_id,))
+
+    conn.commit()
+    cursor.close()
+    conn.close()

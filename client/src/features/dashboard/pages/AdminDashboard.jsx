@@ -146,7 +146,7 @@ const AdminDashboard = () => {
             setEditingProject(null);
             setShowProjectModal(false);
           }}
-          className="profile-modal-glass"
+          className="global-modal-glass"
         >
           <ProjectForm
             onAdded={handleAdded}

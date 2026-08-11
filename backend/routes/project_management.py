@@ -54,6 +54,8 @@ def projects_post():
         )
 
     project_image_url = project_image_base64 if project_image_base64 else None
+    
+    route_locations = data.get("route_locations", [])
 
     new_id = db.insert_project(
         project_name,
@@ -63,6 +65,7 @@ def projects_post():
         location,
         color,
         project_image_url,
+        route_locations,
     )
 
     client_ids = data.get("client_ids", [])
@@ -128,15 +131,18 @@ def projects_put(project_id):
         project_image_url = data.get("project_image_url")
         if project_image_base64 and project_image_base64.startswith("data:image"):
             project_image_url = project_image_base64
+            
+        route_locations = data.get("route_locations")
+        
         db.update_project(
             project_id,
             project_name,
             code_name,
             start_date,
             end_date,
-            location,
             color,
             project_image_url,
+            route_locations,
         )
 
         client_ids = data.get("client_ids", [])
@@ -334,3 +340,28 @@ def delete_equipment_item(item_id):
         return jsonify({"success": True}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@project_bp.route("/api/projects/<int:project_id>/routes/<string:route_id>", methods=["PUT"])
+@roles_required("admin", "manager")
+@cross_origin(supports_credentials=True)
+def update_route(project_id, route_id):
+    route_data = request.json
+    try:
+        from services.db_operations import update_project_route
+        update_project_route(project_id, route_id, route_data)
+        return jsonify({"status": "success", "message": "Route updated successfully"})
+    except Exception as e:
+        print(f"Error updating route: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@project_bp.route("/api/projects/<int:project_id>/routes/<string:route_id>", methods=["DELETE"])
+@roles_required("admin", "manager")
+@cross_origin(supports_credentials=True)
+def delete_route(project_id, route_id):
+    try:
+        from services.db_operations import delete_project_route
+        delete_project_route(project_id, route_id)
+        return jsonify({"status": "success", "message": "Route deleted successfully"})
+    except Exception as e:
+        print(f"Error deleting route: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500

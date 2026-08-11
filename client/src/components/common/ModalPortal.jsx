@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import ReactDOM from "react-dom";
 import Icon from "./Icon";
 import "./Modal.css";
@@ -26,10 +26,26 @@ const ModalPortal = ({
     };
   }, []);
 
+  const overlayMouseDown = React.useRef(false);
+
   const content = (
-    <div className="modal-portal-overlay" onClick={onClose}>
+    <div
+      className="modal-portal-overlay"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) {
+          overlayMouseDown.current = true;
+        }
+      }}
+      onMouseUp={(e) => {
+        if (overlayMouseDown.current && e.target === e.currentTarget) {
+          if (onClose) onClose();
+        }
+        overlayMouseDown.current = false;
+      }}
+    >
       <div
         className={`modal-glass-container ${size === "small" ? "modal-small" : ""} ${className}`}
+        onMouseDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}
       >
         {showClose && onClose && (

@@ -30,7 +30,7 @@ const ProjectDashboardProduction = ({
     <ModalPortal
       onClose={onClose}
       size="large"
-      className="profile-modal-glass production-glass-override"
+      className="global-modal-glass production-glass-override"
     >
       <div className="production-modal-container">
         <div className="modal-header-section">

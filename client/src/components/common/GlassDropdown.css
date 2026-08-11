@@ -77,6 +77,7 @@
   font-size: var(--dd-font-size);
   font-weight: 400;
   overflow: hidden;
+  white-space: nowrap;
   text-overflow: ellipsis;
   margin-right: 4px;
 }
