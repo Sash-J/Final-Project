@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useBlocker } from "react-router-dom";
 import { useModal } from "../../../context/ModalContext";
 import { useProjects } from "../../projects/context/ProjectContext";
@@ -6,264 +6,20 @@ import BudgetEntryForm from "../components/BudgetEntryForm";
 import GlassDropdown from "../../../components/common/GlassDropdown";
 import PageHeader from "../../../components/common/PageHeader";
 import ConfirmationModal from "../../../components/common/ConfirmationModal";
-import ModalPortal from "../../../components/common/ModalPortal";
 
 import HoverTooltip from "../../../components/common/HoverTooltip";
 import "./AdminBudget.css";
 
 import { budgetService } from "../../../services/budgetService";
-
-// ── Reusable status message ───────────────────────────────────────────────────
-const StatusMsg = ({ msg, setMsg }) => {
-  useEffect(() => {
-    if (!msg) return;
-    const isError =
-      msg.startsWith("Error") ||
-      msg.startsWith("X") ||
-      msg.startsWith("❌");
-    if (!isError && setMsg) {
-      const timer = setTimeout(() => {
-        setMsg("");
-      }, 10000);
-      return () => clearTimeout(timer);
-    }
-  }, [msg, setMsg]);
-
-  if (!msg) return null;
-  const isError =
-    msg.startsWith("Error") ||
-    msg.startsWith("X") ||
-    msg.startsWith("❌");
-  return <p key={msg} className={`status-msg ${isError ? "error" : "success"}`}>{msg}</p>;
-};
-
-// ── 1. Add Department ─────────────────────────────────────────────────────────
-const AddDepartment = ({ phases, onAdded }) => {
-  const [name, setName] = useState("");
-  const [phaseId, setPhaseId] = useState("2"); // Default to Production
-  const [msg, setMsg] = useState("");
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setMsg("");
-    try {
-      const data = await budgetService.createDepartment({
-        department_name: name,
-        phase_id: parseInt(phaseId),
-      });
-      if (data && data.error) throw new Error(data.error);
-      
-      setMsg(`"${name}" added`);
-      setName("");
-      onAdded && onAdded();
-    } catch (err) {
-      setMsg(`❌ ${err.message}`);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <div className="modal-header-section" style={{ textAlign: "left", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "15px", marginBottom: "25px" }}>
-        <h3 style={{ margin: 0, fontSize: "1.3rem", fontWeight: "600", textTransform: "none", letterSpacing: "normal" }}>Add Department</h3>
-      </div>
-      <div className="neo-form-group">
-        <label className="neo-label">Enter Department Name</label>
-        <input
-          className="neo-input"
-          type="text"
-          placeholder="e.g. Camera Department"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-      </div>
-
-      <div className="neo-form-group" style={{ marginBottom: "25px" }}>
-        <GlassDropdown
-          label="Select Phase"
-          placeholder="— Phase —"
-          options={phases.map((p) => ({
-            value: p.id,
-            label: p.phase_name,
-          }))}
-          value={phaseId}
-          onChange={(val) => setPhaseId(val)}
-        />
-      </div>
-
-      <button type="submit" className="btn-neo btn-neo-solid" style={{ width: "100%" }}>Add Department</button>
-      <div
-        className="status-msg-container"
-        style={{ minHeight: "32px", marginTop: "0.5rem" }}
-      >
-        <StatusMsg msg={msg} setMsg={setMsg} />
-      </div>
-    </form>
-  );
-};
-
-// ── 2. Add Category ───────────────────────────────────────────────────────────
-const AddCategory = ({ departments, onAdded, onDeptSelect }) => {
-  const [name, setName] = useState("");
-  const [deptId, setDeptId] = useState("");
-  const [msg, setMsg] = useState("");
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setMsg("");
-    try {
-      const data = await budgetService.createCategory({
-        category_name: name,
-        department_id: parseInt(deptId),
-      });
-      if (data && data.error) throw new Error(data.error);
-
-      setMsg(`Category "${name}" added`);
-      setName("");
-      setDeptId("");
-      onDeptSelect && onDeptSelect("");
-      onAdded && onAdded();
-    } catch (err) {
-      setMsg(`❌ ${err.message}`);
-    }
-  };
-
-  const handleDeptChange = (val) => {
-    setDeptId(val);
-    onDeptSelect && onDeptSelect(val);
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <div className="modal-header-section" style={{ textAlign: "left", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "15px", marginBottom: "25px" }}>
-        <h3 style={{ margin: 0, fontSize: "1.3rem", fontWeight: "600", textTransform: "none", letterSpacing: "normal" }}>Add Category</h3>
-      </div>
-      <div className="neo-form-group">
-        <label className="neo-label">Enter Category Name</label>
-        <input
-          className="neo-input"
-          type="text"
-          placeholder="e.g. Electrical"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-      </div>
-      <div className="neo-form-group" style={{ marginBottom: "25px" }}>
-        <GlassDropdown
-          label="Select Department"
-          placeholder="— Department —"
-          options={departments.map((d) => ({
-            value: d.id,
-            label: d.department_name,
-          }))}
-          value={deptId}
-          onChange={handleDeptChange}
-        />
-      </div>
-      <button type="submit" className="btn-neo btn-neo-solid" style={{ width: "100%" }}>Add Category</button>
-      <div
-        className="status-msg-container"
-        style={{ minHeight: "32px", marginTop: "0.5rem" }}
-      >
-        <StatusMsg msg={msg} setMsg={setMsg} />
-      </div>
-    </form>
-  );
-};
-
-// ── 3. Add Budget Item ────────────────────────────────────────────────────────
-const AddBudgetItem = ({
-  categories,
-  onAdded,
-  onCategorySelect,
-  autoAlignEnabled,
-  onToggleAutoAlign,
-}) => {
-  const [name, setName] = useState("");
-  const [catId, setCatId] = useState("");
-  const [msg, setMsg] = useState("");
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setMsg("");
-    try {
-      const data = await budgetService.createBudgetItem({
-        item_name: name, 
-        category_id: parseInt(catId) 
-      });
-      if (data && data.error) throw new Error(data.error);
-      
-      setMsg(`"${name}" added`);
-      setName("");
-      setCatId("");
-      onCategorySelect && onCategorySelect("");
-      onAdded && onAdded();
-    } catch (err) {
-      setMsg(`❌ ${err.message}`);
-    }
-  };
-
-  const handleCatChange = (val) => {
-    setCatId(val);
-    onCategorySelect && onCategorySelect(val);
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <div className="modal-header-section" style={{ textAlign: "left", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "15px", marginBottom: "25px" }}>
-        <h3 style={{ margin: 0, fontSize: "1.3rem", fontWeight: "600", textTransform: "none", letterSpacing: "normal" }}>Add Budget Item</h3>
-      </div>
-      <div className="neo-form-group">
-        <label className="neo-label">Enter Item Name</label>
-        <input
-          className="neo-input"
-          type="text"
-          placeholder="e.g. LED Panel"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-      </div>
-      <div className="neo-form-group" style={{ marginBottom: "25px" }}>
-        <GlassDropdown
-          label="Select Category"
-          placeholder="— Category —"
-          options={categories.map((c) => ({
-            value: c.id,
-            label: `${c.category_name} (${c.department_name})`,
-          }))}
-          value={catId}
-          onChange={handleCatChange}
-        />
-      </div>
-      <button type="submit" className="btn-neo btn-neo-solid" style={{ width: "100%", marginBottom: "15px" }}>Add Budget Item</button>
-      <div className="switch-container" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0" }}>
-        <span className="switch-label neo-label" style={{ marginBottom: 0 }}>Auto-align Department</span>
-        <label className="switch">
-          <input
-            type="checkbox"
-            checked={autoAlignEnabled}
-            onChange={(e) => onToggleAutoAlign(e.target.checked)}
-          />
-          <span className="slider"></span>
-        </label>
-      </div>
-      <div
-        className="status-msg-container"
-        style={{ minHeight: "32px", marginTop: "0.5rem" }}
-      >
-        <StatusMsg msg={msg} setMsg={setMsg} />
-      </div>
-    </form>
-  );
-};
-
+import { getSortedDepartments, getSortedCategories } from "../utils/budgetHelpers";
+import { AddDepartment, AddCategory, AddBudgetItem, WidgetOptionsMenu } from "../components/AdminSidebarWidgets";
+import PublishBudgetModal from "../components/PublishBudgetModal";
 // ── Main AdminBudget Component ────────────────────────────────────────────────
 const AdminBudget = () => {
   const {
     projects,
     refreshProjects,
+    hierarchyCache,
     phasesCache,
     deptsCache,
     catsCache,
@@ -272,62 +28,48 @@ const AdminBudget = () => {
     getBudgetVersions,
   } = useProjects();
 
+  // Generate strictly ordered arrays from the budget hierarchy tree
+  const sortedDepts = useMemo(() => getSortedDepartments(hierarchyCache, deptsCache), [hierarchyCache, deptsCache]);
+  const sortedCats = useMemo(() => getSortedCategories(hierarchyCache, catsCache), [hierarchyCache, catsCache]);
+
   const [projectId, setProjectId] = useState("");
   const [versionId, setVersionId] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
+  const [sidebarActionsNode, setSidebarActionsNode] = useState(null);
   const [selectedCatId, setSelectedCatId] = useState("");
   const [selectedDeptId, setSelectedDeptId] = useState("");
-  const [addCatMarginTop, setAddCatMarginTop] = useState(0);
-  const [addItemMarginTop, setAddItemMarginTop] = useState(0);
   const [autoAlignEnabled, setAutoAlignEnabled] = useState(true);
   const [showPublishModal, setShowPublishModal] = useState(false);
-  const [publishToCrew, setPublishToCrew] = useState(false);
-  const [publishToClient, setPublishToClient] = useState(false);
-  const [selectedPublishVersionId, setSelectedPublishVersionId] = useState("");
+  const [activeAccordion, setActiveAccordion] = useState(null);
+  const isSidebarExpanded = activeAccordion !== null;
+  const isProjectGroupActive = activeAccordion === 'project';
+  const isLowerGroupActive = ['department', 'category', 'item'].includes(activeAccordion);
 
-  useEffect(() => {
-    if (!selectedDeptId || !autoAlignEnabled) {
-      setAddCatMarginTop(0);
-      return;
-    }
+  const [autoCenterViewportEnabled, setAutoCenterViewportEnabled] = useState(true);
 
-    const timer = setTimeout(() => {
-      const row = document.getElementById(`dept-section-${selectedDeptId}`);
-      const card = document.getElementById("add-category-card");
-      if (row && card) {
-        const rowRect = row.getBoundingClientRect();
-        const cardRect = card.getBoundingClientRect();
-        setAddCatMarginTop((prev) => {
-          let offset = rowRect.top - cardRect.top + prev;
-          return offset < 0 ? 0 : offset;
-        });
+  const handleAccordionToggle = (section) => {
+    setActiveAccordion((prev) => {
+      const nextState = prev === section ? null : section;
+      
+      if (nextState) {
+        setTimeout(() => {
+          let id = "";
+          if (nextState === 'project') id = "accordion-project";
+          if (nextState === 'department') id = "accordion-department";
+          if (nextState === 'category') id = "add-category-card";
+          if (nextState === 'item') id = "add-budget-item-card";
+          
+          if (id) {
+            const el = document.getElementById(id);
+            if (el && autoCenterViewportEnabled) {
+              el.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+          }
+        }, 300); // wait for CSS transition
       }
-    }, 200);
-
-    return () => clearTimeout(timer);
-  }, [selectedDeptId, autoAlignEnabled]);
-
-  useEffect(() => {
-    if (!selectedCatId || !autoAlignEnabled) {
-      setAddItemMarginTop(0);
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      const row = document.getElementById(`cat-section-${selectedCatId}`);
-      const card = document.getElementById("add-budget-item-card");
-      if (row && card) {
-        const rowRect = row.getBoundingClientRect();
-        const cardRect = card.getBoundingClientRect();
-        setAddItemMarginTop((prev) => {
-          let offset = rowRect.top - cardRect.top + prev;
-          return offset < 0 ? 0 : offset;
-        });
-      }
-    }, 200);
-
-    return () => clearTimeout(timer);
-  }, [selectedCatId, autoAlignEnabled]);
+      return nextState;
+    });
+  };
 
   // Unsaved changes protection state
   const [budgetIsDirty, setBudgetIsDirty] = useState(false);
@@ -349,7 +91,8 @@ const AdminBudget = () => {
   useEffect(() => {
     refreshProjects();
     getBudgetMetadata(refreshKey > 0);
-  }, [refreshKey, refreshProjects, getBudgetMetadata]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshKey]);
 
   // Browser-level unsaved changes warning
   useEffect(() => {
@@ -463,50 +206,7 @@ const AdminBudget = () => {
 
   const handleOpenPublishModal = () => {
     if (!versionId) return;
-    setSelectedPublishVersionId(versionId);
-    const versionList = versionsCache[projectId] || [];
-    const currentVersion = versionList.find((v) => String(v.id) === String(versionId));
-    if (currentVersion) {
-      setPublishToCrew(!!currentVersion.published_to_crew);
-      setPublishToClient(!!currentVersion.published_to_client);
-    } else {
-      setPublishToCrew(false);
-      setPublishToClient(false);
-    }
     setShowPublishModal(true);
-  };
-
-  const handlePublishVersionChange = (targetVersionId) => {
-    setSelectedPublishVersionId(targetVersionId);
-    const versionList = versionsCache[projectId] || [];
-    const targetVersion = versionList.find((v) => String(v.id) === String(targetVersionId));
-    if (targetVersion) {
-      setPublishToCrew(!!targetVersion.published_to_crew);
-      setPublishToClient(!!targetVersion.published_to_client);
-    } else {
-      setPublishToCrew(false);
-      setPublishToClient(false);
-    }
-  };
-
-  const handleSavePublishSettings = async () => {
-    try {
-      const data = await budgetService.publishBudgetVersion(selectedPublishVersionId, {
-        published_to_crew: publishToCrew,
-        published_to_client: publishToClient,
-      });
-
-      if (data && !data.error) {
-        alert("Publish settings saved!");
-        await getBudgetVersions(projectId, true);
-        setShowPublishModal(false);
-      } else {
-        alert(`Failed to update publish settings: ${data?.error || "Unknown error"}`);
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Error saving publish settings");
-    }
   };
 
   const handleDataAdded = () => {
@@ -544,110 +244,148 @@ const AdminBudget = () => {
 
       <div className="admin-content-animated">
         <div className="admin-budget-content">
-          {/* Master Project Selection Panel */}
-          <div className="master-project-selection full-width" style={{ zIndex: 50, marginBottom: "20px" }}>
-            <div className="project-dropdown-wrapper">
-              <GlassDropdown
-                label="Choose project to manage budgets"
-                placeholder="- Select Project -"
-                options={projects
-                  .filter((p) => p.status !== "completed")
-                  .map((p) => ({
-                    value: p.id,
-                    label: `${p.project_name} ${p.code_name ? `(${p.code_name})` : ""}`,
-                  }))}
-                value={projectId}
-                onChange={(val) => handleProjectChange(val)}
-              />
-            </div>
-
-            {projectId && (
-              <div className="version-selection-area">
-                <div className="version-controls">
-                  <div className="version-select-container">
-                    <GlassDropdown
-                      label="Select Budget Version"
-                      placeholder="— Select —"
-                      modifiers="lg fluid"
-                      options={(versionsCache[projectId] || []).map(
-                        (v) => {
-                          const tags = [];
-                          if (v.published_to_crew) tags.push("Crew");
-                          if (v.published_to_client) tags.push("Client");
-                          const tagStr = tags.length > 0 ? ` [Published: ${tags.join(" & ")}]` : "";
-                          return {
-                            value: v.id,
-                            label: `Version ${v.version_number}${tagStr}`,
-                          };
-                        }
-                      )}
-                      value={versionId}
-                      onChange={(val) => handleVersionChange(val)}
+          <div className={`admin-sidebar ${isSidebarExpanded ? 'expanded' : ''}`}>
+            <div className="admin-sidebar-overlay">
+              <div className={`sidebar-section admin-sidebar-glass ${isSidebarExpanded && !isProjectGroupActive ? 'group-collapsed' : ''}`} id="accordion-project">
+                <HoverTooltip text={isSidebarExpanded ? "" : "Select Project"} wrapperClassName="w-100" style={{ display: 'flex' }}>
+                  <div className="sidebar-widget-header w-100" onClick={() => handleAccordionToggle('project')}>
+                    <div className="sidebar-widget-icon-wrapper theme-blue">
+                      <span className="material-symbols-outlined icon-root">account_tree</span>
+                    </div>
+                    <h3 className="sidebar-widget-title">Select Project</h3>
+                    <WidgetOptionsMenu 
+                      autoCenterEnabled={autoCenterViewportEnabled} 
+                      onToggleAutoCenter={setAutoCenterViewportEnabled} 
+                      isExpanded={activeAccordion === 'project'} 
+                    />
+                  </div>
+                </HoverTooltip>
+                
+                <div className={`sidebar-widget-content ${activeAccordion === 'project' ? 'accordion-open' : ''}`}>
+                  <div className="sidebar-widget-content-inner">
+                    <div className="project-dropdown-wrapper">
+                      <GlassDropdown
+                      label="Choose project to manage budgets"
+                      placeholder="- Select Project -"
+                      options={projects
+                        .filter((p) => p.status !== "completed")
+                        .map((p) => ({
+                          value: p.id,
+                          label: `${p.project_name} ${p.code_name ? `(${p.code_name})` : ""}`,
+                        }))}
+                      value={projectId}
+                      onChange={(val) => handleProjectChange(val)}
                     />
                   </div>
 
-                  <div className="version-actions-row">
-                      <HoverTooltip text="Delete selected version">
-                        <button
-                          type="button"
-                          className="btn-neo-cancel version-action-btn-delete"
-                          onClick={handleDeleteVersion}
-                          disabled={!versionId}
-                        >
-                          <span
-                            className="material-symbols-outlined version-action-icon-delete"
-                          >
-                            delete
-                          </span>
-                        </button>
-                      </HoverTooltip>
+                  {projectId && (
+                    <div className="version-selection-area">
+                      <div className="version-controls">
+                        <div className="version-select-container">
+                          <GlassDropdown
+                            label="Select Budget Version"
+                            placeholder="— Select —"
+                            modifiers="lg fluid"
+                            options={(versionsCache[projectId] || []).map(
+                              (v) => {
+                                const tags = [];
+                                if (v.published_to_crew) tags.push("Crew");
+                                if (v.published_to_client) tags.push("Client");
+                                const tagStr = tags.length > 0 ? ` [Published: ${tags.join(" & ")}]` : "";
+                                return {
+                                  value: v.id,
+                                  label: `Version ${v.version_number}${tagStr}`,
+                                };
+                              }
+                            )}
+                            value={versionId}
+                            onChange={(val) => handleVersionChange(val)}
+                          />
+                        </div>
 
-                      <HoverTooltip text="Clone current version to a new one">
-                        <button
-                          type="button"
-                          className="btn-neo version-action-btn-clone"
-                          onClick={handleCreateNewVersion}
-                        >
-                          + New Version
-                        </button>
-                      </HoverTooltip>
+                        <div className="version-actions-row">
+                          <HoverTooltip text="Delete selected version">
+                            <button
+                              type="button"
+                              className="btn-neo-cancel version-action-btn-delete"
+                              onClick={handleDeleteVersion}
+                              disabled={!versionId}
+                            >
+                              <span className="material-symbols-outlined version-action-icon-delete">
+                                delete
+                              </span>
+                            </button>
+                          </HoverTooltip>
+
+                          <HoverTooltip text="Clone current version to a new one">
+                            <button
+                              type="button"
+                              className="btn-neo version-action-btn-clone"
+                              onClick={handleCreateNewVersion}
+                            >
+                              + New Version
+                            </button>
+                          </HoverTooltip>
+                        </div>
+                      </div>
                     </div>
+                  )}
+                  </div>
+                </div>
+              </div>
+
+              {versionId && (
+                <div className={`sidebar-section admin-sidebar-glass ${isSidebarExpanded && !isLowerGroupActive ? 'group-collapsed' : ''}`} style={{ gap: '12px' }}>
+                  <div id="accordion-department">
+                    <AddDepartment
+                      phases={phasesCache || []}
+                      onAdded={handleDataAdded}
+                      isExpanded={activeAccordion === 'department'}
+                      isSidebarExpanded={isSidebarExpanded}
+                      onToggle={() => handleAccordionToggle('department')}
+                      autoCenterEnabled={autoCenterViewportEnabled}
+                      onToggleAutoCenter={setAutoCenterViewportEnabled}
+                    />
+                  </div>
+                  <hr className="widget-divider" />
+                  <div id="add-category-card">
+                    <AddCategory
+                      departments={sortedDepts}
+                      onAdded={handleDataAdded}
+                      onDeptSelect={setSelectedDeptId}
+                      isExpanded={activeAccordion === 'category'}
+                      isSidebarExpanded={isSidebarExpanded}
+                      onToggle={() => handleAccordionToggle('category')}
+                      autoCenterEnabled={autoCenterViewportEnabled}
+                      onToggleAutoCenter={setAutoCenterViewportEnabled}
+                    />
+                  </div>
+                  <hr className="widget-divider" />
+                  <div id="add-budget-item-card">
+                    <AddBudgetItem
+                      categories={sortedCats}
+                      onAdded={handleDataAdded}
+                      onCategorySelect={setSelectedCatId}
+                      autoAlignEnabled={autoAlignEnabled}
+                      onToggleAutoAlign={setAutoAlignEnabled}
+                      isExpanded={activeAccordion === 'item'}
+                      isSidebarExpanded={isSidebarExpanded}
+                      onToggle={() => handleAccordionToggle('item')}
+                      autoCenterEnabled={autoCenterViewportEnabled}
+                      onToggleAutoCenter={setAutoCenterViewportEnabled}
+                    />
                   </div>
                 </div>
               )}
-          </div>
-
-          <div className="admin-sidebar">
-
-            <div className="grid-window">
-              <AddDepartment
-                phases={phasesCache || []}
-                onAdded={handleDataAdded}
-              />
-            </div>
-            <div
-              className="grid-window"
-              id="add-category-card"
-              style={{ marginTop: `${addCatMarginTop}px` }}
-            >
-              <AddCategory
-                departments={deptsCache || []}
-                onAdded={handleDataAdded}
-                onDeptSelect={setSelectedDeptId}
-              />
-            </div>
-            <div
-              className="grid-window"
-              id="add-budget-item-card"
-              style={{ marginTop: `${addItemMarginTop}px` }}
-            >
-              <AddBudgetItem
-                categories={catsCache || []}
-                onAdded={handleDataAdded}
-                onCategorySelect={setSelectedCatId}
-                autoAlignEnabled={autoAlignEnabled}
-                onToggleAutoAlign={setAutoAlignEnabled}
-              />
+              {versionId && (
+                <div 
+                  ref={setSidebarActionsNode}
+                  className={`sidebar-section admin-sidebar-glass sidebar-actions-container ${isSidebarExpanded ? 'group-collapsed' : ''}`}
+                  style={{ gap: '12px', marginTop: '32px' }}
+                >
+                  {/* Actions will be portaled here from BudgetEntryForm */}
+                </div>
+              )}
             </div>
           </div>
 
@@ -671,6 +409,7 @@ const AdminBudget = () => {
                 selectedCatId={autoAlignEnabled ? selectedCatId : ""}
                 selectedDeptId={autoAlignEnabled ? selectedDeptId : ""}
                 onPublish={handleOpenPublishModal}
+                actionsContainer={sidebarActionsNode}
               />
             </div>
           </div>
@@ -689,91 +428,14 @@ const AdminBudget = () => {
         cancelVariant="danger"
       />
 
-      {showPublishModal && (
-        <ModalPortal className="no-glass" showClose={false}>
-          <div className="publish-modal-overlay" onClick={() => setShowPublishModal(false)}>
-            <div className="publish-modal-content" onClick={(e) => e.stopPropagation()}>
-              <div className="publish-modal-header">
-                <h3>Publish Budget Version</h3>
-                <button className="publish-modal-close" onClick={() => setShowPublishModal(false)}>&times;</button>
-              </div>
-              <div className="publish-modal-body">
-                <div className="publish-modal-field">
-                  <label className="publish-modal-label">Select Version to Publish</label>
-                  <select
-                    className="publish-version-select"
-                    value={selectedPublishVersionId}
-                    onChange={(e) => handlePublishVersionChange(e.target.value)}
-                  >
-                    {(versionsCache[projectId] || []).map((v) => {
-                      const tags = [];
-                      if (v.published_to_crew) tags.push("Crew");
-                      if (v.published_to_client) tags.push("Client");
-                      const tagStr = tags.length > 0 ? ` [Published: ${tags.join(" & ")}]` : "";
-                      return (
-                        <option key={v.id} value={v.id}>
-                          Version {v.version_number}{tagStr}
-                        </option>
-                      );
-                    })}
-                  </select>
-                </div>
-
-                <div className="publish-version-details">
-                  <div className="detail-item">
-                    <span className="detail-label">Active Version in Editor:</span>
-                    <span className="detail-value active-highlight">
-                      Version {(versionsCache[projectId] || []).find((v) => String(v.id) === String(versionId))?.version_number || "None"}
-                    </span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="detail-label">Last Published:</span>
-                    <span className="detail-value">
-                      {(() => {
-                        const selVer = (versionsCache[projectId] || []).find((v) => String(v.id) === String(selectedPublishVersionId));
-                        if (selVer && selVer.published_at) {
-                          return new Date(selVer.published_at).toLocaleString();
-                        }
-                        return "Not published yet";
-                      })()}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="publish-options-group">
-                  <div className="publish-option">
-                    <label className="publish-checkbox-label">
-                      <input
-                        type="checkbox"
-                        checked={publishToCrew}
-                        onChange={(e) => setPublishToCrew(e.target.checked)}
-                        className="publish-checkbox-input"
-                      />
-                      <span>Publish to Production Crew</span>
-                    </label>
-                  </div>
-
-                  <div className="publish-option">
-                    <label className="publish-checkbox-label">
-                      <input
-                        type="checkbox"
-                        checked={publishToClient}
-                        onChange={(e) => setPublishToClient(e.target.checked)}
-                        className="publish-checkbox-input"
-                      />
-                      <span>Publish to Client</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-              <div className="publish-modal-footer">
-                <button className="btn-cancel" onClick={() => setShowPublishModal(false)}>Cancel</button>
-                <button className="btn-save" onClick={handleSavePublishSettings}>Save Settings</button>
-              </div>
-            </div>
-          </div>
-        </ModalPortal>
-      )}
+      <PublishBudgetModal
+        isOpen={showPublishModal}
+        onClose={() => setShowPublishModal(false)}
+        projectId={projectId}
+        versionsCache={versionsCache}
+        initialVersionId={versionId}
+        onSuccess={() => getBudgetVersions(projectId, true)}
+      />
     </section>
   );
 };

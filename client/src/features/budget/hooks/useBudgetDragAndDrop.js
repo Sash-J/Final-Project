@@ -93,6 +93,11 @@ export const useBudgetDragAndDrop = (hierarchy, setHierarchy, invalidateHierarch
     }
 
     //Item dragging
+    if (source.droppableId !== destination.droppableId) {
+      alert("You can only reorder budget rows within their own category.");
+      return;
+    }
+
     let phaseIdx = -1;
     let deptIdx = -1;
     let catIdx = -1;

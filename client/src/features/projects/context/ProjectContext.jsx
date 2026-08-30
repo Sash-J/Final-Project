@@ -140,12 +140,21 @@ export const ProjectProvider = ({ children }) => {
 
       setMetaLoading(true);
       try {
-        const [hData, pData, dData, cData] = await Promise.all([
-          projectService.getHierarchy(),
-          projectService.getPhases(),
-          projectService.getDepartments(),
-          projectService.getCategories(),
-        ]);
+        const hData = await projectService.getHierarchy();
+        
+        const pData = [];
+        const dData = [];
+        const cData = [];
+        
+        hData.forEach((p) => {
+          pData.push({ id: p.phase_id, phase_name: p.phase_name });
+          p.departments?.forEach((d) => {
+            dData.push({ id: d.id, department_name: d.department_name, phase_id: p.phase_id });
+            d.categories?.forEach((c) => {
+              cData.push({ id: c.id, category_name: c.category_name, department_id: d.id });
+            });
+          });
+        });
 
         setHierarchyCache(hData);
         setPhasesCache(pData);
@@ -193,40 +202,25 @@ export const ProjectProvider = ({ children }) => {
 
       setBudgetLoading(true);
       try {
-        const [meta, vData] = await Promise.all([
-          getBudgetMetadata(force),
-          budgetService.getBudgetValues(projectId, versionId),
-        ]);
+        const fullData = await budgetService.getBudgetFull(projectId, versionId);
 
-        const values = vData && !vData.error ? vData : {};
-        const breakdownData = {};
+        if (force || !hierarchyCache) {
+          setHierarchyCache(fullData.hierarchy);
+        }
 
-        const itemizedIds = Object.keys(values).filter(
-          (itemId) => !!values[itemId].is_itemized,
-        );
-
-        if (itemizedIds.length > 0) {
-          await Promise.all(
-            itemizedIds.map(async (itemId) => {
-              try {
-                const bds = await budgetService.getBudgetBreakdown(projectId, versionId, itemId);
-                if (bds) {
-                  breakdownData[itemId] = bds;
-                }
-              } catch (e) {
-                console.error(
-                  `ProjectContext: Failed to fetch breakdown for item ${itemId}`,
-                  e,
-                );
-              }
-            }),
-          );
+        const breakdownsObj = {};
+        if (Array.isArray(fullData.breakdowns)) {
+          fullData.breakdowns.forEach((bd) => {
+            const bId = String(bd.budget_item_id);
+            if (!breakdownsObj[bId]) breakdownsObj[bId] = [];
+            breakdownsObj[bId].push(bd);
+          });
         }
 
         const result = {
-          hierarchy: meta.hierarchy,
-          values: values,
-          breakdowns: breakdownData,
+          hierarchy: fullData.hierarchy || [],
+          values: fullData.values || {},
+          breakdowns: breakdownsObj,
         };
 
         setBudgetCache((prev) => ({
@@ -243,7 +237,7 @@ export const ProjectProvider = ({ children }) => {
         setBudgetLoading(false);
       }
     },
-    [budgetCache, getBudgetMetadata],
+    [budgetCache, hierarchyCache],
   );
 
   const invalidateCache = useCallback((projectId = null) => {

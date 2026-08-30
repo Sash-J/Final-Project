@@ -1,79 +1,30 @@
-/* Reusable sub-nav-btn for budget actions */
-.sub-nav-btn {
+/* Reusable utility classes for Budget Actions */
+.sidebar-widget-icon-wrapper.theme-pdf {
+  background: rgba(75, 192, 192, 0.1) !important;
+}
+.sidebar-widget-icon-wrapper.theme-pdf .icon-root {
+  color: #4bc0c0 !important;
+}
+
+.sidebar-widget-icon-wrapper.theme-submit {
+  background: rgba(0, 230, 115, 0.1) !important;
+}
+.sidebar-widget-icon-wrapper.theme-submit .icon-root {
+  color: #00e673 !important;
+}
+
+.sidebar-widget-header.disabled-header {
+  cursor: not-allowed !important;
+  opacity: 0.5;
+}
+
+/* Sidebar specific overrides */
+.sidebar-actions-container .bef-actions {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-  gap: 0;
-  height: 45px;
-  padding: 0 16px;
-  border: none;
-  background: rgba(255, 255, 255, 0.061);
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 0.85rem;
-  font-weight: 400;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-direction: column;
+  width: 100%;
 }
 
-.sub-nav-btn span:not(.icon-root) {
-  max-width: 0;
-  opacity: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  transition: max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, margin-left 0.3s ease;
-  margin-left: 0;
-}
-
-.sub-nav-btn:hover span:not(.icon-root) {
-  max-width: 150px;
-  opacity: 1;
-  margin-left: 8px;
-}
-
-.sub-nav-btn:hover {
-  color: #fff;
-  filter: brightness(1.2);
-}
-
-.sub-nav-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-  filter: none;
-}
-
-.sub-nav-btn.btn-pdf {
-  background: rgba(75, 192, 192, 0.1);
-  border: 1px solid rgba(75, 192, 192, 0.3);
-  color: #4bc0c0;
-  margin-right: 10px;
-}
-
-.sub-nav-btn.btn-publish {
-  background: rgba(0, 198, 230, 0.1);
-  border: 1px solid rgba(0, 198, 230, 0.3);
-  color: var(--accent-color);
-  margin-right: 10px;
-}
-
-.sub-nav-btn.btn-clear {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.6);
-  margin-right: 10px;
-}
-
-.sub-nav-btn.btn-save {
-  background: rgba(0, 230, 115, 0.1);
-  border: 1px solid rgba(0, 230, 115, 0.3);
-  color: #00e673;
-}
-
-.sub-nav-btn.btn-save span:not(.icon-root) {
-  max-width: 250px;
-  opacity: 1;
-  margin-left: 8px;
-}
 /* Publish Modal Enhancements */
 .publish-modal-field {
   display: flex;

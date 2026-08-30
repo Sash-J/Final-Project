@@ -1,40 +1,34 @@
 /* Floating collapsible search widget (Dynamic scroll layout) */
 .bef-search-widget {
   position: absolute;
-  right: 4px;
+  right: 12px;
   top: 24px;
   z-index: 1000;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  font-family: inherit;
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  /* Scroll transition is handled dynamically via JS now */
   will-change: transform;
 }
 
 .bef-search-trigger-btn {
   width: 48px;
   height: 48px;
-  min-width: 48px;
-  min-height: 48px;
-  max-width: 48px;
-  max-height: 48px;
   flex-shrink: 0;
   padding: 0;
-  box-sizing: border-box;
   border-radius: 50%;
   color: #fff;
   cursor: pointer;
-  transition:
-    opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-    transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-    background 0.3s,
-    border-color 0.3s,
-    box-shadow 0.3s;
   opacity: 1;
   transform: scale(1);
   pointer-events: auto;
   visibility: visible;
+  transition:
+    opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    background 0.4s,
+    border-color 0.4s,
+    box-shadow 0.4s;
 }
 
 .bef-search-trigger-btn .glass-surface__content {
@@ -56,9 +50,9 @@
 }
 
 .bef-search-trigger-btn:hover {
-  background: rgba(0, 198, 230, 0.25);
-  border-color: var(--accent-color);
-  box-shadow: 0 8px 32px 0 rgba(0, 198, 230, 0.3);
+  background: rgba(var(--accent-color-rgb, 0, 198, 230), 0.25);
+  border-color: var(--accent-color, #00c6e6);
+  box-shadow: 0 8px 32px 0 rgba(var(--accent-color-rgb, 0, 198, 230), 0.3);
   transform: scale(1.1);
   animation: pulseSearchGlow 1.5s infinite;
 }
@@ -72,19 +66,19 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  transition:
-    opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    visibility 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  opacity: 0;
-  transform: scale(0.9) translate(15px, -15px);
-  pointer-events: none;
-  visibility: hidden;
   position: absolute;
   right: 0;
   top: 0;
   transform-origin: top right;
   z-index: 1000;
+  opacity: 0;
+  transform: scale(0.9) translate(15px, -15px);
+  pointer-events: none;
+  visibility: hidden;
+  transition:
+    opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    visibility 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .bef-search-widget.expanded .bef-search-container {
@@ -115,7 +109,7 @@
 }
 
 .search-input-icon {
-  color: #888;
+  color: var(--text-secondary, #888);
   font-size: 0.9rem !important;
 }
 
@@ -124,7 +118,7 @@
   background: transparent !important;
   border: none !important;
   outline: none !important;
-  color: #fff !important;
+  color: var(--text-primary, #fff) !important;
   font-size: 0.85rem !important;
   padding: 2px 0 !important;
 }
@@ -132,29 +126,28 @@
 .bef-search-close-btn {
   background: transparent;
   border: none;
-  color: #888;
+  color: var(--text-secondary, #888);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2px;
   border-radius: 4px;
-  transition: all 0.2s;
+  transition: color 0.2s, background-color 0.2s;
 }
 
 .bef-search-close-btn:hover {
-  color: #fff;
+  color: var(--text-primary, #fff);
   background: rgba(255, 255, 255, 0.1);
 }
 
 .bef-search-status-bar {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  align-self: flex-start;
   gap: 8px;
   padding: 4px 0px;
   font-size: 0.75rem;
+  color: var(--text-primary, #e0e0e0);
 }
 
 .bef-search-matches-count {
@@ -170,7 +163,7 @@
 .bef-search-nav-buttons button {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #fff;
+  color: var(--text-primary, #fff);
   border-radius: 4px;
   width: 24px;
   height: 24px;
@@ -178,12 +171,12 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.2s, border-color 0.2s, opacity 0.2s, color 0.2s;
 }
 
 .bef-search-nav-buttons button:hover:not(:disabled) {
-  background: rgba(0, 198, 230, 0.2);
-  border-color: var(--accent-color);
+  background: rgba(var(--accent-color-rgb, 0, 198, 230), 0.2);
+  border-color: var(--accent-color, #00c6e6);
 }
 
 .bef-search-nav-buttons button .material-symbols-outlined {
@@ -193,4 +186,50 @@
 .bef-search-nav-buttons button:disabled {
   opacity: 0.3;
   cursor: not-allowed;
+}
+
+/* ---------------------------------
+ * LIGHT THEME OVERRIDES
+ * --------------------------------- */
+.light-theme .bef-search-trigger-btn {
+  color: #333;
+}
+
+.light-theme .bef-search-close-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: #111;
+}
+
+.light-theme .bef-search-nav-buttons button {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #333;
+}
+
+/* ---------------------------------
+ * RESPONSIVE (MOBILE) OVERRIDES
+ * --------------------------------- */
+@media (max-width: 768px) {
+  .bef-search-widget {
+    right: 8px; /* Give some breathing room on edges */
+  }
+  
+  .bef-search-container {
+    width: calc(100vw - 16px);
+    max-width: 320px;
+    gap: 8px;
+  }
+  
+  .bef-search-trigger-btn {
+    width: 42px;
+    height: 42px;
+  }
+  
+  .bef-search-input-wrapper .glass-surface__content {
+    padding: 6px 8px;
+  }
+  
+  .bef-search-input-wrapper input {
+    font-size: 0.9rem !important; /* Prevent iOS zoom */
+  }
 }

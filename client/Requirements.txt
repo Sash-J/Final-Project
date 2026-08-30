@@ -67,16 +67,16 @@ All features are available for ADMIN
 
 Back End
 
-    Client UI (done ✅)
+    Client UI
         - Edit Profile
             - Change email
-            - Change name
-            - Change username
-            - Change password
-            - Change profile image
-            - Night/day mode
-            - Email notifications
-            - Pause notifications (toggle)
+            - Change name ✅
+            - Change username ✅
+            - Change password ✅
+            - Change profile image ✅
+            - Night/day mode ✅
+            - Email notifications ✅
+            - Pause notifications (toggle) ✅
             - Email address
         - 
 
@@ -114,8 +114,8 @@ Back End
     admin dashboard UI
         - time of the day --> ( Good morning, Good noon, Good evening + user name)
         - access level
-        - Active project (project cards)
-        - released projects (done cards)
+        - Active project (project cards) ✅
+        - released projects (done cards) ✅
         - profile
         - user payments (payment history + pending payments - project based --> must include to nav bar)
         - live client project count down  + release countdoawn (floating modal)
@@ -141,8 +141,8 @@ Back End
                     - All RBAC
                         - individual salaray + advanced paid
                         - Dept head --> department total and advances
-                - Equipment (rates available is shared)
-                - Shooting data and shooting location more prominant
+                - Equipment (rates available is shared) ✅
+                - Shooting data and shooting location more prominant ✅
                 - Payments tile
                     - Manager, Director --> Request payment from full access client (invoice)
                         - Crew request handling area (slection options - phases, departments, categories --> full amount request or manual amount request)

@@ -1,0 +1,79 @@
+.flip-fade-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  width: 100%;
+}
+
+.flip-fade-scene {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 1000px;
+  z-index: 2;
+}
+
+.flip-fade-word {
+  display: flex;
+  gap: 0.15em;
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #ffffff;
+  position: absolute;
+}
+
+@media (min-width: 768px) {
+  .flip-fade-word {
+    font-size: 2.75rem;
+  }
+}
+
+.flip-fade-letter {
+  display: inline-block;
+  transform-style: preserve-3d;
+  opacity: 0;
+  transform: rotateX(90deg) translateY(20px);
+  filter: blur(8px);
+}
+
+/* Enter Animation */
+.flip-fade-word.entering .flip-fade-letter {
+  animation: flipFadeEnter 0.6s cubic-bezier(0.2, 0.65, 0.3, 0.9) forwards;
+}
+
+/* Exit Animation */
+.flip-fade-word.exiting .flip-fade-letter {
+  animation: flipFadeExit 0.4s ease-in forwards;
+}
+
+@keyframes flipFadeEnter {
+  0% {
+    opacity: 0;
+    transform: rotateX(90deg) translateY(20px);
+    filter: blur(8px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: rotateX(0deg) translateY(0px);
+    filter: blur(0px);
+  }
+}
+
+@keyframes flipFadeExit {
+  0% {
+    opacity: 1;
+    transform: rotateX(0deg) translateY(0px);
+    filter: blur(0px);
+  }
+
+  100% {
+    opacity: 0;
+    transform: rotateX(-90deg) translateY(-20px);
+    filter: blur(8px);
+  }
+}

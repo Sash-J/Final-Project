@@ -10,6 +10,18 @@ export const budgetService = {
     }
   },
 
+  getBudgetFull: async (projectId, versionId) => {
+    try {
+      const url = versionId 
+        ? `/api/projects/${projectId}/budget-full?version_id=${versionId}`
+        : `/api/projects/${projectId}/budget-full`;
+      const response = await api.get(url);
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  },
+
   getBudgetValues: async (projectId, versionId = null) => {
     try {
       const url = versionId 

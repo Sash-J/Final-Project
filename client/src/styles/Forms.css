@@ -29,7 +29,7 @@
   outline: none;
   width: 100%;
   box-sizing: border-box;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
 }
 
 .neo-input::placeholder {
@@ -80,7 +80,7 @@
   padding: 12px 24px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: background-color 0.3s, border-color 0.3s, color 0.3s;
   font-size: 0.9rem;
 }
 

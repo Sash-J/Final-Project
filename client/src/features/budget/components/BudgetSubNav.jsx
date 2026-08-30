@@ -1,4 +1,4 @@
-import Icon from "../../../components/common/Icon";
+import HoverTooltip from "../../../components/common/HoverTooltip";
 import "./BudgetSubNav.css";
 
 const BudgetSubNav = ({
@@ -11,40 +11,56 @@ const BudgetSubNav = ({
   externalProjectId,
 }) => {
   return (
-    <div className="bef-actions" style={{ marginLeft: "auto" }}>
-      <button
-        className="sub-nav-btn btn-pdf"
-        onClick={handleDownloadPDF}
-      >
-        <Icon name="file_export" modifiers="md" />
-        <span>Download PDF</span>
-      </button>
+    <div className="bef-actions">
+      <HoverTooltip text="Download PDF" wrapperClassName="w-100" style={{ display: 'flex' }}>
+        <div className="sidebar-widget-header w-100" onClick={handleDownloadPDF}>
+          <div className="sidebar-widget-icon-wrapper theme-pdf">
+            <span className="material-symbols-outlined icon-root">file_export</span>
+          </div>
+          <h3 className="sidebar-widget-title">Download PDF</h3>
+        </div>
+      </HoverTooltip>
+
       {onPublish && versionId && (
-        <button
-          className="sub-nav-btn btn-publish"
-          onClick={onPublish}
-        >
-          <Icon name="publish" modifiers="md" />
-          <span>Publish</span>
-        </button>
+        <>
+          <hr className="widget-divider" />
+          <HoverTooltip text="Publish" wrapperClassName="w-100" style={{ display: 'flex' }}>
+            <div className="sidebar-widget-header w-100" onClick={onPublish}>
+              <div className="sidebar-widget-icon-wrapper theme-orange">
+                <span className="material-symbols-outlined icon-root">publish</span>
+              </div>
+              <h3 className="sidebar-widget-title">Publish</h3>
+            </div>
+          </HoverTooltip>
+        </>
       )}
-      <button
-        className="sub-nav-btn btn-clear"
-        onClick={handleClear}
-        disabled={submitting}
-      >
-        <Icon name="clear_all" modifiers="md" />
-        <span>Clear All</span>
-      </button>
-      <button
-        id="bef-save-button"
-        className="sub-nav-btn btn-save"
-        onClick={handleSubmit}
-        disabled={submitting || !externalProjectId}
-      >
-        <Icon name="save" modifiers="md" />
-        <span>{submitting ? "Saving…" : "Submit All"}</span>
-      </button>
+
+      <hr className="widget-divider" />
+      <HoverTooltip text="Clear All" wrapperClassName="w-100" style={{ display: 'flex' }}>
+        <div 
+          className={`sidebar-widget-header w-100 ${submitting ? 'disabled-header' : ''}`}
+          onClick={submitting ? undefined : handleClear}
+        >
+          <div className="sidebar-widget-icon-wrapper">
+            <span className="material-symbols-outlined icon-root">clear_all</span>
+          </div>
+          <h3 className="sidebar-widget-title">Clear All</h3>
+        </div>
+      </HoverTooltip>
+
+      <hr className="widget-divider" />
+      <HoverTooltip text={submitting ? "Saving…" : "Submit All"} wrapperClassName="w-100" style={{ display: 'flex' }}>
+        <div 
+          id="bef-save-button"
+          className={`sidebar-widget-header w-100 ${(submitting || !externalProjectId) ? 'disabled-header' : ''}`}
+          onClick={(submitting || !externalProjectId) ? undefined : handleSubmit}
+        >
+          <div className="sidebar-widget-icon-wrapper theme-submit">
+            <span className="material-symbols-outlined icon-root">save</span>
+          </div>
+          <h3 className="sidebar-widget-title">{submitting ? "Saving…" : "Submit All"}</h3>
+        </div>
+      </HoverTooltip>
     </div>
   );
 };

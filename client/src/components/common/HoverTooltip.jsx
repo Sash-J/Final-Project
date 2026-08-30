@@ -9,15 +9,33 @@ const HoverTooltip = ({ text, icon, children, wrapperClassName = "", style = {} 
   const wrapperRef = useRef(null);
 
   const handleMouseEnter = () => {
-    if (wrapperRef.current) {
-      const rect = wrapperRef.current.getBoundingClientRect();
-      setCoords({
-        top: rect.top - 8,
-        left: rect.left + rect.width / 2,
-      });
-    }
     setShowTooltip(true);
   };
+
+  React.useEffect(() => {
+    let animationFrameId;
+
+    const updatePosition = () => {
+      if (wrapperRef.current && showTooltip && text) {
+        const rect = wrapperRef.current.getBoundingClientRect();
+        setCoords({
+          top: rect.top - 8,
+          left: rect.left + rect.width / 2,
+        });
+        animationFrameId = requestAnimationFrame(updatePosition);
+      }
+    };
+
+    if (showTooltip && text) {
+      animationFrameId = requestAnimationFrame(updatePosition);
+    }
+
+    return () => {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, [showTooltip, text]);
 
   return (
     <div
@@ -28,7 +46,7 @@ const HoverTooltip = ({ text, icon, children, wrapperClassName = "", style = {} 
       onMouseLeave={() => setShowTooltip(false)}
     >
       {children}
-      {showTooltip && ReactDOM.createPortal(
+      {showTooltip && text && ReactDOM.createPortal(
         <div 
           className="hover-tooltip-positioner" 
           style={{ top: coords.top, left: coords.left }}
