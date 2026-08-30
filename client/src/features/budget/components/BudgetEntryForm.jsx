@@ -1,6 +1,7 @@
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import html2pdf from "html2pdf.js/dist/html2pdf.bundle.min.js";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { budgetService } from "../../../services/budgetService";
 import { projectService } from "../../../services/projectService";
 import { useProjects } from "../../projects/context/ProjectContext";
@@ -42,6 +43,7 @@ const BudgetEntryForm = ({
   selectedCatId = "",
   selectedDeptId = "",
   onPublish = null,
+  actionsContainer = null,
 }) => {
   const { user } = useAuth();
   const isManager = user?.role === "manager";
@@ -220,7 +222,6 @@ const BudgetEntryForm = ({
     let scrollTimeout = null;
     let isScrolling = false;
     let containerDocTop = 0;
-    let initialTranslateY = 0;
 
     const handleScroll = () => {
       if (!containerRef.current || !widgetRef.current) return;
@@ -229,80 +230,35 @@ const BudgetEntryForm = ({
       const maxScrollLimit = document.documentElement.scrollHeight - window.innerHeight;
       const clampedScroll = Math.max(0, Math.min(scrollTop, maxScrollLimit));
 
-      // Calculate layout coordinates once at the start of a scroll gesture
-      // to completely prevent layout thrashing (forced reflows) during scroll ticks.
       if (!isScrolling) {
         isScrolling = true;
         const rect = containerRef.current.getBoundingClientRect();
         containerDocTop = rect.top + scrollTop;
-        initialTranslateY = translateYRef.current;
       }
 
       const clampedRectTop = containerDocTop - clampedScroll;
-
-      // Safe viewport boundary limits for the widget (navbar to viewport bottom)
-      const topLimit = 140;
+      
+      // Target offset to keep the widget 140px below the viewport top
+      const targetOffset = 140 - clampedRectTop;
+      
       const widgetHeight = searchOpen ? 240 : 80;
-      const bottomLimit = window.innerHeight - widgetHeight - 40; // 40px safety padding
-
-      // Calculate widget's viewport position based on its last settled absolute position
-      const naturalViewportTop = initialTranslateY + clampedRectTop;
-
-      let adjustedViewportTop = naturalViewportTop;
-      const resistance = 0.15; // 85% resistance factor
-
-      // Apply rubber-band dampening at boundaries so it slows down and never goes out of frame
-      if (naturalViewportTop < topLimit) {
-        const overshoot = topLimit - naturalViewportTop;
-        adjustedViewportTop = topLimit - overshoot * resistance;
-      } else if (naturalViewportTop > bottomLimit) {
-        const overshoot = naturalViewportTop - bottomLimit;
-        adjustedViewportTop = bottomLimit + overshoot * resistance;
-      }
-
-      // Convert back to container-relative coordinate and clamp to container height
-      const requiredTranslateY = adjustedViewportTop - clampedRectTop;
       const maxScroll = containerRef.current.offsetHeight - widgetHeight;
-      const clampedTranslateY = Math.max(0, Math.min(requiredTranslateY, maxScroll));
+      const clampedTranslateY = Math.max(0, Math.min(targetOffset, maxScroll));
 
-      // Disable transition for instantaneous feedback during scrolling
-      widgetRef.current.style.transition = "none";
+      // Update position with a smooth CSS transition to create a gliding 'trailing' effect
+      widgetRef.current.style.transition = "transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)";
       widgetRef.current.style.transform = `translateY(${clampedTranslateY}px)`;
+      translateYRef.current = clampedTranslateY;
 
       if (scrollTimeout) {
         clearTimeout(scrollTimeout);
       }
 
-      // Settle smoothly after scrolling stops
       scrollTimeout = setTimeout(() => {
         isScrolling = false;
-        
-        if (containerRef.current && widgetRef.current) {
-          const currentRect = containerRef.current.getBoundingClientRect();
-          const currentScrollTop = window.scrollY || document.documentElement.scrollTop;
-          const currentClampedScroll = Math.max(0, Math.min(currentScrollTop, maxScrollLimit));
-          const currentContainerDocTop = currentRect.top + currentScrollTop;
-          const finalClampedRectTop = currentContainerDocTop - currentClampedScroll;
-
-          // Keep widget 140px from viewport top below navbar
-          const targetOffset = 140 - finalClampedRectTop;
-          const finalMaxScroll = containerRef.current.offsetHeight - widgetHeight;
-          const finalOffset = Math.min(
-            Math.max(0, targetOffset),
-            Math.max(0, finalMaxScroll)
-          );
-
-          const distance = Math.abs(translateYRef.current - finalOffset);
-          if (distance > 300) {
-            widgetRef.current.style.transition = "none";
-          } else {
-            widgetRef.current.style.transition = "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)";
-          }
-          void widgetRef.current.offsetHeight; // force reflow
-          widgetRef.current.style.transform = `translateY(${finalOffset}px)`;
-          setTranslateY(finalOffset);
-        }
-      }, 150); // 150ms Stop-scroll detection
+        // Sync state once scrolling stops completely
+        setTranslateY(translateYRef.current);
+      }, 150);
     };
 
     window.addEventListener("scroll", handleScroll, true);
@@ -1048,7 +1004,7 @@ const BudgetEntryForm = ({
                                                         )}
                                                         {providedItem.placeholder}
                                                         <tr className="bef-cat-spacer-row">
-                                                          <td colSpan="8"></td>
+                                                          <td colSpan={canDrag ? 8 : 7}></td>
                                                         </tr>
                                                       </tbody>
                                                     )}
@@ -1083,19 +1039,25 @@ const BudgetEntryForm = ({
           </div>
         )}
 
-        {!loading && hierarchy.length > 0 && (
-          <div className="bef-footer bef-actions-only-footer">
-            <BudgetSubNav 
-              handleDownloadPDF={handleDownloadPDF}
-              onPublish={onPublish}
-              versionId={versionId}
-              handleClear={handleClear}
-              submitting={submitting}
-              handleSubmit={handleSubmit}
-              externalProjectId={externalProjectId}
-            />
-          </div>
-        )}
+        {!loading && externalProjectId && versionId && hierarchy.length > 0 && (() => {
+          const content = (
+            <div className={actionsContainer ? "" : "bef-footer bef-actions-only-footer"}>
+              <BudgetSubNav 
+                handleDownloadPDF={handleDownloadPDF}
+                onPublish={onPublish}
+                versionId={versionId}
+                handleClear={handleClear}
+                submitting={submitting}
+                handleSubmit={handleSubmit}
+                externalProjectId={externalProjectId}
+              />
+            </div>
+          );
+
+          return actionsContainer 
+            ? createPortal(content, actionsContainer)
+            : content;
+        })()}
 
         <div
           className="status-msg-container"

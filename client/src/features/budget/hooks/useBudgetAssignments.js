@@ -38,27 +38,13 @@ export const useBudgetAssignments = (externalProjectId, onDirtyChange) => {
 
     const fetchCrewAndAssignments = async () => {
       try {
-        const [crewRes, deptAssignRes, catAssignRes, itemAssignRes] = await Promise.all([
-          fetch(`${API}/api/projects/${externalProjectId}/crew`, { credentials: "include" }),
-          fetch(`${API}/api/projects/${externalProjectId}/department-crew`, { credentials: "include" }),
-          fetch(`${API}/api/projects/${externalProjectId}/category-crew`, { credentials: "include" }),
-          fetch(`${API}/api/projects/${externalProjectId}/budget-item-crew`, { credentials: "include" })
-        ]);
-        if (crewRes.ok) {
-          const crewData = await crewRes.json();
-          setProjectCrew(crewData);
-        }
-        if (deptAssignRes.ok) {
-          const assignData = await deptAssignRes.json();
-          setDeptAssignments(assignData);
-        }
-        if (catAssignRes.ok) {
-          const assignData = await catAssignRes.json();
-          setCategoryAssignments(assignData);
-        }
-        if (itemAssignRes.ok) {
-          const assignData = await itemAssignRes.json();
-          setBudgetItemAssignments(assignData);
+        const res = await fetch(`${API}/api/projects/${externalProjectId}/budget-init`, { credentials: "include" });
+        if (res.ok) {
+          const data = await res.json();
+          setProjectCrew(data.project_crew || []);
+          setDeptAssignments(data.department_crew || {});
+          setCategoryAssignments(data.category_crew || {});
+          setBudgetItemAssignments(data.budget_item_crew || {});
         }
       } catch (err) {
         console.error("Failed to load crew/assignments", err);

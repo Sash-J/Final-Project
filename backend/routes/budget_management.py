@@ -1,3 +1,4 @@
+# pyrefly: ignore [missing-import]
 from flask import Blueprint, jsonify, request
 from routes.notifications_management import (
     notify_all_admins,
@@ -449,6 +450,50 @@ def assign_project_budget_item_crew_endpoint(project_id, item_id):
         user_ids = data.get("user_ids", [])
         db.update_project_budget_item_crew(project_id, item_id, user_ids)
         return jsonify({"message": "Crew assigned to budget item successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+import decimal
+
+def convert_decimals(obj):
+    if isinstance(obj, decimal.Decimal):
+        return float(obj)
+    if isinstance(obj, dict):
+        return {k: convert_decimals(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [convert_decimals(v) for v in obj]
+    return obj
+
+@budget_bp.route("/api/projects/<int:project_id>/budget-init", methods=["GET"])
+@login_required
+def get_budget_init_endpoint(project_id):
+    try:
+        data = db.get_budget_crew_init(project_id)
+        return jsonify(convert_decimals(data)), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@budget_bp.route("/api/projects/<int:project_id>/budget-full", methods=["GET"])
+@login_required
+def get_budget_full(project_id):
+    version_id = request.args.get("version_id")
+    if version_id in ["null", "undefined", ""]:
+        version_id = None
+    elif version_id is not None:
+        try:
+            version_id = int(version_id)
+        except ValueError:
+            version_id = None
+            
+    try:
+        payload = db.get_budget_full_data(project_id, version_id)
+        
+        # Ensure values gracefully handles errors just in case
+        if "error" in payload.get("values", {}):
+            payload["values"] = {}
+        
+        return jsonify(convert_decimals(payload)), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

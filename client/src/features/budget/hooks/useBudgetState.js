@@ -53,8 +53,8 @@ export const useBudgetState = ({
           return;
         }
 
-        const data = await getBudgetData(externalProjectId, versionId);
-        if (data.hierarchy) {
+        const data = await getBudgetData(externalProjectId, versionId, refreshKey > 0);
+        if (data && data.hierarchy) {
           setHierarchy(data.hierarchy);
         }
         

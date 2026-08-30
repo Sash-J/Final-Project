@@ -1,5 +1,6 @@
 import React from "react";
 import "./BudgetEntrySkeleton.css";
+import FlipFadeText from "../../../components/common/FlipFadeText";
 
 export const SkeletonBox = ({
   className = "",
@@ -59,18 +60,8 @@ export const SkeletonPhase = ({ itemsCount = 3 }) => (
 );
 
 export const SkeletonTable = () => (
-  <div className="premium-skeleton-container">
-    <div className="premium-skel-header">
-      <SkeletonBox className="premium-skel-title" pulse delay={1} />
-      <div className="premium-skel-actions">
-        <SkeletonBox className="premium-skel-btn" pulse delay={2} />
-        <SkeletonBox className="premium-skel-btn" pulse delay={3} />
-      </div>
-    </div>
-    
-    <SkeletonPhase itemsCount={4} />
-    <SkeletonPhase itemsCount={3} />
-    <SkeletonPhase itemsCount={2} />
+  <div className="premium-skeleton-container" style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <FlipFadeText />
   </div>
 );
 

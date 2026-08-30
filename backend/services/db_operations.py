@@ -668,14 +668,7 @@ def get_budget_values_for_project(project_id, version_id=None):
             SELECT 
                 pv.budget_item_id, pv.quantity, pv.rate, pv.rate_type, 
                 pv.rate_multiplier, pv.gross_revenue, pv.additional1, pv.comment1,
-                COALESCE((
-                    SELECT SUM(total) FROM budget_item_breakdowns bib 
-                    WHERE bib.version_id = pv.version_id AND bib.budget_item_id = pv.budget_item_id
-                ), pv.total) as total,
-                (pv.is_itemized OR EXISTS (
-                    SELECT 1 FROM budget_item_breakdowns bib 
-                    WHERE bib.version_id = pv.version_id AND bib.budget_item_id = pv.budget_item_id
-                )) as is_itemized
+                pv.total, pv.is_itemized
             FROM project_budget_values pv
             WHERE pv.version_id = %s
         """
@@ -685,14 +678,7 @@ def get_budget_values_for_project(project_id, version_id=None):
             SELECT 
                 pv.budget_item_id, pv.quantity, pv.rate, pv.rate_type, 
                 pv.rate_multiplier, pv.gross_revenue, pv.additional1, pv.comment1,
-                COALESCE((
-                    SELECT SUM(total) FROM budget_item_breakdowns bib 
-                    WHERE bib.version_id = pv.version_id AND bib.budget_item_id = pv.budget_item_id
-                ), pv.total) as total,
-                (pv.is_itemized OR EXISTS (
-                    SELECT 1 FROM budget_item_breakdowns bib 
-                    WHERE bib.version_id = pv.version_id AND bib.budget_item_id = pv.budget_item_id
-                )) as is_itemized
+                pv.total, pv.is_itemized
             FROM project_budget_values pv
             WHERE pv.version_id = (
                 SELECT id FROM budget_versions 
@@ -976,6 +962,42 @@ def get_budget_item_breakdowns(project_id, version_id, budget_item_id):
     cursor.close()
     conn.close()
     return result
+
+
+def get_all_budget_breakdowns(project_id, version_id=None):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    if version_id:
+        query = """
+            SELECT * FROM budget_item_breakdowns 
+            WHERE project_id = %s AND version_id = %s
+            ORDER BY budget_item_id ASC, id ASC
+        """
+        params = (project_id, version_id)
+    else:
+        query = """
+            SELECT * FROM budget_item_breakdowns 
+            WHERE project_id = %s AND version_id = (
+                SELECT id FROM budget_versions 
+                WHERE project_id = %s 
+                ORDER BY version_number DESC LIMIT 1
+            )
+            ORDER BY budget_item_id ASC, id ASC
+        """
+        params = (project_id, project_id)
+        
+    cursor.execute(query, params)
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    
+    breakdowns = {}
+    for row in rows:
+        item_id = str(row['budget_item_id'])
+        if item_id not in breakdowns:
+            breakdowns[item_id] = []
+        breakdowns[item_id].append(row)
+    return breakdowns
 
 
 def save_budget_item_breakdowns_batch(
@@ -1685,3 +1707,156 @@ def delete_project_route(project_id, route_id):
     conn.commit()
     cursor.close()
     conn.close()
+
+
+def get_budget_full_data(project_id, version_id=None):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    if not version_id:
+        cursor.execute("SELECT id FROM budget_versions WHERE project_id = %s ORDER BY version_number DESC LIMIT 1", (project_id,))
+        rv = cursor.fetchone()
+        version_id = rv["id"] if rv else None
+
+    if not version_id:
+        cursor.close()
+        conn.close()
+        return {"hierarchy": [], "values": {}, "breakdowns": []}
+
+    query = """
+    SELECT p.id as phase_id, p.phase_name, d.id as dept_id, d.department_name, c.id as cat_id, c.category_name, i.id as item_id, i.item_name FROM budget_phases p LEFT JOIN departments d ON p.id = d.phase_id LEFT JOIN categories c ON d.id = c.department_id LEFT JOIN budget_items i ON c.id = i.category_id ORDER BY p.sort_order, d.sort_order, d.id, c.sort_order, i.sort_order;
+    SELECT pv.budget_item_id, pv.quantity, pv.rate, pv.rate_type, pv.rate_multiplier, pv.gross_revenue, pv.additional1, pv.comment1, pv.total, pv.is_itemized FROM project_budget_values pv WHERE pv.version_id = %s;
+    SELECT budget_item_id, SUM(total) as agg_total FROM budget_item_breakdowns WHERE version_id = %s GROUP BY budget_item_id;
+    SELECT * FROM budget_item_breakdowns WHERE project_id = %s AND version_id = %s ORDER BY budget_item_id ASC, id ASC;
+    """
+    
+    results = cursor.execute(query, (version_id, version_id, project_id, version_id), multi=True)
+    
+    # 1: Hierarchy
+    hierarchy_rows = next(results).fetchall()
+    # 2: Values
+    values_rows = next(results).fetchall()
+    # 3: Aggs
+    agg_rows = next(results).fetchall()
+    # 4: Breakdowns
+    breakdowns = next(results).fetchall()
+    
+    cursor.close()
+    conn.close()
+    
+    phases = []
+    phase_map = {}
+    for row in hierarchy_rows:
+        p_id = row['phase_id']
+        if p_id not in phase_map:
+            phase = {'phase_id': p_id, 'phase_name': row['phase_name'], 'departments': [], '_dept_map': {}}
+            phases.append(phase)
+            phase_map[p_id] = phase
+        phase = phase_map[p_id]
+        d_id = row['dept_id']
+        if d_id and d_id not in phase['_dept_map']:
+            dept = {'id': d_id, 'department_name': row['department_name'], 'categories': [], '_cat_map': {}}
+            phase['departments'].append(dept)
+            phase['_dept_map'][d_id] = dept
+        if d_id:
+            dept = phase['_dept_map'][d_id]
+            c_id = row['cat_id']
+            if c_id and c_id not in dept['_cat_map']:
+                cat = {'id': c_id, 'category_name': row['category_name'], 'items': []}
+                dept['categories'].append(cat)
+                dept['_cat_map'][c_id] = cat
+            if c_id:
+                cat = dept['_cat_map'][c_id]
+                i_id = row['item_id']
+                if i_id:
+                    cat['items'].append({'id': i_id, 'item_name': row['item_name'], 'category_id': c_id})
+    for p in phases:
+        p.pop('_dept_map', None)
+        for d in p['departments']:
+            d.pop('_cat_map', None)
+            
+    values_map = {
+        str(row['budget_item_id']): {**row, 'is_itemized': bool(row.get('is_itemized', 0))}
+        for row in values_rows
+    }
+    
+    for b_row in agg_rows:
+        bid_str = str(b_row['budget_item_id'])
+        if bid_str not in values_map:
+            values_map[bid_str] = {
+                'budget_item_id': b_row['budget_item_id'], 'quantity': 0, 'rate': 0, 'rate_type': 'day', 'rate_multiplier': 1, 'gross_revenue': 0, 'additional1': 0, 'comment1': '', 'total': b_row['agg_total'] or 0, 'is_itemized': True
+            }
+        else:
+            values_map[bid_str]['is_itemized'] = True
+            values_map[bid_str]['total'] = b_row['agg_total'] or values_map[bid_str]['total']
+            
+    return {'hierarchy': phases, 'values': values_map, 'breakdowns': breakdowns}
+
+
+def get_budget_crew_init(project_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    query = '''
+        SELECT dca.department_id, u.id as user_id, u.username, u.full_name, u.profile_image
+        FROM department_crew_assignments dca
+        JOIN users u ON dca.user_id = u.id
+        WHERE dca.project_id = %s;
+        
+        SELECT cca.category_id, u.id as user_id, u.username, u.full_name, u.profile_image
+        FROM category_crew_assignments cca
+        JOIN users u ON cca.user_id = u.id
+        WHERE cca.project_id = %s;
+        
+        SELECT bca.budget_item_id, u.id as user_id, u.username, u.full_name, u.profile_image
+        FROM budget_item_crew_assignments bca
+        JOIN users u ON bca.user_id = u.id
+        WHERE bca.project_id = %s;
+        
+        SELECT cp.user_id, u.username, u.full_name, u.profile_image
+        FROM crew_projects cp
+        JOIN users u ON cp.user_id = u.id
+        WHERE cp.project_id = %s;
+        
+        SELECT id, version_number, published_to_crew, published_to_client, created_at, published_at 
+        FROM budget_versions WHERE project_id = %s ORDER BY version_number ASC;
+    '''
+    
+    results = cursor.execute(query, (project_id, project_id, project_id, project_id, project_id), multi=True)
+    
+    dept_rows = next(results).fetchall()
+    dept_assign = {}
+    for r in dept_rows:
+        dept_id = str(r["department_id"])
+        if dept_id not in dept_assign: dept_assign[dept_id] = []
+        dept_assign[dept_id].append({"id": r["user_id"], "username": r["username"], "full_name": r["full_name"], "profile_image": r["profile_image"]})
+        
+    cat_rows = next(results).fetchall()
+    cat_assign = {}
+    for r in cat_rows:
+        cat_id = str(r["category_id"])
+        if cat_id not in cat_assign: cat_assign[cat_id] = []
+        cat_assign[cat_id].append({"id": r["user_id"], "username": r["username"], "full_name": r["full_name"], "profile_image": r["profile_image"]})
+        
+    item_rows = next(results).fetchall()
+    item_assign = {}
+    for r in item_rows:
+        item_id = str(r["budget_item_id"])
+        if item_id not in item_assign: item_assign[item_id] = []
+        item_assign[item_id].append({"id": r["user_id"], "username": r["username"], "full_name": r["full_name"], "profile_image": r["profile_image"]})
+        
+    crew_rows = next(results).fetchall()
+    project_crew = [{"id": r["user_id"], "username": r["username"], "full_name": r["full_name"], "profile_image": r["profile_image"]} for r in crew_rows]
+    
+    version_rows = next(results).fetchall()
+    
+    cursor.close()
+    conn.close()
+    
+    return {
+        "department_crew": dept_assign,
+        "category_crew": cat_assign,
+        "budget_item_crew": item_assign,
+        "project_crew": project_crew,
+        "budget_versions": version_rows
+    }

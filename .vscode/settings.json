@@ -1,0 +1,9 @@
+{
+    "python.analysis.extraPaths": [
+        "./backend"
+    ],
+    "python.envFile": "${workspaceFolder}/.env",
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportMissingImports": "none"
+    }
+}
