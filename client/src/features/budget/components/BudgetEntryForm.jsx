@@ -45,9 +45,9 @@ const BudgetEntryForm = ({
   onPublish = null,
   actionsContainer = null,
 }) => {
-  const { user } = useAuth();
-  const isManager = user?.role === "manager";
-  const isAdmin = user?.role === "admin";
+  const { user, hasRole } = useAuth();
+  const isManager = hasRole("manager");
+  const isAdmin = hasRole("admin");
   const canEdit = isManager || isAdmin;
 
   const {
@@ -813,7 +813,7 @@ const BudgetEntryForm = ({
                                                   className="dept-crew-container"
                                                   onClick={(e) => e.stopPropagation()}
                                                 >
-                                                  {(!user || user.role === "admin" || user.role === "manager") && (
+                                                   {(!user || hasRole(["admin", "manager", "director"])) && (
                                                       <CrewAssignmentDropdown
                                                         assignedCrew={deptAssignments[dept.id] || []}
                                                         projectCrew={projectCrew}

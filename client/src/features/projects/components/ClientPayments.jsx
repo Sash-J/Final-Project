@@ -7,7 +7,7 @@ import "./ClientPayments.css";
 import { formatCurrency, getCurrencySymbol } from "../../../utils/currencyUtils";
 
 const ClientPayments = ({ projectId }) => {
-  const { user } = useAuth();
+  const { hasRole } = useAuth();
   const {
     getProjectPayments,
     paymentsCache,
@@ -24,7 +24,7 @@ const ClientPayments = ({ projectId }) => {
 
   const payments = paymentsCache[projectId] || [];
   const project = detailsCache[projectId] || {};
-  const isAdmin = user?.role === "admin" || user?.role === "manager";
+  const isAdmin = hasRole(["admin", "manager", "director", "accountant"]);
 
   useEffect(() => {
     if (projectId) {

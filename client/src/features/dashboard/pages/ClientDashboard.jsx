@@ -367,7 +367,7 @@ const ClientDashboard = () => {
                     >
                       <SuiTimeline
                         projectId={project.id}
-                        userRole={user.role}
+                        userRole={(user?.roles && user?.roles[0]) || user?.role || "Client"}
                         preview={true}
                         updateTrigger={milestoneUpdateTrigger}
                         onClick={() => setSelectedTimelineProject(project)}
@@ -714,7 +714,7 @@ const ClientDashboard = () => {
                   <SuiTimeline
                     projectId={selectedTimelineProject.id}
                     key={selectedTimelineProject._t || "1"}
-                    userRole={user.role}
+                    userRole={(user?.roles && user?.roles[0]) || user?.role || "Client"}
                     updateTrigger={milestoneUpdateTrigger}
                     onMilestonesChange={() =>
                       setMilestoneUpdateTrigger((prev) => prev + 1)

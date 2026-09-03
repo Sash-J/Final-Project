@@ -83,10 +83,15 @@ app.register_blueprint(milestone_bp)
 app.register_blueprint(notifications_bp)
 
 try:
-    from services.db_operations import run_budget_migration, run_project_locations_migration
+    from services.db_operations import (
+        run_budget_migration,
+        run_project_locations_migration,
+        run_rbac_migration,
+    )
 
     run_budget_migration()
     run_project_locations_migration()
+    run_rbac_migration()
 except Exception as e:
     print("Error running migrations on startup:", e)
 

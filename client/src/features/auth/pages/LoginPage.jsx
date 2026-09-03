@@ -25,8 +25,19 @@ const LoginPage = () => {
   const dashboardPath = (resolvedUser) => {
     const u = resolvedUser || user;
     if (!u) return "/";
-    if (u.role === "admin" || u.role === "manager") return "/admin";
-    if (u.role === "production_crew") return "/crew-dashboard";
+    const userRoles = [
+      ...(u.roles || []),
+      u.role,
+    ]
+      .filter(Boolean)
+      .map((r) => String(r).trim().toLowerCase().replace(/_/g, " "));
+
+    if (userRoles.some((r) => ["admin", "manager", "director", "accountant"].includes(r))) {
+      return "/admin";
+    }
+    if (userRoles.some((r) => ["production crew", "production_crew"].includes(r))) {
+      return "/crew-dashboard";
+    }
     return "/dashboard";
   };
 
@@ -52,10 +63,10 @@ const LoginPage = () => {
           <p className="logged-in-as">
             Signed in as <strong>{user.username}</strong>
           </p>
-          
+
           <div className="auth-action-group">
-            <button 
-              className="btn-neo btn-neo-solid proceed-btn" 
+            <button
+              className="btn-neo btn-neo-solid proceed-btn"
               onClick={() => startTransition(dashboardPath())}
             >
               Go to Dashboard

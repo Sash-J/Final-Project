@@ -14,6 +14,11 @@ const AddMilestonePanel = ({
   userRole = "admin", 
   onDelete = null 
 }) => {
+  const roleNorm = String(userRole || "").trim().toLowerCase().replace(/_/g, " ");
+  const isClient = roleNorm === "client";
+  const isCrew = roleNorm === "production crew" || roleNorm === "crew";
+  const isAdminOrManager = ["admin", "manager", "director", "accountant"].includes(roleNorm);
+
   const [milestoneTitle, setMilestoneTitle] = useState("");
   const [milestoneDate, setMilestoneDate] = useState("");
   const [milestoneAssignee, setMilestoneAssignee] = useState(1); // 1=VD, 0=Client
@@ -78,7 +83,7 @@ const AddMilestonePanel = ({
     setErrorMsg("");
     setSuccessMsg("");
 
-    if (userRole !== "client" && hasErrors) {
+    if (!isClient && hasErrors) {
       setErrorMsg("Please fix the validation errors before submitting.");
       return;
     }
@@ -105,7 +110,7 @@ const AddMilestonePanel = ({
           if (origMatch) origStripped = origMatch[2];
 
           if (finalNote !== origStripped) {
-            const roleTag = userRole === "client" ? "Client" : "VisionDivision";
+            const roleTag = isClient ? "Client" : "VisionDivision";
             finalNote = `[${roleTag}] ${finalNote}`;
           } else {
             finalNote = originalNote;
@@ -113,7 +118,7 @@ const AddMilestonePanel = ({
         }
 
         const payload = { status: milestoneStatus, client_note: finalNote };
-        if (userRole !== "client" || milestone.is_visiondivision === 0) {
+        if (!isClient || milestone.is_visiondivision === 0) {
           payload.title = milestoneTitle;
           payload.description = milestoneDesc;
           payload.target_date = milestoneDate;
@@ -170,7 +175,7 @@ const AddMilestonePanel = ({
             <h2>
               {mode === "add" 
                 ? "Add Milestone" 
-                : userRole === "admin" || userRole === "manager" 
+                : isAdminOrManager 
                   ? "Edit Milestone" 
                   : "Milestone Details"}
             </h2>
@@ -180,7 +185,7 @@ const AddMilestonePanel = ({
                 : "Update a milestone for the timeline"}
             </p>
           </div>
-          {userRole !== "production_crew" && userRole !== "client" && (
+          {!isCrew && !isClient && (
             <HoverTooltip text="Push to schedule" icon="event" style={{ display: "inline-flex" }}>
               <button 
                 type="button" 
@@ -205,7 +210,7 @@ const AddMilestonePanel = ({
         </div>
       </div>
 
-      {userRole !== "client" || mode === "add" ? (
+      {!isClient || mode === "add" ? (
         <>
           <div className="neo-form-group add-milestone-form-top">
             <div className="add-milestone-label-row">
@@ -305,7 +310,7 @@ const AddMilestonePanel = ({
             )}
           </div>
         </>
-      ) : userRole === "production_crew" ? (
+      ) : isCrew ? (
         <div className="sui-milestone-readonly">
           <strong className="sui-milestone-readonly-title">{milestoneTitle}</strong>
           <p className="sui-milestone-readonly-desc">{milestoneDesc}</p>
@@ -332,7 +337,7 @@ const AddMilestonePanel = ({
         </div>
       )}
 
-      {mode === "edit" && userRole !== "production_crew" && (
+      {mode === "edit" && !isCrew && (
         <div className="neo-form-group">
           <div className="add-milestone-label-row">
             <label className="neo-label add-milestone-label-with-badge">
@@ -361,7 +366,7 @@ const AddMilestonePanel = ({
       )}
 
       <div className="add-milestone-panel-actions">
-        {mode === "edit" && userRole !== "client" && userRole !== "production_crew" && onDelete && (
+        {mode === "edit" && !isClient && !isCrew && onDelete && (
           <HoverTooltip text="Delete Milestone" style={{ marginRight: "auto" }}>
             <button
               type="button"
@@ -379,9 +384,9 @@ const AddMilestonePanel = ({
           onClick={onClose}
           disabled={milestoneSaving}
         >
-          {mode === "edit" && userRole === "production_crew" ? "Close" : "Cancel"}
+          {mode === "edit" && isCrew ? "Close" : "Cancel"}
         </button>
-        {userRole !== "production_crew" && (
+        {!isCrew && (
           <button
             type="button"
             className="btn-neo btn-neo-solid"

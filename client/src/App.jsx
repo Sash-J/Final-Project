@@ -88,7 +88,7 @@ const router = createBrowserRouter([
       {
         path: "admin-budget",
         element: (
-          <ProtectedRoute roles={["admin", "manager"]}>
+          <ProtectedRoute roles={["admin", "manager", "director", "accountant"]}>
             <AdminBudget />
           </ProtectedRoute>
         ),
@@ -96,7 +96,7 @@ const router = createBrowserRouter([
       {
         path: "admin",
         element: (
-          <ProtectedRoute roles={["admin", "manager"]}>
+          <ProtectedRoute roles={["admin", "manager", "director", "accountant"]}>
             <AdminDashboard />
           </ProtectedRoute>
         ),
@@ -104,7 +104,7 @@ const router = createBrowserRouter([
       {
         path: "admin/projects/:projectId",
         element: (
-          <ProtectedRoute roles={["admin", "manager"]}>
+          <ProtectedRoute roles={["admin", "manager", "director", "accountant"]}>
             <ProjectDetailDashboard />
           </ProtectedRoute>
         ),
@@ -121,7 +121,7 @@ const router = createBrowserRouter([
         path: "schedule",
         element: (
           <ProtectedRoute
-            roles={["admin", "manager", "production_crew", "client"]}
+            roles={["admin", "manager", "director", "accountant", "coordinator", "production_crew", "production crew", "client"]}
           >
             <Schedule />
           </ProtectedRoute>
@@ -130,7 +130,7 @@ const router = createBrowserRouter([
       {
         path: "finance",
         element: (
-          <ProtectedRoute roles={["admin", "manager"]}>
+          <ProtectedRoute roles={["admin", "manager", "director", "accountant"]}>
             <FinancialDashboard />
           </ProtectedRoute>
         ),

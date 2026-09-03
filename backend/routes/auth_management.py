@@ -44,9 +44,10 @@ def validate_register_data(username, password, role, full_name, telephone, addre
     if special_count != 1:
         return "Password must contain exactly one special character."
 
-    # Role Guard
-    allowed_roles = ["client", "production_crew"]
-    if role not in allowed_roles:
+    # Role Guard: dynamically validate against DB assignable roles
+    assignable_roles = [r["name"].lower() for r in auth.get_assignable_roles()]
+    r_check = role.strip().lower().replace("_", " ")
+    if r_check not in assignable_roles and role.strip().lower() not in assignable_roles:
         return "Forbidden role selection."
 
     # Metadata Validation
@@ -67,6 +68,33 @@ def validate_register_data(username, password, role, full_name, telephone, addre
     return None
 
 
+@auth_bp.route("/api/auth/registration-roles", methods=["GET"])
+def get_registration_roles():
+    """Returns roles allowed for self-registration."""
+    roles = auth.get_assignable_roles()
+    return jsonify(roles), 200
+
+
+@auth_bp.route("/api/auth/me", methods=["GET"])
+@login_required
+def get_current_user():
+    from flask import session
+
+    user_id = session.get("user_id")
+    user_data = get_current_user_data() or {}
+    roles, permissions = auth.get_user_roles_and_permissions(user_id)
+
+    return (
+        jsonify(
+            {
+                "user": user_data,
+                "roles": roles,
+                "permissions": permissions,
+            }
+        ),
+        200,
+    )
+
 # Auth Routes
 @auth_bp.route("/api/login", methods=["POST"])
 def login():
@@ -86,15 +114,22 @@ def login():
                 403,
             )
 
+        roles, permissions = auth.get_user_roles_and_permissions(user["id"])
+        user["roles"] = roles
+        user["permissions"] = permissions
         set_user_session(user)
+
         profile = auth.get_user_profile(user["id"])
         return (
             jsonify(
                 {
                     "message": "Logged in successfully",
                     "user": {
+                        "id": user["id"],
                         "username": user["username"],
                         "role": user["role"],
+                        "roles": roles,
+                        "permissions": permissions,
                         "theme_mode": user.get("theme_mode", "dark"),
                         "profile_image": (
                             profile.get("profile_image", "") if profile else ""
@@ -120,14 +155,20 @@ def get_me():
 
     user_data = get_current_user_data()
     if user_data:
-        profile = auth.get_user_profile(session.get("user_id"))
+        user_id = session.get("user_id")
+        profile = auth.get_user_profile(user_id)
         if profile:
             user_data["profile_image"] = profile.get("profile_image", "")
+        roles, permissions = auth.get_user_roles_and_permissions(user_id)
+        user_data["roles"] = roles
+        user_data["permissions"] = permissions
         return (
             jsonify(
                 {
                     "logged_in": True,
                     "user": user_data,
+                    "roles": roles,
+                    "permissions": permissions,
                 }
             ),
             200,

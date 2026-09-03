@@ -16,6 +16,7 @@ const StatusMsg = ({ msg }) => {
 const UserManagement = () => {
   const [pendingUsers, setPendingUsers] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
+  const [availableRoles, setAvailableRoles] = useState([]);
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
   const [pendingRoles, setPendingRoles] = useState({});
@@ -29,19 +30,25 @@ const UserManagement = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [pendingData, usersData] = await Promise.all([
+      const [pendingData, usersData, rolesData] = await Promise.all([
         userService.getPendingUsers(),
         userService.getUsers(),
+        userService.getRoles().catch(() => []),
       ]);
       const p = Array.isArray(pendingData) ? pendingData : (pendingData.users || []);
       const a = Array.isArray(usersData) ? usersData : (usersData.users || []);
+      const r = Array.isArray(rolesData) ? rolesData : [];
+
       setPendingUsers(p);
+      setAllUsers(a);
+      setAvailableRoles(r);
+
       const roles = {};
       p.forEach((u) => {
-        roles[u.id] = u.role || "client";
+        const defaultRole = (u.roles && u.roles.length > 0 ? u.roles[0] : u.role) || "Client";
+        roles[u.id] = defaultRole;
       });
       setPendingRoles((prev) => ({ ...roles, ...prev }));
-      setAllUsers(a);
     } catch (err) {
       console.error("Failed to fetch users:", err);
       setMsg("Error loading users.");
@@ -54,13 +61,32 @@ const UserManagement = () => {
     fetchData();
   }, []);
 
+  const roleOptions = (
+    availableRoles.length > 0
+      ? availableRoles
+          .filter((r) => r.name.toLowerCase() !== "admin")
+          .map((r) => ({
+            value: r.name,
+            label: r.name.toUpperCase(),
+          }))
+      : [
+          { value: "Client", label: "CLIENT" },
+          { value: "Manager", label: "MANAGER" },
+          { value: "Production Crew", label: "PRODUCTION CREW" },
+          { value: "Director", label: "DIRECTOR" },
+          { value: "Accountant", label: "ACCOUNTANT" },
+          { value: "Coordinator", label: "COORDINATOR" },
+          { value: "Viewer", label: "VIEWER" },
+        ]
+  );
+
   const handlePendingRoleChange = (userId, role) => {
     setPendingRoles((prev) => ({ ...prev, [userId]: role }));
   };
 
   const approveUser = async (userId, username) => {
     setMsg("");
-    const selectedRole = pendingRoles[userId] || "client";
+    const selectedRole = pendingRoles[userId] || "Client";
     try {
       await userService.approveUser(userId, selectedRole);
       setMsg(`Approved user: ${username} as ${selectedRole.toUpperCase()}`);
@@ -147,43 +173,45 @@ const UserManagement = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {pendingUsers.map((u) => (
-                    <tr key={u.id}>
-                      <td>{u.username}</td>
-                      <td>
-                        <GlassDropdown
-                          className="um-role-dropdown"
-                          modifiers="sm fluid"
-                          options={[
-                            { value: "client", label: "CLIENT" },
-                            { value: "manager", label: "MANAGER" },
-                            {
-                              value: "production_crew",
-                              label: "PRODUCTION CREW",
-                            },
-                          ]}
-                          value={pendingRoles[u.id] || u.role}
-                          onChange={(val) => handlePendingRoleChange(u.id, val)}
-                        />
-                      </td>
-                      <td>
-                        <div className="um-action-btns">
-                          <button
-                            className="approve-btn"
-                            onClick={() => approveUser(u.id, u.username)}
-                          >
-                            Approve
-                          </button>
-                          <button
-                            className="reject-btn"
-                            onClick={() => rejectUser(u.id, u.username)}
-                          >
-                            Reject
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                  {pendingUsers.map((u) => {
+                    const currentPendingRole = pendingRoles[u.id] || (u.roles && u.roles.length > 0 ? u.roles[0] : u.role) || "Client";
+                    // Find matching option or match case-insensitively
+                    const matchedOption = roleOptions.find(
+                      (opt) => opt.value.toLowerCase() === String(currentPendingRole).toLowerCase()
+                    );
+                    const selectedVal = matchedOption ? matchedOption.value : currentPendingRole;
+
+                    return (
+                      <tr key={u.id}>
+                        <td>{u.username}</td>
+                        <td>
+                          <GlassDropdown
+                            className="um-role-dropdown"
+                            modifiers="sm fluid"
+                            options={roleOptions}
+                            value={selectedVal}
+                            onChange={(val) => handlePendingRoleChange(u.id, val)}
+                          />
+                        </td>
+                        <td>
+                          <div className="um-action-btns">
+                            <button
+                              className="approve-btn"
+                              onClick={() => approveUser(u.id, u.username)}
+                            >
+                              Approve
+                            </button>
+                            <button
+                              className="reject-btn"
+                              onClick={() => rejectUser(u.id, u.username)}
+                            >
+                              Reject
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -206,72 +234,67 @@ const UserManagement = () => {
               <tbody>
                 {allUsers.length === 0 ? (
                   <tr>
-                    <td colSpan="5" style={{ textAlign: "center", padding: "20px" }}>
+                    <td colSpan="5" className="um-no-users-cell">
                       No users found. Please contact support.
                     </td>
                   </tr>
                 ) : (
                   allUsers.map((u) => {
-                  const role =
-                    u.role &&
-                    ["admin", "manager", "client", "production_crew"].includes(
-                      u.role,
-                    )
-                      ? u.role
-                      : "client";
-                  return (
-                    <tr key={u.id}>
-                      <td>{u.id}</td>
-                      <td>{u.username}</td>
-                      <td>
-                        {u.role === "admin" ? (
-                          <span className="role-badge admin">ADMIN</span>
-                        ) : (
-                          <GlassDropdown
-                            className="um-role-dropdown"
-                            modifiers="sm fluid"
-                            options={[
-                              { value: "client", label: "CLIENT" },
-                              { value: "manager", label: "MANAGER" },
-                              {
-                                value: "production_crew",
-                                label: "PRODUCTION CREW"
-                              },
-                              { value: "director", label: "DIRECTOR" },
-                            ]}
-                            value={role}
-                            onChange={(val) =>
-                              handleRoleChange(u.id, val, u.username)
-                            }
-                          />
-                        )}
-                      </td>
-                      <td>
-                        <span
-                          className={`status-indicator ${u.is_approved ? "approved" : "pending"}`}
-                        >
-                          {u.is_approved ? "Active" : "Pending"}
-                        </span>
-                      </td>
-                      <td>
-                        {u.role !== "admin" && (
-                          <button
-                            className="reject-btn delete-acc-btn"
-                            onClick={() => deleteUser(u.id, u.username)}
+                    const userRoleList = (u.roles && u.roles.length > 0)
+                      ? u.roles
+                      : (u.role ? [u.role] : ["Client"]);
+                    const primaryRole = userRoleList[0] || "Client";
+                    const isAdmin = userRoleList.some(
+                      (r) => String(r).trim().toLowerCase() === "admin"
+                    );
+
+                    const matchedOption = roleOptions.find(
+                      (opt) => opt.value.toLowerCase() === String(primaryRole).toLowerCase()
+                    );
+                    const selectedVal = matchedOption ? matchedOption.value : primaryRole;
+
+                    return (
+                      <tr key={u.id}>
+                        <td>{u.id}</td>
+                        <td>{u.username}</td>
+                        <td>
+                          {isAdmin ? (
+                            <span className="role-badge admin">ADMIN</span>
+                          ) : (
+                            <GlassDropdown
+                              className="um-role-dropdown"
+                              modifiers="sm fluid"
+                              options={roleOptions}
+                              value={selectedVal}
+                              onChange={(val) =>
+                                handleRoleChange(u.id, val, u.username)
+                              }
+                            />
+                          )}
+                        </td>
+                        <td>
+                          <span
+                            className={`status-indicator ${u.is_approved ? "approved" : "pending"}`}
                           >
-                            <span
-                              className="material-symbols-outlined"
-                              style={{ fontSize: "1rem" }}
+                            {u.is_approved ? "Active" : "Pending"}
+                          </span>
+                        </td>
+                        <td>
+                          {!isAdmin && (
+                            <button
+                              className="reject-btn delete-acc-btn"
+                              onClick={() => deleteUser(u.id, u.username)}
                             >
-                              delete
-                            </span>
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
+                              <span className="material-symbols-outlined">
+                                delete
+                              </span>
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>

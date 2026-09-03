@@ -167,6 +167,46 @@ export const AuthProvider = ({ children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
+  const normalizeRole = (r) => {
+    if (!r) return "";
+    return String(r).trim().toLowerCase().replace(/_/g, " ");
+  };
+
+  const hasRole = useCallback(
+    (requiredRoles) => {
+      if (!user) return false;
+      const required = Array.isArray(requiredRoles) ? requiredRoles : [requiredRoles];
+      const normalizedRequired = required.map(normalizeRole);
+
+      const userRoles = [
+        ...(user.roles || []),
+        user.role,
+      ]
+        .filter(Boolean)
+        .map(normalizeRole);
+
+      return normalizedRequired.some((r) => userRoles.includes(r));
+    },
+    [user]
+  );
+
+  const hasPermission = useCallback(
+    (requiredPermissions) => {
+      if (!user) return false;
+      const required = Array.isArray(requiredPermissions)
+        ? requiredPermissions
+        : [requiredPermissions];
+      const userPermissions = (user.permissions || []).map((p) =>
+        String(p).trim().toLowerCase()
+      );
+      if (hasRole("admin")) return true;
+      return required.some((p) =>
+        userPermissions.includes(String(p).trim().toLowerCase())
+      );
+    },
+    [user, hasRole]
+  );
+
   return (
     <AuthContext.Provider
       value={{
@@ -175,6 +215,8 @@ export const AuthProvider = ({ children }) => {
         login,
         logout,
         checkAuth,
+        hasRole,
+        hasPermission,
         sessionExpired,
         isTransiting,
         startTransition,

@@ -7,7 +7,7 @@ import UserProfile from "../../features/users/components/UserProfile";
 import "./Navbar.css";
 
 const Navbar = () => {
-  const { user, updateUserTheme, theme } = useAuth();
+  const { user, updateUserTheme, theme, hasRole } = useAuth();
   const [useImageLogo, setUseImageLogo] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -48,7 +48,7 @@ const Navbar = () => {
       </Link>
 
       <ul className={`nav-links ${isMobileMenuOpen ? "mobile-open" : ""}`}>
-        {user && user.role === "client" && (
+        {user && hasRole("client") && (
           <li>
             <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
               <Icon name="dashboard" modifiers="sm" />
@@ -57,7 +57,7 @@ const Navbar = () => {
           </li>
         )}
 
-        {user && user.role === "production_crew" && (
+        {user && hasRole(["production_crew", "production crew"]) && (
           <li>
             <Link
               to="/crew-dashboard"
@@ -69,7 +69,7 @@ const Navbar = () => {
           </li>
         )}
 
-        {user && (user.role === "admin" || user.role === "manager") && (
+        {user && hasRole(["admin", "manager", "director", "accountant"]) && (
           <>
             <li>
               <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)}>
@@ -89,7 +89,7 @@ const Navbar = () => {
           </>
         )}
 
-        {user && user.role === "admin" && (
+        {user && hasRole("admin") && (
           <li>
             <Link to="/users" onClick={() => setIsMobileMenuOpen(false)}>
               <Icon name="groups" modifiers="md" />
@@ -98,7 +98,7 @@ const Navbar = () => {
           </li>
         )}
 
-        {user && (user.role === "admin" || user.role === "manager") && (
+        {user && hasRole(["admin", "manager", "director", "accountant"]) && (
           <li>
             <Link to="/finance" onClick={() => setIsMobileMenuOpen(false)}>
               <Icon name="assessment" modifiers="md" />

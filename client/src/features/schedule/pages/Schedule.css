@@ -884,3 +884,10 @@ body.light-theme .sidebar-task-card.is-unsaved {
   border-color: #0969da;
 }
 
+.download-pdf-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+
