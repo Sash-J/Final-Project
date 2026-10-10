@@ -38,7 +38,10 @@ const LoginPage = () => {
     if (userRoles.some((r) => ["production crew", "production_crew"].includes(r))) {
       return "/crew-dashboard";
     }
-    return "/dashboard";
+    if (userRoles.includes("client")) {
+      return "/dashboard";
+    }
+    return "/";
   };
 
   if (loading) {

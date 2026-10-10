@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 
 export const useBudgetState = ({
   externalProjectId,
@@ -16,7 +17,6 @@ export const useBudgetState = ({
   const [activeComment, setActiveComment] = useState(null);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [status, setStatus] = useState(null);
   const [breakdownData, setBreakdownData] = useState({});
   const [activeBreakdownId, setActiveBreakdownId] = useState(null);
   const [activeBreakdownItem, setActiveBreakdownItem] = useState(null);
@@ -38,7 +38,6 @@ export const useBudgetState = ({
 
     const loadBudget = async () => {
       setLoading(true);
-      setStatus(null);
       try {
         if (hierarchyCache) {
           setHierarchy(hierarchyCache);
@@ -89,10 +88,7 @@ export const useBudgetState = ({
         onDirtyChange(false);
       } catch (err) {
         console.error("BudgetEntryForm: Failed to load budget data", err);
-        setStatus({
-          type: "error",
-          text: "Failed to load budget data from cache.",
-        });
+        toast.error("Failed to load budget data from cache.");
       } finally {
         setLoading(false);
       }
@@ -165,7 +161,6 @@ export const useBudgetState = ({
     activeComment, setActiveComment,
     loading, setLoading,
     submitting, setSubmitting,
-    status, setStatus,
     breakdownData, setBreakdownData,
     activeBreakdownId, setActiveBreakdownId,
     activeBreakdownItem, setActiveBreakdownItem,

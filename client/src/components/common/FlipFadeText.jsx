@@ -1,22 +1,25 @@
 import React, { useState, useEffect, useCallback } from "react";
 import "./FlipFadeText.css";
 
-const defaultWords = ["LOADING", "COMPUTING", "SEARCHING", "RETRIEVING", "ASSEMBLING"];
+export const budgetWords = ["LOADING", "COMPUTING", "SEARCHING", "RETRIEVING", "ASSEMBLING"];
+export const compareWords = ["COMPARING", "CALCULATING", "FETCHING", "ALIGNING"];
 
 export function FlipFadeText({
-  words = defaultWords,
-  interval = 2500,
+  words,
+  mode = "budget",
+  interval = 2000,
   className = "",
   staggerDelay = 0.1,
   exitStaggerDelay = 0.05,
 }) {
+  const displayWords = words || (mode === "compare" ? compareWords : budgetWords);
   const [index, setIndex] = useState(0);
   const [prevIndex, setPrevIndex] = useState(null);
 
   const updateIndex = useCallback(() => {
     setPrevIndex(index);
-    setIndex((prev) => (prev + 1) % words.length);
-  }, [index, words.length]);
+    setIndex((prev) => (prev + 1) % displayWords.length);
+  }, [index, displayWords.length]);
 
   useEffect(() => {
     const timer = setInterval(updateIndex, interval);
@@ -34,8 +37,8 @@ export function FlipFadeText({
     }
   }, [prevIndex]);
 
-  const currentWord = words[index];
-  const previousWord = prevIndex !== null ? words[prevIndex] : null;
+  const currentWord = displayWords[index];
+  const previousWord = prevIndex !== null ? displayWords[prevIndex] : null;
 
   return (
     <div className={`flip-fade-container ${className}`}>
@@ -54,7 +57,7 @@ export function FlipFadeText({
             ))}
           </div>
         )}
-        
+
         {/* Render current word entering */}
         <div className="flip-fade-word entering" key={`curr-${index}`}>
           {currentWord.split("").map((char, i) => (

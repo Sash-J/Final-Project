@@ -64,7 +64,10 @@ const Home = () => {
         if (hasRole(['production_crew', 'production crew'])) {
             return <Navigate to="/crew-dashboard" />;
         }
-        return <Navigate to="/dashboard" />;
+        if (hasRole('client')) {
+            return <Navigate to="/dashboard" />;
+        }
+        // If user has no valid role, stay on Home page to prevent infinite redirect loops
     }
 
     return (

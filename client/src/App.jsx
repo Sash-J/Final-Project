@@ -13,6 +13,7 @@ import { ProjectProvider } from "./features/projects/context/ProjectContext";
 import Footer from "./components/Layout/Footer";
 import Home from "./components/Layout/Home";
 import Navbar from "./components/Layout/Navbar";
+import GlobalToaster from "./components/common/GlobalToaster";
 import AdminBudget from "./features/budget/pages/AdminBudget";
 import AdminDashboard from "./features/dashboard/pages/AdminDashboard";
 
@@ -144,6 +145,7 @@ const router = createBrowserRouter([
 function App() {
   return (
     <>
+      <GlobalToaster />
       <RouterProvider router={router} />
     </>
   );

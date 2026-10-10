@@ -31,6 +31,9 @@ export const AuthProvider = ({ children }) => {
     try {
       const data = await authService.checkAuth();
       if (data && data.logged_in) {
+        if (data.user && data.user.role) {
+            data.user.role = String(data.user.role).toLowerCase().trim();
+        }
         console.log("checkAuth success, user:", data.user);
         setUser(data.user);
         applyTheme(data.user.theme_mode);
@@ -67,6 +70,9 @@ export const AuthProvider = ({ children }) => {
   const login = async (username, password) => {
     try {
       const loggedInUser = await authService.login(username, password);
+      if (loggedInUser && loggedInUser.role) {
+          loggedInUser.role = String(loggedInUser.role).toLowerCase().trim();
+      }
       setUser(loggedInUser);
 
       const localTheme = localStorage.getItem("theme_mode");

@@ -32,12 +32,32 @@ export const BudgetRow = ({
   isCrewEditing,
   setIsCrewEditing,
   handleAssignBudgetItemCrew,
+  comparisonData = null,
+  totalRaw,
 }) => {
   const v = getVal(item.id, "all") || {};
   const rateType = getVal(item.id, "rate_type");
+  const isCompareMode = !!comparisonData;
+
+  const valA = parseFloat(totalRaw ? totalRaw(item.id) : v.total) || 0;
+  const valB = parseFloat(comparisonData?.budgetB?.[item.id]?.total) || 0;
+  
+  const getVarianceClass = (valA, valB) => {
+    const diff = valA - valB;
+    if (diff > 0) return "variance-negative";
+    if (diff < 0) return "variance-positive";
+    return "variance-neutral";
+  };
+  
+  const formatVariance = (valA, valB) => {
+    const diff = valA - valB;
+    if (diff === 0) return "+$0.00";
+    const formatted = formatCurrency(Math.abs(diff));
+    return diff > 0 ? `+${formatted}` : `-${formatted}`;
+  };
 
   return (
-    <Draggable draggableId={String(item.id)} index={index} isDragDisabled={isDragDisabled}>
+    <Draggable draggableId={String(item.id)} index={index} isDragDisabled={isDragDisabled || isCompareMode}>
       {(providedRow, snapshotRow) => (
         <tr
           id={`budget-row-${item.id}`}
@@ -45,28 +65,34 @@ export const BudgetRow = ({
           {...providedRow.draggableProps}
           className={`bef-row ${isFilled ? "filled" : ""} ${snapshotRow.isDragging ? "dragging" : ""}`}
         >
-          <td className="col-drag" {...providedRow.dragHandleProps}>
-            <Icon name="drag_indicator" className="drag-handle-icon" />
-          </td>
+          {!isCompareMode && (
+            <td className="col-drag" {...providedRow.dragHandleProps}>
+              <Icon name="drag_indicator" className="drag-handle-icon" />
+            </td>
+          )}
           <td className="col-item-name">
             <div className="item-name-cell-wrapper">
-              <button
-                className={`item-itemize-toggle ${v.is_itemized ? "active" : ""}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleToggleItemize(item.id, item.item_name);
-                }}
-                title={v.is_itemized ? "Disable Breakdown" : "Enable Breakdown"}
-              />
+              {!isCompareMode && (
+                <button
+                  className={`item-itemize-toggle ${v.is_itemized ? "active" : ""}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleToggleItemize(item.id, item.item_name);
+                  }}
+                  title={v.is_itemized ? "Disable Breakdown" : "Enable Breakdown"}
+                />
+              )}
               <span className="item-name-text">{item.item_name}</span>
               {v.is_itemized && (
                 <span
                   className="breakdown-badge"
                   onClick={(e) => {
+                    if (isCompareMode) return;
                     e.stopPropagation();
                     setActiveBreakdownId(item.id);
                     setActiveBreakdownItem(item.item_name);
                   }}
+                  style={{ cursor: isCompareMode ? "default" : "pointer" }}
                 >
                   Itemized
                 </span>
@@ -98,7 +124,7 @@ export const BudgetRow = ({
                   handleChange(item.id, "qty", val);
                 }
               }}
-              disabled={showVersionWarning || v.is_itemized}
+              disabled={showVersionWarning || v.is_itemized || isCompareMode}
             />
           </td>
           <td className="col-rate-type">
@@ -119,7 +145,7 @@ export const BudgetRow = ({
                     handleChange(item.id, "multiplier", val);
                   }
                 }}
-                disabled={showVersionWarning || v.is_itemized}
+                disabled={showVersionWarning || v.is_itemized || isCompareMode}
               />
               <div
                 className={`rate-type-toggle ${v.is_itemized ? "disabled" : ""}`}
@@ -136,7 +162,7 @@ export const BudgetRow = ({
                       !v.is_itemized &&
                       handleChange(item.id, "rate_type", "day")
                     }
-                    disabled={v.is_itemized || showVersionWarning}
+                    disabled={v.is_itemized || showVersionWarning || isCompareMode}
                   />
                   DAY
                 </label>
@@ -151,7 +177,7 @@ export const BudgetRow = ({
                     onChange={() =>
                       !v.is_itemized && handleChange(item.id, "rate_type", "cs")
                     }
-                    disabled={v.is_itemized || showVersionWarning}
+                    disabled={v.is_itemized || showVersionWarning || isCompareMode}
                   />
                   CS
                 </label>
@@ -173,12 +199,13 @@ export const BudgetRow = ({
                   if (showVersionWarning) return;
                   handleChange(item.id, "rate", e.target.value);
                 }}
-                disabled={showVersionWarning || v.is_itemized}
+                disabled={showVersionWarning || v.is_itemized || isCompareMode}
               />
             ) : (
               <div
                 className="readability-input-proxy"
                 onClick={() =>
+                  !isCompareMode &&
                   !v.is_itemized &&
                   !showVersionWarning &&
                   setFocusedInput({ itemId: item.id, field: "rate" })
@@ -209,12 +236,13 @@ export const BudgetRow = ({
                     if (showVersionWarning) return;
                     handleChange(item.id, "add1", e.target.value);
                   }}
-                  disabled={showVersionWarning}
+                  disabled={showVersionWarning || isCompareMode}
                 />
               ) : (
                 <div
                   className="readability-input-proxy"
                   onClick={() =>
+                    !isCompareMode &&
                     !showVersionWarning &&
                     setFocusedInput({ itemId: item.id, field: "add1" })
                   }
@@ -276,6 +304,16 @@ export const BudgetRow = ({
           <td className={`col-total total-cell ${isFilled ? "has-value" : ""}`}>
             {totalDisplay(item.id)}
           </td>
+          {isCompareMode && (
+            <>
+              <td className="col-compare-total compare-value-cell">
+                {valB > 0 ? formatCurrency(valB) : "-"}
+              </td>
+              <td className={`col-compare-variance compare-value-cell ${getVarianceClass(valA, valB)}`}>
+                {valA > 0 || valB > 0 ? formatVariance(valA, valB) : "-"}
+              </td>
+            </>
+          )}
         </tr>
       )}
     </Draggable>

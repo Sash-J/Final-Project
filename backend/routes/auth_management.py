@@ -108,6 +108,14 @@ def login():
         and user["username"] == username
         and _bcrypt.check_password_hash(user["password_hash"], password)
     ):
+        if user["username"].lower() == "admin" and user.get("role") is None:
+            auth.update_user_role(user["id"], "admin")
+            user["role"] = "admin"
+            
+        if user["username"].lower() == "manager" and user.get("role") is None:
+            auth.update_user_role(user["id"], "manager")
+            user["role"] = "manager"
+            
         if not user.get("is_approved"):
             return (
                 jsonify({"error": "Your account is pending admin approval"}),

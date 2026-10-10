@@ -475,7 +475,7 @@ def get_budget_init_endpoint(project_id):
         return jsonify({"error": str(e)}), 500
 
 @budget_bp.route("/api/projects/<int:project_id>/budget-full", methods=["GET"])
-@login_required
+@roles_required("admin", "manager", "client", "production_crew")
 def get_budget_full(project_id):
     version_id = request.args.get("version_id")
     if version_id in ["null", "undefined", ""]:
@@ -486,8 +486,11 @@ def get_budget_full(project_id):
         except ValueError:
             version_id = None
             
+    user_id = get_current_user_id()
+    role = get_current_user_role()
+            
     try:
-        payload = db.get_budget_full_data(project_id, version_id)
+        payload = db.get_budget_full_data(project_id, version_id, user_id=user_id, role=role)
         
         # Ensure values gracefully handles errors just in case
         if "error" in payload.get("values", {}):

@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useMemo } from "react";
 import HoverTooltip from "../../../components/common/HoverTooltip";
 import "./CrewAssignmentDropdown.css";
 
-const CrewAssignmentDropdown = ({
+const CrewAssignmentDropdown = React.memo(({
   assignedCrew = [],
   projectCrew = [],
   isActive,
@@ -12,6 +12,53 @@ const CrewAssignmentDropdown = ({
   setIsCrewEditing,
   badgeSize = 18,
 }) => {
+  const renderedDropdownOptions = useMemo(() => {
+    if (projectCrew.length === 0) {
+      return (
+        <div className="no-crew-assigned-warning">
+          No crew assigned to project.
+        </div>
+      );
+    }
+    return projectCrew.map((c) => {
+      const isAssigned = assignedCrew.some(item => item.id === c.id);
+      return (
+        <div 
+          key={c.id} 
+          className={`crew-assign-option ${isAssigned ? "selected" : ""}`}
+          onClick={() => onAssign(c.id)}
+        >
+          <div 
+            className="option-check clickable-unassign"
+            onClick={(e) => {
+              if (isAssigned) {
+                e.stopPropagation();
+                onAssign(c.id);
+              }
+            }}
+          >
+            {isAssigned && (
+              <>
+                <span className="material-symbols-outlined check-icon" style={{ fontSize: "0.9rem" }}>check</span>
+                <span className="material-symbols-outlined remove-icon" style={{ fontSize: "0.9rem", display: "none" }}>close</span>
+              </>
+            )}
+          </div>
+          <div className="dropdown-crew-avatar">
+            {c.profile_image ? (
+              <img src={c.profile_image} alt={c.username} className="dropdown-crew-avatar-img" />
+            ) : (
+              <div className="dropdown-crew-avatar-text">
+                {c.full_name ? c.full_name.charAt(0).toUpperCase() : (c.username ? c.username.charAt(0).toUpperCase() : "?")}
+              </div>
+            )}
+          </div>
+          <span>{c.full_name || c.username}</span>
+        </div>
+      );
+    });
+  }, [projectCrew, assignedCrew, onAssign]);
+
   return (
     <div className="crew-assign-selector-wrapper">
       <HoverTooltip text="Assign Crew">
@@ -56,53 +103,24 @@ const CrewAssignmentDropdown = ({
               <span className="toggle-label">Edit</span>
             </label>
           </div>
-          {projectCrew.length === 0 ? (
-            <div className="no-crew-assigned-warning">
-              No crew assigned to project.
-            </div>
-          ) : (
-            projectCrew.map((c) => {
-              const isAssigned = assignedCrew.some(item => item.id === c.id);
-              return (
-                <div 
-                  key={c.id} 
-                  className={`crew-assign-option ${isAssigned ? "selected" : ""}`}
-                  onClick={() => onAssign(c.id)}
-                >
-                  <div 
-                    className="option-check clickable-unassign"
-                    onClick={(e) => {
-                      if (isAssigned) {
-                        e.stopPropagation();
-                        onAssign(c.id);
-                      }
-                    }}
-                  >
-                    {isAssigned && (
-                      <>
-                        <span className="material-symbols-outlined check-icon" style={{ fontSize: "0.9rem" }}>check</span>
-                        <span className="material-symbols-outlined remove-icon" style={{ fontSize: "0.9rem", display: "none" }}>close</span>
-                      </>
-                    )}
-                  </div>
-                  <div className="dropdown-crew-avatar">
-                    {c.profile_image ? (
-                      <img src={c.profile_image} alt={c.username} className="dropdown-crew-avatar-img" />
-                    ) : (
-                      <div className="dropdown-crew-avatar-text">
-                        {c.full_name ? c.full_name.charAt(0).toUpperCase() : (c.username ? c.username.charAt(0).toUpperCase() : "?")}
-                      </div>
-                    )}
-                  </div>
-                  <span>{c.full_name || c.username}</span>
-                </div>
-              );
-            })
-          )}
+          {renderedDropdownOptions}
         </div>
       )}
     </div>
   );
-};
+}, (prevProps, nextProps) => {
+  if (prevProps.isActive !== nextProps.isActive) return false;
+  if (prevProps.isCrewEditing !== nextProps.isCrewEditing) return false;
+  if (prevProps.badgeSize !== nextProps.badgeSize) return false;
+  if (prevProps.projectCrew !== nextProps.projectCrew) return false;
+  
+  if (prevProps.assignedCrew.length !== nextProps.assignedCrew.length) return false;
+  
+  const prevIds = prevProps.assignedCrew.map(c => c.id).sort().join(',');
+  const nextIds = nextProps.assignedCrew.map(c => c.id).sort().join(',');
+  if (prevIds !== nextIds) return false;
+  
+  return true;
+});
 
 export default CrewAssignmentDropdown;

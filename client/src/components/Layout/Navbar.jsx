@@ -107,7 +107,7 @@ const Navbar = () => {
           </li>
         )}
 
-        {user && (
+        {user && ["admin", "manager", "production_crew", "client"].includes(user.role) && (
           <li>
             <Link to="/schedule" onClick={() => setIsMobileMenuOpen(false)}>
               <Icon name="calendar_month" modifiers="md" />
@@ -153,3 +153,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+

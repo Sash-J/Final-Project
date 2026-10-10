@@ -12,7 +12,7 @@ import "./AdminBudget.css";
 
 import { budgetService } from "../../../services/budgetService";
 import { getSortedDepartments, getSortedCategories } from "../utils/budgetHelpers";
-import { AddDepartment, AddCategory, AddBudgetItem, WidgetOptionsMenu } from "../components/AdminSidebarWidgets";
+import { AddDepartment, AddCategory, AddBudgetItem, WidgetOptionsMenu, CompareBudgetWidget } from "../components/AdminSidebarWidgets";
 import PublishBudgetModal from "../components/PublishBudgetModal";
 // ── Main AdminBudget Component ────────────────────────────────────────────────
 const AdminBudget = () => {
@@ -36,6 +36,25 @@ const AdminBudget = () => {
   const [versionId, setVersionId] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
   const [sidebarActionsNode, setSidebarActionsNode] = useState(null);
+
+  const projectOptions = useMemo(() => projects
+    .filter((p) => p.status !== "completed")
+    .map((p) => ({
+      value: p.id,
+      label: `${p.project_name} ${p.code_name ? `(${p.code_name})` : ""}`,
+    })), [projects]);
+
+  const versionOptions = useMemo(() => (versionsCache[projectId] || []).map((v) => {
+    const tags = [];
+    if (v.published_to_crew) tags.push("Crew");
+    if (v.published_to_client) tags.push("Client");
+    const tagStr = tags.length > 0 ? ` [Published: ${tags.join(" & ")}]` : "";
+    return {
+      value: String(v.id),
+      label: `Version ${v.version_number}${tagStr}`,
+    };
+  }), [versionsCache, projectId]);
+
   const [selectedCatId, setSelectedCatId] = useState("");
   const [selectedDeptId, setSelectedDeptId] = useState("");
   const [autoAlignEnabled, setAutoAlignEnabled] = useState(true);
@@ -44,13 +63,19 @@ const AdminBudget = () => {
   const isSidebarExpanded = activeAccordion !== null;
   const isProjectGroupActive = activeAccordion === 'project';
   const isLowerGroupActive = ['department', 'category', 'item'].includes(activeAccordion);
+  const isCompareGroupActive = activeAccordion === 'compare';
+
+  const [compareProjectId, setCompareProjectId] = useState("");
+  const [compareVersionId, setCompareVersionId] = useState("");
+  const [comparisonData, setComparisonData] = useState(null);
+  const [isCompareLoading, setIsCompareLoading] = useState(false);
 
   const [autoCenterViewportEnabled, setAutoCenterViewportEnabled] = useState(true);
 
   const handleAccordionToggle = (section) => {
     setActiveAccordion((prev) => {
       const nextState = prev === section ? null : section;
-      
+
       if (nextState) {
         setTimeout(() => {
           let id = "";
@@ -58,7 +83,8 @@ const AdminBudget = () => {
           if (nextState === 'department') id = "accordion-department";
           if (nextState === 'category') id = "add-category-card";
           if (nextState === 'item') id = "add-budget-item-card";
-          
+          if (nextState === 'compare') id = "accordion-compare";
+
           if (id) {
             const el = document.getElementById(id);
             if (el && autoCenterViewportEnabled) {
@@ -93,6 +119,36 @@ const AdminBudget = () => {
     getBudgetMetadata(refreshKey > 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshKey]);
+
+  // Fetch comparison data when Compare budget changes
+  useEffect(() => {
+    const fetchCompareData = async () => {
+      if (!compareProjectId || !compareVersionId) {
+        setComparisonData(null);
+        return;
+      }
+      setIsCompareLoading(true);
+      try {
+        const data = await budgetService.getBudgetFull(compareProjectId, compareVersionId);
+
+        const vA = (versionsCache[projectId] || []).find((v) => String(v.id) === String(versionId))?.version_number || "A";
+        const vB = (versionsCache[compareProjectId] || []).find((v) => String(v.id) === String(compareVersionId))?.version_number || "B";
+
+        setComparisonData({
+          budgetB: data?.values || {},
+          versionNameA: `Version ${vA}`,
+          versionNameB: `Version ${vB}`
+        });
+      } catch (err) {
+        console.error("Failed to fetch compare data:", err);
+        setComparisonData(null);
+      } finally {
+        setIsCompareLoading(false);
+      }
+    };
+
+    fetchCompareData();
+  }, [compareProjectId, compareVersionId, projectId, versionId, versionsCache]);
 
   // Browser-level unsaved changes warning
   useEffect(() => {
@@ -191,7 +247,7 @@ const AdminBudget = () => {
 
     try {
       const data = await budgetService.cloneBudgetVersion(projectId, versionId);
-      
+
       if (data && !data.error) {
         await getBudgetVersions(projectId, true);
         setVersionId("");
@@ -253,83 +309,67 @@ const AdminBudget = () => {
                       <span className="material-symbols-outlined icon-root">account_tree</span>
                     </div>
                     <h3 className="sidebar-widget-title">Select Project</h3>
-                    <WidgetOptionsMenu 
-                      autoCenterEnabled={autoCenterViewportEnabled} 
-                      onToggleAutoCenter={setAutoCenterViewportEnabled} 
-                      isExpanded={activeAccordion === 'project'} 
+                    <WidgetOptionsMenu
+                      autoCenterEnabled={autoCenterViewportEnabled}
+                      onToggleAutoCenter={setAutoCenterViewportEnabled}
+                      isExpanded={activeAccordion === 'project'}
                     />
                   </div>
                 </HoverTooltip>
-                
+
                 <div className={`sidebar-widget-content ${activeAccordion === 'project' ? 'accordion-open' : ''}`}>
                   <div className="sidebar-widget-content-inner">
                     <div className="project-dropdown-wrapper">
                       <GlassDropdown
-                      label="Choose project to manage budgets"
-                      placeholder="- Select Project -"
-                      options={projects
-                        .filter((p) => p.status !== "completed")
-                        .map((p) => ({
-                          value: p.id,
-                          label: `${p.project_name} ${p.code_name ? `(${p.code_name})` : ""}`,
-                        }))}
-                      value={projectId}
-                      onChange={(val) => handleProjectChange(val)}
-                    />
-                  </div>
+                        label="Choose project to manage budgets"
+                        placeholder="- Select Project -"
+                        options={projectOptions}
+                        value={projectId}
+                        onChange={(val) => handleProjectChange(val)}
+                      />
+                    </div>
 
-                  {projectId && (
-                    <div className="version-selection-area">
-                      <div className="version-controls">
-                        <div className="version-select-container">
-                          <GlassDropdown
-                            label="Select Budget Version"
-                            placeholder="— Select —"
-                            modifiers="lg fluid"
-                            options={(versionsCache[projectId] || []).map(
-                              (v) => {
-                                const tags = [];
-                                if (v.published_to_crew) tags.push("Crew");
-                                if (v.published_to_client) tags.push("Client");
-                                const tagStr = tags.length > 0 ? ` [Published: ${tags.join(" & ")}]` : "";
-                                return {
-                                  value: v.id,
-                                  label: `Version ${v.version_number}${tagStr}`,
-                                };
-                              }
-                            )}
-                            value={versionId}
-                            onChange={(val) => handleVersionChange(val)}
-                          />
-                        </div>
+                    {projectId && (
+                      <div className="version-selection-area">
+                        <div className="version-controls">
+                          <div className="version-select-container">
+                            <GlassDropdown
+                              label="Select Budget Version"
+                              placeholder="— Select —"
+                              modifiers="lg fluid"
+                              options={versionOptions}
+                              value={versionId}
+                              onChange={(val) => handleVersionChange(val)}
+                            />
+                          </div>
 
-                        <div className="version-actions-row">
-                          <HoverTooltip text="Delete selected version">
-                            <button
-                              type="button"
-                              className="btn-neo-cancel version-action-btn-delete"
-                              onClick={handleDeleteVersion}
-                              disabled={!versionId}
-                            >
-                              <span className="material-symbols-outlined version-action-icon-delete">
-                                delete
-                              </span>
-                            </button>
-                          </HoverTooltip>
+                          <div className="version-actions-row">
+                            <HoverTooltip text="Delete selected version">
+                              <button
+                                type="button"
+                                className="btn-neo-cancel version-action-btn-delete"
+                                onClick={handleDeleteVersion}
+                                disabled={!versionId}
+                              >
+                                <span className="material-symbols-outlined version-action-icon-delete">
+                                  delete
+                                </span>
+                              </button>
+                            </HoverTooltip>
 
-                          <HoverTooltip text="Clone current version to a new one">
-                            <button
-                              type="button"
-                              className="btn-neo version-action-btn-clone"
-                              onClick={handleCreateNewVersion}
-                            >
-                              + New Version
-                            </button>
-                          </HoverTooltip>
+                            <HoverTooltip text="Clone current version to a new one">
+                              <button
+                                type="button"
+                                className="btn-neo version-action-btn-clone"
+                                onClick={handleCreateNewVersion}
+                              >
+                                + New Version
+                              </button>
+                            </HoverTooltip>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
                   </div>
                 </div>
               </div>
@@ -378,7 +418,30 @@ const AdminBudget = () => {
                 </div>
               )}
               {versionId && (
-                <div 
+                <div className={`sidebar-section admin-sidebar-glass ${isSidebarExpanded && !isCompareGroupActive ? 'group-collapsed' : ''}`} style={{ gap: '12px' }}>
+                  <div id="accordion-compare">
+                    <CompareBudgetWidget
+                      projects={projects}
+                      isExpanded={activeAccordion === 'compare'}
+                      isSidebarExpanded={isSidebarExpanded}
+                      onToggle={() => handleAccordionToggle('compare')}
+                      compareProjectId={compareProjectId}
+                      setCompareProjectId={setCompareProjectId}
+                      compareVersionId={compareVersionId}
+                      setCompareVersionId={setCompareVersionId}
+                      onClearCompare={() => {
+                        setCompareProjectId("");
+                        setCompareVersionId("");
+                        if (activeAccordion === 'compare') {
+                          setActiveAccordion(null);
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+              {versionId && (
+                <div
                   ref={setSidebarActionsNode}
                   className={`sidebar-section admin-sidebar-glass sidebar-actions-container ${isSidebarExpanded ? 'group-collapsed' : ''}`}
                   style={{ gap: '12px', marginTop: '32px' }}
@@ -410,6 +473,8 @@ const AdminBudget = () => {
                 selectedDeptId={autoAlignEnabled ? selectedDeptId : ""}
                 onPublish={handleOpenPublishModal}
                 actionsContainer={sidebarActionsNode}
+                comparisonData={comparisonData}
+                isCompareLoading={isCompareLoading}
               />
             </div>
           </div>
