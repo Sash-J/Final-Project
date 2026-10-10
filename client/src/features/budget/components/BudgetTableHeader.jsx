@@ -1,10 +1,10 @@
 import { getCurrencySymbol } from "../../../utils/currencyUtils";
 import { SkeletonBox } from "./BudgetEntrySkeleton";
 
-export const BudgetTableHeader = ({ isSkeleton = false }) => (
+export const BudgetTableHeader = ({ isSkeleton = false, isCompareMode = false, versionNameA = "V1", versionNameB = "V2" }) => (
   <thead>
     <tr>
-      <th className="col-drag"></th>
+      {!isCompareMode && <th className="col-drag"></th>}
       <th className="col-item-name">
         {isSkeleton ? (
           <SkeletonBox className="skel-header-bar-left" />
@@ -50,10 +50,30 @@ export const BudgetTableHeader = ({ isSkeleton = false }) => (
       <th className="col-total">
         {isSkeleton ? (
           <SkeletonBox className="skel-header-bar-right" />
+        ) : isCompareMode ? (
+          `${versionNameA} (${getCurrencySymbol()})`
         ) : (
           `TOTAL (${getCurrencySymbol()})`
         )}
       </th>
+      {isCompareMode && (
+        <>
+          <th className="col-compare-total">
+            {isSkeleton ? (
+              <SkeletonBox className="skel-header-bar-right" />
+            ) : (
+              `${versionNameB} (${getCurrencySymbol()})`
+            )}
+          </th>
+          <th className="col-compare-variance">
+            {isSkeleton ? (
+              <SkeletonBox className="skel-header-bar-right" />
+            ) : (
+              `VARIANCE (${getCurrencySymbol()})`
+            )}
+          </th>
+        </>
+      )}
     </tr>
   </thead>
 );

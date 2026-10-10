@@ -1,9 +1,9 @@
 import api, { handleApiError } from './api';
 
 export const budgetService = {
-  getBudgetVersions: async (projectId) => {
+  getBudgetVersions: async (projectId, options = {}) => {
     try {
-      const response = await api.get(`/api/projects/${projectId}/budget-versions`);
+      const response = await api.get(`/api/projects/${projectId}/budget-versions`, options);
       return response.data;
     } catch (error) {
       handleApiError(error);

@@ -1037,3 +1037,51 @@ body.light-theme .dropdown-title-container {
   align-items: center;
   gap: 8px;
 }
+/* Light Theme Budget Entry Form Overrides */
+body.light-theme .bef-table thead th {
+  background: rgba(0, 0, 0, 0.05);
+  color: #57606a;
+}
+
+body.light-theme .empty-format-text {
+  color: #57606a !important;
+}
+
+body.light-theme .skeleton-phase-header,
+body.light-theme .skeleton-dept-header,
+body.light-theme .skeleton-box {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Budget Format Empty State Styles */
+.empty-format-sheet {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 600px;
+}
+
+.header-only-table {
+  flex-shrink: 0;
+}
+
+.empty-format-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+  padding: 40px;
+}
+
+.empty-format-svg {
+  max-width: 350px;
+  margin-bottom: 32px;
+}
+
+.empty-format-text {
+  font-size: 1rem;
+  font-weight: 400;
+  cursor: default;
+  color: rgba(255, 255, 255, 0.4);
+}

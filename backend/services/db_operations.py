@@ -1709,7 +1709,7 @@ def delete_project_route(project_id, route_id):
     conn.close()
 
 
-def get_budget_full_data(project_id, version_id=None):
+def get_budget_full_data(project_id, version_id=None, user_id=None, role=None):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
@@ -1741,6 +1741,29 @@ def get_budget_full_data(project_id, version_id=None):
     # 4: Breakdowns
     breakdowns = next(results).fetchall()
     
+    # Filter for production_crew
+    if role == "production_crew" and user_id:
+        cursor.execute("SELECT department_id FROM department_crew_assignments WHERE project_id = %s AND user_id = %s", (project_id, user_id))
+        assigned_depts = {row["department_id"] for row in cursor.fetchall()}
+
+        cursor.execute("SELECT category_id FROM category_crew_assignments WHERE project_id = %s AND user_id = %s", (project_id, user_id))
+        assigned_cats = {row["category_id"] for row in cursor.fetchall()}
+
+        cursor.execute("SELECT budget_item_id FROM budget_item_crew_assignments WHERE project_id = %s AND user_id = %s", (project_id, user_id))
+        assigned_items = {row["budget_item_id"] for row in cursor.fetchall()}
+        
+        filtered_hierarchy = []
+        for row in hierarchy_rows:
+            d_id = row['dept_id']
+            c_id = row['cat_id']
+            i_id = row['item_id']
+            
+            # Crew can see this row if they are assigned to the dept, OR the category, OR the item itself
+            if (d_id in assigned_depts) or (c_id in assigned_cats) or (i_id in assigned_items):
+                filtered_hierarchy.append(row)
+        
+        hierarchy_rows = filtered_hierarchy
+
     cursor.close()
     conn.close()
     

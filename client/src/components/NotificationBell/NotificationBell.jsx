@@ -22,7 +22,7 @@ const NotificationBell = () => {
     const handleOutsideClick = (e) => {
       const clickedOutsideBell = bellContainerRef.current && !bellContainerRef.current.contains(e.target);
       const clickedOutsideDropdown = dropdownWrapperRef.current && !dropdownWrapperRef.current.contains(e.target);
-      
+
       if (clickedOutsideBell && clickedOutsideDropdown) {
         setShowDropdown(false);
       }

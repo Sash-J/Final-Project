@@ -2,7 +2,9 @@ import HoverTooltip from "../../../components/common/HoverTooltip";
 import "./BudgetSubNav.css";
 
 const BudgetSubNav = ({
-  handleDownloadPDF,
+  onExportTopSheet,
+  onExportDetailPDF,
+  onExportDetailExcel,
   onPublish,
   versionId,
   handleClear,
@@ -12,12 +14,32 @@ const BudgetSubNav = ({
 }) => {
   return (
     <div className="bef-actions">
-      <HoverTooltip text="Download PDF" wrapperClassName="w-100" style={{ display: 'flex' }}>
-        <div className="sidebar-widget-header w-100" onClick={handleDownloadPDF}>
+      <HoverTooltip text="Export Top-Sheet" wrapperClassName="w-100" style={{ display: 'flex' }}>
+        <div className="sidebar-widget-header w-100" onClick={onExportTopSheet}>
           <div className="sidebar-widget-icon-wrapper theme-pdf">
-            <span className="material-symbols-outlined icon-root">file_export</span>
+            <span className="material-symbols-outlined icon-root">summarize</span>
           </div>
-          <h3 className="sidebar-widget-title">Download PDF</h3>
+          <h3 className="sidebar-widget-title">Top-Sheet PDF</h3>
+        </div>
+      </HoverTooltip>
+      
+      <hr className="widget-divider" />
+      <HoverTooltip text="Export Detail PDF" wrapperClassName="w-100" style={{ display: 'flex' }}>
+        <div className="sidebar-widget-header w-100" onClick={onExportDetailPDF}>
+          <div className="sidebar-widget-icon-wrapper theme-pdf">
+            <span className="material-symbols-outlined icon-root">picture_as_pdf</span>
+          </div>
+          <h3 className="sidebar-widget-title">Detail PDF</h3>
+        </div>
+      </HoverTooltip>
+
+      <hr className="widget-divider" />
+      <HoverTooltip text="Export Detail Excel" wrapperClassName="w-100" style={{ display: 'flex' }}>
+        <div className="sidebar-widget-header w-100" onClick={onExportDetailExcel}>
+          <div className="sidebar-widget-icon-wrapper theme-green">
+            <span className="material-symbols-outlined icon-root">table_view</span>
+          </div>
+          <h3 className="sidebar-widget-title">Detail Excel</h3>
         </div>
       </HoverTooltip>
 

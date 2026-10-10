@@ -7,16 +7,11 @@ import "./UserManagement.css";
 
 import { userService } from "../../../services/userService";
 
-const StatusMsg = ({ msg }) => {
-  if (!msg) return null;
-  const isError = msg.startsWith("Error") || msg.startsWith("Error");
-  return <p className={`status-msg ${isError ? "error" : "success"}`}>{msg}</p>;
-};
+import toast from "react-hot-toast";
 
 const UserManagement = () => {
   const [pendingUsers, setPendingUsers] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
-  const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
   const [pendingRoles, setPendingRoles] = useState({});
 
@@ -44,7 +39,7 @@ const UserManagement = () => {
       setAllUsers(a);
     } catch (err) {
       console.error("Failed to fetch users:", err);
-      setMsg("Error loading users.");
+      toast.error("Error loading users.");
     } finally {
       setLoading(false);
     }
@@ -59,14 +54,13 @@ const UserManagement = () => {
   };
 
   const approveUser = async (userId, username) => {
-    setMsg("");
     const selectedRole = pendingRoles[userId] || "client";
     try {
       await userService.approveUser(userId, selectedRole);
-      setMsg(`Approved user: ${username} as ${selectedRole.toUpperCase()}`);
+      toast.success(`Approved user: ${username} as ${selectedRole.toUpperCase()}`);
       fetchData();
     } catch (err) {
-      setMsg(`${err.message}`);
+      toast.error(err.message);
     }
   };
   const rejectUser = (userId, username) => {
@@ -75,13 +69,12 @@ const UserManagement = () => {
       message: `Are you sure you want to reject and delete user: ${username}?`,
       onConfirm: async () => {
         setConfirmModal({ isOpen: false, message: "", onConfirm: null });
-        setMsg("");
         try {
           await userService.rejectUser(userId);
-          setMsg(`Rejected and removed user: ${username}`);
+          toast.success(`Rejected and removed user: ${username}`);
           fetchData();
         } catch (err) {
-          setMsg(`${err.message}`);
+          toast.error(err.message);
         }
       },
     });
@@ -95,10 +88,10 @@ const UserManagement = () => {
         setConfirmModal({ isOpen: false, message: "", onConfirm: null });
         try {
           await userService.updateUserRole(userId, newRole);
-          setMsg(`Updated role for ${username} to ${newRole.toUpperCase()}`);
+          toast.success(`Updated role for ${username} to ${newRole.toUpperCase()}`);
           fetchData();
         } catch (err) {
-          setMsg(`${err.message}`);
+          toast.error(err.message);
         }
       },
     });
@@ -110,13 +103,12 @@ const UserManagement = () => {
       message: `PERMANENTLY DELETE user account: ${username}? This cannot be undone.`,
       onConfirm: async () => {
         setConfirmModal({ isOpen: false, message: "", onConfirm: null });
-        setMsg("");
         try {
           await userService.deleteUser(userId);
-          setMsg(`Permanently deleted user: ${username}`);
+          toast.success(`Permanently deleted user: ${username}`);
           fetchData();
         } catch (err) {
-          setMsg(`${err.message}`);
+          toast.error(err.message);
         }
       },
     });
@@ -131,7 +123,6 @@ const UserManagement = () => {
       <div className="admin-content-animated">
         <div className="grid-window um-pending-section">
           <h3>Pending Approvals</h3>
-          <StatusMsg msg={msg} />
           {loading ? (
             <p className="um-loading">Loading...</p>
           ) : pendingUsers.length === 0 ? (

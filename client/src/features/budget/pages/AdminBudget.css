@@ -68,8 +68,7 @@ body.light-theme .admin-content-animated {
   gap: 12px;
   z-index: 100;
   transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: visible;
 }
 
 .admin-sidebar-overlay::-webkit-scrollbar {
@@ -88,16 +87,17 @@ body.light-theme .admin-content-animated {
 .admin-sidebar-glass {
   width: 80px;
   box-sizing: border-box;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(18, 19, 26, 0.65);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
+  border-radius: 16px;
   padding: 20px 10px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   display: flex;
   flex-direction: column;
-  flex-shrink: 0; /* CRITICAL: prevents container from squishing and cropping when sidebar overflows viewport */
+  flex-shrink: 0;
+  /* CRITICAL: prevents container from squishing and cropping when sidebar overflows viewport */
   overflow: hidden;
   /* CRITICAL: prevents inner content from spilling out during width expansion */
   transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -109,8 +109,9 @@ body.light-theme .admin-content-animated {
 }
 
 body.light-theme .admin-sidebar-glass {
-  background: rgba(255, 255, 255, 0.6);
-  border: 1px solid rgba(255, 255, 255);
+  background: #ffffff;
+  border-color: #d0d7de;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
 .sidebar-section {
@@ -143,7 +144,7 @@ body.light-theme .admin-sidebar-glass {
 .admin-sidebar.expanded .sidebar-widget-icon-wrapper {
   width: 36px;
   height: 36px;
-  margin: 0;
+  margin: 0 16px 0 0;
 }
 
 .sidebar-widget-icon-wrapper .icon-root {
@@ -232,6 +233,16 @@ body.light-theme .admin-sidebar-glass {
   margin-top: 8px;
 }
 
+.widget-options-menu-dropdown .widget-switch-container {
+  margin: 0;
+}
+
+.widget-options-menu-dropdown .switch-label {
+  font-size: 0.8rem;
+  white-space: nowrap;
+  margin-right: 16px;
+}
+
 .widget-options-menu-overlay {
   position: fixed;
   top: 0;
@@ -243,27 +254,30 @@ body.light-theme .admin-sidebar-glass {
 
 .sidebar-widget-title {
   margin: 0;
-  font-size: 1.15rem;
-  font-weight: 700;
+  font-size: 0.95rem;
+  font-weight: 600;
   color: #fff;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.5px;
   opacity: 0;
   white-space: nowrap;
   max-width: 0;
   overflow: hidden;
   flex: 1;
+  text-align: left !important;
   transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .admin-sidebar.expanded .sidebar-widget-title {
-  max-width: 200px;
+  max-width: 250px;
   opacity: 1;
 }
 
 /* Group Collapsed overrides (when the sidebar is expanded but the specific group is not) */
 .admin-sidebar.expanded .admin-sidebar-glass.group-collapsed {
-  width: 80px; /* Keep it narrow */
-  padding: 20px 10px; /* Restore narrow padding */
+  width: 80px;
+  /* Keep it narrow */
+  padding: 20px 10px;
+  /* Restore narrow padding */
   transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -298,9 +312,12 @@ body.light-theme .admin-sidebar-glass {
   /* Prevent text wrapping during expansion */
   opacity: 0;
   transform: translateY(-10px);
-  pointer-events: none;
-  visibility: hidden;
-  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.4s;
+}
+
+.compare-widget-description {
+  color: #888;
+  font-size: 0.85rem;
+  margin-bottom: 15px;
 }
 
 .admin-sidebar.expanded .sidebar-widget-content.accordion-open {
@@ -333,12 +350,6 @@ body.light-theme .admin-sidebar-glass {
 
 .sidebar-widget-input-wrapper .neo-input {
   padding-left: 44px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.sidebar-widget-input-wrapper .neo-input:focus {
-  background: rgba(255, 255, 255, 0.05);
 }
 
 .sidebar-widget-btn {
@@ -416,8 +427,8 @@ body.light-theme .admin-sidebar-glass {
 
 .db-form h3 {
   color: #fff;
-  font-size: 1.1rem !important;
-  font-weight: 700;
+  font-size: 1rem !important;
+  font-weight: 600;
   margin: 0;
 }
 
@@ -427,32 +438,34 @@ body.light-theme .admin-sidebar-glass {
   width: 100%;
   max-width: 420px;
   text-align: center;
-  color: #ababab;
-  font-size: 0.8rem;
-  font-weight: 200;
-  line-height: 1.2;
+  color: #888;
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.4;
   padding-bottom: 10px;
 }
 
 .db-form input {
-  background: #0d0d0d;
-  border: 1px solid #242424;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
-  color: #eee;
-  padding: 12px;
+  color: #fff;
+  padding: 10px 12px;
   margin-bottom: 16px;
   width: 93%;
   outline: none;
+  font-size: 0.9rem;
 }
 
 .db-form select {
-  background: #0d0d0d;
-  border: 1px solid #242424;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
-  color: #eee;
-  padding: 12px;
+  color: #fff;
+  padding: 10px 12px;
   margin-bottom: 16px;
   width: 100%;
+  font-size: 0.9rem;
 }
 
 .db-form input:focus,
@@ -987,7 +1000,7 @@ input:checked+.slider:before {
   margin-bottom: 15px;
 }
 
-.sidebar-dropdown-mb {
+.sidebar-dropdown-container {
   margin-bottom: 20px;
 }
 
@@ -995,7 +1008,7 @@ input:checked+.slider:before {
   width: 100%;
 }
 
-.sidebar-widget-btn-mb {
+.sidebar-widget-btn-spaced {
   margin-bottom: 15px;
 }
 
@@ -1005,20 +1018,56 @@ input:checked+.slider:before {
 }
 
 /* Sidebar Themes for Icons and Buttons */
-.sidebar-widget-icon-wrapper.theme-blue { background: rgba(59, 130, 246, 0.1) !important; }
-.sidebar-widget-icon-wrapper.theme-blue .icon-root { color: #3b82f6 !important; }
-.sidebar-widget-btn.theme-blue { background: rgba(59, 130, 246, 0.1) !important; border-color: rgba(59, 130, 246, 0.3) !important; color: #3b82f6 !important; }
+.sidebar-widget-icon-wrapper.theme-blue {
+  background: rgba(59, 130, 246, 0.1) !important;
+}
 
-.sidebar-widget-icon-wrapper.theme-green { background: rgba(16, 185, 129, 0.1) !important; }
-.sidebar-widget-icon-wrapper.theme-green .icon-root { color: #10b981 !important; }
-.sidebar-widget-btn.theme-green { background: rgba(16, 185, 129, 0.1) !important; border-color: rgba(16, 185, 129, 0.3) !important; color: #10b981 !important; }
+.sidebar-widget-icon-wrapper.theme-blue .icon-root {
+  color: #3b82f6 !important;
+}
 
-.sidebar-widget-icon-wrapper.theme-orange { background: rgba(245, 158, 11, 0.1) !important; }
-.sidebar-widget-icon-wrapper.theme-orange .icon-root { color: #f59e0b !important; }
-.sidebar-widget-btn.theme-orange { background: rgba(245, 158, 11, 0.1) !important; border-color: rgba(245, 158, 11, 0.3) !important; color: #f59e0b !important; }
+.sidebar-widget-btn.theme-blue {
+  background: rgba(59, 130, 246, 0.1) !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
+  color: #3b82f6 !important;
+}
+
+.sidebar-widget-icon-wrapper.theme-green {
+  background: rgba(16, 185, 129, 0.1) !important;
+}
+
+.sidebar-widget-icon-wrapper.theme-green .icon-root {
+  color: #10b981 !important;
+}
+
+.sidebar-widget-btn.theme-green {
+  background: rgba(16, 185, 129, 0.1) !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+  color: #10b981 !important;
+}
+
+.sidebar-widget-icon-wrapper.theme-orange {
+  background: rgba(245, 158, 11, 0.1) !important;
+}
+
+.sidebar-widget-icon-wrapper.theme-orange .icon-root {
+  color: #f59e0b !important;
+}
+
+.sidebar-widget-btn.theme-orange {
+  background: rgba(245, 158, 11, 0.1) !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+  color: #f59e0b !important;
+}
+
+.sidebar-widget-btn.theme-red {
+  background: rgba(239, 68, 68, 0.15) !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+  color: #ef4444 !important;
+}
 
 /* Switch container specific */
-.auto-align-switch-container {
+.widget-switch-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1027,8 +1076,87 @@ input:checked+.slider:before {
   border-radius: 8px;
 }
 
-.auto-align-switch-label {
+.widget-switch-label {
   margin-bottom: 0;
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.8);
+}
+
+.variance-positive {
+  color: #10b981 !important;
+  /* neon green for savings */
+  font-weight: 600;
+}
+
+.variance-negative {
+  color: #ef4444 !important;
+  /* neon red for overages */
+  font-weight: 600;
+}
+
+.variance-neutral {
+  color: #ccc;
+  font-weight: 600;
+}
+
+.col-compare-total {
+  color: #a78bfa !important;
+}
+
+.admin-sidebar-glass.compare-active-tab {
+  overflow: visible !important;
+  /* Mask punches a transparent ring gap but keeps the green dot area visible */
+  -webkit-mask-image:
+    radial-gradient(circle at calc(100% - 11.5px) 11.5px, transparent 13.5px, black 14px),
+    radial-gradient(circle at calc(100% - 11.5px) 11.5px, black 7.5px, transparent 8px);
+  mask-image:
+    radial-gradient(circle at calc(100% - 11.5px) 11.5px, transparent 13.5px, black 14px),
+    radial-gradient(circle at calc(100% - 11.5px) 11.5px, black 7.5px, transparent 8px);
+}
+
+.sidebar-compare-tab {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 15px;
+  height: 15px;
+  background: #10b981;
+  border-radius: 50%;
+  z-index: 50;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+  /* Soft glow */
+}
+/* Light Theme Sidebar Overrides */
+body.light-theme .sidebar-widget-title,
+body.light-theme .db-form h3 {
+  color: #24292f;
+}
+
+body.light-theme .db-form label,
+body.light-theme .compare-widget-description {
+  color: #57606a;
+}
+
+body.light-theme .widget-options-menu-dropdown {
+  background: #ffffff;
+  border: 1px solid #d0d7de;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+body.light-theme .widget-options-menu-btn {
+  color: #57606a;
+}
+
+body.light-theme .widget-options-menu-btn:hover,
+body.light-theme .widget-options-menu-btn.active {
+  background: rgba(0, 0, 0, 0.05);
+  color: #24292f;
+}
+
+body.light-theme .widget-switch-container {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+body.light-theme .sidebar-widget-input-icon {
+  color: rgba(0, 0, 0, 0.4);
 }

@@ -57,14 +57,18 @@ const Home = () => {
 
     if (loading) return null;
 
-    if (user) {
-        if (user.role === 'admin' || user.role === 'manager') {
+    if (user && user.role) {
+        const role = String(user.role).toLowerCase().trim();
+        if (role === 'admin' || role === 'manager') {
             return <Navigate to="/admin" />;
         }
-        if (user.role === 'production_crew') {
+        if (role === 'production_crew') {
             return <Navigate to="/crew-dashboard" />;
         }
-        return <Navigate to="/dashboard" />;
+        if (role === 'client') {
+            return <Navigate to="/dashboard" />;
+        }
+        // If user has no valid role, stay on Home page to prevent infinite redirect loops
     }
 
     return (

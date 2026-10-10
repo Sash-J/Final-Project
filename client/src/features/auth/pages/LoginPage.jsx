@@ -24,10 +24,12 @@ const LoginPage = () => {
 
   const dashboardPath = (resolvedUser) => {
     const u = resolvedUser || user;
-    if (!u) return "/";
-    if (u.role === "admin" || u.role === "manager") return "/admin";
-    if (u.role === "production_crew") return "/crew-dashboard";
-    return "/dashboard";
+    if (!u || !u.role) return "/";
+    const role = String(u.role).toLowerCase().trim();
+    if (role === "admin" || role === "manager") return "/admin";
+    if (role === "production_crew") return "/crew-dashboard";
+    if (role === "client") return "/dashboard";
+    return "/";
   };
 
   if (loading) {

@@ -27,6 +27,8 @@ import { useBudgetState } from "../hooks/useBudgetState";
 import { useBudgetAssignments } from "../hooks/useBudgetAssignments";
 import { useBudgetCalculations } from "../hooks/useBudgetCalculations";
 import { useBudgetDragAndDrop } from "../hooks/useBudgetDragAndDrop";
+import { exportBudgetToPDF, exportBudgetToExcel } from "../utils/ExportService";
+import toast from "react-hot-toast";
 
 
 
@@ -44,6 +46,8 @@ const BudgetEntryForm = ({
   selectedDeptId = "",
   onPublish = null,
   actionsContainer = null,
+  comparisonData = null,
+  isCompareLoading = false,
 }) => {
   const { user } = useAuth();
   const isManager = user?.role === "manager";
@@ -65,7 +69,6 @@ const BudgetEntryForm = ({
     activeComment, setActiveComment,
     loading,
     submitting, setSubmitting,
-    status, setStatus,
     breakdownData, setBreakdownData,
     activeBreakdownId, setActiveBreakdownId,
     activeBreakdownItem, setActiveBreakdownItem,
@@ -534,18 +537,40 @@ const BudgetEntryForm = ({
     grandTotal,
   } = useBudgetCalculations(values, hierarchy);
 
+  // Comparison helpers
+  const getBudgetBItemTotal = (item) => parseFloat(comparisonData?.budgetB?.[item.id]?.total) || 0;
+  const getBudgetBCatTotal = (cat) =>
+    cat.items.reduce((sum, item) => sum + getBudgetBItemTotal(item), 0);
+  const getBudgetBDeptTotal = (dept) =>
+    dept.categories.reduce((sum, cat) => sum + getBudgetBCatTotal(cat), 0);
+  const getBudgetBPhaseTotal = (phase) =>
+    phase.departments.reduce((sum, dept) => sum + getBudgetBDeptTotal(dept), 0);
+  const getBudgetBGrandTotal = () =>
+    hierarchy.reduce((sum, phase) => sum + getBudgetBPhaseTotal(phase), 0);
+
+  const getVarianceClass = (valA, valB) => {
+    const diff = valA - valB;
+    if (diff > 0) return "variance-negative"; // Overage in Current Budget compared to Baseline
+    if (diff < 0) return "variance-positive"; // Savings in Current Budget compared to Baseline
+    return "variance-neutral";
+  };
+
+  const formatVariance = (valA, valB) => {
+    const diff = valA - valB;
+    if (diff === 0) return "+$0.00";
+    const formatted = formatCurrency(Math.abs(diff));
+    return diff > 0 ? `+${formatted}` : `-${formatted}`;
+  };
+
   const { onDragEnd } = useBudgetDragAndDrop(hierarchy, setHierarchy, invalidateHierarchyCache);
 
   const handleSubmit = async () => {
     if (!externalProjectId) {
-      setStatus({ type: "error", text: "Please select a project first." });
+      toast.error("Please select a project first.");
       return;
     }
     if (!versionId) {
-      setStatus({
-        type: "error",
-        text: "Please select a budget version before proceeding.",
-      });
+      toast.error("Please select a budget version before proceeding.");
       return;
     }
 
@@ -586,14 +611,10 @@ const BudgetEntryForm = ({
     });
 
     if (!payload.length) {
-      setStatus({
-        type: "error",
-        text: "No values entered. Fill in at least one row.",
-      });
+      toast.error("No values entered. Fill in at least one row.");
       return;
     }
     setSubmitting(true);
-    setStatus(null);
     try {
       const data = await budgetService.updateBudgetValuesBatch({
         project_id: parseInt(externalProjectId),
@@ -625,39 +646,24 @@ const BudgetEntryForm = ({
       };
       onDirtyChange(false);
 
-      setStatus({
-        type: "success",
-        text: `${data.message} saved successfully.`,
-      });
+      toast.success(`${data.message} saved successfully.`);
     } catch (err) {
-      setStatus({ type: "error", text: `${err.message}` });
+      toast.error(`${err.message}`);
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleDownloadPDF = () => {
-    const element = document.getElementById("admin-budget-pdf-content");
-    if (!element) return;
-    const dateStr = new Date().toISOString().split("T")[0];
-    const pName = projectName ? projectName.replace(/\s+/g, "_") : "Project";
-    const vName = versionName ? versionName : "Draft";
-    const filename = `${pName}_Version_${vName}_${dateStr}.pdf`;
+  const handleExportTopSheet = () => {
+    exportBudgetToPDF(hierarchy, values, projectName, versionName, "topsheet");
+  };
 
-    const opt = {
-      margin: 10,
-      filename: filename,
-      image: { type: "jpeg", quality: 2 },
-      html2canvas: {
-        scale: 2,
-        useCORS: true,
-        letterRendering: true,
-        backgroundColor: "#0d0e15ff",
-        windowWidth: 1200,
-      },
-      jsPDF: { unit: "mm", format: "a3", orientation: "portrait" },
-    };
-    html2pdf().set(opt).from(element).save();
+  const handleExportDetailPDF = () => {
+    exportBudgetToPDF(hierarchy, values, projectName, versionName, "detail");
+  };
+
+  const handleExportDetailExcel = () => {
+    exportBudgetToExcel(hierarchy, values, projectName);
   };
 
   const handleClear = () => {
@@ -666,7 +672,6 @@ const BudgetEntryForm = ({
 
   const handleConfirmClear = () => {
     setValues({});
-    setStatus(null);
     setShowClearConfirm(false);
   };
 
@@ -710,12 +715,12 @@ const BudgetEntryForm = ({
         )}
 
         {/* Show active skeleton only when truly loading a version */}
-        {loading && <SkeletonTable />}
-        {!loading && (!externalProjectId || !versionId) && (
+        {(loading || isCompareLoading) && <SkeletonTable />}
+        {!(loading || isCompareLoading) && (!externalProjectId || !versionId) && (
           <BudgetFormatEmpty />
         )}
 
-        {!loading && externalProjectId && versionId && hierarchy.length > 0 && (
+        {!(loading || isCompareLoading) && externalProjectId && versionId && hierarchy.length > 0 && (
           <div
             id="admin-budget-pdf-content"
             className="fade-in-section"
@@ -728,8 +733,8 @@ const BudgetEntryForm = ({
             <div className={`bef-sheet ${!canDrag ? "drag-disabled" : ""}`}>
               <DragDropContext onDragEnd={onDragEnd}>
                 <table className="bef-table header-only-table">
-                  <BudgetColGroup />
-                  <BudgetTableHeader />
+                  <BudgetColGroup isCompareMode={!!comparisonData} />
+                  <BudgetTableHeader isCompareMode={!!comparisonData} versionNameA={comparisonData?.versionNameA} versionNameB={comparisonData?.versionNameB} />
                 </table>
 
                 {hierarchy.map((phase) => {
@@ -748,12 +753,28 @@ const BudgetEntryForm = ({
                         <div className="phase-header-left">
                           <h3>{phase.phase_name}</h3>
                         </div>
-                        <div className="phase-header-right">
-                          <span className="phase-total-label">Subtotal: </span>
-                          <span className="phase-total-value">
-                            {formatCurrency(phaseTotal)}
-                          </span>
-                        </div>
+                          <div className="phase-header-right">
+                            {comparisonData ? (
+                              <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
+                                <div style={{ minWidth: "120px", textAlign: "right" }}>
+                                  <span className="phase-total-value">{formatCurrency(phaseTotal)}</span>
+                                </div>
+                                <div style={{ minWidth: "120px", textAlign: "right" }}>
+                                  <span className="col-compare-total phase-total-value">{formatCurrency(getBudgetBPhaseTotal(phase))}</span>
+                                </div>
+                                <div style={{ minWidth: "120px", textAlign: "right", fontWeight: "bold" }} className={getVarianceClass(phaseTotal, getBudgetBPhaseTotal(phase))}>
+                                  {formatVariance(phaseTotal, getBudgetBPhaseTotal(phase))}
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                <span className="phase-total-label">Subtotal: </span>
+                                <span className="phase-total-value">
+                                  {formatCurrency(phaseTotal)}
+                                </span>
+                              </>
+                            )}
+                          </div>
                       </div>
 
                       {isExpanded && (
@@ -781,20 +802,22 @@ const BudgetEntryForm = ({
                                       className={`dept-section ${snapshotDept.isDragging ? "dragging-dept" : ""}`}
                                     >
                                       <table className="bef-table dept-header-table">
-                                        <BudgetColGroup />
+                                        <BudgetColGroup isCompareMode={!!comparisonData} />
                                         <tbody className="bef-dept-body">
                                           <tr
                                             id={`dept-section-${dept.id}`}
                                             className="bef-dept-row"
                                           >
-                                            <td
-                                              className="col-drag"
-                                              {...providedDept.dragHandleProps}
-                                            >
-                                              <span className="material-symbols-outlined drag-handle-icon">
-                                                drag_indicator
-                                              </span>
-                                            </td>
+                                            {!comparisonData && (
+                                              <td
+                                                className="col-drag"
+                                                {...providedDept.dragHandleProps}
+                                              >
+                                                <span className="material-symbols-outlined drag-handle-icon">
+                                                  drag_indicator
+                                                </span>
+                                              </td>
+                                            )}
                                             <td
                                               colSpan="6"
                                               onClick={() => toggleDept(dept.id)}
@@ -833,6 +856,19 @@ const BudgetEntryForm = ({
                                                 return total > 0 ? formatCurrency(total) : "";
                                               })()}
                                             </td>
+                                            {comparisonData && (
+                                              <>
+                                                <td className="col-compare-total dept-subtotal-val" style={{ fontWeight: "700", textAlign: "right", paddingRight: "24px" }}>
+                                                  {(() => {
+                                                    const total = getBudgetBDeptTotal(dept);
+                                                    return total > 0 ? formatCurrency(total) : "-";
+                                                  })()}
+                                                </td>
+                                                <td className={`col-compare-variance dept-subtotal-val ${getVarianceClass(getDeptSubtotal(dept), getBudgetBDeptTotal(dept))}`} style={{ fontWeight: "700", textAlign: "right", paddingRight: "24px" }}>
+                                                  {getDeptSubtotal(dept) > 0 || getBudgetBDeptTotal(dept) > 0 ? formatVariance(getDeptSubtotal(dept), getBudgetBDeptTotal(dept)) : "-"}
+                                                </td>
+                                              </>
+                                            )}
                                           </tr>
                                         </tbody>
                                       </table>
@@ -850,7 +886,7 @@ const BudgetEntryForm = ({
                                               display: collapsedDepts.has(dept.id) ? "none" : "table"
                                             }}
                                           >
-                                            <BudgetColGroup />
+                                            <BudgetColGroup isCompareMode={!!comparisonData} />
                                             {dept.categories.map((cat, catIdx) => (
                                               <Draggable
                                                 key={cat.id}
@@ -874,14 +910,16 @@ const BudgetEntryForm = ({
                                                         {...providedItem.droppableProps}
                                                       >
                                                         <tr id={`cat-section-${cat.id}`} className="bef-cat-row">
-                                                          <td
-                                                            className="col-drag"
-                                                            {...providedCat.dragHandleProps}
-                                                          >
-                                                            <span className="material-symbols-outlined drag-handle-icon">
-                                                              drag_indicator
-                                                            </span>
-                                                          </td>
+                                                          {!comparisonData && (
+                                                            <td
+                                                              className="col-drag"
+                                                              {...providedCat.dragHandleProps}
+                                                            >
+                                                              <span className="material-symbols-outlined drag-handle-icon">
+                                                                drag_indicator
+                                                              </span>
+                                                            </td>
+                                                          )}
                                                           <td
                                                             colSpan="6"
                                                             className="cat-name-cell"
@@ -919,6 +957,19 @@ const BudgetEntryForm = ({
                                                                 : "";
                                                             })()}
                                                           </td>
+                                                          {comparisonData && (
+                                                            <>
+                                                              <td className="col-compare-total cat-subtotal" style={{ fontWeight: "600", color: "#ccc", textAlign: "right" }}>
+                                                                {(() => {
+                                                                  const total = getBudgetBCatTotal(cat);
+                                                                  return total > 0 ? formatCurrency(total) : "-";
+                                                                })()}
+                                                              </td>
+                                                              <td className={`col-compare-variance cat-subtotal ${getVarianceClass(getCategorySubtotal(cat), getBudgetBCatTotal(cat))}`} style={{ fontWeight: "600", textAlign: "right" }}>
+                                                                {getCategorySubtotal(cat) > 0 || getBudgetBCatTotal(cat) > 0 ? formatVariance(getCategorySubtotal(cat), getBudgetBCatTotal(cat)) : "-"}
+                                                              </td>
+                                                            </>
+                                                          )}
                                                         </tr>
 
                                                         {loading &&
@@ -944,7 +995,7 @@ const BudgetEntryForm = ({
                                                                   0) > 0;
 
                                                               return (
-                                                                <BudgetRow
+                                                                <BudgetRow comparisonData={comparisonData}
                                                                   key={item.id}
                                                                   item={item}
                                                                   index={index}
@@ -981,6 +1032,9 @@ const BudgetEntryForm = ({
                                                                   }
                                                                   totalDisplay={
                                                                     totalDisplay
+                                                                  }
+                                                                  totalRaw={
+                                                                    totalRaw
                                                                   }
                                                                   isFilled={isFilled}
                                                                   focusedInput={
@@ -1032,8 +1086,27 @@ const BudgetEntryForm = ({
             </div>
             <div className="bef-footer">
               <div className="bef-grand-total">
-                Grand Total:&nbsp;
-                <strong>{formatCurrency(grandTotal)}</strong>
+                {comparisonData ? (
+                    <div style={{ display: "flex", gap: "24px", alignItems: "center" }}>
+                      <div>
+                        <span style={{ color: "#aaa" }}>Grand Total:&nbsp;</span>
+                        <strong>{formatCurrency(grandTotal)}</strong>
+                      </div>
+                      <div>
+                        <strong className="col-compare-total">{formatCurrency(getBudgetBGrandTotal())}</strong>
+                      </div>
+                      <div>
+                        <strong className={getVarianceClass(grandTotal, getBudgetBGrandTotal())}>
+                          {formatVariance(grandTotal, getBudgetBGrandTotal())}
+                        </strong>
+                      </div>
+                    </div>
+                ) : (
+                  <>
+                    Grand Total:&nbsp;
+                    <strong>{formatCurrency(grandTotal)}</strong>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -1041,32 +1114,25 @@ const BudgetEntryForm = ({
 
         {!loading && externalProjectId && versionId && hierarchy.length > 0 && (() => {
           const content = (
-            <div className={actionsContainer ? "" : "bef-footer bef-actions-only-footer"}>
-              <BudgetSubNav 
-                handleDownloadPDF={handleDownloadPDF}
-                onPublish={onPublish}
-                versionId={versionId}
-                handleClear={handleClear}
-                submitting={submitting}
-                handleSubmit={handleSubmit}
-                externalProjectId={externalProjectId}
-              />
-            </div>
+              <div className={actionsContainer ? "" : "bef-footer bef-actions-only-footer"}>
+                <BudgetSubNav 
+                  onExportTopSheet={handleExportTopSheet}
+                  onExportDetailPDF={handleExportDetailPDF}
+                  onExportDetailExcel={handleExportDetailExcel}
+                  onPublish={onPublish}
+                  versionId={versionId}
+                  handleClear={handleClear}
+                  submitting={submitting}
+                  handleSubmit={handleSubmit}
+                  externalProjectId={externalProjectId}
+                />
+              </div>
           );
 
           return actionsContainer 
             ? createPortal(content, actionsContainer)
             : content;
         })()}
-
-        <div
-          className="status-msg-container"
-          style={{ minHeight: "40px", marginTop: "1rem" }}
-        >
-          {status && (
-            <div className={`bef-status ${status.type}`}>{status.text}</div>
-          )}
-        </div>
 
         <BreakdownModal
           isOpen={!!activeBreakdownId}
