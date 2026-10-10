@@ -300,3 +300,18 @@ body.light-theme .um-loading {
   color: #57606a;
 }
 
+.um-no-users-cell {
+  text-align: center;
+  padding: 20px;
+  color: #8b949e;
+}
+
+.delete-acc-btn .material-symbols-outlined {
+  font-size: 1rem;
+}
+
+body.light-theme .um-no-users-cell {
+  color: #57606a;
+}
+
+

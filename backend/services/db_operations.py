@@ -1,6 +1,179 @@
 from .database import get_connection
 
 
+def run_rbac_migration():
+    """Ensures RBAC tables, roles, permissions, and user_roles are populated and synchronized."""
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        # 1. Ensure core RBAC tables exist
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS roles (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(50) NOT NULL UNIQUE
+        )
+        """)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS permissions (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(150) NOT NULL UNIQUE
+        )
+        """)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS role_permissions (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            role_id INT NOT NULL,
+            permission_id INT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
+            FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE CASCADE
+        )
+        """)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS user_roles (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            role_id INT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+        )
+        """)
+        conn.commit()
+
+        # 2. Seed standard roles
+        standard_roles = [
+            "Admin",
+            "Director",
+            "Manager",
+            "Accountant",
+            "Coordinator",
+            "Viewer",
+            "Client",
+            "Production Crew",
+        ]
+        cursor.executemany("INSERT IGNORE INTO roles (name) VALUES (%s)", [(r,) for r in standard_roles])
+        conn.commit()
+
+        # 3. Seed standard permissions
+        standard_permissions = [
+            "user.view",
+            "user.approve",
+            "user.reject",
+            "user.edit",
+            "employee.delete",
+            "project.view",
+            "project.create",
+            "project.edit",
+            "project.delete",
+            "budget.view",
+            "budget.edit",
+            "budget.publish",
+            "production.view",
+            "production.edit",
+            "schedule.view",
+            "schedule.edit",
+            "finance.view",
+            "finance.edit",
+        ]
+        cursor.executemany("INSERT IGNORE INTO permissions (name) VALUES (%s)", [(p,) for p in standard_permissions])
+        conn.commit()
+
+        # 4. Fetch all roles and permissions maps
+        cursor.execute("SELECT id, name FROM roles")
+        role_map = {r["name"].lower(): r["id"] for r in cursor.fetchall()}
+        cursor.execute("SELECT id, name FROM permissions")
+        perm_map = {p["name"]: p["id"] for p in cursor.fetchall()}
+
+        # 5. Role-Permission assignments
+        role_permission_mappings = {
+            "admin": standard_permissions,
+            "manager": [
+                "user.view", "project.view", "project.create", "project.edit",
+                "budget.view", "budget.edit", "production.view", "production.edit",
+                "schedule.view", "schedule.edit", "finance.view"
+            ],
+            "director": [
+                "user.view", "project.view", "budget.view", "production.view",
+                "schedule.view", "finance.view"
+            ],
+            "accountant": [
+                "project.view", "budget.view", "budget.edit", "finance.view", "finance.edit"
+            ],
+            "production crew": [
+                "production.view", "production.edit", "schedule.view"
+            ],
+            "client": [
+                "project.view", "budget.view", "schedule.view"
+            ],
+            "coordinator": [
+                "project.view", "production.view", "schedule.view", "schedule.edit"
+            ],
+            "viewer": [
+                "project.view", "schedule.view"
+            ],
+        }
+
+        cursor.execute("SELECT role_id, permission_id FROM role_permissions")
+        existing_rp = {(row["role_id"], row["permission_id"]) for row in cursor.fetchall()}
+
+        to_insert_rp = []
+        for r_name, p_names in role_permission_mappings.items():
+            r_id = role_map.get(r_name)
+            if not r_id:
+                continue
+            for p_name in p_names:
+                p_id = perm_map.get(p_name)
+                if p_id and (r_id, p_id) not in existing_rp:
+                    to_insert_rp.append((r_id, p_id))
+
+        if to_insert_rp:
+            cursor.executemany(
+                "INSERT INTO role_permissions (role_id, permission_id) VALUES (%s, %s)",
+                to_insert_rp,
+            )
+            conn.commit()
+
+        # 6. Migrate existing users from users.role to user_roles
+        cursor.execute("SELECT user_id, role_id FROM user_roles")
+        existing_ur = {(row["user_id"], row["role_id"]) for row in cursor.fetchall()}
+
+        cursor.execute("SELECT id, role FROM users WHERE role IS NOT NULL AND role != ''")
+        users_list = cursor.fetchall()
+        to_insert_ur = []
+        for u in users_list:
+            u_id = u["id"]
+            u_role = u["role"].strip().lower()
+            if u_role == "production_crew":
+                u_role = "production crew"
+
+            target_role_id = role_map.get(u_role)
+            if target_role_id and (u_id, target_role_id) not in existing_ur:
+                to_insert_ur.append((u_id, target_role_id))
+
+        if to_insert_ur:
+            cursor.executemany(
+                "INSERT INTO user_roles (user_id, role_id) VALUES (%s, %s)",
+                to_insert_ur,
+            )
+            conn.commit()
+
+        print("RBAC Migration: successfully synchronized roles, permissions, and user_roles.")
+    except Exception as e:
+        print("Error during RBAC migration:", e)
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def create_role_permissions():
+    run_rbac_migration()
+
+
+def create_user_roles():
+    run_rbac_migration()
+
+
 def get_phases():
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)

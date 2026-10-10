@@ -55,9 +55,20 @@ export const userService = {
     }
   },
 
-  approveUser: async (userId) => {
+  getRoles: async () => {
     try {
-      const response = await api.post('/api/admin/approve-user', { user_id: userId });
+      const response = await api.get('/api/admin/roles');
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  },
+
+  approveUser: async (userId, role) => {
+    try {
+      const payload = { user_id: userId };
+      if (role) payload.role = role;
+      const response = await api.post('/api/admin/approve-user', payload);
       return response.data;
     } catch (error) {
       handleApiError(error);

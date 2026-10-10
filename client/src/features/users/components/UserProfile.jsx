@@ -8,7 +8,7 @@ import EditProfile from "../pages/EditProfile";
 import "./UserProfile.css";
 
 const UserProfile = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, hasRole } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [anchorRect, setAnchorRect] = useState(null);
   const menuRef = useRef(null);
@@ -176,7 +176,7 @@ const UserProfile = () => {
                 <span>Settings</span>
               </button>
 
-              {user.role === "admin" && (
+              {hasRole("admin") && (
                 <Link
                   to="/users"
                   className="menu-item"

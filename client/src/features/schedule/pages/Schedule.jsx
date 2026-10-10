@@ -7,7 +7,7 @@ import Icon from "../../../components/common/Icon";
 import html2pdf from "html2pdf.js/dist/html2pdf.bundle.min.js";
 import { scheduleService } from "../../../services/scheduleService";
 import { projectService } from "../../../services/projectService";
-import { authService } from "../../../services/authService";
+import { useAuth } from "../../auth/context/AuthContext";
 
 // Sri Lankan Public Holidays 2026 (Hardcoded for simplicity)
 const SRI_LANKA_HOLIDAYS_2026 = [
@@ -41,10 +41,12 @@ const SRI_LANKA_HOLIDAYS_2026 = [
 const DEFAULT_TASK_COLOR = "#a78bfa";
 
 const Schedule = () => {
+  const { user, hasRole } = useAuth();
+  const canManageSchedule = hasRole(["admin", "manager", "director", "accountant", "coordinator"]);
+
   const [currentDate, setCurrentDate] = useState(new Date());
   const [tasks, setTasks] = useState([]);
   const [originalTasks, setOriginalTasks] = useState([]);
-  const [user, setUser] = useState(null);
   const [projects, setProjects] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -70,11 +72,6 @@ const Schedule = () => {
 
   const viewMonth = currentDate.getMonth();
   const viewYear = currentDate.getFullYear();
-
-  useEffect(() => {
-    fetchUser();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
     fetchTasks();
@@ -110,17 +107,6 @@ const Schedule = () => {
       }
     }
   }, [blocker]);
-
-  const fetchUser = async () => {
-    try {
-      const data = await authService.checkAuth();
-      if (data && data.logged_in) {
-        setUser(data.user);
-      }
-    } catch (err) {
-      console.error("Error fetching user:", err);
-    }
-  };
 
   const fetchTasks = async () => {
     try {
@@ -255,7 +241,7 @@ const Schedule = () => {
   };
 
   const handleOpenTaskModal = (dateStr, taskToEdit = null) => {
-    if (user?.role !== "admin" && user?.role !== "manager") return;
+    if (!canManageSchedule) return;
     setSelectedDate(dateStr);
     if (taskToEdit) {
       setTaskForm({
@@ -426,7 +412,7 @@ const Schedule = () => {
         >
           <div className="calendar-cell-header">
             <span className="day-number">{day}</span>
-            {(user?.role === "admin" || user?.role === "manager") && (
+            {canManageSchedule && (
               <button
                 className="add-task-btn"
                 onClick={() => handleOpenTaskModal(dateStr)}
@@ -515,11 +501,10 @@ const Schedule = () => {
               <button onClick={handleGoToToday} className="today-btn">
                 Today
               </button>
-              {(user?.role === "admin" || user?.role === "manager") && (
+              {canManageSchedule && (
                 <button
                   onClick={handleDownloadPDF}
                   className="download-pdf-btn"
-                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
                 >
                   <Icon name="download" modifiers="sm" />
                   Download PDF
@@ -794,7 +779,7 @@ const Schedule = () => {
                       >
                         {submitting ? "Adding..." : "Post Note"}
                       </button>
-                      {(user?.role === "admin" || user?.role === "manager") && (
+                      {canManageSchedule && (
                         <>
                           <button
                             type="button"

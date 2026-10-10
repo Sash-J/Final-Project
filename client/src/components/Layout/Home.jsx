@@ -10,7 +10,7 @@ import Footer from './Footer';
 import './Home.css';
 
 const Home = () => {
-    const { user, loading } = useAuth();
+    const { user, loading, hasRole } = useAuth();
     const containerRef = useRef(null);
 
     useEffect(() => {
@@ -57,15 +57,14 @@ const Home = () => {
 
     if (loading) return null;
 
-    if (user && user.role) {
-        const role = String(user.role).toLowerCase().trim();
-        if (role === 'admin' || role === 'manager') {
+    if (user) {
+        if (hasRole(['admin', 'manager', 'director', 'accountant'])) {
             return <Navigate to="/admin" />;
         }
-        if (role === 'production_crew') {
+        if (hasRole(['production_crew', 'production crew'])) {
             return <Navigate to="/crew-dashboard" />;
         }
-        if (role === 'client') {
+        if (hasRole('client')) {
             return <Navigate to="/dashboard" />;
         }
         // If user has no valid role, stay on Home page to prevent infinite redirect loops
