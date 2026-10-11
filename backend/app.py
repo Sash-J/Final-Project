@@ -6,8 +6,6 @@ from flask_bcrypt import Bcrypt
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-import re
-
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "super_secret_key")
 

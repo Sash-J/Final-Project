@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 import services.auth_operations as auth
-from core.session_handler import login_required, roles_required
+from core.session_handler import login_required, permissions_required
 
 user_mgmt_bp = Blueprint("user_management", __name__)
 
@@ -14,25 +14,25 @@ def _is_valid_role(role):
 
 
 @user_mgmt_bp.route("/api/admin/pending-users", methods=["GET"])
-@roles_required("admin")
+@permissions_required("user.view")
 def pending_users_get():
     return jsonify(auth.get_pending_users()), 200
 
 
 @user_mgmt_bp.route("/api/admin/users", methods=["GET"])
-@roles_required("admin")
+@permissions_required("user.view")
 def users_get():
     return jsonify(auth.get_all_users()), 200
 
 
 @user_mgmt_bp.route("/api/clients", methods=["GET"])
-@roles_required("admin", "manager")
+@permissions_required("user.view", "project.view")
 def clients_get():
     return jsonify(auth.get_clients()), 200
 
 
 @user_mgmt_bp.route("/api/admin/approve-user", methods=["POST"])
-@roles_required("admin")
+@permissions_required("user.approve")
 def approve_user_post():
     data = request.get_json() or {}
     user_id = data.get("user_id")
@@ -53,7 +53,7 @@ def approve_user_post():
 
 
 @user_mgmt_bp.route("/api/admin/reject-user", methods=["POST"])
-@roles_required("admin")
+@permissions_required("user.reject")
 def reject_user_post():
     data = request.get_json() or {}
     user_id = data.get("user_id")
@@ -64,7 +64,7 @@ def reject_user_post():
 
 
 @user_mgmt_bp.route("/api/admin/delete-user", methods=["POST"])
-@roles_required("admin")
+@permissions_required("employee.delete")
 def delete_user_post():
     data = request.get_json() or {}
     user_id = data.get("user_id")
@@ -77,7 +77,7 @@ def delete_user_post():
 
 
 @user_mgmt_bp.route("/api/admin/update-user-role", methods=["POST"])
-@roles_required("admin")
+@permissions_required("user.edit")
 def update_user_role_post():
     data = request.get_json() or {}
     user_id = data.get("user_id")
@@ -96,13 +96,13 @@ def update_user_role_post():
 
 
 @user_mgmt_bp.route("/api/admin/roles", methods=["GET"])
-@roles_required("admin")
+@permissions_required("user.view")
 def roles_get():
     return jsonify(auth.get_all_roles()), 200
 
 
 @user_mgmt_bp.route("/api/admin/permissions", methods=["GET"])
-@roles_required("admin")
+@permissions_required("user.view")
 def permissions_get():
     return jsonify(auth.get_all_permissions()), 200
 
@@ -114,7 +114,7 @@ def get_crew_endpoint():
 
 
 @user_mgmt_bp.route("/api/admin/assign-client", methods=["POST"])
-@roles_required("admin")
+@permissions_required("user.edit", "project.edit")
 def assign_client_post():
     data = request.get_json()
     user_id = data.get("user_id")
@@ -129,7 +129,7 @@ def assign_client_post():
 
 
 @user_mgmt_bp.route("/api/admin/remove-client", methods=["POST"])
-@roles_required("admin")
+@permissions_required("user.edit", "project.edit")
 def remove_client_post():
     data = request.get_json()
     user_id = data.get("user_id")
@@ -144,6 +144,6 @@ def remove_client_post():
 
 
 @user_mgmt_bp.route("/api/projects/<int:project_id>/clients", methods=["GET"])
-@roles_required("admin", "manager")
+@permissions_required("user.view", "project.view")
 def project_clients_get(project_id):
     return jsonify(auth.get_project_clients(project_id)), 200

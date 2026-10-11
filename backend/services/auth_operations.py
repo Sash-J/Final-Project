@@ -39,12 +39,15 @@ def create_user(
     full_name=None,
     address=None,
     telephone=None,
+    gender=None,
+    skill=None,
+    verified_level=None,
 ):
     with db_cursor(commit=True) as cursor:
         cursor.execute(
-            """INSERT INTO users (username, password_hash, role, is_approved, full_name, address, telephone) 
-               VALUES (%s, %s, %s, %s, %s, %s, %s)""",
-            (username, password_hash, role, is_approved, full_name, address, telephone),
+            """INSERT INTO users (username, password_hash, role, is_approved, full_name, address, telephone, gender, skill, verified_level) 
+               VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+            (username, password_hash, role, is_approved, full_name, address, telephone, gender, skill, verified_level),
         )
         new_id = cursor.lastrowid
 
@@ -62,7 +65,7 @@ def create_user(
 
 def _fetch_users_with_roles(only_pending=False):
     query = """
-        SELECT u.id, u.username, u.role, u.is_approved,
+        SELECT u.id, u.username, u.role, u.is_approved, u.full_name, u.telephone, u.gender, u.skill, u.verified_level,
                COALESCE(r.name, u.role) AS role_name
         FROM users u
         LEFT JOIN user_roles ur ON u.id = ur.user_id
@@ -83,6 +86,11 @@ def _fetch_users_with_roles(only_pending=False):
             user_map[uid] = {
                 "id": uid,
                 "username": row["username"],
+                "full_name": row.get("full_name"),
+                "telephone": row.get("telephone"),
+                "gender": row.get("gender"),
+                "skill": row.get("skill"),
+                "verified_level": row.get("verified_level"),
                 "role": row["role"],
                 "is_approved": row["is_approved"],
                 "roles": [],
@@ -119,12 +127,12 @@ def _get_users_by_roles(role_names):
 
 def get_clients():
     """Returns all approved client users from DB roles."""
-    return _get_users_by_roles(["client"])
+    return _get_users_by_roles(["client", "client (full access)", "client (half access)"])
 
 
 def get_crew_users():
-    """Returns all users with the role 'Production Crew' from DB roles."""
-    return _get_users_by_roles(["production crew", "crew"])
+    """Returns all users with crew or department head roles from DB roles."""
+    return _get_users_by_roles(["production crew", "crew", "department head"])
 
 
 def approve_user(user_id):
@@ -167,12 +175,17 @@ def update_user_role(user_id, role):
         role_id = role_row["id"]
         role_name = role_row["name"]
 
-        # Only sync users.role for ENUM-safe legacy values
+        # Only sync users.role for ENUM-safe legacy values; clear it for newer DB roles
         legacy_value = role_name.lower().replace(" ", "_")
         if legacy_value in _LEGACY_ENUM_ROLES:
             cursor.execute(
                 "UPDATE users SET role = %s WHERE id = %s",
                 (legacy_value, user_id),
+            )
+        else:
+            cursor.execute(
+                "UPDATE users SET role = NULL WHERE id = %s",
+                (user_id,),
             )
 
         # user_roles is the authoritative source — replace existing entry
@@ -195,7 +208,13 @@ def get_assignable_roles():
     """Returns roles available for self-registration or basic assignment."""
     with db_cursor() as cursor:
         cursor.execute(
-            "SELECT id, name FROM roles WHERE LOWER(name) IN ('client', 'production crew') ORDER BY id ASC"
+            """SELECT id, name FROM roles 
+               WHERE LOWER(name) IN (
+                   'client', 'client (full access)', 'client (half access)',
+                   'production crew', 'crew', 'department head',
+                   'director', 'manager', 'accountant', 'coordinator', 'viewer'
+               ) 
+               ORDER BY id ASC"""
         )
         return cursor.fetchall()
 
@@ -371,6 +390,7 @@ def get_user_roles_and_permissions(user_id):
                 FROM roles r
                 INNER JOIN user_roles ur ON ur.role_id = r.id
                 WHERE ur.user_id = %s
+                ORDER BY r.id ASC
                 """,
                 (user_id,),
             )

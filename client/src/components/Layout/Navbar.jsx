@@ -7,7 +7,7 @@ import UserProfile from "../../features/users/components/UserProfile";
 import "./Navbar.css";
 
 const Navbar = () => {
-  const { user, updateUserTheme, theme, hasRole } = useAuth();
+  const { user, updateUserTheme, theme, hasRole, hasPermission } = useAuth();
   const [useImageLogo, setUseImageLogo] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -69,27 +69,28 @@ const Navbar = () => {
           </li>
         )}
 
-        {user && hasRole(["admin", "manager", "director", "accountant"]) && (
-          <>
-            <li>
-              <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)}>
-                <Icon name="dashboard" modifiers="md" />
-                <span>Dashboard</span>
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/admin-budget"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <Icon name="payments" modifiers="md" />
-                <span>Budget</span>
-              </Link>
-            </li>
-          </>
+        {user && !hasRole(["client", "production_crew", "production crew"]) && (
+          <li>
+            <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)}>
+              <Icon name="dashboard" modifiers="md" />
+              <span>Dashboard</span>
+            </Link>
+          </li>
         )}
 
-        {user && hasRole("admin") && (
+        {user && hasPermission("budget.view") && !hasRole(["client", "production_crew", "production crew"]) && (
+          <li>
+            <Link
+              to="/admin-budget"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <Icon name="payments" modifiers="md" />
+              <span>Budget</span>
+            </Link>
+          </li>
+        )}
+
+        {user && (hasPermission("user.view") || hasRole("admin")) && (
           <li>
             <Link to="/users" onClick={() => setIsMobileMenuOpen(false)}>
               <Icon name="groups" modifiers="md" />
@@ -98,7 +99,7 @@ const Navbar = () => {
           </li>
         )}
 
-        {user && hasRole(["admin", "manager", "director", "accountant"]) && (
+        {user && hasPermission("finance.view") && (
           <li>
             <Link to="/finance" onClick={() => setIsMobileMenuOpen(false)}>
               <Icon name="assessment" modifiers="md" />
@@ -107,7 +108,7 @@ const Navbar = () => {
           </li>
         )}
 
-        {user && ["admin", "manager", "production_crew", "client"].includes(user.role) && (
+        {user && hasPermission("schedule.view") && (
           <li>
             <Link to="/schedule" onClick={() => setIsMobileMenuOpen(false)}>
               <Icon name="calendar_month" modifiers="md" />

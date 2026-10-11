@@ -63,6 +63,10 @@
   margin-top: 10px;
 }
 
+.milestone-delete-tooltip {
+  margin-right: auto;
+}
+
 .btn-milestone-delete {
   color: #f87171;
   border-color: rgba(248, 113, 113, 0.3);

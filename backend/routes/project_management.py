@@ -1,27 +1,27 @@
 from flask import Blueprint, jsonify, request
-from routes.notifications_management import notify_all_admins
 from flask_cors import cross_origin
+from routes.notifications_management import notify_all_admins
 import services.db_operations as db
 import services.auth_operations as auth
-from core.session_handler import login_required, roles_required
+from core.session_handler import permissions_required
 
 project_bp = Blueprint("project_management", __name__)
 
 
 @project_bp.route("/getTable", methods=["GET"])
-@login_required
+@permissions_required("project.view")
 def getTable():
     return jsonify({"tables": db.get_tables()}), 200
 
 
 @project_bp.route("/api/projects", methods=["GET"])
-@login_required
+@permissions_required("project.view")
 def projects_get():
     return jsonify(db.get_projects()), 200
 
 
 @project_bp.route("/api/projects/<int:project_id>", methods=["GET"])
-@login_required
+@permissions_required("project.view")
 def project_detail_get(project_id):
     project = db.get_project_by_id(project_id)
     if not project:
@@ -30,7 +30,7 @@ def project_detail_get(project_id):
 
 
 @project_bp.route("/api/projects", methods=["POST"])
-@roles_required("admin", "manager")
+@permissions_required("project.create")
 def projects_post():
     data = request.get_json()
     project_name = data.get("project_name", "").strip()
@@ -89,7 +89,7 @@ def projects_post():
 
 
 @project_bp.route("/api/projects/<int:project_id>/status", methods=["PUT"])
-@login_required
+@permissions_required("project.edit")
 def update_project_status_endpoint(project_id):
     data = request.get_json()
     status = data.get("status")
@@ -103,7 +103,7 @@ def update_project_status_endpoint(project_id):
 
 
 @project_bp.route("/api/projects/<int:project_id>", methods=["PUT"])
-@roles_required("admin", "manager")
+@permissions_required("project.edit")
 @cross_origin(supports_credentials=True)
 def projects_put(project_id):
     try:
@@ -173,7 +173,7 @@ def projects_put(project_id):
 
 
 @project_bp.route("/api/projects/<int:project_id>", methods=["DELETE"])
-@roles_required("admin", "manager")
+@permissions_required("project.delete")
 def projects_delete(project_id):
     try:
         db.delete_project(project_id)
@@ -183,7 +183,7 @@ def projects_delete(project_id):
 
 
 @project_bp.route("/api/projects/<int:project_id>/hierarchy", methods=["PUT"])
-@roles_required("admin", "manager")
+@permissions_required("production.edit")
 @cross_origin(supports_credentials=True)
 def update_project_hierarchy_endpoint(project_id):
     import json
@@ -198,7 +198,7 @@ def update_project_hierarchy_endpoint(project_id):
 
 
 @project_bp.route("/api/projects/<int:project_id>/equipment", methods=["PUT"])
-@login_required
+@permissions_required("production.edit")
 @cross_origin(supports_credentials=True)
 def update_project_equipment_endpoint(project_id):
     import json
@@ -218,7 +218,7 @@ def update_project_equipment_endpoint(project_id):
 
 # Payments
 @project_bp.route("/api/projects/<int:project_id>/payments", methods=["GET"])
-@login_required
+@permissions_required("finance.view")
 def get_project_payments(project_id):
     try:
         payments = db.get_payments_for_project(project_id)
@@ -228,7 +228,7 @@ def get_project_payments(project_id):
 
 
 @project_bp.route("/api/projects/<int:project_id>/payments", methods=["POST"])
-@roles_required("admin", "manager")
+@permissions_required("finance.edit")
 def post_project_payment(project_id):
     try:
         data = request.get_json()
@@ -246,7 +246,7 @@ def post_project_payment(project_id):
 
 
 @project_bp.route("/api/projects/<int:project_id>/crew", methods=["GET"])
-@login_required
+@permissions_required("project.view")
 def get_project_crew_members(project_id):
     try:
         crew_ids = auth.get_project_crew(project_id)
@@ -267,7 +267,7 @@ def get_project_crew_members(project_id):
 # --- EQUIPMENT RELATIONAL DB ENDPOINTS ---
 
 @project_bp.route("/api/projects/<int:project_id>/equipment_full", methods=["GET"])
-@login_required
+@permissions_required("production.view")
 def get_project_equipment_full(project_id):
     try:
         data = db.get_project_equipment_full(project_id)
@@ -276,7 +276,7 @@ def get_project_equipment_full(project_id):
         return jsonify({"error": str(e)}), 500
 
 @project_bp.route("/api/projects/<int:project_id>/departments", methods=["POST"])
-@login_required
+@permissions_required("production.edit")
 def create_equipment_department(project_id):
     data = request.get_json()
     name = data.get('name', 'New Department')
@@ -287,7 +287,7 @@ def create_equipment_department(project_id):
         return jsonify({"error": str(e)}), 500
 
 @project_bp.route("/api/departments/<int:department_id>", methods=["PUT"])
-@login_required
+@permissions_required("production.edit")
 def update_equipment_department(department_id):
     data = request.get_json()
     name = data.get('name')
@@ -300,7 +300,7 @@ def update_equipment_department(department_id):
         return jsonify({"error": str(e)}), 500
 
 @project_bp.route("/api/departments/<int:department_id>", methods=["DELETE"])
-@login_required
+@permissions_required("production.edit")
 def delete_equipment_department(department_id):
     try:
         db.delete_equipment_department(department_id)
@@ -309,7 +309,7 @@ def delete_equipment_department(department_id):
         return jsonify({"error": str(e)}), 500
 
 @project_bp.route("/api/departments/<int:department_id>/items", methods=["POST"])
-@login_required
+@permissions_required("production.edit")
 def create_equipment_item(department_id):
     data = request.get_json()
     name = data.get('name', 'New Equipment')
@@ -321,7 +321,7 @@ def create_equipment_item(department_id):
         return jsonify({"error": str(e)}), 500
 
 @project_bp.route("/api/equipment/<int:item_id>", methods=["PUT"])
-@login_required
+@permissions_required("production.edit")
 def update_equipment_item(item_id):
     data = request.get_json()
     name = data.get('name')
@@ -333,7 +333,7 @@ def update_equipment_item(item_id):
         return jsonify({"error": str(e)}), 500
 
 @project_bp.route("/api/equipment/<int:item_id>", methods=["DELETE"])
-@login_required
+@permissions_required("production.edit")
 def delete_equipment_item(item_id):
     try:
         db.delete_equipment_item(item_id)
@@ -342,7 +342,7 @@ def delete_equipment_item(item_id):
         return jsonify({"error": str(e)}), 500
 
 @project_bp.route("/api/projects/<int:project_id>/routes/<string:route_id>", methods=["PUT"])
-@roles_required("admin", "manager")
+@permissions_required("project.edit")
 @cross_origin(supports_credentials=True)
 def update_route(project_id, route_id):
     route_data = request.json
@@ -355,7 +355,7 @@ def update_route(project_id, route_id):
         return jsonify({"status": "error", "message": str(e)}), 500
 
 @project_bp.route("/api/projects/<int:project_id>/routes/<string:route_id>", methods=["DELETE"])
-@roles_required("admin", "manager")
+@permissions_required("project.edit")
 @cross_origin(supports_credentials=True)
 def delete_route(project_id, route_id):
     try:

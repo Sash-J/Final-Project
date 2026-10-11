@@ -7,6 +7,7 @@ import AddMilestonePanel from "./AddMilestonePanel";
 import "./AddMilestonePanel.css";
 import { ScrollTimeline } from "./ScrollTimeline";
 import "./SuiTimeline.css";
+import { useAuth } from "../../auth/context/AuthContext";
 
 const SuiTimeline = ({
   projectId,
@@ -17,6 +18,8 @@ const SuiTimeline = ({
   onMilestonesChange,
   onClick,
 }) => {
+  const { user } = useAuth();
+  const effectiveRole = userRole || (user?.roles && user?.roles[0]) || user?.role || "client";
   const { getProjectMilestones, milestonesCache } = useProjects();
   const milestones = useMemo(() => milestonesCache[projectId] || [], [milestonesCache, projectId]);
   
@@ -183,7 +186,7 @@ const SuiTimeline = ({
             onClose={closeModal}
             mode="edit"
             milestone={selectedMilestone}
-            userRole={userRole}
+            userRole={effectiveRole}
             onDelete={handleDelete}
           />
         </ModalPortal>

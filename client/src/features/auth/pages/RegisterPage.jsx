@@ -25,10 +25,20 @@ const RegisterPage = () => {
     username: "",
     password: "",
     confirmPassword: "",
-    role: "client",
+    gender: "male",
     full_name: "",
     telephone: "",
     address: "",
+    // 3-Tier Filter state
+    mainCategory: "client", // "client" | "crew"
+    clientTier: "full", // "full" | "half"
+    clientFullSkill: "Artist",
+    clientHalfSkill: "Cast",
+    crewType: "external", // "external" | "internal"
+    internalRole: "Director",
+    externalRole: "Crew", // "Department Head" | "Crew"
+    deptHeadSkill: "Art",
+    customDept: "",
   });
 
   const [fieldErrors, setFieldErrors] = useState({
@@ -44,29 +54,29 @@ const RegisterPage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const validateField = (name, value, currentPassword = formData.password) => {
-    let error = "";
+    let err = "";
     switch (name) {
       case "username":
-        error = validateUsername(value);
+        err = validateUsername(value);
         break;
       case "password":
-        error = validatePassword(value);
+        err = validatePassword(value);
         break;
       case "confirmPassword":
-        error = validateConfirmPassword(value, currentPassword);
+        err = validateConfirmPassword(value, currentPassword);
         break;
       case "address":
-        error = validateAddress(value);
+        err = validateAddress(value);
         break;
       default:
         break;
     }
-    setFieldErrors((prev) => ({ ...prev, [name]: error }));
+    setFieldErrors((prev) => ({ ...prev, [name]: err }));
   };
 
   const handleUsernameChange = (e) => {
     const value = e.target.value.replace(/[^a-zA-Z_]/g, "");
-    setFormData({ ...formData, username: value });
+    setFormData((prev) => ({ ...prev, username: value }));
     setFieldErrors((prev) => ({ ...prev, username: "" }));
   };
 
@@ -93,34 +103,75 @@ const RegisterPage = () => {
 
   const handleConfirmChange = (e) => {
     const value = e.target.value;
-    setFormData({ ...formData, confirmPassword: value });
+    setFormData((prev) => ({ ...prev, confirmPassword: value }));
     validateField("confirmPassword", value);
   };
 
   const handleAddressChange = (e) => {
     const value = e.target.value.replace(/[<>{}[\]]/g, "");
-    setFormData({ ...formData, address: value });
+    setFormData((prev) => ({ ...prev, address: value }));
     setFieldErrors((prev) => ({ ...prev, address: "" }));
   };
 
   const handlePhoneChange = (e) => {
     const value = e.target.value;
     const filteredValue = value.replace(/(?!^\+)\D/g, "");
-    setFormData({ ...formData, telephone: filteredValue });
-    setFieldErrors((prev) => ({ ...prev, telephone: validateTelephone(filteredValue) }));
+    setFormData((prev) => ({ ...prev, telephone: filteredValue }));
+    setFieldErrors((prev) => ({
+      ...prev,
+      telephone: validateTelephone(filteredValue),
+    }));
   };
 
   const handleNameChange = (e) => {
     const value = e.target.value;
     const filteredValue = value.replace(/[^a-zA-Z\s]/g, "");
-    setFormData({ ...formData, full_name: filteredValue });
+    setFormData((prev) => ({ ...prev, full_name: filteredValue }));
+  };
+
+  // Helper to calculate the final Role and Skill for submission and preview
+  const getResolvedRoleAndSkill = () => {
+    if (formData.mainCategory === "client") {
+      if (formData.clientTier === "full") {
+        return {
+          role: "Client (Full Access)",
+          skill: formData.clientFullSkill,
+        };
+      }
+      return {
+        role: "Client (Half Access)",
+        skill: formData.clientHalfSkill,
+      };
+    }
+    // Production Crew
+    if (formData.crewType === "internal") {
+      return {
+        role: formData.internalRole,
+        skill: formData.internalRole,
+      };
+    }
+    // External Crew
+    if (formData.externalRole === "Department Head") {
+      const skillName =
+        formData.deptHeadSkill === "Other"
+          ? formData.customDept.trim() || "Department Head"
+          : formData.deptHeadSkill;
+      return {
+        role: "Department Head",
+        skill: skillName,
+      };
+    }
+    return {
+      role: "Crew",
+      skill: "General Crew",
+    };
   };
 
   const nextStep = () => {
     if (step === 1) {
-      const { username, password } = formData;
-      if (!username || !password) {
-        setError("Username and password are required.");
+      const { username, password, confirmPassword } = formData;
+      if (!username || !password || !confirmPassword) {
+        setError("Please fill all required account fields in Step 1.");
         return;
       }
 
@@ -133,23 +184,23 @@ const RegisterPage = () => {
         return;
       }
     } else if (step === 2) {
-      if (!formData.full_name || !formData.telephone) {
-        setError("Full Name and Telephone are required.");
+      if (!formData.full_name || !formData.telephone || !formData.address) {
+        setError("Full Name, Telephone, and Address are required.");
         return;
       }
 
-      if (fieldErrors.full_name || fieldErrors.telephone) {
+      if (fieldErrors.full_name || fieldErrors.telephone || fieldErrors.address) {
         setError("Please fix the errors in Step 2 first.");
         return;
       }
     }
     setError("");
-    setStep(step + 1);
+    setStep((prev) => prev + 1);
   };
 
   const prevStep = () => {
     setError("");
-    setStep(step - 1);
+    setStep((prev) => prev - 1);
   };
 
   const handleSubmit = async (e) => {
@@ -158,9 +209,22 @@ const RegisterPage = () => {
     setMessage("");
     setError("");
 
+    const { role, skill } = getResolvedRoleAndSkill();
+
+    const payload = {
+      username: formData.username,
+      password: formData.password,
+      role,
+      skill,
+      gender: formData.gender,
+      full_name: formData.full_name,
+      telephone: formData.telephone,
+      address: formData.address,
+    };
+
     try {
-      const data = await authService.register(formData);
-      setMessage(data.message);
+      const data = await authService.register(payload);
+      setMessage(data.message || "Registration successful. Pending admin approval.");
       setTimeout(() => startTransition("/login"), 2500);
     } catch (err) {
       setError(err.message || "Registration failed. Please try again later.");
@@ -169,12 +233,14 @@ const RegisterPage = () => {
     }
   };
 
+  const { role: resolvedRole, skill: resolvedSkill } = getResolvedRoleAndSkill();
+
   const renderStep = () => {
     switch (step) {
       case 1:
         return (
           <div className="step-content">
-            <h3>Step 1: Account Credentials</h3>
+            <h3>Step 1: Account & Credentials</h3>
             <div className="neo-form-group">
               <label className="neo-label">Username</label>
               <input
@@ -211,37 +277,7 @@ const RegisterPage = () => {
                   onClick={() => setShowPassword(!showPassword)}
                   title={showPassword ? "Hide Password" : "Show Password"}
                 >
-                  {showPassword ? (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                      <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                  ) : (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                      <line x1="1" y1="1" x2="23" y2="23"></line>
-                    </svg>
-                  )}
+                  <Icon name={showPassword ? "visibility" : "visibility_off"} modifiers="sm" />
                 </button>
               </div>
               {fieldErrors.password && (
@@ -272,37 +308,7 @@ const RegisterPage = () => {
                       showConfirmPassword ? "Hide Password" : "Show Password"
                     }
                   >
-                    {showConfirmPassword ? (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                        <circle cx="12" cy="12" r="3"></circle>
-                      </svg>
-                    ) : (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                        <line x1="1" y1="1" x2="23" y2="23"></line>
-                      </svg>
-                    )}
+                    <Icon name={showConfirmPassword ? "visibility" : "visibility_off"} modifiers="sm" />
                   </button>
                 </div>
                 {fieldErrors.confirmPassword && (
@@ -313,10 +319,31 @@ const RegisterPage = () => {
               </div>
             )}
 
+            {/* Gender Selection */}
+            <div className="neo-form-group">
+              <label className="neo-label">Gender</label>
+              <div className="register-gender-selector">
+                {[
+                  { value: "male", label: "Male" },
+                  { value: "female", label: "Female" },
+                  { value: "other", label: "Other" },
+                  { value: "prefer_not_to_say", label: "Prefer not to say" },
+                ].map((g) => (
+                  <button
+                    key={g.value}
+                    type="button"
+                    className={`register-gender-btn ${formData.gender === g.value ? "active" : ""}`}
+                    onClick={() => setFormData((prev) => ({ ...prev, gender: g.value }))}
+                  >
+                    {g.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <button
               type="button"
-              className="btn-neo btn-neo-solid next-btn"
-              style={{ width: '100%', padding: '16px' }}
+              className="btn-neo btn-neo-solid next-btn register-btn-full"
               onClick={nextStep}
               disabled={
                 !formData.username ||
@@ -334,7 +361,7 @@ const RegisterPage = () => {
       case 2:
         return (
           <div className="step-content animate-in">
-            <h3>Step 2: Personal Details</h3>
+            <h3>Step 2: Personal & Contact Info</h3>
             <div className="neo-form-group">
               <label className="neo-label">Full Name</label>
               <input
@@ -366,30 +393,6 @@ const RegisterPage = () => {
                 </span>
               )}
             </div>
-            <div className="btn-row">
-              <button type="button" className="btn-neo-cancel prev-btn" onClick={prevStep} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span className="material-symbols-outlined">arrow_back</span>
-              </button>
-              <button
-                type="button"
-                className="btn-neo btn-neo-solid next-btn"
-                style={{ flex: 1, padding: '16px' }}
-                onClick={nextStep}
-                disabled={
-                  !formData.full_name ||
-                  !formData.telephone ||
-                  fieldErrors.telephone
-                }
-              >
-                Next: Contact Info
-              </button>
-            </div>
-          </div>
-        );
-      case 3:
-        return (
-          <div className="step-content animate-in">
-            <h3>Step 3: Contact Information</h3>
             <div className="neo-form-group">
               <label className="neo-label">Physical Address</label>
               <textarea
@@ -399,8 +402,8 @@ const RegisterPage = () => {
                 onChange={handleAddressChange}
                 required
                 maxLength={500}
-                placeholder="Enter your full address"
-                rows="4"
+                placeholder="Enter your residential or studio address"
+                rows="3"
               ></textarea>
               {fieldErrors.address && (
                 <span className="neo-field-error-msg">
@@ -409,13 +412,275 @@ const RegisterPage = () => {
               )}
             </div>
             <div className="btn-row">
-              <button type="button" className="btn-neo-cancel prev-btn" onClick={prevStep} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span className="material-symbols-outlined">arrow_back</span>
+              <button
+                type="button"
+                className="btn-neo-cancel prev-btn register-btn-icon"
+                onClick={prevStep}
+              >
+                <Icon name="arrow_back" modifiers="sm" />
+              </button>
+              <button
+                type="button"
+                className="btn-neo btn-neo-solid next-btn register-btn-flex"
+                onClick={nextStep}
+                disabled={
+                  !formData.full_name ||
+                  !formData.telephone ||
+                  !formData.address ||
+                  fieldErrors.telephone ||
+                  fieldErrors.address
+                }
+              >
+                Next: Role & Classification
+              </button>
+            </div>
+          </div>
+        );
+      case 3:
+        return (
+          <div className="step-content animate-in">
+            <h3>Step 3: Role & Classification</h3>
+
+            {/* Filter 1: Main Category */}
+            <div className="filter-tier-group">
+              <label className="filter-tier-label">
+                <Icon name="category" modifiers="xs" /> Filter 1: Organization Role
+              </label>
+              <div className="filter-pills-row">
+                <button
+                  type="button"
+                  className={`filter-pill ${formData.mainCategory === "client" ? "active" : ""}`}
+                  onClick={() => setFormData((prev) => ({ ...prev, mainCategory: "client" }))}
+                >
+                  <Icon name="person" modifiers="sm" />
+                  <span>Client / Artist</span>
+                </button>
+                <button
+                  type="button"
+                  className={`filter-pill ${formData.mainCategory === "crew" ? "active" : ""}`}
+                  onClick={() => setFormData((prev) => ({ ...prev, mainCategory: "crew" }))}
+                >
+                  <Icon name="movie" modifiers="sm" />
+                  <span>Production Crew</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Filter 2 & 3 for CLIENT */}
+            {formData.mainCategory === "client" && (
+              <>
+                <div className="filter-tier-group animate-in">
+                  <label className="filter-tier-label">
+                    <Icon name="tune" modifiers="xs" /> Filter 2: Client Access Level
+                  </label>
+                  <div className="filter-pills-row">
+                    <button
+                      type="button"
+                      className={`filter-pill ${formData.clientTier === "full" ? "active" : ""}`}
+                      onClick={() => setFormData((prev) => ({ ...prev, clientTier: "full" }))}
+                    >
+                      <Icon name="verified" modifiers="sm" />
+                      <span>Full Access</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`filter-pill ${formData.clientTier === "half" ? "active" : ""}`}
+                      onClick={() => setFormData((prev) => ({ ...prev, clientTier: "half" }))}
+                    >
+                      <Icon name="shield" modifiers="sm" />
+                      <span>Half Access</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="filter-tier-group animate-in">
+                  <label className="filter-tier-label">
+                    <Icon name="workspace_premium" modifiers="xs" /> Filter 3: Category / Skill
+                  </label>
+                  {formData.clientTier === "full" ? (
+                    <div className="filter-skills-grid">
+                      {[
+                        "Artist",
+                        "Producer",
+                        "Director",
+                        "Corporate client",
+                        "Colloborated production house",
+                      ].map((skill) => (
+                        <button
+                          key={skill}
+                          type="button"
+                          className={`filter-skill-pill ${formData.clientFullSkill === skill ? "active" : ""}`}
+                          onClick={() => setFormData((prev) => ({ ...prev, clientFullSkill: skill }))}
+                        >
+                          {skill}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="filter-skills-grid">
+                      {[
+                        "Cast",
+                        "Actor / Actress",
+                        "Model",
+                        "Child Actor",
+                        "Extras",
+                      ].map((skill) => (
+                        <button
+                          key={skill}
+                          type="button"
+                          className={`filter-skill-pill ${formData.clientHalfSkill === skill ? "active" : ""}`}
+                          onClick={() => setFormData((prev) => ({ ...prev, clientHalfSkill: skill }))}
+                        >
+                          {skill}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+
+            {/* Filter 2 & 3 for PRODUCTION CREW */}
+            {formData.mainCategory === "crew" && (
+              <>
+                <div className="filter-tier-group animate-in">
+                  <label className="filter-tier-label">
+                    <Icon name="tune" modifiers="xs" /> Filter 2: Crew Category
+                  </label>
+                  <div className="filter-pills-row">
+                    <button
+                      type="button"
+                      className={`filter-pill ${formData.crewType === "external" ? "active" : ""}`}
+                      onClick={() => setFormData((prev) => ({ ...prev, crewType: "external" }))}
+                    >
+                      <Icon name="groups" modifiers="sm" />
+                      <span>External Crew</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`filter-pill ${formData.crewType === "internal" ? "active" : ""}`}
+                      onClick={() => setFormData((prev) => ({ ...prev, crewType: "internal" }))}
+                    >
+                      <Icon name="badge" modifiers="sm" />
+                      <span>Internal Team</span>
+                    </button>
+                  </div>
+                </div>
+
+                {formData.crewType === "internal" ? (
+                  <div className="filter-tier-group animate-in">
+                    <label className="filter-tier-label">
+                      <Icon name="workspace_premium" modifiers="xs" /> Filter 3: Internal Designation
+                    </label>
+                    <div className="filter-skills-grid">
+                      {[
+                        "Director",
+                        "Manager",
+                        "Accountant",
+                        "Coordinator",
+                        "Viewer",
+                      ].map((r) => (
+                        <button
+                          key={r}
+                          type="button"
+                          className={`filter-skill-pill ${formData.internalRole === r ? "active" : ""}`}
+                          onClick={() => setFormData((prev) => ({ ...prev, internalRole: r }))}
+                        >
+                          {r}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="filter-tier-group animate-in">
+                      <label className="filter-tier-label">
+                        <Icon name="manage_accounts" modifiers="xs" /> Filter 3: External Role
+                      </label>
+                      <div className="filter-pills-row">
+                        <button
+                          type="button"
+                          className={`filter-pill ${formData.externalRole === "Department Head" ? "active" : ""}`}
+                          onClick={() => setFormData((prev) => ({ ...prev, externalRole: "Department Head" }))}
+                        >
+                          <Icon name="engineering" modifiers="sm" />
+                          <span>Dept Head</span>
+                        </button>
+                        <button
+                          type="button"
+                          className={`filter-pill ${formData.externalRole === "Crew" ? "active" : ""}`}
+                          onClick={() => setFormData((prev) => ({ ...prev, externalRole: "Crew" }))}
+                        >
+                          <Icon name="group" modifiers="sm" />
+                          <span>General Crew</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {formData.externalRole === "Department Head" && (
+                      <div className="filter-tier-group animate-in">
+                        <label className="filter-tier-label">
+                          <Icon name="construction" modifiers="xs" /> Department Assignment
+                        </label>
+                        <div className="filter-skills-grid">
+                          {[
+                            "Art",
+                            "Light",
+                            "Camera",
+                            "Sound",
+                            "Technical Advisor",
+                            "Gaffer",
+                            "Costume",
+                            "Other",
+                          ].map((d) => (
+                            <button
+                              key={d}
+                              type="button"
+                              className={`filter-skill-pill ${formData.deptHeadSkill === d ? "active" : ""}`}
+                              onClick={() => setFormData((prev) => ({ ...prev, deptHeadSkill: d }))}
+                            >
+                              {d}
+                            </button>
+                          ))}
+                        </div>
+                        {formData.deptHeadSkill === "Other" && (
+                          <div className="neo-form-group animate-in">
+                            <input
+                              className="neo-input"
+                              type="text"
+                              value={formData.customDept}
+                              onChange={(e) => setFormData((prev) => ({ ...prev, customDept: e.target.value }))}
+                              placeholder="Specify department name..."
+                              maxLength={50}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
+              </>
+            )}
+
+            {/* Resolved Role Summary Banner */}
+            <div className="role-summary-banner">
+              <span>Selected Role:</span>
+              <span className="role-summary-highlight">
+                {resolvedRole} {resolvedSkill && `(${resolvedSkill})`}
+              </span>
+            </div>
+
+            <div className="btn-row">
+              <button
+                type="button"
+                className="btn-neo-cancel prev-btn register-btn-icon"
+                onClick={prevStep}
+              >
+                <Icon name="arrow_back" modifiers="sm" />
               </button>
               <button
                 type="submit"
-                className="btn-neo btn-neo-solid submit-btn"
-                style={{ flex: 1, padding: '16px' }}
+                className="btn-neo btn-neo-solid submit-btn register-btn-flex"
                 disabled={loading}
               >
                 {loading ? "Creating Account..." : "Finish Registration"}
@@ -437,12 +702,12 @@ const RegisterPage = () => {
             style={{ width: `${(step / 3) * 100}%` }}
           ></div>
         </div>
-        <h2>{step === 3 ? "FINALIZE" : "JOIN US"}</h2>
+        <h2>{step === 3 ? "CLASSIFICATION" : step === 2 ? "DETAILS" : "JOIN US"}</h2>
         <div className="step-indicator">Step {step} of 3</div>
 
         <form onSubmit={handleSubmit}>
           {renderStep()}
-          <div className="neo-status-messages" style={{ marginTop: "10px", minHeight: "40px" }}>
+          <div className="neo-status-messages register-status-wrapper">
             <div className={`neo-status error ${error ? "show" : ""}`}>
               <Icon name="error" modifiers="sm" /> <span>{error}</span>
             </div>

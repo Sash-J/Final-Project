@@ -1,5 +1,4 @@
-# pyrefly: ignore [missing-import]
-from flask import Blueprint, jsonify, request, session
+from flask import Blueprint, jsonify, session
 # pyre-ignore [missing-import]:
 from services.database import get_connection
 from core.session_handler import login_required
@@ -32,7 +31,13 @@ def notify_all_admins(message, msg_type="info"):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     try:
-        cursor.execute("SELECT id FROM users WHERE role = 'admin'")
+        cursor.execute("""
+            SELECT DISTINCT u.id 
+            FROM users u
+            LEFT JOIN user_roles ur ON u.id = ur.user_id
+            LEFT JOIN roles r ON ur.role_id = r.id
+            WHERE LOWER(r.name) = 'admin' OR LOWER(u.role) = 'admin'
+        """)
         admins = cursor.fetchall()
         for admin in admins:
             create_notification(admin["id"], message, msg_type)

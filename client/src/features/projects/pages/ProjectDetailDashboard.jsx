@@ -20,6 +20,7 @@ import HoverTooltip from "../../../components/common/HoverTooltip";
 import CompositeBentoCard from "../../../components/common/CompositeBentoCard";
 import GlassSurface from "../../../components/common/GlassSurface";
 import Grainient from "../../../components/common/Grainient";
+import { useAuth } from "../../auth/context/AuthContext";
 
 const ProjectDetailSkeleton = ({ projectId }) => (
   <div className="project-detail-root">
@@ -84,6 +85,8 @@ const ProjectDetailDashboard = () => {
     getProjectMilestones,
     milestonesCache,
   } = useProjects();
+  const { user, hasPermission } = useAuth();
+  const currentRole = (user?.roles && user?.roles[0]) || user?.role || "admin";
 
   const [activeTab] = useState("overview");
   const [showEditModal, setShowEditModal] = useState(false);
@@ -223,12 +226,14 @@ const ProjectDetailDashboard = () => {
             <Icon name="arrow_back" modifiers="md" />
             <span>Back</span>
           </button>
-          <button
-            className="project-hero-btn delete global-glass-effect"
-            onClick={handleDelete}
-          >
-            <Icon name="delete" modifiers="md" />
-          </button>
+          {hasPermission("project.delete") && (
+            <button
+              className="project-hero-btn delete global-glass-effect"
+              onClick={handleDelete}
+            >
+              <Icon name="delete" modifiers="md" />
+            </button>
+          )}
         </div>
 
         <div className="project-main-info">
@@ -255,12 +260,14 @@ const ProjectDetailDashboard = () => {
               </span>
               <div className="project-name-group">
                 <ScrambleText as="h1" text={project.project_name} />
-                <button
-                  className="project-hero-btn edit global-glass-effect"
-                  onClick={() => setShowEditModal(true)}
-                >
-                  <Icon name="edit" modifiers="md" />
-                </button>
+                {hasPermission("project.edit") && (
+                  <button
+                    className="project-hero-btn edit global-glass-effect"
+                    onClick={() => setShowEditModal(true)}
+                  >
+                    <Icon name="edit" modifiers="md" />
+                  </button>
+                )}
               </div>
               <div className="project-metadata-row">
                 <p className="project-location-text">
@@ -330,7 +337,7 @@ const ProjectDetailDashboard = () => {
                 >
                   <SuiTimeline
                     projectId={projectId}
-                    userRole="admin"
+                    userRole={currentRole}
                     preview={true}
                   />
                 </div>
@@ -665,6 +672,7 @@ const ProjectDetailDashboard = () => {
                   >
                     <AddMilestonePanel
                       projectId={projectId}
+                      userRole={currentRole}
                       onSuccess={() => {
                         setTimelineTrigger((prev) => prev + 1);
                         setShowAddMilestone(false);
@@ -677,7 +685,7 @@ const ProjectDetailDashboard = () => {
                 <div className="project-timeline-embedded-wrap">
                   <SuiTimeline
                     projectId={projectId}
-                    userRole="admin"
+                    userRole={currentRole}
                     updateTrigger={timelineTrigger}
                     viewMode={timelineViewMode}
                   />

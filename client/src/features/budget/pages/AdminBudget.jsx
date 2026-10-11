@@ -14,8 +14,12 @@ import { budgetService } from "../../../services/budgetService";
 import { getSortedDepartments, getSortedCategories } from "../utils/budgetHelpers";
 import { AddDepartment, AddCategory, AddBudgetItem, WidgetOptionsMenu, CompareBudgetWidget } from "../components/AdminSidebarWidgets";
 import PublishBudgetModal from "../components/PublishBudgetModal";
+import { useAuth } from "../../auth/context/AuthContext";
 // ── Main AdminBudget Component ────────────────────────────────────────────────
 const AdminBudget = () => {
+  const { hasPermission } = useAuth();
+  const canEditBudget = hasPermission("budget.edit");
+  const canPublishBudget = hasPermission("budget.publish");
   const {
     projects,
     refreshProjects,
@@ -357,15 +361,17 @@ const AdminBudget = () => {
                               </button>
                             </HoverTooltip>
 
-                            <HoverTooltip text="Clone current version to a new one">
-                              <button
-                                type="button"
-                                className="btn-neo version-action-btn-clone"
-                                onClick={handleCreateNewVersion}
-                              >
-                                + New Version
-                              </button>
-                            </HoverTooltip>
+                            {canEditBudget && (
+                              <HoverTooltip text="Clone current version to a new one">
+                                <button
+                                  type="button"
+                                  className="btn-neo version-action-btn-clone"
+                                  onClick={handleCreateNewVersion}
+                                >
+                                  + New Version
+                                </button>
+                              </HoverTooltip>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -374,7 +380,7 @@ const AdminBudget = () => {
                 </div>
               </div>
 
-              {versionId && (
+              {canEditBudget && versionId && (
                 <div className={`sidebar-section admin-sidebar-glass ${isSidebarExpanded && !isLowerGroupActive ? 'group-collapsed' : ''}`} style={{ gap: '12px' }}>
                   <div id="accordion-department">
                     <AddDepartment
@@ -471,7 +477,7 @@ const AdminBudget = () => {
                 onDirtyChange={handleDirtyChange}
                 selectedCatId={autoAlignEnabled ? selectedCatId : ""}
                 selectedDeptId={autoAlignEnabled ? selectedDeptId : ""}
-                onPublish={handleOpenPublishModal}
+                onPublish={canPublishBudget ? handleOpenPublishModal : undefined}
                 actionsContainer={sidebarActionsNode}
                 comparisonData={comparisonData}
                 isCompareLoading={isCompareLoading}

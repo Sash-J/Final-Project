@@ -4,6 +4,7 @@ import { validateAddMilestoneForm, validateMilestoneNote } from "../../../utils/
 import Icon from "../../../components/common/Icon";
 import HoverTooltip from "../../../components/common/HoverTooltip";
 import "./AddMilestonePanel.css";
+import { useAuth } from "../../auth/context/AuthContext";
 
 const AddMilestonePanel = ({ 
   projectId, 
@@ -11,10 +12,12 @@ const AddMilestonePanel = ({
   onClose, 
   mode = "add", 
   milestone = null, 
-  userRole = "admin", 
+  userRole, 
   onDelete = null 
 }) => {
-  const roleNorm = String(userRole || "").trim().toLowerCase().replace(/_/g, " ");
+  const { user } = useAuth();
+  const effectiveRole = userRole || (user?.roles && user?.roles[0]) || user?.role || "client";
+  const roleNorm = String(effectiveRole || "").trim().toLowerCase().replace(/_/g, " ");
   const isClient = roleNorm === "client";
   const isCrew = roleNorm === "production crew" || roleNorm === "crew";
   const isAdminOrManager = ["admin", "manager", "director", "accountant"].includes(roleNorm);
@@ -367,7 +370,7 @@ const AddMilestonePanel = ({
 
       <div className="add-milestone-panel-actions">
         {mode === "edit" && !isClient && !isCrew && onDelete && (
-          <HoverTooltip text="Delete Milestone" style={{ marginRight: "auto" }}>
+          <HoverTooltip text="Delete Milestone" wrapperClassName="milestone-delete-tooltip">
             <button
               type="button"
               className="btn-neo-cancel btn-milestone-delete"
