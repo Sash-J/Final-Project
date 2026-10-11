@@ -21,7 +21,7 @@ def init_auth(bcrypt_instance):
     _bcrypt = bcrypt_instance
 
 
-def validate_register_data(username, password, role, full_name, telephone, address):
+def validate_register_data(username, password, role, full_name, telephone, address, gender=None):
     """Deep validation of registration data before database insertion."""
 
     # Username Validation
@@ -49,6 +49,10 @@ def validate_register_data(username, password, role, full_name, telephone, addre
     r_check = role.strip().lower().replace("_", " ")
     if r_check not in assignable_roles and role.strip().lower() not in assignable_roles:
         return "Forbidden role selection."
+
+    # Gender validation (if provided)
+    if gender and str(gender).strip().lower() not in ["male", "female", "other", "prefer_not_to_say", "prefer not to say"]:
+        return "Invalid gender selection."
 
     # Metadata Validation
     if len(full_name) > 100:
@@ -128,6 +132,7 @@ def login():
         set_user_session(user)
 
         profile = auth.get_user_profile(user["id"])
+        primary_role = roles[0] if roles else (user.get("role") or "")
         return (
             jsonify(
                 {
@@ -135,7 +140,7 @@ def login():
                     "user": {
                         "id": user["id"],
                         "username": user["username"],
-                        "role": user["role"],
+                        "role": primary_role,
                         "roles": roles,
                         "permissions": permissions,
                         "theme_mode": user.get("theme_mode", "dark"),
@@ -203,20 +208,22 @@ def check_connection():
 
 @auth_bp.route("/api/register", methods=["POST"])
 def register():
-    data = request.get_json()
+    data = request.get_json() or {}
     username = data.get("username", "").strip()
     password = data.get("password")
-    role = data.get("role", "client")
+    role = data.get("role", "Client").strip()
     full_name = data.get("full_name", "").strip()
     address = data.get("address", "").strip()
     telephone = data.get("telephone", "").strip()
+    gender = data.get("gender", "").strip().lower()
+    skill = data.get("skill", "").strip()
 
     if not username or not password:
         return jsonify({"error": "Username and password are required"}), 400
 
     # security check, help from ChatGPT
     validation_error = validate_register_data(
-        username, password, role, full_name, telephone, address
+        username, password, role, full_name, telephone, address, gender=gender
     )
     if validation_error:
         return jsonify({"error": validation_error}), 400
@@ -225,17 +232,35 @@ def register():
     if existing_user:
         return jsonify({"error": "Username already exists"}), 400
 
+    # Determine initial verification level per role matrix
+    role_norm = role.strip().lower()
+    if "admin" in role_norm:
+        v_level = "Diamond Verification"
+    elif "director" in role_norm:
+        v_level = "Golden Level 3"
+    elif "manager" in role_norm:
+        v_level = "Golden Level 2"
+    elif "full" in role_norm or role_norm == "client":
+        v_level = "Gold level 1"
+    elif "crew" in role_norm and "head" not in role_norm:
+        v_level = "white"
+    else:
+        v_level = "Silver"
+
     hashed = _bcrypt.generate_password_hash(password).decode("utf-8")
     new_user_id = auth.create_user(
-        username,
-        hashed,
-        role,
+        username=username,
+        password_hash=hashed,
+        role=role,
         is_approved=0,
         full_name=full_name,
         address=address,
         telephone=telephone,
+        gender=gender,
+        skill=skill,
+        verified_level=v_level,
     )
-    notify_all_admins(f"New user registered: {username}. Awaiting approval.", "info")
+    notify_all_admins(f"New user registered: {username} ({role}). Awaiting approval.", "info")
     return (
         jsonify(
             {

@@ -191,7 +191,15 @@ export const AuthProvider = ({ children }) => {
         .filter(Boolean)
         .map(normalizeRole);
 
-      return normalizedRequired.some((r) => userRoles.includes(r));
+      return normalizedRequired.some((r) =>
+        userRoles.some(
+          (ur) =>
+            ur === r ||
+            (r === "client" && ur.startsWith("client")) ||
+            ((r === "production crew" || r === "crew") &&
+              (ur === "crew" || ur === "production crew" || ur === "department head"))
+        )
+      );
     },
     [user]
   );

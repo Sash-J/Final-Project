@@ -202,3 +202,239 @@ body.light-theme .password-toggle-btn {
 body.light-theme .password-toggle-btn:hover {
   color: #24292f !important;
 }
+
+/* ── Gender Selection Styles ── */
+.register-gender-selector {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.register-gender-btn {
+  flex: 1;
+  min-width: 90px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.register-gender-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.register-gender-btn.active {
+  background: rgba(0, 198, 230, 0.2);
+  border-color: var(--accent-color);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 0 10px rgba(0, 198, 230, 0.3);
+}
+
+body.light-theme .register-gender-btn {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #57606a;
+}
+
+body.light-theme .register-gender-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: #24292f;
+}
+
+body.light-theme .register-gender-btn.active {
+  background: rgba(9, 105, 218, 0.12);
+  border-color: #0969da;
+  color: #0969da;
+  box-shadow: none;
+}
+
+/* ── 3-Tier Filter Styles ── */
+.filter-tier-group {
+  margin-bottom: 20px;
+}
+
+.filter-tier-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 8px;
+}
+
+body.light-theme .filter-tier-label {
+  color: #57606a;
+}
+
+.filter-pills-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filter-pill {
+  flex: 1;
+  min-width: 120px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #eee;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.filter-pill:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.filter-pill.active {
+  background: rgba(0, 198, 230, 0.16);
+  border-color: var(--accent-color);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 0 16px rgba(0, 198, 230, 0.3);
+}
+
+body.light-theme .filter-pill {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #24292f;
+}
+
+body.light-theme .filter-pill:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+body.light-theme .filter-pill.active {
+  background: rgba(9, 105, 218, 0.12);
+  border-color: #0969da;
+  color: #0969da;
+  box-shadow: none;
+}
+
+.filter-skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.filter-skill-pill {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.filter-skill-pill:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.filter-skill-pill.active {
+  background: rgba(0, 198, 230, 0.22);
+  border-color: var(--accent-color);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 0 12px rgba(0, 198, 230, 0.25);
+}
+
+body.light-theme .filter-skill-pill {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #57606a;
+}
+
+body.light-theme .filter-skill-pill:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #24292f;
+}
+
+body.light-theme .filter-skill-pill.active {
+  background: rgba(9, 105, 218, 0.12);
+  border-color: #0969da;
+  color: #0969da;
+  box-shadow: none;
+}
+
+/* ── Role Summary Card ── */
+.role-summary-banner {
+  background: rgba(0, 198, 230, 0.08);
+  border: 1px solid rgba(0, 198, 230, 0.2);
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin-top: 18px;
+  font-size: 0.85rem;
+  color: #e0f2fe;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+body.light-theme .role-summary-banner {
+  background: rgba(9, 105, 218, 0.06);
+  border-color: rgba(9, 105, 218, 0.2);
+  color: #1f2328;
+}
+
+.role-summary-highlight {
+  font-weight: 700;
+  color: var(--accent-color);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+body.light-theme .role-summary-highlight {
+  color: #0969da;
+}
+
+/* ── Button Utilities (strict CSS separation) ── */
+.register-btn-full {
+  width: 100%;
+  padding: 16px;
+}
+
+.register-btn-flex {
+  flex: 1;
+  padding: 16px;
+}
+
+.register-btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.register-status-wrapper {
+  margin-top: 10px;
+  min-height: 40px;
+}

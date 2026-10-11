@@ -334,7 +334,7 @@ const CrewDashboard = () => {
                     >
                       <SuiTimeline
                         projectId={project.id}
-                        userRole="production_crew"
+                        userRole={(user?.roles && user?.roles[0]) || user?.role || "production_crew"}
                         preview={true}
                         updateTrigger={milestoneUpdateTrigger}
                         onClick={() => setSelectedTimelineProject(project)}
@@ -686,7 +686,7 @@ const CrewDashboard = () => {
                   <SuiTimeline
                     projectId={selectedTimelineProject.id}
                     key={selectedTimelineProject._t || "1"}
-                    userRole="production_crew"
+                    userRole={(user?.roles && user?.roles[0]) || user?.role || "production_crew"}
                     updateTrigger={milestoneUpdateTrigger}
                     onMilestonesChange={() =>
                       setMilestoneUpdateTrigger((prev) => prev + 1)

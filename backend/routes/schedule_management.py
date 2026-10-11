@@ -1,7 +1,10 @@
 from flask import Blueprint, jsonify, request, session
 import services.db_operations as db
 from services.database import get_connection
-from core.session_handler import login_required, roles_required, get_current_user_id
+from core.session_handler import (
+    permissions_required,
+    get_current_user_id,
+)
 from routes.notifications_management import notify_project_stakeholders
 
 schedule_bp = Blueprint("schedule_management", __name__)
@@ -169,9 +172,11 @@ def get_task_notes(task_id):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     query = """
-        SELECT n.*, u.username, u.role
+        SELECT n.*, u.username, COALESCE(r.name, u.role) as role
         FROM task_notes n
         JOIN users u ON n.user_id = u.id
+        LEFT JOIN user_roles ur ON u.id = ur.user_id
+        LEFT JOIN roles r ON ur.role_id = r.id
         WHERE n.task_id = %s
         ORDER BY n.created_at ASC
     """
@@ -198,7 +203,7 @@ def insert_task_note(task_id, user_id, note_text):
 
 
 @schedule_bp.route("/api/schedule/tasks", methods=["GET"])
-@login_required
+@permissions_required("schedule.view")
 def schedule_tasks_get():
     year = request.args.get("year", type=int)
     month = request.args.get("month", type=int)
@@ -212,7 +217,7 @@ def schedule_tasks_get():
 
 
 @schedule_bp.route("/api/schedule/tasks", methods=["POST"])
-@roles_required("admin", "manager")
+@permissions_required("schedule.edit")
 def schedule_tasks_post():
     data = request.get_json()
     title = data.get("title", "").strip()
@@ -254,7 +259,7 @@ def schedule_tasks_post():
 
 
 @schedule_bp.route("/api/schedule/tasks/<int:task_id>", methods=["DELETE"])
-@roles_required("admin", "manager")
+@permissions_required("schedule.edit")
 def schedule_task_delete(task_id):
     try:
         delete_schedule_task(task_id)
@@ -264,7 +269,7 @@ def schedule_task_delete(task_id):
 
 
 @schedule_bp.route("/api/schedule/tasks/<int:task_id>", methods=["PUT"])
-@roles_required("admin", "manager")
+@permissions_required("schedule.edit")
 def schedule_task_put(task_id):
     data = request.get_json()
     title = data.get("title", "").strip()
@@ -293,7 +298,7 @@ def schedule_task_put(task_id):
 
 
 @schedule_bp.route("/api/schedule/tasks/<int:task_id>/notes", methods=["GET"])
-@login_required
+@permissions_required("schedule.view")
 def task_notes_get(task_id):
     try:
         notes = get_task_notes(task_id)
@@ -303,7 +308,7 @@ def task_notes_get(task_id):
 
 
 @schedule_bp.route("/api/schedule/tasks/<int:task_id>/notes", methods=["POST"])
-@login_required
+@permissions_required("schedule.view")
 def task_notes_post(task_id):
     data = request.get_json()
     note_text = data.get("note_text", "").strip()
@@ -340,7 +345,7 @@ def task_notes_post(task_id):
 
 
 @schedule_bp.route("/api/schedule/bulk-save", methods=["POST"])
-@roles_required("admin", "manager")
+@permissions_required("schedule.edit")
 def schedule_bulk_save_post():
     data = request.get_json()
     year = data.get("year")

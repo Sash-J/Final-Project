@@ -108,7 +108,6 @@ export const SidebarWidgetAccordion = ({
 export const AddDepartment = ({ phases, onAdded, isExpanded, isSidebarExpanded, onToggle, autoCenterEnabled, onToggleAutoCenter }) => {
   const [name, setName] = useState("");
   const [phaseId, setPhaseId] = useState("2"); // Default to Production
-  const [msg, setMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const phaseOptions = useMemo(() => phases.map((p) => ({ value: p.id, label: p.phase_name })), [phases]);
@@ -117,7 +116,6 @@ export const AddDepartment = ({ phases, onAdded, isExpanded, isSidebarExpanded, 
     e.preventDefault();
     if (isSubmitting) return;
     setIsSubmitting(true);
-    setMsg("");
     try {
       const data = await budgetService.createDepartment({
         department_name: name,
@@ -182,14 +180,12 @@ export const AddDepartment = ({ phases, onAdded, isExpanded, isSidebarExpanded, 
 export const AddCategory = ({ departments, onAdded, onDeptSelect, isExpanded, isSidebarExpanded, onToggle, autoCenterEnabled, onToggleAutoCenter }) => {
   const [name, setName] = useState("");
   const [deptId, setDeptId] = useState("");
-  const [msg, setMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
     setIsSubmitting(true);
-    setMsg("");
     try {
       const data = await budgetService.createCategory({
         category_name: name,
@@ -275,14 +271,12 @@ export const AddBudgetItem = ({
 }) => {
   const [name, setName] = useState("");
   const [catId, setCatId] = useState("");
-  const [msg, setMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
     setIsSubmitting(true);
-    setMsg("");
     try {
       const data = await budgetService.createBudgetItem({
         item_name: name,
@@ -337,10 +331,7 @@ export const AddBudgetItem = ({
         <div className="sidebar-dropdown-container">
           <GlassDropdown
             placeholder="— Select Category —"
-            options={categories.map((c) => ({
-              value: c.id,
-              label: `${c.category_name} (${c.department_name})`,
-            }))}
+            options={catOptions}
             value={catId}
             onChange={handleCatChange}
           />

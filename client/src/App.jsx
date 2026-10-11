@@ -81,7 +81,7 @@ const router = createBrowserRouter([
       {
         path: "crew-dashboard",
         element: (
-          <ProtectedRoute roles={["production_crew"]}>
+          <ProtectedRoute roles={["production_crew", "production crew", "crew", "department head"]}>
             <CrewDashboard />
           </ProtectedRoute>
         ),
@@ -89,7 +89,7 @@ const router = createBrowserRouter([
       {
         path: "admin-budget",
         element: (
-          <ProtectedRoute roles={["admin", "manager", "director", "accountant"]}>
+          <ProtectedRoute permissions={["budget.view"]}>
             <AdminBudget />
           </ProtectedRoute>
         ),
@@ -97,7 +97,7 @@ const router = createBrowserRouter([
       {
         path: "admin",
         element: (
-          <ProtectedRoute roles={["admin", "manager", "director", "accountant"]}>
+          <ProtectedRoute permissions={["project.view"]}>
             <AdminDashboard />
           </ProtectedRoute>
         ),
@@ -105,7 +105,7 @@ const router = createBrowserRouter([
       {
         path: "admin/projects/:projectId",
         element: (
-          <ProtectedRoute roles={["admin", "manager", "director", "accountant"]}>
+          <ProtectedRoute permissions={["project.view"]}>
             <ProjectDetailDashboard />
           </ProtectedRoute>
         ),
@@ -113,7 +113,7 @@ const router = createBrowserRouter([
       {
         path: "users",
         element: (
-          <ProtectedRoute roles={["admin"]}>
+          <ProtectedRoute permissions={["user.view"]}>
             <UserManagement />
           </ProtectedRoute>
         ),
@@ -121,9 +121,7 @@ const router = createBrowserRouter([
       {
         path: "schedule",
         element: (
-          <ProtectedRoute
-            roles={["admin", "manager", "director", "accountant", "coordinator", "production_crew", "production crew", "client"]}
-          >
+          <ProtectedRoute permissions={["schedule.view"]}>
             <Schedule />
           </ProtectedRoute>
         ),
@@ -131,7 +129,7 @@ const router = createBrowserRouter([
       {
         path: "finance",
         element: (
-          <ProtectedRoute roles={["admin", "manager", "director", "accountant"]}>
+          <ProtectedRoute permissions={["finance.view"]}>
             <FinancialDashboard />
           </ProtectedRoute>
         ),

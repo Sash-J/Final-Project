@@ -32,13 +32,13 @@ const LoginPage = () => {
       .filter(Boolean)
       .map((r) => String(r).trim().toLowerCase().replace(/_/g, " "));
 
-    if (userRoles.some((r) => ["admin", "manager", "director", "accountant"].includes(r))) {
+    if (userRoles.some((r) => ["admin", "manager", "director", "accountant", "coordinator", "viewer"].includes(r))) {
       return "/admin";
     }
-    if (userRoles.some((r) => ["production crew", "production_crew"].includes(r))) {
+    if (userRoles.some((r) => ["production crew", "production_crew", "crew", "department head"].includes(r))) {
       return "/crew-dashboard";
     }
-    if (userRoles.includes("client")) {
+    if (userRoles.some((r) => r.startsWith("client"))) {
       return "/dashboard";
     }
     return "/";

@@ -35,114 +35,166 @@ def run_rbac_migration():
             user_id INT NOT NULL,
             role_id INT NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY uq_user_role (user_id, role_id),
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
             FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
         )
         """)
         conn.commit()
 
-        # 2. Seed standard roles
-        standard_roles = [
-            "Admin",
-            "Director",
-            "Manager",
-            "Accountant",
-            "Coordinator",
-            "Viewer",
-            "Client",
-            "Production Crew",
-        ]
-        cursor.executemany("INSERT IGNORE INTO roles (name) VALUES (%s)", [(r,) for r in standard_roles])
+        # 1b. Ensure users table has gender, skill, verified_level columns
+        cursor.execute("DESCRIBE users")
+        user_cols = {c["Field"] for c in cursor.fetchall()}
+        if "gender" not in user_cols:
+            cursor.execute("ALTER TABLE users ADD COLUMN gender VARCHAR(20) DEFAULT NULL")
+        if "skill" not in user_cols:
+            cursor.execute("ALTER TABLE users ADD COLUMN skill VARCHAR(100) DEFAULT NULL")
+        if "verified_level" not in user_cols:
+            cursor.execute("ALTER TABLE users ADD COLUMN verified_level VARCHAR(50) DEFAULT NULL")
         conn.commit()
 
-        # 3. Seed standard permissions
-        standard_permissions = [
-            "user.view",
-            "user.approve",
-            "user.reject",
-            "user.edit",
-            "employee.delete",
-            "project.view",
-            "project.create",
-            "project.edit",
-            "project.delete",
-            "budget.view",
-            "budget.edit",
-            "budget.publish",
-            "production.view",
-            "production.edit",
-            "schedule.view",
-            "schedule.edit",
-            "finance.view",
-            "finance.edit",
-        ]
-        cursor.executemany("INSERT IGNORE INTO permissions (name) VALUES (%s)", [(p,) for p in standard_permissions])
-        conn.commit()
+        # 2. Seed standard roles if table is empty
+        cursor.execute("SELECT COUNT(*) AS cnt FROM roles")
+        role_count = cursor.fetchone()["cnt"]
+        if role_count == 0:
+            standard_roles = [
+                "Admin",
+                "Director",
+                "Manager",
+                "Accountant",
+                "Coordinator",
+                "Viewer",
+                "Department Head",
+                "Crew",
+                "Production Crew",
+                "Client (Full Access)",
+                "Client (Half Access)",
+                "Client",
+            ]
+            cursor.executemany("INSERT IGNORE INTO roles (name) VALUES (%s)", [(r,) for r in standard_roles])
+            conn.commit()
 
-        # 4. Fetch all roles and permissions maps
+        # 3. Check if permissions table is already populated.
+        # If records exist, the database is the absolute single source of truth.
+        # We NEVER re-seed permissions or overwrite role-permission mappings from code!
+        cursor.execute("SELECT COUNT(*) AS cnt FROM permissions")
+        perm_count = cursor.fetchone()["cnt"]
+
+        if perm_count == 0:
+            print("RBAC: Database permissions table is empty. Performing initial bootstrap seed...")
+            standard_permissions = [
+                "user.view",
+                "user.approve",
+                "user.reject",
+                "user.edit",
+                "employee.delete",
+                "project.view",
+                "project.create",
+                "project.edit",
+                "project.delete",
+                "budget.view",
+                "budget.edit",
+                "budget.publish",
+                "production.view",
+                "production.edit",
+                "schedule.view",
+                "schedule.edit",
+                "finance.view",
+                "finance.edit",
+            ]
+            cursor.executemany("INSERT IGNORE INTO permissions (name) VALUES (%s)", [(p,) for p in standard_permissions])
+            conn.commit()
+
+            # Fetch roles and permissions maps for initial mapping
+            cursor.execute("SELECT id, name FROM roles")
+            role_map = {r["name"].lower(): r["id"] for r in cursor.fetchall()}
+            cursor.execute("SELECT id, name FROM permissions")
+            perm_map = {p["name"]: p["id"] for p in cursor.fetchall()}
+
+            # Initial role-permission assignments per project specification matrix
+            role_permission_mappings = {
+                "admin": standard_permissions,
+                "director": [
+                    "user.view", "user.approve", "user.reject", "user.edit",
+                    "project.view", "project.edit", "budget.view", "production.view",
+                    "production.edit", "schedule.view", "schedule.edit", "finance.view"
+                ],
+                "manager": [
+                    "user.view", "project.view", "project.create", "project.edit",
+                    "budget.view", "budget.edit", "production.view", "production.edit",
+                    "schedule.view", "schedule.edit", "finance.view"
+                ],
+                "accountant": [
+                    "project.view", "budget.view", "budget.edit", "finance.view", "finance.edit",
+                    "schedule.view", "user.view", "production.view"
+                ],
+                "coordinator": [
+                    "project.view", "budget.view", "schedule.view", "schedule.edit",
+                    "production.view", "finance.view", "user.view"
+                ],
+                "viewer": [
+                    "project.view", "budget.view", "schedule.view", "production.view", "user.view"
+                ],
+                "department head": [
+                    "project.view", "production.view", "production.edit", "schedule.view", "budget.view"
+                ],
+                "crew": [
+                    "project.view", "production.view", "schedule.view", "budget.view"
+                ],
+                "production crew": [
+                    "project.view", "production.view", "production.edit", "schedule.view", "budget.view"
+                ],
+                "client (full access)": [
+                    "project.view", "budget.view", "schedule.view", "production.view"
+                ],
+                "client (half access)": [
+                    "project.view", "budget.view", "schedule.view", "production.view"
+                ],
+                "client": [
+                    "project.view", "budget.view", "schedule.view", "production.view"
+                ],
+            }
+
+            cursor.execute("SELECT role_id, permission_id FROM role_permissions")
+            existing_rp = {(row["role_id"], row["permission_id"]) for row in cursor.fetchall()}
+
+            to_insert_rp = []
+            for r_name, p_names in role_permission_mappings.items():
+                r_id = role_map.get(r_name)
+                if not r_id:
+                    continue
+                for p_name in p_names:
+                    p_id = perm_map.get(p_name)
+                    if p_id and (r_id, p_id) not in existing_rp:
+                        to_insert_rp.append((r_id, p_id))
+
+            if to_insert_rp:
+                cursor.executemany(
+                    "INSERT INTO role_permissions (role_id, permission_id) VALUES (%s, %s)",
+                    to_insert_rp,
+                )
+                conn.commit()
+            print("RBAC: Initial bootstrap seed complete.")
+        else:
+            print(f"RBAC: {perm_count} permissions exist in DB. Database is the sole source of truth (code seeding bypassed).")
+
+        # Fetch role_map for step 6 user migration
         cursor.execute("SELECT id, name FROM roles")
         role_map = {r["name"].lower(): r["id"] for r in cursor.fetchall()}
-        cursor.execute("SELECT id, name FROM permissions")
-        perm_map = {p["name"]: p["id"] for p in cursor.fetchall()}
-
-        # 5. Role-Permission assignments
-        role_permission_mappings = {
-            "admin": standard_permissions,
-            "manager": [
-                "user.view", "project.view", "project.create", "project.edit",
-                "budget.view", "budget.edit", "production.view", "production.edit",
-                "schedule.view", "schedule.edit", "finance.view"
-            ],
-            "director": [
-                "user.view", "project.view", "budget.view", "production.view",
-                "schedule.view", "finance.view"
-            ],
-            "accountant": [
-                "project.view", "budget.view", "budget.edit", "finance.view", "finance.edit"
-            ],
-            "production crew": [
-                "production.view", "production.edit", "schedule.view"
-            ],
-            "client": [
-                "project.view", "budget.view", "schedule.view"
-            ],
-            "coordinator": [
-                "project.view", "production.view", "schedule.view", "schedule.edit"
-            ],
-            "viewer": [
-                "project.view", "schedule.view"
-            ],
-        }
-
-        cursor.execute("SELECT role_id, permission_id FROM role_permissions")
-        existing_rp = {(row["role_id"], row["permission_id"]) for row in cursor.fetchall()}
-
-        to_insert_rp = []
-        for r_name, p_names in role_permission_mappings.items():
-            r_id = role_map.get(r_name)
-            if not r_id:
-                continue
-            for p_name in p_names:
-                p_id = perm_map.get(p_name)
-                if p_id and (r_id, p_id) not in existing_rp:
-                    to_insert_rp.append((r_id, p_id))
-
-        if to_insert_rp:
-            cursor.executemany(
-                "INSERT INTO role_permissions (role_id, permission_id) VALUES (%s, %s)",
-                to_insert_rp,
-            )
-            conn.commit()
 
         # 6. Migrate existing users from users.role to user_roles
         cursor.execute("SELECT user_id, role_id FROM user_roles")
-        existing_ur = {(row["user_id"], row["role_id"]) for row in cursor.fetchall()}
+        existing_ur_rows = cursor.fetchall()
+        existing_ur = {(row["user_id"], row["role_id"]) for row in existing_ur_rows}
+        users_with_roles = {row["user_id"] for row in existing_ur_rows}
 
         cursor.execute("SELECT id, role FROM users WHERE role IS NOT NULL AND role != ''")
         users_list = cursor.fetchall()
         to_insert_ur = []
         for u in users_list:
             u_id = u["id"]
+            if u_id in users_with_roles:
+                continue
             u_role = u["role"].strip().lower()
             if u_role == "production_crew":
                 u_role = "production crew"
@@ -153,7 +205,7 @@ def run_rbac_migration():
 
         if to_insert_ur:
             cursor.executemany(
-                "INSERT INTO user_roles (user_id, role_id) VALUES (%s, %s)",
+                "INSERT IGNORE INTO user_roles (user_id, role_id) VALUES (%s, %s)",
                 to_insert_ur,
             )
             conn.commit()
@@ -1914,8 +1966,9 @@ def get_budget_full_data(project_id, version_id=None, user_id=None, role=None):
     # 4: Breakdowns
     breakdowns = next(results).fetchall()
     
-    # Filter for production_crew
-    if role == "production_crew" and user_id:
+    # Filter for production_crew / crew / department head
+    r_norm = str(role or "").strip().lower().replace("_", " ")
+    if r_norm in ("production crew", "crew", "department head") and user_id:
         cursor.execute("SELECT department_id FROM department_crew_assignments WHERE project_id = %s AND user_id = %s", (project_id, user_id))
         assigned_depts = {row["department_id"] for row in cursor.fetchall()}
 

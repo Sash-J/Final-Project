@@ -8,11 +8,11 @@ import services.db_operations as db
 import services.auth_operations as auth
 from core.session_handler import (
     login_required,
-    roles_required,
+    permissions_required,
     get_current_user_id,
     get_current_user_role,
+    has_role,
 )
-import os
 
 budget_bp = Blueprint("budget_management", __name__)
 
@@ -25,7 +25,7 @@ def departments_get():
 
 
 @budget_bp.route("/api/departments", methods=["POST"])
-@roles_required("admin", "manager")
+@permissions_required("budget.edit")
 def departments_post():
     data = request.get_json()
     department_name = data.get("department_name", "").strip()
@@ -37,7 +37,7 @@ def departments_post():
 
 
 @budget_bp.route("/api/departments/reorder", methods=["POST"])
-@roles_required("admin", "manager")
+@permissions_required("budget.edit")
 def departments_reorder():
     data = request.get_json()
     ordered_ids = data.get("ordered_ids", [])
@@ -64,7 +64,7 @@ def categories_get():
 
 
 @budget_bp.route("/api/categories", methods=["POST"])
-@roles_required("admin", "manager")
+@permissions_required("budget.edit")
 def categories_post():
     data = request.get_json()
     category_name = data.get("category_name", "").strip()
@@ -76,7 +76,7 @@ def categories_post():
 
 
 @budget_bp.route("/api/categories/reorder", methods=["POST"])
-@roles_required("admin", "manager")
+@permissions_required("budget.edit")
 def categories_reorder():
     data = request.get_json()
     ordered_ids = data.get("ordered_ids", [])
@@ -97,7 +97,7 @@ def budget_items_get():
 
 
 @budget_bp.route("/api/budget-items", methods=["POST"])
-@roles_required("admin", "manager")
+@permissions_required("budget.edit")
 def budget_items_post():
     data = request.get_json()
     item_name = data.get("item_name", "").strip()
@@ -109,7 +109,7 @@ def budget_items_post():
 
 
 @budget_bp.route("/api/budget-items/reorder", methods=["POST"])
-@roles_required("admin", "manager")
+@permissions_required("budget.edit")
 def budget_items_reorder():
     data = request.get_json()
     ordered_ids = data.get("ordered_ids", [])
@@ -130,7 +130,7 @@ def budget_values_get():
 
 
 @budget_bp.route("/api/budget-values", methods=["POST"])
-@roles_required("admin", "manager")
+@permissions_required("budget.edit")
 def budget_values_post():
     data = request.get_json()
     project_id = data.get("project_id")
@@ -145,7 +145,7 @@ def budget_values_post():
 
 
 @budget_bp.route("/api/budget-values/project/<int:project_id>", methods=["GET"])
-@login_required
+@permissions_required("budget.view", "production.view")
 def budget_values_for_project(project_id):
     version_id = request.args.get("version_id")
     if version_id:
@@ -154,10 +154,9 @@ def budget_values_for_project(project_id):
         except ValueError:
             version_id = None
 
-    role = get_current_user_role()
-    if role in ["production_crew", "client"]:
+    if has_role("production crew", "crew", "client"):
         versions = db.get_budget_versions(project_id)
-        if role == "production_crew":
+        if has_role("production crew", "crew"):
             allowed_ids = [v["id"] for v in versions if v.get("published_to_crew") == 1]
         else:
             allowed_ids = [v["id"] for v in versions if v.get("published_to_client") == 1]
@@ -174,7 +173,7 @@ def budget_values_for_project(project_id):
 
 
 @budget_bp.route("/api/budget-values/batch", methods=["POST"])
-@roles_required("admin", "manager")
+@permissions_required("budget.edit")
 def budget_values_batch():
     data = request.get_json()
     project_id = data.get("project_id")
@@ -206,7 +205,7 @@ def budget_values_batch():
 
 
 @budget_bp.route("/api/budget-values/breakdown", methods=["GET"])
-@login_required
+@permissions_required("budget.view")
 def budget_item_breakdown_get():
     project_id = request.args.get("project_id")
     version_id = request.args.get("version_id")
@@ -228,7 +227,7 @@ def budget_item_breakdown_get():
 
 
 @budget_bp.route("/api/budget-values/breakdown", methods=["POST"])
-@roles_required("admin", "manager")
+@permissions_required("budget.edit")
 def budget_item_breakdown_post():
     data = request.get_json()
     project_id = data.get("project_id")
@@ -253,7 +252,7 @@ def budget_item_breakdown_post():
 
 # Budget Versions
 @budget_bp.route("/api/projects/<int:project_id>/budget-versions", methods=["POST"])
-@roles_required("admin", "manager")
+@permissions_required("budget.edit")
 def budget_versions_post(project_id):
     data = request.get_json()
     source_version_id = data.get("source_version_id")
@@ -271,14 +270,13 @@ def budget_versions_post(project_id):
 
 
 @budget_bp.route("/api/projects/<int:project_id>/budget-versions", methods=["GET"])
-@login_required
+@permissions_required("budget.view", "production.view")
 def budget_versions_get(project_id):
     try:
         versions = db.get_budget_versions(project_id)
-        role = get_current_user_role()
-        if role == "production_crew":
+        if has_role("production crew", "crew"):
             versions = [v for v in versions if v.get("published_to_crew") == 1]
-        elif role == "client":
+        elif has_role("client"):
             versions = [v for v in versions if v.get("published_to_client") == 1]
         return jsonify(versions), 200
     except Exception as e:
@@ -289,7 +287,7 @@ def budget_versions_get(project_id):
 
 
 @budget_bp.route("/api/budget-versions/<int:version_id>", methods=["DELETE"])
-@roles_required("admin", "manager")
+@permissions_required("budget.edit")
 def budget_version_delete(version_id):
     try:
         db.delete_budget_version(version_id)
@@ -299,7 +297,7 @@ def budget_version_delete(version_id):
 
 
 @budget_bp.route("/api/budget-versions/<int:version_id>/publish", methods=["PUT"])
-@roles_required("admin", "manager")
+@permissions_required("budget.publish")
 def budget_version_publish(version_id):
     try:
         data = request.get_json() or {}
@@ -319,14 +317,13 @@ def hierarchy_get():
 
 # Client Dashboard
 @budget_bp.route("/api/client/dashboard", methods=["GET"])
-@roles_required("client", "manager", "admin", "production_crew")
+@login_required
 def client_dashboard_get():
     user_id = get_current_user_id()
-    role = get_current_user_role()
     if not user_id:
         return jsonify({"error": "Unauthorized"}), 401
 
-    if role == "production_crew":
+    if has_role("production crew", "crew"):
         projects = auth.get_crew_projects(user_id)
     else:
         projects = auth.get_client_projects(user_id)
@@ -340,7 +337,7 @@ def client_dashboard_get():
 
 # Payments
 @budget_bp.route("/api/admin/payments", methods=["POST"])
-@roles_required("admin", "manager")
+@permissions_required("finance.edit")
 def payments_post():
     data = request.get_json()
     project_id = data.get("project_id")
@@ -372,7 +369,7 @@ def payments_post():
 
 
 @budget_bp.route("/api/admin/finance/summary", methods=["GET"])
-@roles_required("admin", "manager")
+@permissions_required("finance.view")
 def finance_summary_get():
     try:
         summary = db.get_admin_financial_summary()
@@ -382,7 +379,7 @@ def finance_summary_get():
 
 
 @budget_bp.route("/api/admin/finance/projects", methods=["GET"])
-@roles_required("admin", "manager")
+@permissions_required("finance.view")
 def finance_projects_get():
     try:
         projects = db.get_all_projects_financials()
@@ -392,7 +389,7 @@ def finance_projects_get():
 
 
 @budget_bp.route("/api/projects/<int:project_id>/department-crew", methods=["GET"])
-@login_required
+@permissions_required("budget.view", "production.view")
 def get_project_department_crew_endpoint(project_id):
     try:
         return jsonify(db.get_project_department_crew(project_id)), 200
@@ -401,7 +398,7 @@ def get_project_department_crew_endpoint(project_id):
 
 
 @budget_bp.route("/api/projects/<int:project_id>/departments/<int:dept_id>/assign-crew", methods=["POST"])
-@roles_required("admin", "manager")
+@permissions_required("budget.edit", "production.edit")
 def assign_project_department_crew_endpoint(project_id, dept_id):
     try:
         data = request.get_json() or {}
@@ -413,7 +410,7 @@ def assign_project_department_crew_endpoint(project_id, dept_id):
 
 
 @budget_bp.route("/api/projects/<int:project_id>/category-crew", methods=["GET"])
-@login_required
+@permissions_required("budget.view", "production.view")
 def get_project_category_crew_endpoint(project_id):
     try:
         return jsonify(db.get_project_category_crew(project_id)), 200
@@ -422,7 +419,7 @@ def get_project_category_crew_endpoint(project_id):
 
 
 @budget_bp.route("/api/projects/<int:project_id>/categories/<int:cat_id>/assign-crew", methods=["POST"])
-@roles_required("admin", "manager")
+@permissions_required("budget.edit", "production.edit")
 def assign_project_category_crew_endpoint(project_id, cat_id):
     try:
         data = request.get_json() or {}
@@ -434,7 +431,7 @@ def assign_project_category_crew_endpoint(project_id, cat_id):
 
 
 @budget_bp.route("/api/projects/<int:project_id>/budget-item-crew", methods=["GET"])
-@login_required
+@permissions_required("budget.view", "production.view")
 def get_project_budget_item_crew_endpoint(project_id):
     try:
         return jsonify(db.get_project_budget_item_crew(project_id)), 200
@@ -443,7 +440,7 @@ def get_project_budget_item_crew_endpoint(project_id):
 
 
 @budget_bp.route("/api/projects/<int:project_id>/budget-items/<int:item_id>/assign-crew", methods=["POST"])
-@roles_required("admin", "manager")
+@permissions_required("budget.edit", "production.edit")
 def assign_project_budget_item_crew_endpoint(project_id, item_id):
     try:
         data = request.get_json() or {}
@@ -466,7 +463,7 @@ def convert_decimals(obj):
     return obj
 
 @budget_bp.route("/api/projects/<int:project_id>/budget-init", methods=["GET"])
-@login_required
+@permissions_required("budget.view")
 def get_budget_init_endpoint(project_id):
     try:
         data = db.get_budget_crew_init(project_id)
@@ -475,7 +472,7 @@ def get_budget_init_endpoint(project_id):
         return jsonify({"error": str(e)}), 500
 
 @budget_bp.route("/api/projects/<int:project_id>/budget-full", methods=["GET"])
-@roles_required("admin", "manager", "client", "production_crew")
+@permissions_required("budget.view", "production.view")
 def get_budget_full(project_id):
     version_id = request.args.get("version_id")
     if version_id in ["null", "undefined", ""]:

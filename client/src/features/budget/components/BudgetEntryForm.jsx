@@ -1,5 +1,4 @@
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
-import html2pdf from "html2pdf.js/dist/html2pdf.bundle.min.js";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { budgetService } from "../../../services/budgetService";

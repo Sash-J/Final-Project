@@ -6,10 +6,17 @@ import "./UserManagement.css";
 
 
 import { userService } from "../../../services/userService";
+import { useAuth } from "../../auth/context/AuthContext";
 
 import toast from "react-hot-toast";
 
 const UserManagement = () => {
+  const { hasPermission } = useAuth();
+  const canApprove = hasPermission("user.approve");
+  const canReject = hasPermission("user.reject");
+  const canEdit = hasPermission("user.edit");
+  const canDelete = hasPermission("employee.delete");
+
   const [pendingUsers, setPendingUsers] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
   const [availableRoles, setAvailableRoles] = useState([]);
@@ -66,12 +73,16 @@ const UserManagement = () => {
           }))
       : [
           { value: "Client", label: "CLIENT" },
+          { value: "Client (Full Access)", label: "CLIENT (FULL ACCESS)" },
+          { value: "Client (Half Access)", label: "CLIENT (HALF ACCESS)" },
           { value: "Manager", label: "MANAGER" },
-          { value: "Production Crew", label: "PRODUCTION CREW" },
           { value: "Director", label: "DIRECTOR" },
           { value: "Accountant", label: "ACCOUNTANT" },
           { value: "Coordinator", label: "COORDINATOR" },
           { value: "Viewer", label: "VIEWER" },
+          { value: "Department Head", label: "DEPARTMENT HEAD" },
+          { value: "Crew", label: "CREW" },
+          { value: "Production Crew", label: "PRODUCTION CREW" },
         ]
   );
 
@@ -176,29 +187,41 @@ const UserManagement = () => {
                       <tr key={u.id}>
                         <td>{u.username}</td>
                         <td>
-                          <GlassDropdown
-                            className="um-role-dropdown"
-                            modifiers="sm fluid"
-                            options={roleOptions}
-                            value={selectedVal}
-                            onChange={(val) => handlePendingRoleChange(u.id, val)}
-                          />
+                          {canEdit ? (
+                            <GlassDropdown
+                              className="um-role-dropdown"
+                              modifiers="sm fluid"
+                              options={roleOptions}
+                              value={selectedVal}
+                              onChange={(val) => handlePendingRoleChange(u.id, val)}
+                            />
+                          ) : (
+                            <span className="role-badge">{selectedVal}</span>
+                          )}
                         </td>
                         <td>
-                          <div className="um-action-btns">
-                            <button
-                              className="approve-btn"
-                              onClick={() => approveUser(u.id, u.username)}
-                            >
-                              Approve
-                            </button>
-                            <button
-                              className="reject-btn"
-                              onClick={() => rejectUser(u.id, u.username)}
-                            >
-                              Reject
-                            </button>
-                          </div>
+                          {canApprove || canReject ? (
+                            <div className="um-action-btns">
+                              {canApprove && (
+                                <button
+                                  className="approve-btn"
+                                  onClick={() => approveUser(u.id, u.username)}
+                                >
+                                  Approve
+                                </button>
+                              )}
+                              {canReject && (
+                                <button
+                                  className="reject-btn"
+                                  onClick={() => rejectUser(u.id, u.username)}
+                                >
+                                  Reject
+                                </button>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="pending-status-text">Pending Admin Approval</span>
+                          )}
                         </td>
                       </tr>
                     );
@@ -251,7 +274,7 @@ const UserManagement = () => {
                         <td>
                           {isAdmin ? (
                             <span className="role-badge admin">ADMIN</span>
-                          ) : (
+                          ) : canEdit ? (
                             <GlassDropdown
                               className="um-role-dropdown"
                               modifiers="sm fluid"
@@ -261,6 +284,8 @@ const UserManagement = () => {
                                 handleRoleChange(u.id, val, u.username)
                               }
                             />
+                          ) : (
+                            <span className="role-badge">{primaryRole}</span>
                           )}
                         </td>
                         <td>
@@ -271,10 +296,11 @@ const UserManagement = () => {
                           </span>
                         </td>
                         <td>
-                          {!isAdmin && (
+                          {!isAdmin && canDelete && (
                             <button
                               className="reject-btn delete-acc-btn"
                               onClick={() => deleteUser(u.id, u.username)}
+                              title="Delete User"
                             >
                               <span className="material-symbols-outlined">
                                 delete

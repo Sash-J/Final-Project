@@ -40,7 +40,17 @@ def roles_required(*roles):
 
             norm_user_roles = {_normalize_role(r) for r in user_roles}
 
-            if not (norm_required & norm_user_roles):
+            matched = bool(norm_required & norm_user_roles)
+            if not matched:
+                for r in norm_required:
+                    if r == "client" and any(u.startswith("client") for u in norm_user_roles):
+                        matched = True
+                        break
+                    if r in ("crew", "production crew") and any(u in ("crew", "production crew", "department head") for u in norm_user_roles):
+                        matched = True
+                        break
+
+            if not matched:
                 return jsonify({"error": "Unauthorized"}), 403
             return f(*args, **kwargs)
 
@@ -52,6 +62,8 @@ def roles_required(*roles):
 # Check permission decorator
 def permissions_required(*permissions):
     """Requires the user to have at least one of the specified DB permissions."""
+    norm_required = {p.strip().lower() for p in permissions}
+
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
@@ -66,8 +78,8 @@ def permissions_required(*permissions):
             if "admin" in user_roles or _normalize_role(session.get("user_role")) == "admin":
                 return f(*args, **kwargs)
 
-            user_permissions = set(session.get("user_permissions") or [])
-            if not any(p in user_permissions for p in permissions):
+            user_permissions = {p.strip().lower() for p in (session.get("user_permissions") or [])}
+            if not (norm_required & user_permissions):
                 return jsonify({"error": "Forbidden: missing required permission"}), 403
             return f(*args, **kwargs)
 
@@ -134,7 +146,16 @@ def has_role(*roles):
     if session.get("user_role"):
         user_roles.append(session.get("user_role"))
     norm_user = {_normalize_role(r) for r in user_roles}
-    return bool(norm_required & norm_user)
+    if norm_required & norm_user:
+        return True
+
+    for r in norm_required:
+        if r == "client" and any(u.startswith("client") for u in norm_user):
+            return True
+        if r in ("crew", "production crew") and any(u in ("crew", "production crew", "department head") for u in norm_user):
+            return True
+
+    return False
 
 
 def has_permission(*permissions):
@@ -144,8 +165,9 @@ def has_permission(*permissions):
     user_roles = [_normalize_role(r) for r in (session.get("user_roles") or [])]
     if "admin" in user_roles or _normalize_role(session.get("user_role")) == "admin":
         return True
-    user_permissions = set(session.get("user_permissions") or [])
-    return any(p in user_permissions for p in permissions)
+    user_permissions = {p.strip().lower() for p in (session.get("user_permissions") or [])}
+    norm_required = {p.strip().lower() for p in permissions}
+    return bool(norm_required & user_permissions)
 
 
 def get_current_user_data():

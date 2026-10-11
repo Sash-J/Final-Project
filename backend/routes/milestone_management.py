@@ -1,11 +1,13 @@
-from flask import Blueprint, jsonify, request, session
+from flask import Blueprint, jsonify, request
 from services.database import get_connection
-from core.session_handler import login_required, roles_required, get_current_user_id
+from core.session_handler import (
+    login_required,
+    get_current_user_id,
+    has_role,
+)
 from routes.notifications_management import (
-    create_notification,
     notify_project_stakeholders,
 )
-import services.auth_operations as auth
 import services.db_operations as db
 
 milestone_bp = Blueprint("milestone_management", __name__)
@@ -142,15 +144,15 @@ def create_milestone(project_id):
     if not title or not target_date:
         return jsonify({"error": "title and target_date are required"}), 400
 
-    user_role = session.get("user_role")
+    is_admin_or_manager = has_role("admin", "manager")
     raw_ivd = data.get("is_visiondivision")
     try:
         if raw_ivd is not None and str(raw_ivd).strip() != "":
             is_visiondivision = int(raw_ivd)
         else:
-            is_visiondivision = 1 if user_role in ["admin", "manager"] else 0
+            is_visiondivision = 1 if is_admin_or_manager else 0
     except (ValueError, TypeError):
-        is_visiondivision = 1 if user_role in ["admin", "manager"] else 0
+        is_visiondivision = 1 if is_admin_or_manager else 0
 
     try:
         new_id = insert_milestone(
@@ -179,7 +181,7 @@ def create_milestone(project_id):
 @milestone_bp.route("/api/milestones/<int:milestone_id>", methods=["PUT"])
 @login_required
 def edit_milestone(milestone_id):
-    if session.get("user_role") == "production_crew":
+    if has_role("production crew", "crew"):
         return jsonify({"error": "Production crew cannot edit milestones"}), 403
     data = request.get_json()
     status = data.get("status")
@@ -200,12 +202,11 @@ def edit_milestone(milestone_id):
         except (ValueError, TypeError):
             is_visiondivision = None
 
-    user_role = session.get("user_role")
     milestone = get_milestone_by_id(milestone_id)
     if not milestone:
         return jsonify({"error": "Milestone not found"}), 404
 
-    if user_role == "client" and milestone.get("is_visiondivision"):
+    if has_role("client") and milestone.get("is_visiondivision"):
         if title is not None or description is not None or target_date is not None:
             return (
                 jsonify(
@@ -251,16 +252,14 @@ def edit_milestone(milestone_id):
 @milestone_bp.route("/api/milestones/<int:milestone_id>", methods=["DELETE"])
 @login_required
 def remove_milestone(milestone_id):
-    user_role = session.get("user_role")
+    if has_role("client"):
+        return jsonify({"error": "Clients cannot delete milestones"}), 403
+    if has_role("production crew", "crew"):
+        return jsonify({"error": "Production crew cannot delete milestones"}), 403
+
     milestone = get_milestone_by_id(milestone_id)
     if not milestone:
         return jsonify({"error": "Milestone not found"}), 404
-
-    if user_role == "client" and milestone.get("is_visiondivision"):
-        return (
-            jsonify({"error": "Clients cannot delete VisionDivision milestones"}),
-            403,
-        )
 
     try:
         delete_milestone(milestone_id)
