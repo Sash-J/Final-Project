@@ -1,0 +1,216 @@
+/* UserRoleDonutWidget.css - Role Demographics Composite Bento Card */
+
+.donut-composite-wrapper {
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* Lead Avatar Accent */
+.donut-lead-avatar {
+  color: #a855f7 !important;
+  background: rgba(168, 85, 247, 0.12) !important;
+}
+
+/* Selector Icon Accent */
+.donut-selector-icon {
+  background: rgba(168, 85, 247, 0.15) !important;
+  color: #a855f7 !important;
+}
+
+/* Donut Composite Body */
+.donut-composite-body {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-sizing: border-box;
+  padding: 0 4px;
+}
+
+/* SVG Donut Graphic */
+.donut-svg-wrapper {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  min-width: 110px;
+  min-height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.donut-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.donut-track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.05);
+  stroke-width: 11;
+}
+
+.donut-slice {
+  fill: none;
+  stroke-width: 11;
+  stroke-linecap: round;
+  transition:
+    stroke-dasharray 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.slice-internal {
+  stroke: #a855f7;
+}
+
+.slice-crew {
+  stroke: #10b981;
+}
+
+.slice-clients {
+  stroke: #06b6d4;
+}
+
+.donut-center-info {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.donut-center-number {
+  pointer-events: auto;
+  cursor: default;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+}
+
+.donut-center-label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+/* Legend Stack */
+.donut-legend-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 145px;
+}
+
+.donut-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
+}
+
+.donut-legend-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.legend-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot-internal {
+  background: #a855f7;
+}
+
+.dot-crew {
+  background: #10b981;
+}
+
+.dot-clients {
+  background: #06b6d4;
+}
+
+.legend-text-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.legend-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #f3f4f6;
+  line-height: 1.2;
+}
+
+.legend-count {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.legend-percentage {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* Light Theme Overrides */
+body.light-theme .donut-lead-avatar {
+  background: rgba(168, 85, 247, 0.1) !important;
+  color: #8b5cf6 !important;
+}
+
+body.light-theme .donut-selector-icon {
+  background: rgba(168, 85, 247, 0.1) !important;
+  color: #8b5cf6 !important;
+}
+
+body.light-theme .donut-track {
+  stroke: rgba(0, 0, 0, 0.06);
+}
+
+body.light-theme .donut-center-number {
+  color: #24292f;
+}
+
+body.light-theme .donut-center-label {
+  color: #57606a;
+}
+
+body.light-theme .donut-legend-item {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+body.light-theme .donut-legend-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+body.light-theme .legend-name {
+  color: #24292f;
+}
+
+body.light-theme .legend-count {
+  color: #57606a;
+}
+
+body.light-theme .legend-percentage {
+  color: #24292f;
+}

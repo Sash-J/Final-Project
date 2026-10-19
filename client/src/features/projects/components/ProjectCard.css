@@ -149,6 +149,51 @@
   cursor: pointer;
 }
 
+.project-card-client-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.project-card-client-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.project-card-client-name {
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: -0.2px;
+}
+
+.project-card-client-badge {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.project-card-client-separator {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.9rem;
+  margin-right: 2px;
+}
+
+.compact-header-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.compact-client-badge {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
 .project-card-client {
   margin: 0;
   color: #fff;
@@ -314,6 +359,14 @@ body.light-theme .project-card-title {
 
 body.light-theme .project-card-client {
   color: #24292f;
+}
+
+body.light-theme .project-card-client-name {
+  color: #24292f;
+}
+
+body.light-theme .project-card-client-separator {
+  color: #8c959f;
 }
 
 body.light-theme .project-card-location {

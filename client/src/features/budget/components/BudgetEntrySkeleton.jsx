@@ -1,6 +1,6 @@
 import React from "react";
 import "./BudgetEntrySkeleton.css";
-import FlipFadeText from "../../../components/common/FlipFadeText";
+import FlipFadeText from "../../../components/effects/FlipFadeText";
 
 export const SkeletonBox = ({
   className = "",

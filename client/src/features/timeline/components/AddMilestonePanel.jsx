@@ -18,9 +18,9 @@ const AddMilestonePanel = ({
   const { user } = useAuth();
   const effectiveRole = userRole || (user?.roles && user?.roles[0]) || user?.role || "client";
   const roleNorm = String(effectiveRole || "").trim().toLowerCase().replace(/_/g, " ");
-  const isClient = roleNorm === "client";
-  const isCrew = roleNorm === "production crew" || roleNorm === "crew";
-  const isAdminOrManager = ["admin", "manager", "director", "accountant"].includes(roleNorm);
+  const isClient = roleNorm.startsWith("client");
+  const isCrew = roleNorm === "crew" || roleNorm === "department head";
+  const isAdminOrManager = ["admin", "manager", "director", "accountant", "coordinator", "viewer"].includes(roleNorm);
 
   const [milestoneTitle, setMilestoneTitle] = useState("");
   const [milestoneDate, setMilestoneDate] = useState("");

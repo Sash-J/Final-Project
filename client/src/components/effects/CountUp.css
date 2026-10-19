@@ -1,0 +1,53 @@
+/* CountUp.css - Rolling and counting number animation styling */
+
+.countup-wrapper {
+  display: inline-block;
+  font-variant-numeric: tabular-nums;
+}
+
+.countup-roll-container {
+  display: inline-flex;
+  white-space: pre;
+  user-select: none;
+}
+
+.countup-slot {
+  display: inline-block;
+  height: 1.2em;
+  line-height: 1.2em;
+}
+
+.countup-slot-char {
+  overflow: hidden;
+}
+
+.countup-slot-digit {
+  position: relative;
+  overflow: hidden;
+}
+
+.countup-strip-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.countup-digit-cell {
+  height: 1.2em;
+  display: inline-block;
+}
+
+.countup-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.countup-svg-defs {
+  position: absolute;
+}

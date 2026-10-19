@@ -17,6 +17,10 @@
   animation: fadeInTooltipModal 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.hover-tooltip-positioner.position-flipped {
+  align-items: flex-start;
+}
+
 .hover-tooltip-modal {
   display: flex;
   align-items: center;
@@ -26,10 +30,48 @@
   border-radius: 8px;
   box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
   white-space: nowrap;
-  background: rgba(18, 19, 26, 0.65);
+  background: rgba(18, 19, 26, 0.75);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   position: relative;
+}
+
+.hover-tooltip-modal.hover-tooltip-rich {
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  white-space: normal;
+  max-width: 280px;
+}
+
+.hover-tooltip-modal.hover-tooltip-rich .hover-tooltip-icon {
+  margin-top: 2px;
+  font-size: 1.1rem !important;
+  flex-shrink: 0;
+}
+
+.hover-tooltip-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+  min-width: 0;
+}
+
+.hover-tooltip-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.2px;
+  line-height: 1.25;
+}
+
+.hover-tooltip-desc {
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.35;
 }
 
 .hover-tooltip-modal::after {
@@ -40,7 +82,13 @@
   transform: translateX(-50%);
   border-width: 5px;
   border-style: solid;
-  border-color: rgba(18, 19, 26, 0.65) transparent transparent transparent;
+  border-color: rgba(18, 19, 26, 0.75) transparent transparent transparent;
+}
+
+.hover-tooltip-positioner.position-flipped .hover-tooltip-modal::after {
+  top: auto;
+  bottom: 100%;
+  border-color: transparent transparent rgba(18, 19, 26, 0.75) transparent;
 }
 
 .hover-tooltip-icon {
@@ -67,15 +115,28 @@
 
 /* Light Theme Styling Overrides */
 body.light-theme .hover-tooltip-modal {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.96);
   border-color: #d0d7de;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
 }
 
 body.light-theme .hover-tooltip-text {
   color: #24292f;
 }
 
-body.light-theme .hover-tooltip-modal::after {
-  border-color: rgba(255, 255, 255, 0.95) transparent transparent transparent;
+body.light-theme .hover-tooltip-title {
+  color: #0f172a;
 }
+
+body.light-theme .hover-tooltip-desc {
+  color: #64748b;
+}
+
+body.light-theme .hover-tooltip-modal::after {
+  border-color: rgba(255, 255, 255, 0.96) transparent transparent transparent;
+}
+
+body.light-theme .hover-tooltip-positioner.position-flipped .hover-tooltip-modal::after {
+  border-color: transparent transparent rgba(255, 255, 255, 0.96) transparent;
+}
+

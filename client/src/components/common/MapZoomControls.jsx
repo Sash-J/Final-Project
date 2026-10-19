@@ -1,7 +1,7 @@
 import L from "leaflet";
 import { useEffect, useRef } from "react";
 import { useMap } from "react-leaflet";
-import GlassSurface from "./GlassSurface";
+import GlassSurface from "../effects/GlassSurface";
 import HoverTooltip from "./HoverTooltip";
 import Icon from "./Icon";
 

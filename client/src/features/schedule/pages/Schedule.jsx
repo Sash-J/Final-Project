@@ -457,9 +457,10 @@ const Schedule = () => {
   return (
     <div className="schedule-container">
       <PageHeader
-        title="Production Schedule"
+        category="Production Timeline"
+        title="Schedule"
         description="Manage project tasks and schedule."
-      ></PageHeader>
+      />
 
       {hasUnsavedChanges && (
         <div className="unsaved-changes-bar">

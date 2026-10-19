@@ -298,7 +298,8 @@ const AdminBudget = () => {
   return (
     <section id="admin-budget">
       <PageHeader
-        title="Budget Entry"
+        category="Production Budget"
+        title="Entry"
         description="Enhanced view for managing hierarchy and budget entry"
       />
 

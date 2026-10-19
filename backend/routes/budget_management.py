@@ -154,9 +154,9 @@ def budget_values_for_project(project_id):
         except ValueError:
             version_id = None
 
-    if has_role("production crew", "crew", "client"):
+    if has_role("crew", "client"):
         versions = db.get_budget_versions(project_id)
-        if has_role("production crew", "crew"):
+        if has_role("crew"):
             allowed_ids = [v["id"] for v in versions if v.get("published_to_crew") == 1]
         else:
             allowed_ids = [v["id"] for v in versions if v.get("published_to_client") == 1]
@@ -274,7 +274,7 @@ def budget_versions_post(project_id):
 def budget_versions_get(project_id):
     try:
         versions = db.get_budget_versions(project_id)
-        if has_role("production crew", "crew"):
+        if has_role("crew"):
             versions = [v for v in versions if v.get("published_to_crew") == 1]
         elif has_role("client"):
             versions = [v for v in versions if v.get("published_to_client") == 1]
@@ -323,7 +323,7 @@ def client_dashboard_get():
     if not user_id:
         return jsonify({"error": "Unauthorized"}), 401
 
-    if has_role("production crew", "crew"):
+    if has_role("crew"):
         projects = auth.get_crew_projects(user_id)
     else:
         projects = auth.get_client_projects(user_id)

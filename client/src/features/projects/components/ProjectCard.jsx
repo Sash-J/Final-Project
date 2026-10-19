@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import HoverTooltip from "../../../components/common/HoverTooltip";
 import Icon from "../../../components/common/Icon";
 import ScrambleText from "../../../components/common/ScrambleText";
+import VerificationBadge from "../../../components/common/VerificationBadge";
 import "./ProjectCard.css";
 
 const ProjectCard = ({
@@ -19,7 +20,38 @@ const ProjectCard = ({
     navigate(`/admin/projects/${project.id}`);
   };
 
+  const getClients = () => {
+    if (Array.isArray(project.client_details) && project.client_details.length > 0) {
+      return project.client_details.map((c) => ({
+        id: c.id,
+        name: c.username || c.name || "Client",
+        tier: c.verified_level || c.role || "Gold level 1",
+      }));
+    }
 
+    if (project.client_usernames) {
+      const names = project.client_usernames
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      const tiers = project.client_verified_levels
+        ? project.client_verified_levels
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [];
+      return names.map((name, i) => ({
+        id: i,
+        name,
+        tier: tiers[i] || project.client_roles || "Gold level 1",
+      }));
+    }
+
+    return [];
+  };
+
+  const clients = getClients();
+  const primaryClientTier = clients.length > 0 ? clients[0].tier : null;
 
   return (
     <div
@@ -74,17 +106,42 @@ const ProjectCard = ({
                 )}
               </h3>
               {isCompact && (
-                <span className="compact-code" style={{ color: project.color }}>
-                  {project.code_name}
-                </span>
+                <div className="compact-header-meta">
+                  <span className="compact-code" style={{ color: project.color }}>
+                    {project.code_name}
+                  </span>
+                  {primaryClientTier && (
+                    <VerificationBadge
+                      tier={primaryClientTier}
+                      size="xs"
+                      className="compact-client-badge"
+                    />
+                  )}
+                </div>
               )}
             </div>
 
             {!isCompact && (
               <>
-                <p className="project-card-client">
-                  {project.client_usernames || "Private Client"}
-                </p>
+                <div className="project-card-client-wrap">
+                  {clients.length > 0 ? (
+                    clients.map((c, idx) => (
+                      <span key={c.id || idx} className="project-card-client-item">
+                        <span className="project-card-client-name">{c.name}</span>
+                        <VerificationBadge
+                          tier={c.tier}
+                          size="xs"
+                          className="project-card-client-badge"
+                        />
+                        {idx < clients.length - 1 && (
+                          <span className="project-card-client-separator">,</span>
+                        )}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="project-card-client-name">Private Client</span>
+                  )}
+                </div>
                 <p className="project-card-location">
                   {project.location || "Remote Production"}
                 </p>

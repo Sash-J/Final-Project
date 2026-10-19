@@ -49,7 +49,10 @@ const FinancialDashboard = () => {
 
   return (
     <div className="fd-root">
-      <PageHeader title="Financial Overview">
+      <PageHeader
+        category="Financial Records"
+        title="Overview"
+      >
         <span className="bef-pill">Studio Accounts</span>
       </PageHeader>
 
@@ -85,7 +88,12 @@ const FinancialDashboard = () => {
           </div>
         </div>
 
-        <PageHeader title="Project Accounts" />
+        <PageHeader
+          category="Project Accounts"
+          title="Ledger"
+          showBadge={false}
+          className="fd-section-header"
+        />
 
         <div className="fd-table-container">
           <table className="fd-table">

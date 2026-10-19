@@ -19,7 +19,7 @@ const ConfirmationModal = ({
       onClose={onCancel}
       size="small"
       showClose={false}
-      className="confirmation-modal-glass"
+      className="global-modal-glass confirmation-modal-glass"
     >
       <div className="modal-header">
         <h3>{title}</h3>
@@ -29,13 +29,13 @@ const ConfirmationModal = ({
       </div>
       <div className="modal-footer">
         <button
-          className={`btn-modal-cancel variant-${cancelVariant}`}
+          className={`btn-neo btn-neo-cancel btn-modal-cancel variant-${cancelVariant}`}
           onClick={onCancel}
         >
           {cancelLabel}
         </button>
         <button
-          className={`btn-modal-confirm variant-${confirmVariant}`}
+          className={`btn-neo ${confirmVariant === "danger" ? "btn-neo-cancel variant-danger" : "btn-neo-solid"} btn-modal-confirm`}
           onClick={onConfirm}
         >
           {confirmLabel}

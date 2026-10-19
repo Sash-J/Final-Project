@@ -196,8 +196,7 @@ export const AuthProvider = ({ children }) => {
           (ur) =>
             ur === r ||
             (r === "client" && ur.startsWith("client")) ||
-            ((r === "production crew" || r === "crew") &&
-              (ur === "crew" || ur === "production crew" || ur === "department head"))
+            (r === "crew" && (ur === "crew" || ur === "department head"))
         )
       );
     },

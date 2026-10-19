@@ -51,54 +51,43 @@
 .btn-modal-cancel,
 .btn-modal-confirm {
   flex: 1;
-  padding: 12px;
-  border-radius: 12px;
-  cursor: pointer;
-  font-weight: 500;
-  font-size: 0.95rem;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 12px 20px !important;
+  font-size: 0.92rem !important;
 }
 
 .variant-danger {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
-  border: none;
-  font-size: 0.9rem;
-  font-weight: 500;
+  background: rgba(239, 68, 68, 0.15) !important;
+  border: 1px solid rgba(239, 68, 68, 0.4) !important;
+  color: #f87171 !important;
 }
 
 .variant-danger:hover {
-  background: rgb(255, 98, 98);
-  color: #ffffff;
-  transform: translateY(-1px);
+  background: rgba(239, 68, 68, 0.3) !important;
+  border-color: rgba(239, 68, 68, 0.7) !important;
+  color: #ffffff !important;
 }
 
 .variant-accent {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
-  border: none;
-  font-size: 0.9rem;
-  font-weight: 500;
+  background: rgba(0, 198, 230, 0.12) !important;
+  border: 1px solid rgba(0, 198, 230, 0.35) !important;
+  color: #00f0ff !important;
 }
 
 .variant-accent:hover {
-  background: var(--accent-color);
-  transform: translateY(-1px);
+  background: rgba(0, 198, 230, 0.25) !important;
+  border-color: rgba(0, 198, 230, 0.6) !important;
+  color: #ffffff !important;
 }
 
 .variant-glass {
-  background: rgba(255, 255, 255, 0.05);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: #fff !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 .variant-glass:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
 }
 
 @keyframes modalSlideUp {

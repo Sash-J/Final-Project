@@ -31,6 +31,46 @@ def get_user_by_username(username):
         return cursor.fetchone()
 
 
+TIER_PRIORITY = {
+    "Diamond": 6,
+    "Golden Level 3": 5,
+    "Golden Level 2": 4,
+    "Gold level 1": 3,
+    "Silver": 2,
+    "Frosted Crystal": 1,
+}
+
+
+def get_tier_for_role(role_name):
+    """Maps a given role name to its corresponding verification tier."""
+    if not role_name:
+        return "Frosted Crystal"
+    r = str(role_name).strip().lower().replace("_", " ")
+    if "admin" in r:
+        return "Diamond"
+    elif "director" in r:
+        return "Golden Level 3"
+    elif "manager" in r:
+        return "Golden Level 2"
+    elif "client (full access)" in r or (r.startswith("client") and "full" in r):
+        return "Gold level 1"
+    elif "viewer" in r:
+        return "Frosted Crystal"
+    elif any(x in r for x in ["accountant", "coordinator", "department head", "crew", "client (half access)"]):
+        return "Silver"
+    return "Silver"
+
+
+def get_highest_tier_for_roles(role_names):
+    """Returns the highest priority tier among multiple assigned roles."""
+    if not role_names:
+        return "Frosted Crystal"
+    tiers = [get_tier_for_role(r) for r in role_names if r]
+    if not tiers:
+        return "Frosted Crystal"
+    return max(tiers, key=lambda t: TIER_PRIORITY.get(t, 0))
+
+
 def create_user(
     username,
     password_hash,
@@ -43,6 +83,9 @@ def create_user(
     skill=None,
     verified_level=None,
 ):
+    if not verified_level:
+        verified_level = get_tier_for_role(role)
+
     with db_cursor(commit=True) as cursor:
         cursor.execute(
             """INSERT INTO users (username, password_hash, role, is_approved, full_name, address, telephone, gender, skill, verified_level) 
@@ -65,7 +108,7 @@ def create_user(
 
 def _fetch_users_with_roles(only_pending=False):
     query = """
-        SELECT u.id, u.username, u.role, u.is_approved, u.full_name, u.telephone, u.gender, u.skill, u.verified_level,
+        SELECT u.id, u.username, u.role, u.is_approved, u.full_name, u.telephone, u.gender, u.skill, u.verified_level, u.profile_image,
                COALESCE(r.name, u.role) AS role_name
         FROM users u
         LEFT JOIN user_roles ur ON u.id = ur.user_id
@@ -91,12 +134,20 @@ def _fetch_users_with_roles(only_pending=False):
                 "gender": row.get("gender"),
                 "skill": row.get("skill"),
                 "verified_level": row.get("verified_level"),
+                "profile_image": row.get("profile_image"),
                 "role": row["role"],
                 "is_approved": row["is_approved"],
                 "roles": [],
             }
         if row["role_name"] and row["role_name"] not in user_map[uid]["roles"]:
             user_map[uid]["roles"].append(row["role_name"])
+
+    for u in user_map.values():
+        all_user_roles = u["roles"] if u["roles"] else ([u["role"]] if u["role"] else [])
+        calculated_tier = get_highest_tier_for_roles(all_user_roles)
+        if not u["verified_level"] or u["verified_level"] != calculated_tier:
+            u["verified_level"] = calculated_tier
+
     return list(user_map.values())
 
 
@@ -113,7 +164,7 @@ def _get_users_by_roles(role_names):
     with db_cursor() as cursor:
         cursor.execute(
             f"""
-            SELECT DISTINCT u.id, u.username
+            SELECT DISTINCT u.id, u.username, u.full_name, u.profile_image
             FROM users u
             JOIN user_roles ur ON u.id = ur.user_id
             JOIN roles r ON ur.role_id = r.id
@@ -127,17 +178,30 @@ def _get_users_by_roles(role_names):
 
 def get_clients():
     """Returns all approved client users from DB roles."""
-    return _get_users_by_roles(["client", "client (full access)", "client (half access)"])
+    return _get_users_by_roles(["client (full access)", "client (half access)"])
 
 
 def get_crew_users():
     """Returns all users with crew or department head roles from DB roles."""
-    return _get_users_by_roles(["production crew", "crew", "department head"])
+    return _get_users_by_roles(["crew", "department head"])
 
 
 def approve_user(user_id):
     with db_cursor(commit=True) as cursor:
         cursor.execute("UPDATE users SET is_approved = 1 WHERE id = %s", (user_id,))
+        cursor.execute("""
+            SELECT r.name FROM user_roles ur
+            JOIN roles r ON ur.role_id = r.id
+            WHERE ur.user_id = %s
+        """, (user_id,))
+        current_roles = [row["name"] for row in cursor.fetchall()]
+        if not current_roles:
+            cursor.execute("SELECT role FROM users WHERE id = %s", (user_id,))
+            user_row = cursor.fetchone()
+            if user_row and user_row.get("role"):
+                current_roles = [user_row["role"]]
+        v_level = get_highest_tier_for_roles(current_roles)
+        cursor.execute("UPDATE users SET verified_level = %s WHERE id = %s", (v_level, user_id))
         return True
 
 
@@ -194,6 +258,9 @@ def update_user_role(user_id, role):
             "INSERT INTO user_roles (user_id, role_id) VALUES (%s, %s)",
             (user_id, role_id),
         )
+
+        v_level = get_highest_tier_for_roles([role_name])
+        cursor.execute("UPDATE users SET verified_level = %s WHERE id = %s", (v_level, user_id))
         return True
 
 
@@ -210,8 +277,8 @@ def get_assignable_roles():
         cursor.execute(
             """SELECT id, name FROM roles 
                WHERE LOWER(name) IN (
-                   'client', 'client (full access)', 'client (half access)',
-                   'production crew', 'crew', 'department head',
+                   'client (full access)', 'client (half access)',
+                   'crew', 'department head',
                    'director', 'manager', 'accountant', 'coordinator', 'viewer'
                ) 
                ORDER BY id ASC"""

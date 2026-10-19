@@ -1,6 +1,6 @@
 import React from "react";
 import HoverTooltip from "../../../components/common/HoverTooltip";
-import GlassSurface from "../../../components/common/GlassSurface";
+import GlassSurface from "../../../components/effects/GlassSurface";
 import "./BudgetSearchWidget.css";
 
 const BudgetSearchWidget = ({

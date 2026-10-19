@@ -1,0 +1,138 @@
+/* UserMetricsGaugeWidget.css - User Metrics Composite Bento Card */
+
+.metrics-composite-wrapper {
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* Give bottom content optimal breathing room for larger gauges */
+.user-metrics-bento .composite-bottom-content {
+  padding: 18px 16px 22px 16px;
+}
+
+/* Lead Avatar Accent */
+.metrics-lead-avatar {
+  color: #00f0ff !important;
+  background: rgba(0, 240, 255, 0.12) !important;
+}
+
+/* Selector Icon Accent */
+.metrics-selector-icon {
+  background: rgba(0, 240, 255, 0.15) !important;
+  color: #00f0ff !important;
+}
+
+/* Metrics Composite Body */
+.metrics-composite-body {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 8px;
+  box-sizing: border-box;
+  padding: 0 4px;
+}
+
+/* Individual Gauge Item */
+.metric-gauge-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 95px;
+  min-width: 85px;
+}
+
+.gauge-svg-wrap {
+  position: relative;
+  width: 114px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gauge-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.gauge-track-arc {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 8;
+  stroke-linecap: round;
+}
+
+.gauge-val-arc {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Color Themes */
+.gauge-cyan .gauge-val-arc {
+  stroke: #00f0ff;
+}
+
+.gauge-amber .gauge-val-arc {
+  stroke: #f59e0b;
+}
+
+.gauge-emerald .gauge-val-arc {
+  stroke: #10b981;
+}
+
+.gauge-center-reading {
+  position: absolute;
+  bottom: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.gauge-readout-value {
+  pointer-events: auto;
+  cursor: default;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1;
+  letter-spacing: -0.2px;
+}
+
+.gauge-item-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.65);
+  text-align: center;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+}
+
+/* Light Theme Overrides */
+body.light-theme .metrics-lead-avatar {
+  background: rgba(0, 198, 255, 0.1) !important;
+  color: #0969da !important;
+}
+
+body.light-theme .metrics-selector-icon {
+  background: rgba(0, 198, 255, 0.1) !important;
+  color: #0969da !important;
+}
+
+body.light-theme .gauge-track-arc {
+  stroke: rgba(0, 0, 0, 0.06);
+}
+
+body.light-theme .gauge-readout-value {
+  color: #24292f;
+}
+
+body.light-theme .gauge-item-label {
+  color: #57606a;
+}

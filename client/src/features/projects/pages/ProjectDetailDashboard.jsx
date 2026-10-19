@@ -18,7 +18,7 @@ import AddMilestonePanel from "../../timeline/components/AddMilestonePanel";
 import SuiTimeline from "../../timeline/components/SuiTimeline";
 import HoverTooltip from "../../../components/common/HoverTooltip";
 import CompositeBentoCard from "../../../components/common/CompositeBentoCard";
-import GlassSurface from "../../../components/common/GlassSurface";
+import GlassSurface from "../../../components/effects/GlassSurface";
 import Grainient from "../../../components/common/Grainient";
 import { useAuth } from "../../auth/context/AuthContext";
 
@@ -54,7 +54,7 @@ const ProjectDetailSkeleton = ({ projectId }) => (
 
     <div className="dashboard-content-grid">
       <div className="bento-layout">
-        <div className="bento-item lg-rect summary-bento-card no-padding overflow-hidden">
+        <div className="bento-item lg-rect glass-card no-padding overflow-hidden">
           {projectId ? (
             <div className="project-timeline-preview">
               <SuiTimeline
@@ -330,7 +330,7 @@ const ProjectDetailDashboard = () => {
         <>
           {activeTab === "overview" && (
             <div className="bento-layout fade-in">
-              <div className="bento-item lg-rect summary-bento-card no-padding overflow-hidden">
+              <div className="bento-item lg-rect glass-card no-padding overflow-hidden">
                 <div
                   className="project-timeline-preview"
                   onClick={() => setShowTimelineModal(true)}
@@ -344,7 +344,6 @@ const ProjectDetailDashboard = () => {
               </div>
 
               <CompositeBentoCard
-                className="summary-bento-card"
                 onClick={() => {
                   setProductionViewMode("hierarchy");
                   setShowProductionModal(true);
@@ -424,7 +423,7 @@ const ProjectDetailDashboard = () => {
               />
 
               <div
-                className="bento-item sm-square glass-card summary-bento-card equipment-bento-card clickable-bento-card"
+                className="bento-item sm-square glass-card equipment-bento-card clickable-bento-card"
                 onClick={() => {
                   setProductionViewMode("equipment");
                   setShowProductionModal(true);

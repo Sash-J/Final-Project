@@ -1,3 +1,4 @@
+import json
 from .database import get_connection
 
 
@@ -53,136 +54,131 @@ def run_rbac_migration():
             cursor.execute("ALTER TABLE users ADD COLUMN verified_level VARCHAR(50) DEFAULT NULL")
         conn.commit()
 
-        # 2. Seed standard roles if table is empty
-        cursor.execute("SELECT COUNT(*) AS cnt FROM roles")
-        role_count = cursor.fetchone()["cnt"]
-        if role_count == 0:
-            standard_roles = [
-                "Admin",
-                "Director",
-                "Manager",
-                "Accountant",
-                "Coordinator",
-                "Viewer",
-                "Department Head",
-                "Crew",
-                "Production Crew",
-                "Client (Full Access)",
-                "Client (Half Access)",
-                "Client",
-            ]
-            cursor.executemany("INSERT IGNORE INTO roles (name) VALUES (%s)", [(r,) for r in standard_roles])
-            conn.commit()
+        # 2. Seed standard roles and synchronize
+        standard_roles = [
+            "Admin",
+            "Director",
+            "Manager",
+            "Accountant",
+            "Coordinator",
+            "Viewer",
+            "Department Head",
+            "Crew",
+            "Client (Full Access)",
+            "Client (Half Access)",
+        ]
+        cursor.executemany("INSERT IGNORE INTO roles (name) VALUES (%s)", [(r,) for r in standard_roles])
+        conn.commit()
 
-        # 3. Check if permissions table is already populated.
-        # If records exist, the database is the absolute single source of truth.
-        # We NEVER re-seed permissions or overwrite role-permission mappings from code!
-        cursor.execute("SELECT COUNT(*) AS cnt FROM permissions")
-        perm_count = cursor.fetchone()["cnt"]
+        # Reassign legacy roles (Production Crew -> Crew, Client -> Client (Full Access)) and purge obsolete roles
+        cursor.execute("SELECT id, name FROM roles")
+        role_id_by_name = {r["name"].lower(): r["id"] for r in cursor.fetchall()}
 
-        if perm_count == 0:
-            print("RBAC: Database permissions table is empty. Performing initial bootstrap seed...")
-            standard_permissions = [
-                "user.view",
-                "user.approve",
-                "user.reject",
-                "user.edit",
-                "employee.delete",
-                "project.view",
-                "project.create",
-                "project.edit",
-                "project.delete",
-                "budget.view",
-                "budget.edit",
-                "budget.publish",
-                "production.view",
-                "production.edit",
-                "schedule.view",
-                "schedule.edit",
-                "finance.view",
-                "finance.edit",
-            ]
-            cursor.executemany("INSERT IGNORE INTO permissions (name) VALUES (%s)", [(p,) for p in standard_permissions])
-            conn.commit()
+        if "production crew" in role_id_by_name and "crew" in role_id_by_name:
+            prod_crew_id = role_id_by_name["production crew"]
+            crew_id = role_id_by_name["crew"]
+            cursor.execute("UPDATE IGNORE user_roles SET role_id = %s WHERE role_id = %s", (crew_id, prod_crew_id))
+            cursor.execute("DELETE FROM user_roles WHERE role_id = %s", (prod_crew_id,))
 
-            # Fetch roles and permissions maps for initial mapping
-            cursor.execute("SELECT id, name FROM roles")
-            role_map = {r["name"].lower(): r["id"] for r in cursor.fetchall()}
-            cursor.execute("SELECT id, name FROM permissions")
-            perm_map = {p["name"]: p["id"] for p in cursor.fetchall()}
+        if "client" in role_id_by_name and "client (full access)" in role_id_by_name:
+            generic_client_id = role_id_by_name["client"]
+            client_full_id = role_id_by_name["client (full access)"]
+            cursor.execute("UPDATE IGNORE user_roles SET role_id = %s WHERE role_id = %s", (client_full_id, generic_client_id))
+            cursor.execute("DELETE FROM user_roles WHERE role_id = %s", (generic_client_id,))
 
-            # Initial role-permission assignments per project specification matrix
-            role_permission_mappings = {
-                "admin": standard_permissions,
-                "director": [
-                    "user.view", "user.approve", "user.reject", "user.edit",
-                    "project.view", "project.edit", "budget.view", "production.view",
-                    "production.edit", "schedule.view", "schedule.edit", "finance.view"
-                ],
-                "manager": [
-                    "user.view", "project.view", "project.create", "project.edit",
-                    "budget.view", "budget.edit", "production.view", "production.edit",
-                    "schedule.view", "schedule.edit", "finance.view"
-                ],
-                "accountant": [
-                    "project.view", "budget.view", "budget.edit", "finance.view", "finance.edit",
-                    "schedule.view", "user.view", "production.view"
-                ],
-                "coordinator": [
-                    "project.view", "budget.view", "schedule.view", "schedule.edit",
-                    "production.view", "finance.view", "user.view"
-                ],
-                "viewer": [
-                    "project.view", "budget.view", "schedule.view", "production.view", "user.view"
-                ],
-                "department head": [
-                    "project.view", "production.view", "production.edit", "schedule.view", "budget.view"
-                ],
-                "crew": [
-                    "project.view", "production.view", "schedule.view", "budget.view"
-                ],
-                "production crew": [
-                    "project.view", "production.view", "production.edit", "schedule.view", "budget.view"
-                ],
-                "client (full access)": [
-                    "project.view", "budget.view", "schedule.view", "production.view"
-                ],
-                "client (half access)": [
-                    "project.view", "budget.view", "schedule.view", "production.view"
-                ],
-                "client": [
-                    "project.view", "budget.view", "schedule.view", "production.view"
-                ],
-            }
+        format_strings = ",".join(["%s"] * len(standard_roles))
+        cursor.execute(f"DELETE FROM roles WHERE name NOT IN ({format_strings})", standard_roles)
+        conn.commit()
 
-            cursor.execute("SELECT role_id, permission_id FROM role_permissions")
-            existing_rp = {(row["role_id"], row["permission_id"]) for row in cursor.fetchall()}
+        # 3. Ensure permissions exist
+        standard_permissions = [
+            "user.view",
+            "user.approve",
+            "user.reject",
+            "user.edit",
+            "employee.delete",
+            "project.view",
+            "project.create",
+            "project.edit",
+            "project.delete",
+            "budget.view",
+            "budget.edit",
+            "budget.publish",
+            "production.view",
+            "production.edit",
+            "schedule.view",
+            "schedule.edit",
+            "finance.view",
+            "finance.edit",
+        ]
+        cursor.executemany("INSERT IGNORE INTO permissions (name) VALUES (%s)", [(p,) for p in standard_permissions])
+        conn.commit()
 
-            to_insert_rp = []
-            for r_name, p_names in role_permission_mappings.items():
-                r_id = role_map.get(r_name)
-                if not r_id:
-                    continue
-                for p_name in p_names:
-                    p_id = perm_map.get(p_name)
-                    if p_id and (r_id, p_id) not in existing_rp:
-                        to_insert_rp.append((r_id, p_id))
-
-            if to_insert_rp:
-                cursor.executemany(
-                    "INSERT INTO role_permissions (role_id, permission_id) VALUES (%s, %s)",
-                    to_insert_rp,
-                )
-                conn.commit()
-            print("RBAC: Initial bootstrap seed complete.")
-        else:
-            print(f"RBAC: {perm_count} permissions exist in DB. Database is the sole source of truth (code seeding bypassed).")
-
-        # Fetch role_map for step 6 user migration
+        # Fetch roles and permissions maps for mappings
         cursor.execute("SELECT id, name FROM roles")
         role_map = {r["name"].lower(): r["id"] for r in cursor.fetchall()}
+        cursor.execute("SELECT id, name FROM permissions")
+        perm_map = {p["name"]: p["id"] for p in cursor.fetchall()}
 
-        # 6. Migrate existing users from users.role to user_roles
+        # Role-permission assignments for the 10 official roles
+        role_permission_mappings = {
+            "admin": standard_permissions,
+            "director": [
+                "user.view", "user.approve", "user.reject", "user.edit",
+                "project.view", "project.edit", "budget.view", "production.view",
+                "production.edit", "schedule.view", "schedule.edit", "finance.view"
+            ],
+            "manager": [
+                "user.view", "project.view", "project.create", "project.edit",
+                "budget.view", "budget.edit", "production.view", "production.edit",
+                "schedule.view", "schedule.edit", "finance.view"
+            ],
+            "accountant": [
+                "project.view", "budget.view", "budget.edit", "finance.view", "finance.edit",
+                "schedule.view", "user.view", "production.view"
+            ],
+            "coordinator": [
+                "project.view", "budget.view", "schedule.view", "schedule.edit",
+                "production.view", "finance.view", "user.view"
+            ],
+            "viewer": [
+                "project.view", "budget.view", "schedule.view", "production.view", "user.view"
+            ],
+            "department head": [
+                "project.view", "production.view", "production.edit", "schedule.view", "budget.view"
+            ],
+            "crew": [
+                "project.view", "production.view", "schedule.view", "budget.view"
+            ],
+            "client (full access)": [
+                "project.view", "budget.view", "schedule.view", "production.view"
+            ],
+            "client (half access)": [
+                "project.view", "budget.view", "schedule.view", "production.view"
+            ],
+        }
+
+        cursor.execute("SELECT role_id, permission_id FROM role_permissions")
+        existing_rp = {(row["role_id"], row["permission_id"]) for row in cursor.fetchall()}
+
+        to_insert_rp = []
+        for r_name, p_names in role_permission_mappings.items():
+            r_id = role_map.get(r_name)
+            if not r_id:
+                continue
+            for p_name in p_names:
+                p_id = perm_map.get(p_name)
+                if p_id and (r_id, p_id) not in existing_rp:
+                    to_insert_rp.append((r_id, p_id))
+
+        if to_insert_rp:
+            cursor.executemany(
+                "INSERT INTO role_permissions (role_id, permission_id) VALUES (%s, %s)",
+                to_insert_rp,
+            )
+            conn.commit()
+
+        # 4. Migrate existing users from users.role to user_roles
         cursor.execute("SELECT user_id, role_id FROM user_roles")
         existing_ur_rows = cursor.fetchall()
         existing_ur = {(row["user_id"], row["role_id"]) for row in existing_ur_rows}
@@ -196,8 +192,10 @@ def run_rbac_migration():
             if u_id in users_with_roles:
                 continue
             u_role = u["role"].strip().lower()
-            if u_role == "production_crew":
-                u_role = "production crew"
+            if u_role in ("production_crew", "production crew"):
+                u_role = "crew"
+            elif u_role == "client":
+                u_role = "client (full access)"
 
             target_role_id = role_map.get(u_role)
             if target_role_id and (u_id, target_role_id) not in existing_ur:
@@ -210,7 +208,7 @@ def run_rbac_migration():
             )
             conn.commit()
 
-        print("RBAC Migration: successfully synchronized roles, permissions, and user_roles.")
+        print("RBAC Migration: successfully synchronized 10 official roles, permissions, and user_roles.")
     except Exception as e:
         print("Error during RBAC migration:", e)
     finally:
@@ -224,6 +222,36 @@ def create_role_permissions():
 
 def create_user_roles():
     run_rbac_migration()
+
+
+def sync_verified_levels_migration():
+    """Synchronizes verified_level for all existing users according to their active roles."""
+    from .auth_operations import get_highest_tier_for_roles
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("""
+            SELECT u.id, u.role, GROUP_CONCAT(r.name) as assigned_roles
+            FROM users u
+            LEFT JOIN user_roles ur ON u.id = ur.user_id
+            LEFT JOIN roles r ON ur.role_id = r.id
+            GROUP BY u.id
+        """)
+        users = cursor.fetchall()
+        for u in users:
+            roles_list = []
+            if u.get("assigned_roles"):
+                roles_list = [r.strip() for r in u["assigned_roles"].split(",") if r.strip()]
+            elif u.get("role"):
+                roles_list = [u["role"]]
+            tier = get_highest_tier_for_roles(roles_list)
+            cursor.execute("UPDATE users SET verified_level = %s WHERE id = %s", (tier, u["id"]))
+        conn.commit()
+    except Exception as e:
+        print("Error syncing verified levels migration:", e)
+    finally:
+        cursor.close()
+        conn.close()
 
 
 def get_phases():
@@ -251,11 +279,25 @@ def get_projects():
     cursor = conn.cursor(dictionary=True)
     query = """
         SELECT p.*, 
-               GROUP_CONCAT(DISTINCT u_client.username SEPARATOR ', ') as client_usernames,
-               GROUP_CONCAT(DISTINCT u_client.id SEPARATOR ',') as client_ids,
+               GROUP_CONCAT(DISTINCT u_client.username ORDER BY u_client.id SEPARATOR ', ') as client_usernames,
+               GROUP_CONCAT(DISTINCT u_client.id ORDER BY u_client.id SEPARATOR ',') as client_ids,
+               GROUP_CONCAT(DISTINCT COALESCE(u_client.verified_level, u_client.role) ORDER BY u_client.id SEPARATOR ', ') as client_verified_levels,
+               GROUP_CONCAT(DISTINCT u_client.role ORDER BY u_client.id SEPARATOR ', ') as client_roles,
                GROUP_CONCAT(DISTINCT u_crew.username SEPARATOR ', ') as crew_usernames,
                GROUP_CONCAT(DISTINCT u_crew.id SEPARATOR ',') as crew_ids,
-               (SELECT COUNT(*) FROM budget_versions bv WHERE bv.project_id = p.id) as version_count
+               (SELECT COUNT(*) FROM budget_versions bv WHERE bv.project_id = p.id) as version_count,
+               (SELECT JSON_ARRAYAGG(
+                   JSON_OBJECT(
+                       'id', u.id,
+                       'username', u.username,
+                       'role', u.role,
+                       'verified_level', COALESCE(u.verified_level, u.role)
+                   )
+                )
+                FROM client_projects cp2
+                JOIN users u ON cp2.user_id = u.id
+                WHERE cp2.project_id = p.id
+               ) as client_details
         FROM projects p
         LEFT JOIN client_projects cp ON p.id = cp.project_id
         LEFT JOIN users u_client ON cp.user_id = u_client.id
@@ -268,6 +310,15 @@ def get_projects():
     result = cursor.fetchall()
     cursor.close()
     conn.close()
+    for row in result:
+        raw_cd = row.get("client_details")
+        if isinstance(raw_cd, str):
+            try:
+                row["client_details"] = json.loads(raw_cd)
+            except Exception:
+                row["client_details"] = []
+        elif not raw_cd:
+            row["client_details"] = []
     return result
 
 
@@ -480,11 +531,25 @@ def get_project_by_id(project_id):
     cursor = conn.cursor(dictionary=True, buffered=True)
     query = """
         SELECT p.*, 
-               GROUP_CONCAT(DISTINCT u_client.username SEPARATOR ', ') as client_usernames,
-               GROUP_CONCAT(DISTINCT u_client.id SEPARATOR ',') as client_ids,
+               GROUP_CONCAT(DISTINCT u_client.username ORDER BY u_client.id SEPARATOR ', ') as client_usernames,
+               GROUP_CONCAT(DISTINCT u_client.id ORDER BY u_client.id SEPARATOR ',') as client_ids,
+               GROUP_CONCAT(DISTINCT COALESCE(u_client.verified_level, u_client.role) ORDER BY u_client.id SEPARATOR ', ') as client_verified_levels,
+               GROUP_CONCAT(DISTINCT u_client.role ORDER BY u_client.id SEPARATOR ', ') as client_roles,
                GROUP_CONCAT(DISTINCT u_crew.username SEPARATOR ', ') as crew_usernames,
                GROUP_CONCAT(DISTINCT u_crew.id SEPARATOR ',') as crew_ids,
                (SELECT COUNT(*) FROM budget_versions bv WHERE bv.project_id = p.id) as version_count,
+               (SELECT JSON_ARRAYAGG(
+                   JSON_OBJECT(
+                       'id', u.id,
+                       'username', u.username,
+                       'role', u.role,
+                       'verified_level', COALESCE(u.verified_level, u.role)
+                   )
+                )
+                FROM client_projects cp2
+                JOIN users u ON cp2.user_id = u.id
+                WHERE cp2.project_id = p.id
+               ) as client_details,
                (SELECT COALESCE(SUM(total), 0) FROM project_budget_values pbv 
                 WHERE pbv.version_id = (SELECT id FROM budget_versions WHERE project_id = p.id ORDER BY version_number DESC LIMIT 1)
                ) as latest_budget_total,
@@ -501,6 +566,15 @@ def get_project_by_id(project_id):
     result = cursor.fetchone()
 
     if result:
+        raw_cd = result.get("client_details")
+        if isinstance(raw_cd, str):
+            try:
+                result["client_details"] = json.loads(raw_cd)
+            except Exception:
+                result["client_details"] = []
+        elif not raw_cd:
+            result["client_details"] = []
+
         result["latest_budget_total"] = float(result["latest_budget_total"] or 0)
         result["total_paid"] = float(result["total_paid"] or 0)
         result["balance"] = result["latest_budget_total"] - result["total_paid"]
@@ -571,7 +645,6 @@ def get_project_by_id(project_id):
         # In get_project_by_id, equipment_data historically contained hero and heroSecondary.
         # The frontend parses it if it exists.
         if hero_data:
-            import json
             hero_payload = {
                 "hero": {
                     "label": hero_data['hero_label'],
@@ -1966,9 +2039,9 @@ def get_budget_full_data(project_id, version_id=None, user_id=None, role=None):
     # 4: Breakdowns
     breakdowns = next(results).fetchall()
     
-    # Filter for production_crew / crew / department head
+    # Filter for crew / department head
     r_norm = str(role or "").strip().lower().replace("_", " ")
-    if r_norm in ("production crew", "crew", "department head") and user_id:
+    if r_norm in ("crew", "department head") and user_id:
         cursor.execute("SELECT department_id FROM department_crew_assignments WHERE project_id = %s AND user_id = %s", (project_id, user_id))
         assigned_depts = {row["department_id"] for row in cursor.fetchall()}
 

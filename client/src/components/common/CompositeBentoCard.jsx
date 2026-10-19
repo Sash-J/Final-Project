@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
-import GlassSurface from "./GlassSurface";
+import GlassSurface from "../effects/GlassSurface";
 import Grainient from "./Grainient";
 import "./CompositeBentoCard.css";
 
@@ -22,14 +22,19 @@ const CompositeBentoCard = ({
   useEffect(() => {
     if (!singleOverlay || !cardRef.current) return;
 
+    let isMounted = true;
+
     const updateDims = () => {
+      if (!isMounted) return;
       const card = cardRef.current;
+      if (!card) return;
+
       const s1 = card.querySelector(".composite-shape-1");
       const s2 = card.querySelector(".composite-shape-2");
       const s3 = card.querySelector(".composite-shape-3");
       const b = card.querySelector(".composite-bridge-wrapper");
 
-      if (s1 && s2 && s3 && b) {
+      if (s1 && s2 && s3 && b && isMounted) {
         setMaskDims({
           s1: {
             x: s1.offsetLeft,
@@ -60,10 +65,15 @@ const CompositeBentoCard = ({
     };
 
     const observer = new ResizeObserver(updateDims);
-    observer.observe(cardRef.current);
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
     updateDims();
 
-    return () => observer.disconnect();
+    return () => {
+      isMounted = false;
+      observer.disconnect();
+    };
   }, [singleOverlay]);
 
   const handleMouseMove = (e) => {
@@ -196,8 +206,8 @@ const CompositeBentoCard = ({
               className="composite-bridge-stroke"
               d="M 0 0 C 0 24 -6.4 32 -32 32"
               fill="none"
-              stroke="rgba(255, 255, 255, 0.05)"
-              strokeWidth="0.75"
+              stroke="rgba(255, 255, 255, 0.1)"
+              strokeWidth="1"
               vectorEffect="non-scaling-stroke"
             />
           </svg>

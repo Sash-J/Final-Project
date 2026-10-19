@@ -35,7 +35,7 @@ const LoginPage = () => {
     if (userRoles.some((r) => ["admin", "manager", "director", "accountant", "coordinator", "viewer"].includes(r))) {
       return "/admin";
     }
-    if (userRoles.some((r) => ["production crew", "production_crew", "crew", "department head"].includes(r))) {
+    if (userRoles.some((r) => ["crew", "department head"].includes(r))) {
       return "/crew-dashboard";
     }
     if (userRoles.some((r) => r.startsWith("client"))) {
