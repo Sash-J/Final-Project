@@ -58,10 +58,10 @@ const Home = () => {
     if (loading) return null;
 
     if (user) {
-        if (hasRole(['admin', 'manager', 'director', 'accountant'])) {
+        if (hasRole(['admin', 'manager', 'director', 'accountant', 'coordinator', 'viewer'])) {
             return <Navigate to="/admin" />;
         }
-        if (hasRole(['production_crew', 'production crew'])) {
+        if (hasRole(['crew', 'department head'])) {
             return <Navigate to="/crew-dashboard" />;
         }
         if (hasRole('client')) {

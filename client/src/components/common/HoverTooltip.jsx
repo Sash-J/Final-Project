@@ -3,10 +3,23 @@ import ReactDOM from "react-dom";
 import Icon from "./Icon";
 import "./HoverTooltip.css";
 
-const HoverTooltip = ({ text, icon, children, wrapperClassName = "", style = {} }) => {
+const HoverTooltip = ({
+  text,
+  title,
+  description,
+  icon,
+  iconClassName = "",
+  children,
+  wrapperClassName = "",
+  style = {},
+}) => {
   const [showTooltip, setShowTooltip] = useState(false);
   const [coords, setCoords] = useState({ top: 0, left: 0 });
+  const [isFlipped, setIsFlipped] = useState(false);
   const wrapperRef = useRef(null);
+
+  const displayTitle = title || text;
+  const hasContent = Boolean(displayTitle || description);
 
   const handleMouseEnter = () => {
     setShowTooltip(true);
@@ -16,17 +29,19 @@ const HoverTooltip = ({ text, icon, children, wrapperClassName = "", style = {} 
     let animationFrameId;
 
     const updatePosition = () => {
-      if (wrapperRef.current && showTooltip && text) {
+      if (wrapperRef.current && showTooltip && hasContent) {
         const rect = wrapperRef.current.getBoundingClientRect();
+        const flip = rect.top < 70;
+        setIsFlipped(flip);
         setCoords({
-          top: rect.top - 8,
+          top: flip ? rect.bottom + 8 : rect.top - 8,
           left: rect.left + rect.width / 2,
         });
         animationFrameId = requestAnimationFrame(updatePosition);
       }
     };
 
-    if (showTooltip && text) {
+    if (showTooltip && hasContent) {
       animationFrameId = requestAnimationFrame(updatePosition);
     }
 
@@ -35,7 +50,7 @@ const HoverTooltip = ({ text, icon, children, wrapperClassName = "", style = {} 
         cancelAnimationFrame(animationFrameId);
       }
     };
-  }, [showTooltip, text]);
+  }, [showTooltip, hasContent]);
 
   return (
     <div
@@ -46,14 +61,27 @@ const HoverTooltip = ({ text, icon, children, wrapperClassName = "", style = {} 
       onMouseLeave={() => setShowTooltip(false)}
     >
       {children}
-      {showTooltip && text && ReactDOM.createPortal(
-        <div 
-          className="hover-tooltip-positioner" 
+      {showTooltip && hasContent && ReactDOM.createPortal(
+        <div
+          className={`hover-tooltip-positioner ${isFlipped ? "position-flipped" : ""}`}
           style={{ top: coords.top, left: coords.left }}
         >
-          <div className="hover-tooltip-modal">
-            {icon && <Icon name={icon} modifiers="xs" className="hover-tooltip-icon" />}
-            <div className="hover-tooltip-text">{text}</div>
+          <div className={`hover-tooltip-modal ${description ? "hover-tooltip-rich" : ""}`}>
+            {icon && (
+              <Icon
+                name={icon}
+                modifiers="xs"
+                className={`hover-tooltip-icon ${iconClassName}`.trim()}
+              />
+            )}
+            {description ? (
+              <div className="hover-tooltip-content">
+                {displayTitle && <div className="hover-tooltip-title">{displayTitle}</div>}
+                <div className="hover-tooltip-desc">{description}</div>
+              </div>
+            ) : (
+              <div className="hover-tooltip-text">{displayTitle}</div>
+            )}
           </div>
         </div>,
         document.body

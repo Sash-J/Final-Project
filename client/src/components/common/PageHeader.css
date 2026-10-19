@@ -1,49 +1,226 @@
+/* PageHeader.css - Modern Two-Tier Dashboard Header */
+
 .page-header {
-  text-align: center;
-  margin-bottom: 40px;
-}
-
-.page-header h2 {
-  font-size: 3rem;
-  color: #fff;
-  margin-bottom: 8px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  text-transform: capitalize;
-}
-
-.page-header-desc {
-  color: #b7b7b7;
-  font-size: 0.95rem;
-  max-width: 600px;
-  margin: 0 auto;
-  padding-bottom: 10px;
-}
-
-.page-header-actions {
-  margin-top: 10px;
   display: flex;
-  justify-content: center;
-  gap: 12px;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-bottom: 36px;
+  width: 100%;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.page-header-title-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.page-header-eyebrow {
+  font-size: clamp(1.4rem, 2.2vw, 1.85rem);
+  font-weight: 400;
+  color: #8c9ba5;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  margin: 0;
+  text-transform: capitalize;
+  user-select: none;
+}
+
+.page-header-main-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
   flex-wrap: wrap;
 }
 
+.page-header-title {
+  font-size: clamp(2.2rem, 3.5vw, 2.85rem);
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin: 0;
+  text-transform: capitalize;
+}
+
+/* Signature Badge Group: Lime Asterisk + Dark Arrow */
+.page-header-badge-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: default;
+  user-select: none;
+  vertical-align: middle;
+}
+
+.page-header-asterisk-badge {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 50%;
+  background: var(--accent-color);
+  color: #0b0f14;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(0, 195, 255, 0.35);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  line-height: 0;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.page-header-asterisk-icon {
+  display: block;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.page-header-arrow-badge {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  border-radius: 50%;
+  background: #12171f;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: transform 0.25s ease, background-color 0.2s ease;
+  line-height: 0;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.page-header-arrow-icon {
+  display: block;
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+
+.page-header-desc {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.95rem;
+  max-width: 650px;
+  margin: 6px 0 0 0;
+  line-height: 1.5;
+  text-align: left;
+}
+
+/* Actions on the right */
+.page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.page-header-actions .new-project-btn {
+  margin-top: 0 !important;
+}
+
+/* Reusable Filter/Control Pills */
+.page-header-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.85rem;
+  font-weight: 500;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.page-header-pill:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+/* Section Header Variant (for nested headers like Project Accounts) */
+.page-header.fd-section-header {
+  margin-top: 40px;
+  margin-bottom: 20px;
+}
+
+.page-header.fd-section-header .page-header-eyebrow {
+  font-size: 1.15rem;
+}
+
+.page-header.fd-section-header .page-header-title {
+  font-size: 1.65rem;
+}
+
+/* Global Page Container Widths */
 .fd-root,
 .schedule-container,
 #admin-dashboard,
 #admin-budget {
-  max-width: 1400px;
+  max-width: 1700px;
   margin: 0 auto;
-  padding: 80px 20px 40px;
+  padding: 60px 20px 40px;
   min-height: 100vh;
 }
 
 /* Light Theme Styling Overrides */
-body.light-theme .page-header h2 {
-  color: #24292f;
+body.light-theme .page-header-eyebrow {
+  color: #718096;
+}
+
+body.light-theme .page-header-title {
+  color: #0f172a;
 }
 
 body.light-theme .page-header-desc {
-  color: #57606a;
+  color: #64748b;
 }
 
+body.light-theme .page-header-arrow-badge {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .page-header-pill {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #334155;
+}
+
+body.light-theme .page-header-pill:hover {
+  background: rgba(0, 0, 0, 0.07);
+  border-color: rgba(0, 0, 0, 0.15);
+  color: #0f172a;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .page-header-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}

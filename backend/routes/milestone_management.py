@@ -181,8 +181,8 @@ def create_milestone(project_id):
 @milestone_bp.route("/api/milestones/<int:milestone_id>", methods=["PUT"])
 @login_required
 def edit_milestone(milestone_id):
-    if has_role("production crew", "crew"):
-        return jsonify({"error": "Production crew cannot edit milestones"}), 403
+    if has_role("crew"):
+        return jsonify({"error": "Crew cannot edit milestones"}), 403
     data = request.get_json()
     status = data.get("status")
     client_note = data.get("client_note")
@@ -254,8 +254,8 @@ def edit_milestone(milestone_id):
 def remove_milestone(milestone_id):
     if has_role("client"):
         return jsonify({"error": "Clients cannot delete milestones"}), 403
-    if has_role("production crew", "crew"):
-        return jsonify({"error": "Production crew cannot delete milestones"}), 403
+    if has_role("crew"):
+        return jsonify({"error": "Crew cannot delete milestones"}), 403
 
     milestone = get_milestone_by_id(milestone_id)
     if not milestone:

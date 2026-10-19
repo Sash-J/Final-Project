@@ -1,0 +1,184 @@
+/* VerificationBadge.css - Minimalist Pure Icon Badges with GlareHover */
+
+.badge-interactive-container,
+.badge-static-wrap,
+.badge-tooltip-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  vertical-align: middle;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.badge-glare-outer {
+  cursor: pointer;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease;
+  flex-shrink: 0;
+}
+
+.badge-glare-outer:hover {
+  transform: scale(1.15);
+}
+
+.badge-glare-outer:active {
+  transform: scale(0.95);
+}
+
+.verification-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  vertical-align: middle;
+  user-select: none;
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.tier-badge-icon {
+  display: inline-block;
+  line-height: 1 !important;
+  font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24;
+}
+
+/* =========================================
+   SIZING MODIFIERS
+========================================= */
+
+.tier-size-xs .tier-badge-icon {
+  font-size: 11px !important;
+}
+
+.tier-size-sm .tier-badge-icon {
+  font-size: 13px !important;
+}
+
+.tier-size-md .tier-badge-icon {
+  font-size: 17px !important;
+}
+
+.tier-size-lg .tier-badge-icon {
+  font-size: 21px !important;
+}
+
+.tier-badge-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+/* =========================================
+   METALLIC TIER COLORS & GLOWS (DARK THEME)
+========================================= */
+
+/* Diamond - Admin */
+.badge-tier-diamond {
+  color: #00f0ff;
+}
+
+.badge-interactive-container:hover .badge-tier-diamond {
+  filter: drop-shadow(0 0 6px rgba(0, 240, 255, 0.9));
+}
+
+/* Golden Level 3 - Director */
+.badge-tier-golden-3 {
+  color: #fbbf24;
+}
+
+.badge-interactive-container:hover .badge-tier-golden-3 {
+  filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.9));
+}
+
+/* Golden Level 2 - Manager */
+.badge-tier-golden-2 {
+  color: #f59e0b;
+}
+
+.badge-interactive-container:hover .badge-tier-golden-2 {
+  filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.85));
+}
+
+/* Gold Level 1 - Client (Full Access) */
+.badge-tier-golden-1 {
+  color: #eab308;
+}
+
+.badge-interactive-container:hover .badge-tier-golden-1 {
+  filter: drop-shadow(0 0 5px rgba(234, 179, 8, 0.8));
+}
+
+/* Silver - Operations, Crew, Dept Head, Accountant, Coordinator, Client Half */
+.badge-tier-silver {
+  color: #cbd5e1;
+}
+
+.badge-interactive-container:hover .badge-tier-silver {
+  filter: drop-shadow(0 0 5px rgba(203, 213, 225, 0.8));
+}
+
+/* Frosted Crystal - Viewer & Guests */
+.badge-tier-crystal {
+  color: #f8fafc;
+}
+
+.badge-interactive-container:hover .badge-tier-crystal {
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8));
+}
+
+/* =========================================
+   LIGHT THEME OVERRIDES
+========================================= */
+
+body.light-theme .badge-tier-diamond {
+  color: #0284c7;
+}
+
+body.light-theme .badge-tier-golden-3 {
+  color: #d97706;
+}
+
+body.light-theme .badge-tier-golden-2 {
+  color: #b45309;
+}
+
+body.light-theme .badge-tier-golden-1 {
+  color: #ca8a04;
+}
+
+body.light-theme .badge-tier-silver {
+  color: #64748b;
+}
+
+body.light-theme .badge-tier-crystal {
+  color: #475569;
+}
+
+body.light-theme .badge-interactive-container:hover .badge-tier-diamond {
+  filter: drop-shadow(0 0 5px rgba(2, 132, 199, 0.6));
+}
+
+body.light-theme .badge-interactive-container:hover .badge-tier-golden-3 {
+  filter: drop-shadow(0 0 5px rgba(217, 119, 6, 0.6));
+}
+
+body.light-theme .badge-interactive-container:hover .badge-tier-golden-2 {
+  filter: drop-shadow(0 0 5px rgba(180, 83, 9, 0.6));
+}
+
+body.light-theme .badge-interactive-container:hover .badge-tier-golden-1 {
+  filter: drop-shadow(0 0 5px rgba(202, 138, 4, 0.6));
+}
+
+body.light-theme .badge-interactive-container:hover .badge-tier-silver {
+  filter: drop-shadow(0 0 5px rgba(100, 116, 139, 0.6));
+}
+
+body.light-theme .badge-interactive-container:hover .badge-tier-crystal {
+  filter: drop-shadow(0 0 5px rgba(71, 85, 105, 0.5));
+}

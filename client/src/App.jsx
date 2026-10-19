@@ -13,7 +13,7 @@ import { ProjectProvider } from "./features/projects/context/ProjectContext";
 import Footer from "./components/Layout/Footer";
 import Home from "./components/Layout/Home";
 import Navbar from "./components/Layout/Navbar";
-import GlobalToaster from "./components/common/GlobalToaster";
+import GlobalToaster from "./components/toast/GlobalToaster";
 import AdminBudget from "./features/budget/pages/AdminBudget";
 import AdminDashboard from "./features/dashboard/pages/AdminDashboard";
 
@@ -81,7 +81,7 @@ const router = createBrowserRouter([
       {
         path: "crew-dashboard",
         element: (
-          <ProtectedRoute roles={["production_crew", "production crew", "crew", "department head"]}>
+          <ProtectedRoute roles={["crew", "department head"]}>
             <CrewDashboard />
           </ProtectedRoute>
         ),

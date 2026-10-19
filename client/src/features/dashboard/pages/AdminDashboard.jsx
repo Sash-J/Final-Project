@@ -71,7 +71,8 @@ const AdminDashboard = () => {
   return (
     <section id="admin-dashboard">
       <PageHeader
-        title="Admin Dashboard"
+        category="Administration"
+        title="Dashboard"
         description="Centralized project management and system configuration."
       >
         <button

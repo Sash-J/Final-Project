@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Icon from "../../../components/common/Icon";
 import HoverTooltip from "../../../components/common/HoverTooltip";
-import GlassSurface from "../../../components/common/GlassSurface";
+import GlassSurface from "../../../components/effects/GlassSurface";
 import { projectService } from "../../../services/projectService";
 import "./CrewHierarchy.css";
 

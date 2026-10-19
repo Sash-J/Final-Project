@@ -57,7 +57,7 @@ const Navbar = () => {
           </li>
         )}
 
-        {user && hasRole(["production_crew", "production crew"]) && (
+        {user && hasRole(["crew", "department head"]) && (
           <li>
             <Link
               to="/crew-dashboard"
@@ -69,7 +69,7 @@ const Navbar = () => {
           </li>
         )}
 
-        {user && !hasRole(["client", "production_crew", "production crew"]) && (
+        {user && !hasRole(["client", "crew", "department head"]) && (
           <li>
             <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)}>
               <Icon name="dashboard" modifiers="md" />
@@ -78,7 +78,7 @@ const Navbar = () => {
           </li>
         )}
 
-        {user && hasPermission("budget.view") && !hasRole(["client", "production_crew", "production crew"]) && (
+        {user && hasPermission("budget.view") && !hasRole(["client", "crew", "department head"]) && (
           <li>
             <Link
               to="/admin-budget"

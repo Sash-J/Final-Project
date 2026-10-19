@@ -46,7 +46,7 @@ def roles_required(*roles):
                     if r == "client" and any(u.startswith("client") for u in norm_user_roles):
                         matched = True
                         break
-                    if r in ("crew", "production crew") and any(u in ("crew", "production crew", "department head") for u in norm_user_roles):
+                    if r == "crew" and any(u in ("crew", "department head") for u in norm_user_roles):
                         matched = True
                         break
 
@@ -152,7 +152,7 @@ def has_role(*roles):
     for r in norm_required:
         if r == "client" and any(u.startswith("client") for u in norm_user):
             return True
-        if r in ("crew", "production crew") and any(u in ("crew", "production crew", "department head") for u in norm_user):
+        if r == "crew" and any(u in ("crew", "department head") for u in norm_user):
             return True
 
     return False

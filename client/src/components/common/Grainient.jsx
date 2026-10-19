@@ -195,6 +195,7 @@ const Grainient = ({
     ctxMap.set(container, { renderer, program, mesh });
 
     const setSize = () => {
+      if (!container || !container.isConnected) return;
       const rect = container.getBoundingClientRect();
       const w = Math.max(1, Math.ceil(rect.width));
       const h = Math.max(1, Math.ceil(rect.height));

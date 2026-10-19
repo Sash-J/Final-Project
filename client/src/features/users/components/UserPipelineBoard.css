@@ -1,0 +1,285 @@
+/* UserPipelineBoard.css - Kanban Board Container & Header Controls */
+
+.pipeline-board-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Top Navigation Bar */
+.pipeline-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  width: 100%;
+  padding-bottom: 8px;
+}
+
+
+/* Segmented Pill Switcher (inspired by top toggle pill in reference design) */
+.pipeline-segmented-pill {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+  padding: 4px;
+  gap: 3px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
+.segmented-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  white-space: nowrap;
+}
+
+.segmented-pill-btn:hover {
+  color: #fff;
+}
+
+.segmented-pill-btn.active {
+  background: #000;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+}
+
+.segmented-badge-alert {
+  padding: 1px 6px;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: #f59e0b;
+  color: #000;
+}
+
+/* Tools & Search */
+.pipeline-tools-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pipeline-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 9999px;
+  padding: 8px 16px;
+  transition: all 0.2s ease;
+}
+
+.pipeline-search-wrap:focus-within {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(0, 240, 255, 0.4);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.2);
+}
+
+.pipeline-search-icon {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.pipeline-search-input {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 0.85rem;
+  width: 170px;
+  outline: none;
+}
+
+.pipeline-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.pipeline-search-clear {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.pipeline-search-clear:hover {
+  color: #fff;
+}
+
+.pipeline-refresh-btn {
+  padding: 8px 18px !important;
+  font-size: 0.85rem !important;
+  font-weight: 500 !important;
+  gap: 8px;
+  border-radius: 9999px !important;
+}
+
+.pipeline-refresh-btn .icon-root {
+  transition: transform 0.4s ease;
+}
+
+.pipeline-refresh-btn:hover .icon-root {
+  transform: rotate(180deg);
+}
+
+.pipeline-refresh-btn.is-spinning {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.pipeline-refresh-btn.is-spinning .icon-root {
+  animation: pipelineBtnSpin 0.9s linear infinite;
+}
+
+@keyframes pipelineBtnSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Columns Grid */
+.pipeline-columns-grid {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  scroll-behavior: smooth;
+  box-sizing: border-box;
+  align-items: flex-start;
+}
+
+.pipeline-columns-grid::-webkit-scrollbar {
+  height: 6px;
+}
+
+.pipeline-columns-grid::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 9999px;
+}
+
+.pipeline-columns-grid::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+}
+
+.pipeline-columns-grid::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+@media (max-width: 1024px) {
+  .pipeline-top-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pipeline-segmented-pill {
+    width: 100%;
+    overflow-x: auto;
+  }
+}
+
+/* ==========================================================================
+   LIGHT THEME OVERRIDES
+   ========================================================================== */
+body.light-theme .pipeline-segmented-pill {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+body.light-theme .segmented-pill-btn {
+  color: #64748b;
+}
+
+body.light-theme .segmented-pill-btn:hover {
+  color: #0f172a;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+body.light-theme .segmented-pill-btn.active {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+}
+
+body.light-theme .pipeline-search-wrap {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+body.light-theme .pipeline-search-wrap:focus-within {
+  background: #ffffff;
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+body.light-theme .pipeline-search-icon {
+  color: #94a3b8;
+}
+
+body.light-theme .pipeline-search-input {
+  color: #0f172a;
+}
+
+body.light-theme .pipeline-search-input::placeholder {
+  color: #94a3b8;
+}
+
+body.light-theme .pipeline-search-clear {
+  color: #94a3b8;
+}
+
+body.light-theme .pipeline-search-clear:hover {
+  color: #0f172a;
+}
+
+body.light-theme .pipeline-refresh-btn {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #334155 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+body.light-theme .pipeline-refresh-btn:hover {
+  background: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+body.light-theme .pipeline-columns-grid::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+body.light-theme .pipeline-columns-grid::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+body.light-theme .pipeline-columns-grid::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}

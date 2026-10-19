@@ -5,7 +5,7 @@ import React, {
   useState,
 } from "react";
 import CompositeBentoCard from "../../../components/common/CompositeBentoCard";
-import GlassSurface from "../../../components/common/GlassSurface";
+import GlassSurface from "../../../components/effects/GlassSurface";
 import HoverTooltip from "../../../components/common/HoverTooltip";
 import Icon from "../../../components/common/Icon";
 import DarkVeil from "../../../components/effects/DarkVeil";
@@ -788,7 +788,6 @@ const EquipmentVisualization = ({
                     style={{ height: `${dynamicHeight}px` }}
                   >
                     <CompositeBentoCard
-                      className="summary-bento-card"
                       singleOverlay={true}
                       pillClassName=""
                       overlayComponent={<DarkVeil globalSync={true} />}

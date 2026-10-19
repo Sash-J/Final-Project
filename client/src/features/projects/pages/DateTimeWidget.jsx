@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import "./DateTimeWidget.css";
 import Icon from "../../../components/common/Icon";
-import GlassSurface from "../../../components/common/GlassSurface";
+import GlassSurface from "../../../components/effects/GlassSurface";
 
 const DateTimeWidget = () => {
   const [currentTime, setCurrentTime] = useState(new Date());

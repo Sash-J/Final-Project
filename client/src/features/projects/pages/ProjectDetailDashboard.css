@@ -600,85 +600,14 @@ body.light-theme .timeline-legend-label {
 }
 
 /* -------------------------------------
-   Summary Bento Card (Dark Theme)
+   Equipment Preview & Timeline Legend
 ------------------------------------- */
-
-.summary-bento-card {
-  background: rgba(255, 255, 255, 0.04) !important;
-  backdrop-filter: blur(24px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: 32px !important;
-  color: #fff !important;
-  padding: 24px !important;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
-  position: relative;
-  overflow: visible !important;
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
-}
-
-.summary-bento-card:hover {
-  transform: translateY(-5px);
-  border-color: rgba(var(--accent-color-rgb), 0.3) !important;
-}
 
 .summary-bento-top {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 20px;
-}
-
-.summary-bento-top-right {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 20px;
-}
-
-.summary-lead-container {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 10px;
-  width: 100%;
-}
-
-.summary-avatar {
-  width: 44px;
-  height: 44px;
-  min-width: 44px;
-  min-height: 44px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: rgba(var(--accent-color-rgb), 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 1.2rem;
-  color: var(--accent-color);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-}
-
-.summary-lead-text {
-  display: flex;
-  flex-direction: column;
-}
-
-.summary-lead-name {
-  font-weight: 600;
-  font-size: 0.85rem;
-  text-align: left;
-  margin-bottom: 3px;
-  color: #fff;
-  letter-spacing: -0.2px;
-  line-height: 1.2;
 }
 
 .equipment-preview {
@@ -726,115 +655,11 @@ body.light-theme .timeline-legend-label {
   text-align: center;
 }
 
-.summary-lead-role {
-  font-size: 0.7rem;
-  text-align: left;
-  color: rgba(255, 255, 255, 0.6);
-  font-weight: 400;
-}
-
-.summary-bento-middle {
-  margin-bottom: 16px;
-}
-
-.summary-bento-title {
-  font-size: 1.6rem;
-  font-weight: 700;
-  text-align: left;
-  margin: 0 0 4px 0;
-  color: #fff;
-}
-
-.summary-bento-subtitle {
-  display: block;
-  text-align: left;
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.6);
-}
-
 .equipment-bento-card .summary-bento-title,
 .equipment-bento-card .summary-bento-subtitle {
   text-align: right;
 }
-.summary-bento-subtitle strong {
-  color: var(--accent-color);
-  font-weight: 500;
-}
 
-.summary-progress-container {
-  margin-top: auto;
-  margin-bottom: 0;
-}
-
-.summary-progress-bar {
-  width: 100%;
-  height: 8px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  overflow: hidden;
-}
-
-.summary-progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--accent-color), var(--accent-color));
-  box-shadow: 0 0 10px rgba(var(--accent-color-rgb), 0.5);
-  border-radius: 4px;
-}
-
-.summary-progress-labels {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.summary-progress-labels span:last-child {
-  color: var(--accent-color);
-  font-weight: 700;
-}
-
-.summary-selector {
-  display: flex;
-  align-items: center;
-  padding: 6px 6px 6px 6px;
-  width: max-content;
-  flex: 0 0 auto;
-  justify-content: flex-start;
-  border-radius: 30px !important;
-  font-size: 0.85rem;
-  font-weight: 500;
-  gap: 6px;
-  color: #fff;
-  white-space: nowrap;
-  transform: scale(0.9) translateY(0px);
-  transform-origin: top right;
-  cursor: pointer;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1.5px solid rgba(255, 255, 255, 0.1) !important;
-}
-
-/* Remove premium-glass-card matrix animations from the selector */
-.summary-selector::before,
-.summary-selector::after {
-  display: none !important;
-}
-
-.summary-selector-icon {
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
-  min-height: 28px;
-  flex-shrink: 0;
-  background: rgba(var(--accent-color-rgb), 0.1);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 8px;
-}
 .summary-selector-icon .timeline-legend-dot {
   width: 8px;
   height: 8px;
@@ -868,52 +693,6 @@ body.light-theme .timeline-legend-label {
   color: #57606a;
 }
 
-/* Light Theme overrides for Summary Bento Cards */
-
-body.light-theme .summary-bento-card {
-  color: #24292f !important;
-}
-
-body.light-theme .summary-lead-name,
-body.light-theme .summary-bento-title {
-  color: #24292f;
-}
-
-body.light-theme .summary-lead-role,
-body.light-theme .summary-bento-subtitle {
-  color: #57606a;
-}
-
-body.light-theme .summary-bento-subtitle strong {
-  color: #0969da;
-}
-
-body.light-theme .summary-selector {
-  background: #ffffff;
-  color: #24292f;
-}
-
-body.light-theme .summary-selector > body.light-theme .summary-selector-icon {
-  background: rgba(9, 105, 218, 0.1);
-}
-
-body.light-theme .summary-selector-icon body.light-theme .summary-progress-bar {
-  background: rgba(0, 0, 0, 0.08);
-}
-
-body.light-theme .summary-progress-fill {
-  background: linear-gradient(90deg, #0969da, #0366d6);
-  box-shadow: 0 0 10px rgba(9, 105, 218, 0.3);
-}
-
-body.light-theme .summary-progress-labels {
-  color: #57606a;
-}
-
-body.light-theme .summary-progress-labels span:last-child {
-  color: #0969da;
-}
-
 body.light-theme .equipment-preview-overlay {
   background: linear-gradient(
     to top,
@@ -925,13 +704,6 @@ body.light-theme .equipment-preview-overlay {
 body.light-theme .equipment-icon-opacity {
   color: #24292f;
   opacity: 0.15;
-}
-
-body.light-theme .summary-avatar {
-  background: rgba(9, 105, 218, 0.1);
-  border-color: rgba(9, 105, 218, 0.2);
-  color: #0969da;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 /* Extracted inline styles */

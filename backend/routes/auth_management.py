@@ -233,19 +233,7 @@ def register():
         return jsonify({"error": "Username already exists"}), 400
 
     # Determine initial verification level per role matrix
-    role_norm = role.strip().lower()
-    if "admin" in role_norm:
-        v_level = "Diamond Verification"
-    elif "director" in role_norm:
-        v_level = "Golden Level 3"
-    elif "manager" in role_norm:
-        v_level = "Golden Level 2"
-    elif "full" in role_norm or role_norm == "client":
-        v_level = "Gold level 1"
-    elif "crew" in role_norm and "head" not in role_norm:
-        v_level = "white"
-    else:
-        v_level = "Silver"
+    v_level = auth.get_tier_for_role(role)
 
     hashed = _bcrypt.generate_password_hash(password).decode("utf-8")
     new_user_id = auth.create_user(
