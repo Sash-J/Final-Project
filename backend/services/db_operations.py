@@ -91,6 +91,24 @@ def run_rbac_migration():
         conn.commit()
 
         # 3. Ensure permissions exist
+        hierarchy_permissions = [
+            "hierarchy.node.add",
+            "hierarchy.node.edit",
+            "hierarchy.node.delete",
+            "hierarchy.node.drag",
+        ]
+
+        # Purge plain-text duplicate permissions to maintain the canonical domain.entity.action standard
+        legacy_duplicate_permissions = [
+            "Add child node",
+            "Edit node",
+            "Delete Node",
+            "Node draggable",
+        ]
+        format_perm = ",".join(["%s"] * len(legacy_duplicate_permissions))
+        cursor.execute(f"DELETE FROM permissions WHERE name IN ({format_perm})", legacy_duplicate_permissions)
+        conn.commit()
+
         standard_permissions = [
             "user.view",
             "user.approve",
@@ -110,6 +128,7 @@ def run_rbac_migration():
             "schedule.edit",
             "finance.view",
             "finance.edit",
+            *hierarchy_permissions,
         ]
         cursor.executemany("INSERT IGNORE INTO permissions (name) VALUES (%s)", [(p,) for p in standard_permissions])
         conn.commit()
@@ -126,12 +145,14 @@ def run_rbac_migration():
             "director": [
                 "user.view", "user.approve", "user.reject", "user.edit",
                 "project.view", "project.edit", "budget.view", "production.view",
-                "production.edit", "schedule.view", "schedule.edit", "finance.view"
+                "production.edit", "schedule.view", "schedule.edit", "finance.view",
+                *hierarchy_permissions,
             ],
             "manager": [
                 "user.view", "project.view", "project.create", "project.edit",
                 "budget.view", "budget.edit", "production.view", "production.edit",
-                "schedule.view", "schedule.edit", "finance.view"
+                "schedule.view", "schedule.edit", "finance.view",
+                *hierarchy_permissions,
             ],
             "accountant": [
                 "project.view", "budget.view", "budget.edit", "finance.view", "finance.edit",
@@ -145,7 +166,8 @@ def run_rbac_migration():
                 "project.view", "budget.view", "schedule.view", "production.view", "user.view"
             ],
             "department head": [
-                "project.view", "production.view", "production.edit", "schedule.view", "budget.view"
+                "project.view", "production.view", "production.edit", "schedule.view", "budget.view",
+                *hierarchy_permissions,
             ],
             "crew": [
                 "project.view", "production.view", "schedule.view", "budget.view"
@@ -157,6 +179,18 @@ def run_rbac_migration():
                 "project.view", "budget.view", "schedule.view", "production.view"
             ],
         }
+
+        # Explicitly ensure client accounts NEVER have hierarchy edit permissions
+        client_role_ids = [role_map[r] for r in ["client (full access)", "client (half access)"] if r in role_map]
+        hierarchy_perm_ids = [perm_map[p] for p in hierarchy_permissions if p in perm_map]
+        if client_role_ids and hierarchy_perm_ids:
+            c_placeholders = ",".join(["%s"] * len(client_role_ids))
+            p_placeholders = ",".join(["%s"] * len(hierarchy_perm_ids))
+            cursor.execute(
+                f"DELETE FROM role_permissions WHERE role_id IN ({c_placeholders}) AND permission_id IN ({p_placeholders})",
+                tuple(client_role_ids + hierarchy_perm_ids),
+            )
+            conn.commit()
 
         cursor.execute("SELECT role_id, permission_id FROM role_permissions")
         existing_rp = {(row["role_id"], row["permission_id"]) for row in cursor.fetchall()}

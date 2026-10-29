@@ -1,5 +1,5 @@
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { budgetService } from "../../../services/budgetService";
 import { projectService } from "../../../services/projectService";
@@ -33,6 +33,8 @@ import toast from "react-hot-toast";
 
 
 
+const NOOP = () => {};
+
 const BudgetEntryForm = ({
   embedded = false,
   externalProjectId = "",
@@ -40,18 +42,25 @@ const BudgetEntryForm = ({
   projectName = "",
   versionName = "",
   refreshKey = 0,
-  onDirtyChange = () => {},
+  onDirtyChange = NOOP,
   selectedCatId = "",
   selectedDeptId = "",
   onPublish = null,
   actionsContainer = null,
   comparisonData = null,
   isCompareLoading = false,
+  canEdit: canEditProp = undefined,
+  hideUnused = false,
+  hideMargin = false,
 }) => {
-  const { user, hasRole } = useAuth();
+  const { user, hasRole, hasPermission } = useAuth();
   const isManager = hasRole("manager");
   const isAdmin = hasRole("admin");
-  const canEdit = isManager || isAdmin;
+  const isClient = hasRole("client");
+  const hasEditPermission = hasPermission("budget.edit");
+  const canEdit = canEditProp !== undefined ? canEditProp : ((isManager || isAdmin || hasEditPermission) && !isClient);
+  const shouldHideUnused = hideUnused || isClient;
+  const hideGrossAndAdd = hideMargin || shouldHideUnused;
 
   const {
     getBudgetData,
@@ -84,6 +93,7 @@ const BudgetEntryForm = ({
     onDirtyChange,
     hierarchyCache,
     getBudgetData,
+    canEdit,
   });
 
   const {
@@ -105,12 +115,126 @@ const BudgetEntryForm = ({
     handleAssignBudgetItemCrew,
   } = useBudgetAssignments(externalProjectId, onDirtyChange);
 
+  const {
+    calcGross,
+    totalRaw,
+    getCategorySubtotal,
+    getDeptSubtotal,
+    grossDisplay,
+    totalDisplay,
+    getPhaseSubtotal,
+    grandTotal,
+  } = useBudgetCalculations(values, hierarchy);
+
+  // Comparison helpers
+  const getBudgetBItemTotal = (item) => parseFloat(comparisonData?.budgetB?.[item.id]?.total) || 0;
+  const getBudgetBCatTotal = (cat) =>
+    (cat.items || []).reduce((sum, item) => sum + getBudgetBItemTotal(item), 0);
+  const getBudgetBDeptTotal = (dept) =>
+    (dept.categories || []).reduce((sum, cat) => sum + getBudgetBCatTotal(cat), 0);
+  const getBudgetBPhaseTotal = (phase) =>
+    (phase.departments || []).reduce((sum, dept) => sum + getBudgetBDeptTotal(dept), 0);
+  const getBudgetBGrandTotal = () =>
+    (hierarchy || []).reduce((sum, phase) => sum + getBudgetBPhaseTotal(phase), 0);
+
+  const getVarianceClass = (valA, valB) => {
+    const diff = valA - valB;
+    if (diff > 0) return "variance-negative"; // Overage in Current Budget compared to Baseline
+    if (diff < 0) return "variance-positive"; // Savings in Current Budget compared to Baseline
+    return "variance-neutral";
+  };
+
+  const formatVariance = (valA, valB) => {
+    const diff = valA - valB;
+    if (diff === 0) return "+$0.00";
+    const formatted = formatCurrency(Math.abs(diff));
+    return diff > 0 ? `+${formatted}` : `-${formatted}`;
+  };
+
+  const displayHierarchy = useMemo(() => {
+    if (!shouldHideUnused || !hierarchy || hierarchy.length === 0) {
+      return hierarchy;
+    }
+
+    const getItemBTotal = (item) => parseFloat(comparisonData?.budgetB?.[item.id]?.total) || 0;
+    const getCatBTotal = (cat) =>
+      (cat.items || []).reduce((sum, item) => sum + getItemBTotal(item), 0);
+    const getDeptBTotal = (dept) =>
+      (dept.categories || []).reduce((sum, cat) => sum + getCatBTotal(cat), 0);
+    const getPhaseBTotal = (phase) =>
+      (phase.departments || []).reduce((sum, dept) => sum + getDeptBTotal(dept), 0);
+
+    const isItemUsed = (item) => {
+      const v = values[item.id];
+      const q = v ? (parseFloat(v.qty) || 0) : 0;
+      const r = v ? (parseFloat(v.rate) || 0) : 0;
+      const a1 = v ? (parseFloat(v.add1) || 0) : 0;
+      const tot = totalRaw ? totalRaw(item.id) : (v ? (parseFloat(v.total) || 0) : 0);
+      const isItemized = v ? Boolean(v.is_itemized) : false;
+      const hasComment = v ? Boolean(v.c1 && String(v.c1).trim().length > 0) : false;
+      const compareBTotal = comparisonData ? getItemBTotal(item) : 0;
+      return q > 0 || r > 0 || a1 > 0 || tot > 0 || isItemized || hasComment || compareBTotal > 0;
+    };
+
+    return hierarchy
+      .map((phase) => {
+        const filteredDepts = (phase.departments || [])
+          .map((dept) => {
+            const filteredCats = (dept.categories || [])
+              .map((cat) => {
+                const usedItems = (cat.items || []).filter(isItemUsed);
+                const catSubtotal = getCategorySubtotal(cat);
+                const catBTotal = comparisonData ? getCatBTotal(cat) : 0;
+                if (usedItems.length === 0 && catSubtotal <= 0 && catBTotal <= 0) {
+                  return null;
+                }
+                return {
+                  ...cat,
+                  items: usedItems,
+                };
+              })
+              .filter(Boolean);
+
+            const deptSubtotal = getDeptSubtotal(dept);
+            const deptBTotal = comparisonData ? getDeptBTotal(dept) : 0;
+            if (filteredCats.length === 0 && deptSubtotal <= 0 && deptBTotal <= 0) {
+              return null;
+            }
+            return {
+              ...dept,
+              categories: filteredCats,
+            };
+          })
+          .filter(Boolean);
+
+        const phaseSubtotal = getPhaseSubtotal(phase);
+        const phaseBTotal = comparisonData ? getPhaseBTotal(phase) : 0;
+        if (filteredDepts.length === 0 && phaseSubtotal <= 0 && phaseBTotal <= 0) {
+          return null;
+        }
+        return {
+          ...phase,
+          departments: filteredDepts,
+        };
+      })
+      .filter(Boolean);
+  }, [
+    shouldHideUnused,
+    hierarchy,
+    values,
+    totalRaw,
+    getCategorySubtotal,
+    getDeptSubtotal,
+    getPhaseSubtotal,
+    comparisonData,
+  ]);
+
   useEffect(() => {
-    if (!selectedCatId || !hierarchy.length) return;
+    if (!selectedCatId || !displayHierarchy.length) return;
 
     let foundPhaseId = null;
     let foundDeptId = null;
-    for (const phase of hierarchy) {
+    for (const phase of displayHierarchy) {
       if (phase.departments) {
         for (const dept of phase.departments) {
           if (dept.categories) {
@@ -158,13 +282,13 @@ const BudgetEntryForm = ({
       }, 150);
       return () => clearTimeout(timer);
     }
-  }, [selectedCatId, hierarchy, setCollapsedDepts, setExpandedPhases]);
+  }, [selectedCatId, displayHierarchy, setCollapsedDepts, setExpandedPhases]);
 
   useEffect(() => {
-    if (!selectedDeptId || !hierarchy.length) return;
+    if (!selectedDeptId || !displayHierarchy.length) return;
 
     let foundPhaseId = null;
-    for (const phase of hierarchy) {
+    for (const phase of displayHierarchy) {
       if (phase.departments) {
         const hasDept = phase.departments.some(
           (dept) => String(dept.id) === String(selectedDeptId)
@@ -206,7 +330,7 @@ const BudgetEntryForm = ({
       }, 150);
       return () => clearTimeout(timer);
     }
-  }, [selectedDeptId, hierarchy, setCollapsedDepts, setExpandedPhases]);
+  }, [selectedDeptId, displayHierarchy, setCollapsedDepts, setExpandedPhases]);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
@@ -318,7 +442,7 @@ const BudgetEntryForm = ({
     const query = searchQuery.toLowerCase().trim();
     const results = [];
 
-    hierarchy.forEach((phase) => {
+    displayHierarchy.forEach((phase) => {
       if (phase.departments) {
         phase.departments.forEach((dept) => {
           if (dept.categories) {
@@ -343,7 +467,7 @@ const BudgetEntryForm = ({
 
     setSearchResults(results);
     setCurrentMatchIndex(results.length > 0 ? 0 : -1);
-  }, [searchQuery, hierarchy]);
+  }, [searchQuery, displayHierarchy]);
 
   const goToMatch = (idx) => {
     if (searchResults.length === 0 || idx < 0 || idx >= searchResults.length) return;
@@ -525,42 +649,6 @@ const BudgetEntryForm = ({
       .catch((err) => console.error("Failed to save breakdown:", err));
   };
 
-  const {
-    calcGross,
-    totalRaw,
-    getCategorySubtotal,
-    getDeptSubtotal,
-    grossDisplay,
-    totalDisplay,
-    getPhaseSubtotal,
-    grandTotal,
-  } = useBudgetCalculations(values, hierarchy);
-
-  // Comparison helpers
-  const getBudgetBItemTotal = (item) => parseFloat(comparisonData?.budgetB?.[item.id]?.total) || 0;
-  const getBudgetBCatTotal = (cat) =>
-    cat.items.reduce((sum, item) => sum + getBudgetBItemTotal(item), 0);
-  const getBudgetBDeptTotal = (dept) =>
-    dept.categories.reduce((sum, cat) => sum + getBudgetBCatTotal(cat), 0);
-  const getBudgetBPhaseTotal = (phase) =>
-    phase.departments.reduce((sum, dept) => sum + getBudgetBDeptTotal(dept), 0);
-  const getBudgetBGrandTotal = () =>
-    hierarchy.reduce((sum, phase) => sum + getBudgetBPhaseTotal(phase), 0);
-
-  const getVarianceClass = (valA, valB) => {
-    const diff = valA - valB;
-    if (diff > 0) return "variance-negative"; // Overage in Current Budget compared to Baseline
-    if (diff < 0) return "variance-positive"; // Savings in Current Budget compared to Baseline
-    return "variance-neutral";
-  };
-
-  const formatVariance = (valA, valB) => {
-    const diff = valA - valB;
-    if (diff === 0) return "+$0.00";
-    const formatted = formatCurrency(Math.abs(diff));
-    return diff > 0 ? `+${formatted}` : `-${formatted}`;
-  };
-
   const { onDragEnd } = useBudgetDragAndDrop(hierarchy, setHierarchy, invalidateHierarchyCache);
 
   const handleSubmit = async () => {
@@ -654,15 +742,15 @@ const BudgetEntryForm = ({
   };
 
   const handleExportTopSheet = () => {
-    exportBudgetToPDF(hierarchy, values, projectName, versionName, "topsheet");
+    exportBudgetToPDF(displayHierarchy, values, projectName, versionName, "topsheet");
   };
 
   const handleExportDetailPDF = () => {
-    exportBudgetToPDF(hierarchy, values, projectName, versionName, "detail");
+    exportBudgetToPDF(displayHierarchy, values, projectName, versionName, "detail");
   };
 
   const handleExportDetailExcel = () => {
-    exportBudgetToExcel(hierarchy, values, projectName);
+    exportBudgetToExcel(displayHierarchy, values, projectName);
   };
 
   const handleClear = () => {
@@ -681,11 +769,14 @@ const BudgetEntryForm = ({
   const showVersionWarning = externalProjectId && !versionId;
   const isReadOnly = showVersionWarning || (!!versionId && !canEdit);
   const canDrag = isAdmin && !isReadOnly;
+  const showDrag = canDrag && !comparisonData;
+  const headerColSpan = hideGrossAndAdd ? 4 : 6;
+  const spacerColSpan = (showDrag ? 1 : 0) + headerColSpan + 1 + (comparisonData ? 2 : 0);
 
   return (
     <div className="bef-root" onClick={() => setActiveComment(null)}>
       {/* Floating Collapsible Search Widget */}
-      {externalProjectId && versionId && hierarchy.length > 0 && (
+      {externalProjectId && versionId && displayHierarchy.length > 0 && (
         <BudgetSearchWidget 
           widgetRef={widgetRef}
           searchOpen={searchOpen}
@@ -719,24 +810,27 @@ const BudgetEntryForm = ({
           <BudgetFormatEmpty />
         )}
 
-        {!(loading || isCompareLoading) && externalProjectId && versionId && hierarchy.length > 0 && (
+        {!(loading || isCompareLoading) && externalProjectId && versionId && displayHierarchy.length === 0 && (
+          <div className="bef-empty-version-state">
+            <span className="material-symbols-outlined bef-empty-version-icon">inventory_2</span>
+            <h3>No Published Budget Structure Found</h3>
+            <p>This published version does not contain any budget phases or items.</p>
+          </div>
+        )}
+
+        {!(loading || isCompareLoading) && externalProjectId && versionId && displayHierarchy.length > 0 && (
           <div
             id="admin-budget-pdf-content"
-            className="fade-in-section"
-            style={{
-              padding: "20px",
-              backgroundColor: "#0d0e15",
-              borderRadius: "12px",
-            }}
+            className="fade-in-section bef-sheet-container"
           >
             <div className={`bef-sheet ${!canDrag ? "drag-disabled" : ""}`}>
               <DragDropContext onDragEnd={onDragEnd}>
                 <table className="bef-table header-only-table">
-                  <BudgetColGroup isCompareMode={!!comparisonData} />
-                  <BudgetTableHeader isCompareMode={!!comparisonData} versionNameA={comparisonData?.versionNameA} versionNameB={comparisonData?.versionNameB} />
+                  <BudgetColGroup isCompareMode={!!comparisonData} hideGrossAndAdd={hideGrossAndAdd} canDrag={canDrag} />
+                  <BudgetTableHeader isCompareMode={!!comparisonData} versionNameA={comparisonData?.versionNameA} versionNameB={comparisonData?.versionNameB} hideGrossAndAdd={hideGrossAndAdd} canDrag={canDrag} />
                 </table>
 
-                {hierarchy.map((phase) => {
+                {displayHierarchy.map((phase) => {
                   const isExpanded = expandedPhases.has(phase.phase_id);
                   const phaseTotal = getPhaseSubtotal(phase);
 
@@ -801,13 +895,13 @@ const BudgetEntryForm = ({
                                       className={`dept-section ${snapshotDept.isDragging ? "dragging-dept" : ""}`}
                                     >
                                       <table className="bef-table dept-header-table">
-                                        <BudgetColGroup isCompareMode={!!comparisonData} />
+                                        <BudgetColGroup isCompareMode={!!comparisonData} hideGrossAndAdd={hideGrossAndAdd} canDrag={canDrag} />
                                         <tbody className="bef-dept-body">
                                           <tr
                                             id={`dept-section-${dept.id}`}
                                             className="bef-dept-row"
                                           >
-                                            {!comparisonData && (
+                                            {showDrag && (
                                               <td
                                                 className="col-drag"
                                                 {...providedDept.dragHandleProps}
@@ -818,7 +912,7 @@ const BudgetEntryForm = ({
                                               </td>
                                             )}
                                             <td
-                                              colSpan="6"
+                                              colSpan={headerColSpan}
                                               onClick={() => toggleDept(dept.id)}
                                               className="dept-header-cell"
                                             >
@@ -849,7 +943,7 @@ const BudgetEntryForm = ({
                                                 </div>
                                               </div>
                                             </td>
-                                            <td className="col-total dept-subtotal-val" style={{ fontWeight: "700", color: "var(--accent-color)", textAlign: "right", paddingRight: "24px" }}>
+                                            <td className="col-total dept-subtotal-val">
                                               {(() => {
                                                 const total = getDeptSubtotal(dept);
                                                 return total > 0 ? formatCurrency(total) : "";
@@ -885,7 +979,7 @@ const BudgetEntryForm = ({
                                               display: collapsedDepts.has(dept.id) ? "none" : "table"
                                             }}
                                           >
-                                            <BudgetColGroup isCompareMode={!!comparisonData} />
+                                            <BudgetColGroup isCompareMode={!!comparisonData} hideGrossAndAdd={hideGrossAndAdd} canDrag={canDrag} />
                                             {dept.categories.map((cat, catIdx) => (
                                               <Draggable
                                                 key={cat.id}
@@ -909,7 +1003,7 @@ const BudgetEntryForm = ({
                                                         {...providedItem.droppableProps}
                                                       >
                                                         <tr id={`cat-section-${cat.id}`} className="bef-cat-row">
-                                                          {!comparisonData && (
+                                                          {showDrag && (
                                                             <td
                                                               className="col-drag"
                                                               {...providedCat.dragHandleProps}
@@ -920,7 +1014,7 @@ const BudgetEntryForm = ({
                                                             </td>
                                                           )}
                                                           <td
-                                                            colSpan="6"
+                                                            colSpan={headerColSpan}
                                                             className="cat-name-cell"
                                                           >
                                                             <div className="cat-header-row" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -928,18 +1022,20 @@ const BudgetEntryForm = ({
                                                                 {cat.category_name}
                                                               </span>
                                                               
-                                                              <div className="crew-assign-wrapper" style={{ marginLeft: "10px", position: "relative" }}>
-                                                                <CrewAssignmentDropdown
-                                                                  assignedCrew={categoryAssignments[cat.id] || []}
-                                                                  projectCrew={projectCrew}
-                                                                  isActive={activeAssignCatId === cat.id}
-                                                                  onToggle={() => setActiveAssignCatId(activeAssignCatId === cat.id ? null : cat.id)}
-                                                                  onAssign={(crewId) => handleAssignCategoryCrew(cat.id, crewId)}
-                                                                  isCrewEditing={isCrewEditing}
-                                                                  setIsCrewEditing={setIsCrewEditing}
-                                                                  badgeSize={18}
-                                                                />
-                                                              </div>
+                                                              {canEdit && (
+                                                                <div className="crew-assign-wrapper" style={{ marginLeft: "10px", position: "relative" }}>
+                                                                  <CrewAssignmentDropdown
+                                                                    assignedCrew={categoryAssignments[cat.id] || []}
+                                                                    projectCrew={projectCrew}
+                                                                    isActive={activeAssignCatId === cat.id}
+                                                                    onToggle={() => setActiveAssignCatId(activeAssignCatId === cat.id ? null : cat.id)}
+                                                                    onAssign={(crewId) => handleAssignCategoryCrew(cat.id, crewId)}
+                                                                    isCrewEditing={isCrewEditing}
+                                                                    setIsCrewEditing={setIsCrewEditing}
+                                                                    badgeSize={18}
+                                                                  />
+                                                                </div>
+                                                              )}
 
                                                             </div>
                                                           </td>
@@ -976,9 +1072,9 @@ const BudgetEntryForm = ({
                                                           Object.keys(values).length ===
                                                             0) ? (
                                                           <>
-                                                            <SkeletonRow />
-                                                            <SkeletonRow />
-                                                            <SkeletonRow />
+                                                            <SkeletonRow hideGrossAndAdd={hideGrossAndAdd} canDrag={canDrag} isCompareMode={!!comparisonData} />
+                                                            <SkeletonRow hideGrossAndAdd={hideGrossAndAdd} canDrag={canDrag} isCompareMode={!!comparisonData} />
+                                                            <SkeletonRow hideGrossAndAdd={hideGrossAndAdd} canDrag={canDrag} isCompareMode={!!comparisonData} />
                                                           </>
                                                         ) : (
                                                           cat.items.map(
@@ -1026,6 +1122,12 @@ const BudgetEntryForm = ({
                                                                   showVersionWarning={
                                                                     isReadOnly
                                                                   }
+                                                                  isReadOnly={
+                                                                    isReadOnly
+                                                                  }
+                                                                  canEdit={
+                                                                    canEdit
+                                                                  }
                                                                   grossDisplay={
                                                                     grossDisplay
                                                                   }
@@ -1050,6 +1152,8 @@ const BudgetEntryForm = ({
                                                                   isCrewEditing={isCrewEditing}
                                                                   setIsCrewEditing={setIsCrewEditing}
                                                                   handleAssignBudgetItemCrew={handleAssignBudgetItemCrew}
+                                                                  canDrag={canDrag}
+                                                                  hideGrossAndAdd={hideGrossAndAdd}
                                                                 />
                                                               );
                                                             },
@@ -1057,7 +1161,7 @@ const BudgetEntryForm = ({
                                                         )}
                                                         {providedItem.placeholder}
                                                         <tr className="bef-cat-spacer-row">
-                                                          <td colSpan={canDrag ? 8 : 7}></td>
+                                                          <td colSpan={spacerColSpan}></td>
                                                         </tr>
                                                       </tbody>
                                                     )}
@@ -1124,6 +1228,7 @@ const BudgetEntryForm = ({
                   submitting={submitting}
                   handleSubmit={handleSubmit}
                   externalProjectId={externalProjectId}
+                  canEdit={canEdit}
                 />
               </div>
           );
@@ -1147,6 +1252,7 @@ const BudgetEntryForm = ({
           projectId={externalProjectId}
           versionId={versionId}
           itemId={activeBreakdownId}
+          isReadOnly={isReadOnly}
         />
 
         <ConfirmationModal

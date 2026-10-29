@@ -21,11 +21,13 @@ const GlassDropdown = ({
   value,
   onChange,
   multiple = false,
+  isMulti = false,
   placeholder = "Select...",
   className = "",
   modifiers = "",
   style = {},
 }) => {
+  const isMultiple = Boolean(multiple || isMulti);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
   const menuRef = useRef(null);
@@ -72,11 +74,17 @@ const GlassDropdown = ({
   const handleToggle = () => setIsOpen(!isOpen);
 
   const handleOptionClick = (optionValue) => {
-    if (multiple) {
-      const currentValues = Array.isArray(value) ? value : [];
-      const isSelected = currentValues.includes(optionValue);
+    if (isMultiple) {
+      const currentValues = Array.isArray(value)
+        ? value
+        : value !== undefined && value !== null && value !== ""
+          ? [value]
+          : [];
+      const isSelected = currentValues.some(
+        (v) => String(v) === String(optionValue),
+      );
       const nextValues = isSelected
-        ? currentValues.filter((v) => v !== optionValue)
+        ? currentValues.filter((v) => String(v) !== String(optionValue))
         : [...currentValues, optionValue];
       onChange(nextValues);
     } else {
@@ -86,10 +94,22 @@ const GlassDropdown = ({
   };
 
   let triggerText = placeholder;
-  if (multiple) {
-    const count = Array.isArray(value) ? value.length : 0;
+  if (isMultiple) {
+    const selectedList = Array.isArray(value)
+      ? value
+      : value !== undefined && value !== null && value !== ""
+        ? [value]
+        : [];
+    const count = selectedList.length;
     if (count > 0) {
-      triggerText = `${count} selected`;
+      if (count === 1) {
+        const found = options.find(
+          (o) => String(o.value) === String(selectedList[0]),
+        );
+        triggerText = found ? found.label : `${count} selected`;
+      } else {
+        triggerText = `${count} selected`;
+      }
     }
   } else if (value !== "" && value !== undefined && value !== null) {
     const selectedOpt = options.find((o) => String(o.value) === String(value));
@@ -124,8 +144,13 @@ const GlassDropdown = ({
               </div>
             ) : (
               options.map((opt) => {
-                const isSelected = multiple
-                  ? Array.isArray(value) && value.includes(opt.value)
+                const isSelected = isMultiple
+                  ? (Array.isArray(value)
+                      ? value
+                      : value !== undefined && value !== null && value !== ""
+                        ? [value]
+                        : []
+                    ).some((v) => String(v) === String(opt.value))
                   : String(value) === String(opt.value);
 
                 return (
@@ -134,7 +159,7 @@ const GlassDropdown = ({
                     className={`glass-dropdown-item ${isSelected ? "selected" : ""}`}
                     onClick={() => handleOptionClick(opt.value)}
                   >
-                    {multiple && (
+                    {isMultiple && (
                       <div
                         className={`glass-checkbox ${isSelected ? "checked" : ""}`}
                       >

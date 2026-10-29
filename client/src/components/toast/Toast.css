@@ -33,6 +33,7 @@
 }
 
 @media (max-width: 600px) {
+
   .toast[data-inline='false'],
   .swipe-toast[data-inline='false'] {
     --st-offset: 16px;
@@ -86,6 +87,7 @@
 }
 
 @starting-style {
+
   .toast[data-inline='true'],
   .swipe-toast[data-inline='true'] {
     grid-template-rows: 0fr;
@@ -187,7 +189,7 @@
 
 .toast__title,
 .swipe-toast__title {
-  font-weight: 600;
+  font-weight: 400;
   line-height: 1.4;
   color: var(--st-ink);
   letter-spacing: -0.1px;
@@ -257,6 +259,7 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
+
   .toast__action:hover,
   .swipe-toast__action:hover {
     opacity: 0.88;
@@ -275,19 +278,17 @@
   bottom: 0;
   left: 0;
   height: var(--st-fuse-h);
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    color-mix(in srgb, var(--st-fuse) 18%, transparent) 9%,
-    color-mix(in srgb, var(--st-fuse) 50%, transparent) 18%,
-    color-mix(in srgb, var(--st-fuse) 84%, transparent) 28%,
-    var(--st-fuse) 38%,
-    var(--st-fuse) 62%,
-    color-mix(in srgb, var(--st-fuse) 84%, transparent) 72%,
-    color-mix(in srgb, var(--st-fuse) 50%, transparent) 82%,
-    color-mix(in srgb, var(--st-fuse) 18%, transparent) 91%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg,
+      transparent 0%,
+      color-mix(in srgb, var(--st-fuse) 18%, transparent) 9%,
+      color-mix(in srgb, var(--st-fuse) 50%, transparent) 18%,
+      color-mix(in srgb, var(--st-fuse) 84%, transparent) 28%,
+      var(--st-fuse) 38%,
+      var(--st-fuse) 62%,
+      color-mix(in srgb, var(--st-fuse) 84%, transparent) 72%,
+      color-mix(in srgb, var(--st-fuse) 50%, transparent) 82%,
+      color-mix(in srgb, var(--st-fuse) 18%, transparent) 91%,
+      transparent 100%);
   transform-origin: left center;
   pointer-events: none;
 }
@@ -319,6 +320,7 @@ body.light-theme .swipe-toast__card {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .toast__lift,
   .swipe-toast__lift {
     transform: none !important;

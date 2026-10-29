@@ -66,6 +66,14 @@
   justify-content: center;
 }
 
+.finance-sub-nav .btn-neo {
+  gap: 8px;
+}
+
+.finance-integrated-section {
+  margin-top: 20px;
+}
+
 .sub-nav-btn {
   display: flex;
   align-items: center;

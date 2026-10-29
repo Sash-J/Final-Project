@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { budgetService } from "../../../services/budgetService";
 import { useProjects } from "../context/ProjectContext";
 import Icon from "../../../components/common/Icon";
@@ -8,6 +9,7 @@ import ClientPayments from "./ClientPayments";
 import "./ProjectDashboardFinance.css";
 
 const ProjectDashboardFinance = ({ projectId, onClose, projectTotalPaid }) => {
+  const navigate = useNavigate();
   const [showPayments, setShowPayments] = useState(false);
   const [budgetVersions, setBudgetVersions] = useState([]);
   const [selectedVersionId, setSelectedVersionId] = useState("");
@@ -48,12 +50,11 @@ const ProjectDashboardFinance = ({ projectId, onClose, projectTotalPaid }) => {
           <p>Manage budget and payments</p>
         </div>
         
-        <div className="integrated-budget-section fade-in" style={{ marginTop: '20px' }}>
+        <div className="integrated-budget-section finance-integrated-section fade-in">
           <div className="finance-sub-nav">
             <button
               className={`btn-neo ${!showPayments ? "btn-neo-solid" : ""}`}
               onClick={() => setShowPayments(false)}
-              style={{ gap: '8px' }}
             >
               <Icon name="finance" modifiers="md" />
               <span>Budget Summary</span>
@@ -61,10 +62,20 @@ const ProjectDashboardFinance = ({ projectId, onClose, projectTotalPaid }) => {
             <button
               className={`btn-neo ${showPayments ? "btn-neo-solid" : ""}`}
               onClick={() => setShowPayments(true)}
-              style={{ gap: '8px' }}
             >
               <Icon name="payments" modifiers="md" />
               <span>Payment Records</span>
+            </button>
+            <button
+              className="btn-neo"
+              onClick={() => {
+                if (onClose) onClose();
+                navigate(`/budget?projectId=${projectId}`);
+              }}
+              title="Open full interactive budget view"
+            >
+              <Icon name="open_in_new" modifiers="md" />
+              <span>Full Budget Sheet</span>
             </button>
           </div>
 

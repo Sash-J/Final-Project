@@ -12,7 +12,7 @@ import { useAuth } from "../../auth/context/AuthContext";
 import toast from "react-hot-toast";
 import Icon from "../../../components/common/Icon";
 import { formatRoleOptions, getDefaultRole, categorizeRole } from "../utils/roleUtils";
-import "../../dashboard/pages/AdminDashboard.css";
+import { PageContainer, PageContentCard } from "../../../components/common/PageContainer";
 import "./UserManagement.css";
 
 const UserManagement = () => {
@@ -252,14 +252,14 @@ const UserManagement = () => {
   };
 
   return (
-    <section id="admin-dashboard">
+    <PageContainer id="user-management">
       <PageHeader
         category="User Management"
         title="Overview"
         description="Operational workforce pipelines, role assignments, and member analytics."
       />
 
-      <div className="admin-content-animated">
+      <PageContentCard>
         {/* Main Connected Kanban Board */}
         <UserPipelineBoard
           pendingUsers={pendingUsers}
@@ -369,7 +369,7 @@ const UserManagement = () => {
             <UserMetricsGaugeWidget allUsers={allUsers} pendingUsers={pendingUsers} />
           </div>
         </div>
-      </div>
+      </PageContentCard>
 
       {/* User Inspection & Actions Modal */}
       <UserActionModal
@@ -396,7 +396,7 @@ const UserManagement = () => {
           setConfirmModal({ isOpen: false, message: "", onConfirm: null });
         }}
       />
-    </section>
+    </PageContainer>
   );
 };
 

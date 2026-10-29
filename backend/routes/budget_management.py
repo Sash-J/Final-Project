@@ -147,6 +147,7 @@ def budget_values_post():
 @budget_bp.route("/api/budget-values/project/<int:project_id>", methods=["GET"])
 @permissions_required("budget.view", "production.view")
 def budget_values_for_project(project_id):
+    user_id = get_current_user_id()
     version_id = request.args.get("version_id")
     if version_id:
         try:
@@ -154,20 +155,33 @@ def budget_values_for_project(project_id):
         except ValueError:
             version_id = None
 
-    if has_role("crew", "client"):
-        versions = db.get_budget_versions(project_id)
-        if has_role("crew"):
-            allowed_ids = [v["id"] for v in versions if v.get("published_to_crew") == 1]
-        else:
+    if not has_role("admin", "manager", "director"):
+        if has_role("client"):
+            client_project_ids = [p["id"] for p in auth.get_client_projects(user_id)]
+            if project_id not in client_project_ids:
+                return jsonify({"error": "Unauthorized"}), 403
+            versions = db.get_budget_versions(project_id)
             allowed_ids = [v["id"] for v in versions if v.get("published_to_client") == 1]
-
-        if version_id:
-            if version_id not in allowed_ids:
-                return jsonify({}), 200
-        else:
-            if not allowed_ids:
-                return jsonify({}), 200
-            version_id = allowed_ids[-1]
+            if version_id:
+                if version_id not in allowed_ids:
+                    return jsonify({}), 200
+            else:
+                if not allowed_ids:
+                    return jsonify({}), 200
+                version_id = allowed_ids[-1]
+        elif has_role("crew"):
+            crew_project_ids = [p["id"] for p in auth.get_crew_projects(user_id)]
+            if project_id not in crew_project_ids:
+                return jsonify({"error": "Unauthorized"}), 403
+            versions = db.get_budget_versions(project_id)
+            allowed_ids = [v["id"] for v in versions if v.get("published_to_crew") == 1]
+            if version_id:
+                if version_id not in allowed_ids:
+                    return jsonify({}), 200
+            else:
+                if not allowed_ids:
+                    return jsonify({}), 200
+                version_id = allowed_ids[-1]
 
     return jsonify(db.get_budget_values_for_project(project_id, version_id)), 200
 
@@ -218,9 +232,30 @@ def budget_item_breakdown_get():
         )
 
     try:
-        breakdowns = db.get_budget_item_breakdowns(
-            int(project_id), int(version_id), int(item_id)
-        )
+        p_id = int(project_id)
+        v_id = int(version_id)
+        i_id = int(item_id)
+
+        user_id = get_current_user_id()
+        if not has_role("admin", "manager", "director"):
+            if has_role("client"):
+                client_project_ids = [p["id"] for p in auth.get_client_projects(user_id)]
+                if p_id not in client_project_ids:
+                    return jsonify({"error": "Unauthorized"}), 403
+                versions = db.get_budget_versions(p_id)
+                published_ids = [v["id"] for v in versions if v.get("published_to_client") == 1]
+                if v_id not in published_ids:
+                    return jsonify({"error": "Unauthorized"}), 403
+            elif has_role("crew"):
+                crew_project_ids = [p["id"] for p in auth.get_crew_projects(user_id)]
+                if p_id not in crew_project_ids:
+                    return jsonify({"error": "Unauthorized"}), 403
+                versions = db.get_budget_versions(p_id)
+                published_ids = [v["id"] for v in versions if v.get("published_to_crew") == 1]
+                if v_id not in published_ids:
+                    return jsonify({"error": "Unauthorized"}), 403
+
+        breakdowns = db.get_budget_item_breakdowns(p_id, v_id, i_id)
         return jsonify(breakdowns), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -273,11 +308,23 @@ def budget_versions_post(project_id):
 @permissions_required("budget.view", "production.view")
 def budget_versions_get(project_id):
     try:
+        user_id = get_current_user_id()
+        if not has_role("admin", "manager", "director"):
+            if has_role("client"):
+                client_project_ids = [p["id"] for p in auth.get_client_projects(user_id)]
+                if project_id not in client_project_ids:
+                    return jsonify({"error": "Unauthorized"}), 403
+                versions = db.get_budget_versions(project_id)
+                versions = [v for v in versions if v.get("published_to_client") == 1]
+                return jsonify(versions), 200
+            elif has_role("crew"):
+                crew_project_ids = [p["id"] for p in auth.get_crew_projects(user_id)]
+                if project_id not in crew_project_ids:
+                    return jsonify({"error": "Unauthorized"}), 403
+                versions = db.get_budget_versions(project_id)
+                versions = [v for v in versions if v.get("published_to_crew") == 1]
+                return jsonify(versions), 200
         versions = db.get_budget_versions(project_id)
-        if has_role("crew"):
-            versions = [v for v in versions if v.get("published_to_crew") == 1]
-        elif has_role("client"):
-            versions = [v for v in versions if v.get("published_to_client") == 1]
         return jsonify(versions), 200
     except Exception as e:
         import traceback
@@ -317,6 +364,7 @@ def hierarchy_get():
 
 # Client Dashboard
 @budget_bp.route("/api/client/dashboard", methods=["GET"])
+@budget_bp.route("/api/dashboard/client", methods=["GET"])
 @login_required
 def client_dashboard_get():
     user_id = get_current_user_id()
@@ -327,10 +375,6 @@ def client_dashboard_get():
         projects = auth.get_crew_projects(user_id)
     else:
         projects = auth.get_client_projects(user_id)
-
-    # Enhance each project with its payment history
-    for proj in projects:
-        proj["payments"] = db.get_payments_for_project(proj["id"])
 
     return jsonify(projects), 200
 
@@ -452,10 +496,13 @@ def assign_project_budget_item_crew_endpoint(project_id, item_id):
 
 
 import decimal
+import datetime
 
 def convert_decimals(obj):
     if isinstance(obj, decimal.Decimal):
         return float(obj)
+    if isinstance(obj, (datetime.datetime, datetime.date)):
+        return obj.isoformat()
     if isinstance(obj, dict):
         return {k: convert_decimals(v) for k, v in obj.items()}
     if isinstance(obj, list):
@@ -465,6 +512,16 @@ def convert_decimals(obj):
 @budget_bp.route("/api/projects/<int:project_id>/budget-init", methods=["GET"])
 @permissions_required("budget.view")
 def get_budget_init_endpoint(project_id):
+    user_id = get_current_user_id()
+    if has_role("client"):
+        client_project_ids = [p["id"] for p in auth.get_client_projects(user_id)]
+        if project_id not in client_project_ids:
+            return jsonify({"error": "Unauthorized"}), 403
+    elif has_role("crew"):
+        crew_project_ids = [p["id"] for p in auth.get_crew_projects(user_id)]
+        if project_id not in crew_project_ids:
+            return jsonify({"error": "Unauthorized"}), 403
+
     try:
         data = db.get_budget_crew_init(project_id)
         return jsonify(convert_decimals(data)), 200
@@ -485,6 +542,34 @@ def get_budget_full(project_id):
             
     user_id = get_current_user_id()
     role = get_current_user_role()
+
+    if not has_role("admin", "manager", "director"):
+        if has_role("client"):
+            client_project_ids = [p["id"] for p in auth.get_client_projects(user_id)]
+            if project_id not in client_project_ids:
+                return jsonify({"error": "Unauthorized: Not assigned to project"}), 403
+            versions = db.get_budget_versions(project_id)
+            allowed_ids = [int(v["id"]) for v in versions if bool(v.get("published_to_client"))]
+            if not allowed_ids:
+                return jsonify({"hierarchy": [], "values": {}, "breakdowns": []}), 200
+            if version_id is not None:
+                if version_id not in allowed_ids:
+                    return jsonify({"error": "Unauthorized: Version not published to client"}), 403
+            else:
+                version_id = allowed_ids[-1]
+        elif has_role("crew"):
+            crew_project_ids = [p["id"] for p in auth.get_crew_projects(user_id)]
+            if project_id not in crew_project_ids:
+                return jsonify({"error": "Unauthorized: Not assigned to project"}), 403
+            versions = db.get_budget_versions(project_id)
+            allowed_ids = [int(v["id"]) for v in versions if bool(v.get("published_to_crew"))]
+            if not allowed_ids:
+                return jsonify({"hierarchy": [], "values": {}, "breakdowns": []}), 200
+            if version_id is not None:
+                if version_id not in allowed_ids:
+                    return jsonify({"error": "Unauthorized: Version not published to crew"}), 403
+            else:
+                version_id = allowed_ids[-1]
             
     try:
         payload = db.get_budget_full_data(project_id, version_id, user_id=user_id, role=role)

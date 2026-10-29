@@ -8,9 +8,10 @@ export const useBudgetState = ({
   onDirtyChange,
   hierarchyCache,
   getBudgetData,
+  canEdit = true,
 }) => {
   const [hierarchy, setHierarchy] = useState([]);
-  const [expandedPhases, setExpandedPhases] = useState(new Set([2]));
+  const [expandedPhases, setExpandedPhases] = useState(new Set([1, 2, 3]));
   const [collapsedDepts, setCollapsedDepts] = useState(new Set());
   const [values, setValues] = useState({});
 
@@ -27,6 +28,10 @@ export const useBudgetState = ({
   const [focusedInput, setFocusedInput] = useState(null);
 
   const initialDataRef = useRef(null);
+  const onDirtyChangeRef = useRef(onDirtyChange);
+  useEffect(() => {
+    onDirtyChangeRef.current = onDirtyChange;
+  }, [onDirtyChange]);
 
   useEffect(() => {
     if (!externalProjectId) {
@@ -38,6 +43,8 @@ export const useBudgetState = ({
 
     const loadBudget = async () => {
       setLoading(true);
+      initialDataRef.current = null;
+      onDirtyChangeRef.current?.(false);
       try {
         if (hierarchyCache) {
           setHierarchy(hierarchyCache);
@@ -47,14 +54,25 @@ export const useBudgetState = ({
           setValues({});
           setBreakdownData({});
           initialDataRef.current = { values: "{}", breakdowns: "{}" };
-          onDirtyChange(false);
+          onDirtyChangeRef.current?.(false);
           setLoading(false);
           return;
         }
 
         const data = await getBudgetData(externalProjectId, versionId, refreshKey > 0);
-        if (data && data.hierarchy) {
+        if (!data || typeof data !== "object") {
+          setHierarchy([]);
+          setValues({});
+          setBreakdownData({});
+          initialDataRef.current = { values: "{}", breakdowns: "{}" };
+          onDirtyChangeRef.current?.(false);
+          setLoading(false);
+          return;
+        }
+
+        if (data && data.hierarchy && Array.isArray(data.hierarchy)) {
           setHierarchy(data.hierarchy);
+          setExpandedPhases(new Set(data.hierarchy.map((p) => p.phase_id)));
         }
         
         const serverValues = data.values || {};
@@ -62,7 +80,7 @@ export const useBudgetState = ({
 
         Object.keys(serverValues).forEach((itemId) => {
           const idNum = parseInt(itemId);
-          const rowData = serverValues[itemId];
+          const rowData = serverValues[itemId] || {};
           initialValues[idNum] = {
             qty: String(parseFloat(rowData.quantity) || ""),
             rate: String(parseFloat(rowData.rate) || ""),
@@ -85,7 +103,7 @@ export const useBudgetState = ({
           values: JSON.stringify(initialValues),
           breakdowns: JSON.stringify(data.breakdowns || {}),
         };
-        onDirtyChange(false);
+        onDirtyChangeRef.current?.(false);
       } catch (err) {
         console.error("BudgetEntryForm: Failed to load budget data", err);
         toast.error("Failed to load budget data from cache.");
@@ -96,10 +114,15 @@ export const useBudgetState = ({
 
     loadBudget();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [externalProjectId, versionId, refreshKey, onDirtyChange]);
+  }, [externalProjectId, versionId, refreshKey, getBudgetData]);
 
   //Budget unsaved changes tracking
   useEffect(() => {
+    if (!canEdit) {
+      onDirtyChangeRef.current?.(false);
+      return;
+    }
+
     if (!initialDataRef.current) return;
 
     const isValuesDirty =
@@ -107,8 +130,8 @@ export const useBudgetState = ({
     const isBreakdownsDirty =
       initialDataRef.current.breakdowns !== JSON.stringify(breakdownData);
 
-    onDirtyChange(isValuesDirty || isBreakdownsDirty);
-  }, [values, breakdownData, onDirtyChange]);
+    onDirtyChangeRef.current?.(isValuesDirty || isBreakdownsDirty);
+  }, [values, breakdownData, canEdit]);
 
   const togglePhase = (phaseId) => {
     const next = new Set(expandedPhases);

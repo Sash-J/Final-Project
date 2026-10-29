@@ -11,7 +11,22 @@ const ProjectDashboardProduction = ({
   onClose,
   viewMode = "hierarchy",
 }) => {
-  const { user } = useAuth();
+  const { user, hasPermission, hasRole } = useAuth();
+
+  const isClient = hasRole("client");
+  const canEditHierarchy =
+    !isClient &&
+    hasPermission([
+      "hierarchy.node.add",
+      "hierarchy.node.edit",
+      "hierarchy.node.delete",
+      "hierarchy.node.drag",
+      "Add child node",
+      "Edit node",
+      "Delete Node",
+      "Node draggable",
+      "production.edit",
+    ]);
 
   const [lastUpdated, setLastUpdated] = useState({
     date: new Date(),
@@ -34,15 +49,7 @@ const ProjectDashboardProduction = ({
     >
       <div className="production-modal-container">
         <div className="modal-header-section">
-          <div
-            className="timeline-header-top-row"
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              width: "100%",
-            }}
-          >
+          <div className="timeline-header-top-row">
             <div className="timeline-header-title-group">
               <div>
                 <h2>
@@ -50,7 +57,9 @@ const ProjectDashboardProduction = ({
                 </h2>
                 <p>
                   {viewMode === "hierarchy"
-                    ? "Manage project crew structure and roles"
+                    ? canEditHierarchy
+                      ? "Manage project crew structure and roles"
+                      : "View project crew structure and roles"
                     : "Manage production equipment and inventory"}
                 </p>
               </div>

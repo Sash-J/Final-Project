@@ -136,6 +136,20 @@
   margin: 0;
 }
 
+.bdm-row input:disabled,
+.bdm-select:disabled {
+  opacity: 0.75;
+  cursor: default;
+  border-color: transparent;
+  background-color: transparent;
+}
+
+.bdm-row input:disabled:hover,
+.bdm-select:disabled:hover {
+  background-color: transparent;
+  border-color: transparent;
+}
+
 .bdm-readonly {
   font-size: 0.8rem;
   color: rgba(255, 255, 255, 0.3);

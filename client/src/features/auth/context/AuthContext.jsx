@@ -6,6 +6,17 @@ import SessionTimeoutModal from "../../../components/common/SessionTimeoutModal"
 
 const AuthContext = createContext();
 
+const PERMISSION_ALIASES = {
+  "add child node": "hierarchy.node.add",
+  "hierarchy.node.add": "add child node",
+  "edit node": "hierarchy.node.edit",
+  "hierarchy.node.edit": "edit node",
+  "delete node": "hierarchy.node.delete",
+  "hierarchy.node.delete": "delete node",
+  "node draggable": "hierarchy.node.drag",
+  "hierarchy.node.drag": "node draggable",
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -213,9 +224,12 @@ export const AuthProvider = ({ children }) => {
         String(p).trim().toLowerCase()
       );
       if (hasRole("admin")) return true;
-      return required.some((p) =>
-        userPermissions.includes(String(p).trim().toLowerCase())
-      );
+      return required.some((p) => {
+        const norm = String(p).trim().toLowerCase();
+        if (userPermissions.includes(norm)) return true;
+        const alias = PERMISSION_ALIASES[norm];
+        return alias && userPermissions.includes(alias.toLowerCase());
+      });
     },
     [user, hasRole]
   );

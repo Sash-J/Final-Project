@@ -1160,3 +1160,35 @@ body.light-theme .widget-switch-container {
 body.light-theme .sidebar-widget-input-icon {
   color: rgba(0, 0, 0, 0.4);
 }
+
+/* Client Budget Notice */
+.client-budget-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(0, 198, 230, 0.08);
+  border: 1px solid rgba(0, 198, 230, 0.2);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-top: 16px;
+  color: #cbd5e1;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.client-budget-notice .icon-root {
+  color: #00c6e6;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+body.light-theme .client-budget-notice {
+  background: rgba(9, 105, 218, 0.06);
+  border-color: rgba(9, 105, 218, 0.2);
+  color: #57606a;
+}
+
+body.light-theme .client-budget-notice .icon-root {
+  color: #0969da;
+}
+

@@ -48,7 +48,7 @@ const Navbar = () => {
       </Link>
 
       <ul className={`nav-links ${isMobileMenuOpen ? "mobile-open" : ""}`}>
-        {user && hasRole("client") && (
+        {user && hasRole("client") && !hasRole(["admin", "manager", "director"]) && (
           <li>
             <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
               <Icon name="dashboard" modifiers="sm" />
@@ -69,7 +69,7 @@ const Navbar = () => {
           </li>
         )}
 
-        {user && !hasRole(["client", "crew", "department head"]) && (
+        {user && (hasRole(["admin", "manager", "director"]) || !hasRole(["client", "crew", "department head"])) && (
           <li>
             <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)}>
               <Icon name="dashboard" modifiers="md" />
@@ -78,10 +78,10 @@ const Navbar = () => {
           </li>
         )}
 
-        {user && hasPermission("budget.view") && !hasRole(["client", "crew", "department head"]) && (
+        {user && hasPermission("budget.view") && !hasRole(["crew", "department head"]) && (
           <li>
             <Link
-              to="/admin-budget"
+              to={hasRole("client") ? "/budget" : (location.pathname.startsWith("/budget") ? "/budget" : "/admin-budget")}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               <Icon name="payments" modifiers="md" />

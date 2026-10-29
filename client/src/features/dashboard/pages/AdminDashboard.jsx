@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import PageHeader from "../../../components/common/PageHeader";
+import { PageContainer, PageContentCard } from "../../../components/common/PageContainer";
 import "./AdminDashboard.css";
 import ProjectCard from "../../projects/components/ProjectCard";
 import "../../../components/Skeleton/Skeleton";
 import { ProjectCardSkeleton } from "../../../components/Skeleton/DashboardSkeleton";
-import { useModal } from "../../../context/ModalContext";
 import Icon from "../../../components/common/Icon";
+import { useAuth } from "../../auth/context/AuthContext";
 
 import { useProjects } from "../../projects/context/ProjectContext";
 import { projectService } from "../../../services/projectService";
@@ -13,6 +14,10 @@ import ProjectForm from "../../projects/components/ProjectForm";
 import ModalPortal from "../../../components/common/ModalPortal";
 
 const AdminDashboard = () => {
+  const { user, hasRole, hasPermission } = useAuth();
+  const isClient = hasRole("client") && !hasRole(["admin", "manager", "director"]);
+  const canManageProjects = hasRole(["admin", "manager", "director"]) || hasPermission("project.create");
+
   const {
     projects,
     loading: projectsLoading,
@@ -22,8 +27,6 @@ const AdminDashboard = () => {
 
   const [editingProject, setEditingProject] = useState(null);
   const [showProjectModal, setShowProjectModal] = useState(false);
-
-  const { showConfirm } = useModal();
 
   // Load projects from context on mount.
   useEffect(() => {
@@ -38,30 +41,16 @@ const AdminDashboard = () => {
     setShowProjectModal(false);
   };
 
-  const handleDelete = async (id) => {
-    const ok = await showConfirm(
-      "Are you sure you want to delete this project? All associated data will be permanently removed.",
-    );
-    if (!ok) return;
-      try {
-        await projectService.deleteProject(id);
-        invalidateCache();
-        refreshProjects(true);
-      } catch (err) {
-        alert(err.message || "Failed to delete");
-      }
-  };
-
   const handleToggleStatus = async (id, currentStatus) => {
     const newStatus =
       currentStatus === "completed" ? "in_progress" : "completed";
-      try {
-        await projectService.toggleProjectStatus(id, newStatus);
-        invalidateCache();
-        refreshProjects(true);
-      } catch (err) {
-        alert(err.message || "Failed to update status");
-      }
+    try {
+      await projectService.toggleProjectStatus(id, newStatus);
+      invalidateCache();
+      refreshProjects(true);
+    } catch (err) {
+      alert(err.message || "Failed to update status");
+    }
   };
 
   //archived project filtering
@@ -69,46 +58,71 @@ const AdminDashboard = () => {
   const archivedProjects = projects.filter((p) => p.status === "completed");
 
   return (
-    <section id="admin-dashboard">
+    <PageContainer
+      id={isClient ? "client-dashboard" : "admin-dashboard"}
+      className={isClient ? "client-dashboard-section" : ""}
+    >
       <PageHeader
-        category="Administration"
-        title="Dashboard"
-        description="Centralized project management and system configuration."
+        category={isClient ? "Client Portal" : "Administration"}
+        title={isClient ? `Dashboard${user?.username ? `, ${user.username}` : ""}` : "Dashboard"}
+        description={
+          isClient
+            ? "Overview of your assigned productions and project delivery status."
+            : "Centralized project management and system configuration."
+        }
       >
-        <button
-          className="sui-btn sui-btn-save new-project-btn"
-          onClick={() => {
-            setEditingProject(null);
-            setShowProjectModal(true);
-          }}
-        >
-          <Icon name="add" modifiers="sm" />
-          <span>New Project</span>
-        </button>
+        {canManageProjects ? (
+          <button
+            className="sui-btn sui-btn-save new-project-btn"
+            onClick={() => {
+              setEditingProject(null);
+              setShowProjectModal(true);
+            }}
+          >
+            <Icon name="add" modifiers="sm" />
+            <span>New Project</span>
+          </button>
+        ) : isClient ? (
+          <div className="client-header-badges">
+            <div className="client-status-pill">
+              <span className="client-status-dot"></span>
+              <span className="client-status-text">
+                {ongoingProjects.length}{" "}
+                {ongoingProjects.length === 1 ? "Active Production" : "Active Productions"}
+              </span>
+            </div>
+            <button
+              className="client-refresh-btn"
+              onClick={() => refreshProjects(true)}
+              title="Refresh dashboard"
+            >
+              <Icon name="refresh" modifiers="sm" />
+            </button>
+          </div>
+        ) : null}
       </PageHeader>
 
-      <div className="admin-content-animated">
+      <PageContentCard className="admin-content-animated">
         {ongoingProjects.length > 0 || projectsLoading ? (
           <div className="project-tiles-grid">
             {projectsLoading
               ? [...Array(6)].map((_, i) => <ProjectCardSkeleton key={i} />)
               : ongoingProjects.map((project) => (
-                  <ProjectCard
-                    key={project.id}
-                    project={project}
-                    onEdit={(p) => {
-                      setEditingProject(p);
-                      setShowProjectModal(true);
-                    }}
-                    onDelete={handleDelete}
-                    onToggleStatus={handleToggleStatus}
-                  />
-                ))}
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  onToggleStatus={canManageProjects ? handleToggleStatus : undefined}
+                />
+              ))}
           </div>
         ) : (
           <div className="no-projects-message">
             <Icon name="folder_off" modifiers="lg" />
-            <p>No active productions found. Start by creating a new one.</p>
+            <p>
+              {isClient
+                ? "No active productions assigned to your account."
+                : "No active productions found. Start by creating a new one."}
+            </p>
           </div>
         )}
 
@@ -116,9 +130,10 @@ const AdminDashboard = () => {
           <div className="archived-section">
             <div className="archived-header">
               <Icon name="archive" modifiers="md" />
-              <h3>Archived Projects</h3>
+              <h3>Completed Projects</h3>
               <span className="archived-count">
-                {archivedProjects.length} projects
+                {archivedProjects.length}{" "}
+                {archivedProjects.length === 1 ? "project" : "projects"}
               </span>
             </div>
             <div className="project-tiles-grid archived-grid">
@@ -127,21 +142,16 @@ const AdminDashboard = () => {
                   key={project.id}
                   project={project}
                   variant="compact"
-                  onEdit={(p) => {
-                    setEditingProject(p);
-                    setShowProjectModal(true);
-                  }}
-                  onDelete={handleDelete}
-                  onToggleStatus={handleToggleStatus}
+                  onToggleStatus={canManageProjects ? handleToggleStatus : undefined}
                 />
               ))}
             </div>
           </div>
         )}
-      </div>
+      </PageContentCard>
 
       {/* Project Add/Edit Modal */}
-      {showProjectModal && (
+      {canManageProjects && showProjectModal && (
         <ModalPortal
           onClose={() => {
             setEditingProject(null);
@@ -160,7 +170,7 @@ const AdminDashboard = () => {
           />
         </ModalPortal>
       )}
-    </section>
+    </PageContainer>
   );
 };
 

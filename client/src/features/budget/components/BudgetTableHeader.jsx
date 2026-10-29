@@ -1,10 +1,19 @@
 import { getCurrencySymbol } from "../../../utils/currencyUtils";
 import { SkeletonBox } from "./BudgetEntrySkeleton";
 
-export const BudgetTableHeader = ({ isSkeleton = false, isCompareMode = false, versionNameA = "V1", versionNameB = "V2" }) => (
-  <thead>
-    <tr>
-      {!isCompareMode && <th className="col-drag"></th>}
+export const BudgetTableHeader = ({
+  isSkeleton = false,
+  isCompareMode = false,
+  versionNameA = "V1",
+  versionNameB = "V2",
+  hideGrossAndAdd = false,
+  canDrag = true,
+}) => {
+  const showDrag = canDrag && !isCompareMode;
+  return (
+    <thead>
+      <tr>
+        {showDrag && <th className="col-drag"></th>}
       <th className="col-item-name">
         {isSkeleton ? (
           <SkeletonBox className="skel-header-bar-left" />
@@ -33,20 +42,24 @@ export const BudgetTableHeader = ({ isSkeleton = false, isCompareMode = false, v
           "RATE"
         )}
       </th>
-      <th className="col-gross">
-        {isSkeleton ? (
-          <SkeletonBox className="skel-header-bar-right" />
-        ) : (
-          `GROSS (${getCurrencySymbol()})`
-        )}
-      </th>
-      <th className="col-add">
-        {isSkeleton ? (
-          <SkeletonBox className="skel-header-bar-right" />
-        ) : (
-          "ADDITIONAL"
-        )}
-      </th>
+      {!hideGrossAndAdd && (
+        <>
+          <th className="col-gross">
+            {isSkeleton ? (
+              <SkeletonBox className="skel-header-bar-right" />
+            ) : (
+              `GROSS (${getCurrencySymbol()})`
+            )}
+          </th>
+          <th className="col-add">
+            {isSkeleton ? (
+              <SkeletonBox className="skel-header-bar-right" />
+            ) : (
+              "ADDITIONAL"
+            )}
+          </th>
+        </>
+      )}
       <th className="col-total">
         {isSkeleton ? (
           <SkeletonBox className="skel-header-bar-right" />
@@ -76,6 +89,7 @@ export const BudgetTableHeader = ({ isSkeleton = false, isCompareMode = false, v
       )}
     </tr>
   </thead>
-);
+  );
+};
 
 export default BudgetTableHeader;
