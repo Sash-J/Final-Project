@@ -16,11 +16,16 @@ import ScrambleText from "../../../components/common/ScrambleText";
 import ProjectForm from "../components/ProjectForm";
 import AddMilestonePanel from "../../timeline/components/AddMilestonePanel";
 import SuiTimeline from "../../timeline/components/SuiTimeline";
-import HoverTooltip from "../../../components/common/HoverTooltip";
+import ViewToggle from "../../../components/common/ViewToggle";
 import CompositeBentoCard from "../../../components/common/CompositeBentoCard";
 import GlassSurface from "../../../components/effects/GlassSurface";
 import Grainient from "../../../components/common/Grainient";
 import { useAuth } from "../../auth/context/AuthContext";
+
+const TIMELINE_VIEW_OPTIONS = [
+  { value: "detailed", icon: "view_comfy", label: "Detailed View" },
+  { value: "simple", icon: "view_cozy", label: "Simple View" },
+];
 
 const ProjectDetailSkeleton = ({ projectId }) => (
   <div className="project-detail-root">
@@ -85,7 +90,7 @@ const ProjectDetailDashboard = () => {
     getProjectMilestones,
     milestonesCache,
   } = useProjects();
-  const { user, hasPermission } = useAuth();
+  const { user, hasPermission, hasRole } = useAuth();
   const currentRole = (user?.roles && user?.roles[0]) || user?.role || "admin";
 
   const [activeTab] = useState("overview");
@@ -214,6 +219,16 @@ const ProjectDetailDashboard = () => {
     setShowEditModal(false);
   };
 
+  const handleBack = () => {
+    if (hasRole("client")) {
+      navigate("/dashboard");
+    } else if (hasRole(["crew", "department head"])) {
+      navigate("/crew-dashboard");
+    } else {
+      navigate("/admin");
+    }
+  };
+
   if (detailsLoading && !project)
     return <ProjectDetailSkeleton projectId={projectId} />;
   if (!project) return null;
@@ -222,18 +237,30 @@ const ProjectDetailDashboard = () => {
     <div className="project-detail-root">
       <div className="project-detail-header-wrap">
         <div className="pd-top-row">
-          <button className="back-to-admin" onClick={() => navigate("/admin")}>
+          <button className="back-to-admin" onClick={handleBack}>
             <Icon name="arrow_back" modifiers="md" />
             <span>Back</span>
           </button>
-          {hasPermission("project.delete") && (
-            <button
-              className="project-hero-btn delete global-glass-effect"
-              onClick={handleDelete}
-            >
-              <Icon name="delete" modifiers="md" />
-            </button>
-          )}
+          <div className="pd-top-row-actions">
+            {hasPermission("project.edit") && (
+              <button
+                className="project-hero-btn edit global-glass-effect"
+                onClick={() => setShowEditModal(true)}
+                title="Edit Project"
+              >
+                <Icon name="edit" modifiers="md" />
+              </button>
+            )}
+            {hasPermission("project.delete") && (
+              <button
+                className="project-hero-btn delete global-glass-effect"
+                onClick={handleDelete}
+                title="Delete Project"
+              >
+                <Icon name="delete" modifiers="md" />
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="project-main-info">
@@ -294,7 +321,15 @@ const ProjectDetailDashboard = () => {
                 <label>Remaining</label>
                 <span className="warning-text">{remainingCount}</span>
               </div>
-              <div className="hero-stat-box">
+              <div
+                className={`hero-stat-box ${hasPermission("budget.view") ? "clickable" : ""}`}
+                onClick={() => {
+                  if (hasPermission("budget.view")) {
+                    navigate(`/budget?projectId=${projectId}`);
+                  }
+                }}
+                title={hasPermission("budget.view") ? "View project budget" : undefined}
+              >
                 <label>Budget</label>
                 <span>{formatCurrency(project.latest_budget_total)}</span>
               </div>
@@ -623,24 +658,12 @@ const ProjectDetailDashboard = () => {
                       </button>
                     </div>
 
-                    <div className="sui-view-toggle">
-                      <HoverTooltip text="Detailed View">
-                        <button
-                          className={`sui-view-toggle-btn ${timelineViewMode === "detailed" ? "active" : ""}`}
-                          onClick={() => setTimelineViewMode("detailed")}
-                        >
-                          <Icon name="view_comfy" modifiers="sm" />
-                        </button>
-                      </HoverTooltip>
-                      <HoverTooltip text="Simple View">
-                        <button
-                          className={`sui-view-toggle-btn ${timelineViewMode === "simple" ? "active" : ""}`}
-                          onClick={() => setTimelineViewMode("simple")}
-                        >
-                          <Icon name="view_cozy" modifiers="sm" />
-                        </button>
-                      </HoverTooltip>
-                    </div>
+                    <ViewToggle
+                      value={timelineViewMode}
+                      onChange={setTimelineViewMode}
+                      ariaLabel="Timeline view mode"
+                      options={TIMELINE_VIEW_OPTIONS}
+                    />
                   </div>
 
                   <div className="timeline-legend-wrapper">

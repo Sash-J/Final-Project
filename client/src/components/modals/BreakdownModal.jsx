@@ -10,6 +10,7 @@ const BreakdownModal = ({
   onSave,
   initialItems = [],
   itemName = "",
+  isReadOnly = false,
 }) => {
   const [items, setItems] = useState([]);
 
@@ -148,6 +149,7 @@ const BreakdownModal = ({
                     type="text"
                     placeholder="e.g. 2K Fresnel"
                     value={item.description}
+                    disabled={isReadOnly}
                     onChange={(e) =>
                       handleRowChange(item.id, "description", e.target.value)
                     }
@@ -158,6 +160,7 @@ const BreakdownModal = ({
                     type="number"
                     placeholder="0"
                     value={item.quantity}
+                    disabled={isReadOnly}
                     onChange={(e) =>
                       handleRowChange(item.id, "quantity", e.target.value)
                     }
@@ -167,6 +170,7 @@ const BreakdownModal = ({
                   <select
                     className="bdm-select"
                     value={item.rate_type}
+                    disabled={isReadOnly}
                     onChange={(e) =>
                       handleRowChange(item.id, "rate_type", e.target.value)
                     }
@@ -180,6 +184,7 @@ const BreakdownModal = ({
                     type="number"
                     placeholder="1"
                     value={item.rate_multiplier}
+                    disabled={isReadOnly}
                     onChange={(e) =>
                       handleRowChange(
                         item.id,
@@ -194,6 +199,7 @@ const BreakdownModal = ({
                     type="number"
                     placeholder="0.00"
                     value={item.rate}
+                    disabled={isReadOnly}
                     onChange={(e) =>
                       handleRowChange(item.id, "rate", e.target.value)
                     }
@@ -207,6 +213,7 @@ const BreakdownModal = ({
                     type="number"
                     placeholder="0.00"
                     value={item.additional1}
+                    disabled={isReadOnly}
                     onChange={(e) =>
                       handleRowChange(item.id, "additional1", e.target.value)
                     }
@@ -216,7 +223,7 @@ const BreakdownModal = ({
                   {formatCurrency(item.total, false)}
                 </td>
                 <td>
-                  {index > 0 && (
+                  {!isReadOnly && index > 0 && (
                     <button
                       className="project-hero-btn delete remove-item-btn"
                       onClick={() => removeRow(item.id)}
@@ -230,11 +237,13 @@ const BreakdownModal = ({
             ))}
           </tbody>
         </table>
-        <div className="bdm-add-row-container">
-          <button className="btn-neo bdm-add-row-btn" onClick={addRow}>
-            <Icon name="add" modifiers="sm" /> <span>Add Another Sub-Item</span>
-          </button>
-        </div>
+        {!isReadOnly && (
+          <div className="bdm-add-row-container">
+            <button className="btn-neo bdm-add-row-btn" onClick={addRow}>
+              <Icon name="add" modifiers="sm" /> <span>Add Another Sub-Item</span>
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="bdm-footer">
@@ -243,12 +252,20 @@ const BreakdownModal = ({
           <strong>{formatCurrency(grandTotal)}</strong>
         </div>
         <div className="bdm-actions">
-          <button className="btn-neo btn-neo-cancel" onClick={onClose}>
-            Cancel
-          </button>
-          <button className="btn-neo btn-neo-solid" onClick={handleSave}>
-            Save & Apply
-          </button>
+          {isReadOnly ? (
+            <button className="btn-neo btn-neo-solid" onClick={onClose}>
+              Close
+            </button>
+          ) : (
+            <>
+              <button className="btn-neo btn-neo-cancel" onClick={onClose}>
+                Cancel
+              </button>
+              <button className="btn-neo btn-neo-solid" onClick={handleSave}>
+                Save & Apply
+              </button>
+            </>
+          )}
         </div>
       </div>
     </ModalPortal>

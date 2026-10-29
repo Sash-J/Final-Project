@@ -168,16 +168,6 @@
   font-size: 1.65rem;
 }
 
-/* Global Page Container Widths */
-.fd-root,
-.schedule-container,
-#admin-dashboard,
-#admin-budget {
-  max-width: 1700px;
-  margin: 0 auto;
-  padding: 60px 20px 40px;
-  min-height: 100vh;
-}
 
 /* Light Theme Styling Overrides */
 body.light-theme .page-header-eyebrow {

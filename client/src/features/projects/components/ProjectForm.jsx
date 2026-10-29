@@ -118,11 +118,25 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    const payload = {
+      ...formData,
+      client_ids: Array.isArray(formData.client_ids)
+        ? formData.client_ids.map(Number)
+        : formData.client_ids
+          ? [Number(formData.client_ids)]
+          : [],
+      crew_ids: Array.isArray(formData.crew_ids)
+        ? formData.crew_ids.map(Number)
+        : formData.crew_ids
+          ? [Number(formData.crew_ids)]
+          : [],
+    };
+
     try {
       if (editingProject) {
-        await projectService.updateProject(editingProject.id, formData);
+        await projectService.updateProject(editingProject.id, payload);
       } else {
-        await projectService.createProject(formData);
+        await projectService.createProject(payload);
       }
 
       toast.success(
@@ -278,6 +292,7 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
                 <div className="project-form-group">
                   <label className="neo-label">Associate Client</label>
                   <GlassDropdown
+                    multiple
                     isMulti
                     options={clients.map((c) => ({
                       value: c.id,
@@ -285,7 +300,10 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
                     }))}
                     value={formData.client_ids}
                     onChange={(ids) =>
-                      setFormData({ ...formData, client_ids: ids })
+                      setFormData({
+                        ...formData,
+                        client_ids: Array.isArray(ids) ? ids : (ids ? [ids] : []),
+                      })
                     }
                     placeholder="Add Client"
                   />
@@ -295,6 +313,7 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
                 <div className="project-form-group">
                   <label className="neo-label">Assign Production Crew</label>
                   <GlassDropdown
+                    multiple
                     isMulti
                     options={crew.map((c) => ({
                       value: c.id,
@@ -302,7 +321,10 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
                     }))}
                     value={formData.crew_ids}
                     onChange={(ids) =>
-                      setFormData({ ...formData, crew_ids: ids })
+                      setFormData({
+                        ...formData,
+                        crew_ids: Array.isArray(ids) ? ids : (ids ? [ids] : []),
+                      })
                     }
                     placeholder="Add Prod. Crew"
                   />

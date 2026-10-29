@@ -19,6 +19,13 @@
   overflow: hidden;
 }
 
+.timeline-header-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
 /* ==========================================================================
    2. Sub-Navigation
    ========================================================================== */

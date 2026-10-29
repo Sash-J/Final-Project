@@ -1,0 +1,111 @@
+/* ViewToggle.css - Centralized Segmented View/Density Switcher */
+
+.sui-view-toggle,
+.view-toggle-root {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(18, 19, 26, 0.98);
+  border-radius: 8px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  user-select: none;
+  box-sizing: border-box;
+}
+
+/* Size Variants */
+.sui-view-toggle.size-sm,
+.view-toggle-root.size-sm {
+  padding: 3px;
+  gap: 3px;
+}
+
+.sui-view-toggle.size-md,
+.view-toggle-root.size-md {
+  padding: 5px;
+  gap: 5px;
+}
+
+/* Individual Toggle Buttons */
+.sui-view-toggle-btn,
+.view-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 4px;
+  box-sizing: border-box;
+}
+
+.sui-view-toggle.size-md .sui-view-toggle-btn,
+.view-toggle-root.size-md .view-toggle-btn {
+  width: 32px;
+  height: 32px;
+}
+
+.sui-view-toggle-btn:hover:not(:disabled),
+.view-toggle-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.sui-view-toggle-btn.active,
+.view-toggle-btn.active {
+  background: rgba(var(--accent-color-rgb, 0, 198, 230), 0.2);
+  color: var(--accent-color, #00c6e6);
+  box-shadow: 0 0 10px rgba(0, 198, 230, 0.25);
+}
+
+.sui-view-toggle-btn:disabled,
+.view-toggle-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.sui-view-toggle-btn .icon-root,
+.view-toggle-btn .icon-root {
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* Optional inline button label */
+.view-toggle-btn-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-left: 6px;
+  margin-right: 2px;
+}
+
+/* ── Light Theme Styling ─────────────────────────────────────────────────── */
+body.light-theme .sui-view-toggle,
+body.light-theme .view-toggle-root {
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .sui-view-toggle-btn,
+body.light-theme .view-toggle-btn {
+  color: #475569;
+}
+
+body.light-theme .sui-view-toggle-btn:hover:not(:disabled),
+body.light-theme .view-toggle-btn:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.05);
+  color: #0f172a;
+}
+
+body.light-theme .sui-view-toggle-btn.active,
+body.light-theme .view-toggle-btn.active {
+  background: rgba(var(--accent-color-rgb, 0, 198, 230), 0.12);
+  color: #0099b3;
+  box-shadow: 0 1px 4px rgba(0, 153, 179, 0.2);
+}

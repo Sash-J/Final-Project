@@ -15,6 +15,7 @@ import Home from "./components/Layout/Home";
 import Navbar from "./components/Layout/Navbar";
 import GlobalToaster from "./components/toast/GlobalToaster";
 import AdminBudget from "./features/budget/pages/AdminBudget";
+import ClientBudgetVault from "./features/budget/pages/ClientBudgetVault";
 import AdminDashboard from "./features/dashboard/pages/AdminDashboard";
 
 import ClientDashboard from "./features/dashboard/pages/ClientDashboard";
@@ -91,6 +92,22 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute permissions={["budget.view"]}>
             <AdminBudget />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "budget",
+        element: (
+          <ProtectedRoute permissions={["budget.view"]}>
+            <ClientBudgetVault />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "budgets",
+        element: (
+          <ProtectedRoute permissions={["budget.view"]}>
+            <ClientBudgetVault />
           </ProtectedRoute>
         ),
       },

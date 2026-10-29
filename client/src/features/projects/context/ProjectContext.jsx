@@ -1,13 +1,31 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
 import { projectService } from "../../../services/projectService";
 import { budgetService } from "../../../services/budgetService";
+import { useAuth } from "../../auth/context/AuthContext";
 
 const ProjectContext = createContext();
 
 export const ProjectProvider = ({ children }) => {
+  const { user } = useAuth();
+  const userId = user?.id;
+
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isCached, setIsCached] = useState(false);
+
+  useEffect(() => {
+    setProjects([]);
+    setIsCached(false);
+    setDetailsCache({});
+    setBudgetCache({});
+    setPaymentsCache({});
+    setMilestonesCache({});
+    setVersionsCache({});
+    setHierarchyCache(null);
+    setPhasesCache(null);
+    setDeptsCache(null);
+    setCatsCache(null);
+  }, [userId]);
 
   const [detailsCache, setDetailsCache] = useState({});
   const [detailsLoading, setDetailsLoading] = useState(false);
@@ -26,6 +44,15 @@ export const ProjectProvider = ({ children }) => {
 
   const [versionsCache, setVersionsCache] = useState({});
   const [versionsLoading, setVersionsLoading] = useState(false);
+
+  const versionsCacheRef = useRef(versionsCache);
+  versionsCacheRef.current = versionsCache;
+
+  const budgetCacheRef = useRef(budgetCache);
+  budgetCacheRef.current = budgetCache;
+
+  const hierarchyCacheRef = useRef(hierarchyCache);
+  hierarchyCacheRef.current = hierarchyCache;
 
   const refreshProjects = useCallback(
     async (force = false) => {
@@ -173,7 +200,7 @@ export const ProjectProvider = ({ children }) => {
 
   const getBudgetVersions = useCallback(
     async (projectId, force = false) => {
-      if (versionsCache[projectId] && !force) return versionsCache[projectId];
+      if (versionsCacheRef.current[projectId] && !force) return versionsCacheRef.current[projectId];
 
       setVersionsLoading(true);
       try {
@@ -192,20 +219,25 @@ export const ProjectProvider = ({ children }) => {
         setVersionsLoading(false);
       }
     },
-    [versionsCache],
+    [],
   );
 
   const getBudgetData = useCallback(
     async (projectId, versionId, force = false) => {
-      const projectCache = budgetCache[projectId] || {};
-      if (projectCache[versionId] && !force) return projectCache[versionId];
+      const pIdStr = String(projectId);
+      const vIdStr = String(versionId);
+      const projectCache = budgetCacheRef.current[pIdStr] || {};
+      if (projectCache[vIdStr] && !force) return projectCache[vIdStr];
 
       setBudgetLoading(true);
       try {
         const fullData = await budgetService.getBudgetFull(projectId, versionId);
+        if (!fullData || typeof fullData !== "object") {
+          return { hierarchy: [], values: {}, breakdowns: {} };
+        }
 
-        if (force || !hierarchyCache) {
-          setHierarchyCache(fullData.hierarchy);
+        if (force || !hierarchyCacheRef.current) {
+          setHierarchyCache(fullData.hierarchy || []);
         }
 
         const breakdownsObj = {};
@@ -223,21 +255,30 @@ export const ProjectProvider = ({ children }) => {
           breakdowns: breakdownsObj,
         };
 
+        budgetCacheRef.current = {
+          ...budgetCacheRef.current,
+          [pIdStr]: {
+            ...(budgetCacheRef.current[pIdStr] || {}),
+            [vIdStr]: result,
+          },
+        };
+
         setBudgetCache((prev) => ({
           ...prev,
-          [projectId]: {
-            ...(prev[projectId] || {}),
-            [versionId]: result,
+          [pIdStr]: {
+            ...(prev[pIdStr] || {}),
+            [vIdStr]: result,
           },
         }));
         return result;
       } catch (err) {
         console.error("ProjectContext: Error caching budget data", err);
+        return { hierarchy: [], values: {}, breakdowns: {} };
       } finally {
         setBudgetLoading(false);
       }
     },
-    [budgetCache, hierarchyCache],
+    [],
   );
 
   const invalidateCache = useCallback((projectId = null) => {

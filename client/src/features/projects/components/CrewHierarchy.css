@@ -101,6 +101,22 @@
   z-index: 1;
 }
 
+.org-node-card.is-clickable {
+  cursor: pointer;
+}
+
+.org-node-card.is-readonly {
+  cursor: default;
+}
+
+.org-node-card.is-draggable {
+  cursor: grab;
+}
+
+.org-node-card.is-clickable.is-draggable {
+  cursor: pointer;
+}
+
 .org-node-title {
   font-size: 0.9rem;
   font-weight: 600;
@@ -163,6 +179,11 @@
   flex: 1;
   padding: 20px;
   box-sizing: border-box;
+  cursor: grab;
+}
+
+.org-tree-wrapper.is-canvas-dragging {
+  cursor: grabbing;
 }
 
 .org-tree-scaled {
@@ -297,6 +318,10 @@ body.light-theme .add-node-btn:hover {
   margin-bottom: 2px;
 }
 
+.mm-header {
+  position: relative;
+}
+
 .mm-header h2 {
   font-size: 0.8rem;
   margin: 0;
@@ -329,6 +354,12 @@ body.light-theme .add-node-btn:hover {
 .mm-delete-btn:hover {
   background: rgba(239, 68, 68, 0.15);
   color: #ff6b6b;
+}
+
+.mm-delete-wrapper {
+  position: absolute;
+  top: -2px;
+  right: -2px;
 }
 
 .mm-input {
@@ -467,7 +498,11 @@ body.light-theme .mm-card {
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   color: #24292f;
 }
-body.light-theme .mm-header h2 {
+body.light-theme .mm-header {
+  position: relative;
+}
+
+.mm-header h2 {
   color: #24292f;
 }
 body.light-theme .mm-header p {

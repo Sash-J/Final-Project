@@ -25,6 +25,12 @@
   z-index: 100;
 }
 
+.pd-top-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .back-to-admin {
   background: transparent;
   border: none;
@@ -189,6 +195,16 @@
   flex-direction: column;
 }
 
+.hero-stat-box.clickable {
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.hero-stat-box.clickable:hover {
+  opacity: 0.85;
+  transform: translateY(-2px);
+}
+
 .hero-stat-box label {
   font-size: 0.8rem;
   color: rgba(255, 255, 255, 0.3);
@@ -338,39 +354,7 @@
   position: relative;
 }
 
-.sui-view-toggle {
-  display: flex;
-  gap: 4px;
-  background: rgba(18, 19, 26, 0.98);
-  border-radius: 8px;
-  padding: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-}
 
-.sui-view-toggle-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
-  color: #fff;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  padding: 4px;
-}
-
-.sui-view-toggle-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.sui-view-toggle-btn.active {
-  background: rgba(var(--accent-color-rgb), 0.2);
-  color: var(--accent-color);
-}
 
 .timeline-modal-container .modal-header-section {
   display: flex;
@@ -438,25 +422,7 @@
    Light Theme Styling Overrides for Project Detail Dashboard
    ========================================== */
 
-/* Light Theme Styling for Timeline view toggle */
-body.light-theme .sui-view-toggle {
-  background: rgba(255, 255, 255, 0.98);
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
 
-body.light-theme .sui-view-toggle-btn {
-  color: #333;
-}
-
-body.light-theme .sui-view-toggle-btn:hover {
-  background: rgba(0, 0, 0, 0.05);
-}
-
-body.light-theme .sui-view-toggle-btn.active {
-  background: rgba(var(--accent-color-rgb), 0.1);
-  color: #0099b3;
-}
 
 /* Light Theme Styling for Dashboard */
 body.light-theme .project-detail-root {

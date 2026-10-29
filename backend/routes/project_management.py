@@ -3,7 +3,13 @@ from flask_cors import cross_origin
 from routes.notifications_management import notify_all_admins
 import services.db_operations as db
 import services.auth_operations as auth
-from core.session_handler import permissions_required
+from core.session_handler import (
+    permissions_required,
+    login_required,
+    get_current_user_id,
+    has_permission,
+    has_role,
+)
 
 project_bp = Blueprint("project_management", __name__)
 
@@ -17,12 +23,28 @@ def getTable():
 @project_bp.route("/api/projects", methods=["GET"])
 @permissions_required("project.view")
 def projects_get():
+    user_id = get_current_user_id()
+    if not has_role("admin", "manager", "director"):
+        if has_role("client"):
+            return jsonify(auth.get_client_projects(user_id)), 200
+        elif has_role("crew"):
+            return jsonify(auth.get_crew_projects(user_id)), 200
     return jsonify(db.get_projects()), 200
 
 
 @project_bp.route("/api/projects/<int:project_id>", methods=["GET"])
 @permissions_required("project.view")
 def project_detail_get(project_id):
+    user_id = get_current_user_id()
+    if not has_role("admin", "manager", "director"):
+        if has_role("client"):
+            client_project_ids = [p["id"] for p in auth.get_client_projects(user_id)]
+            if project_id not in client_project_ids:
+                return jsonify({"error": "Unauthorized"}), 403
+        elif has_role("crew"):
+            crew_project_ids = [p["id"] for p in auth.get_crew_projects(user_id)]
+            if project_id not in crew_project_ids:
+                return jsonify({"error": "Unauthorized"}), 403
     project = db.get_project_by_id(project_id)
     if not project:
         return jsonify({"error": "Project not found"}), 404
@@ -68,33 +90,44 @@ def projects_post():
         route_locations,
     )
 
-    client_ids = data.get("client_ids", [])
-    if isinstance(client_ids, list):
-        for c_id in client_ids:
+    raw_clients = data.get("client_ids", [])
+    if isinstance(raw_clients, (int, str)):
+        raw_clients = [raw_clients]
+    if isinstance(raw_clients, list):
+        for c_id in raw_clients:
             try:
-                auth.assign_client_to_project(c_id, new_id)
-            except:
-                pass
+                auth.assign_client_to_project(int(c_id), new_id)
+            except Exception as e:
+                print(f"Error assigning client {c_id} to project {new_id}:", e)
 
-    crew_ids = data.get("crew_ids", [])
-    if isinstance(crew_ids, list):
-        for cr_id in crew_ids:
+    raw_crew = data.get("crew_ids", [])
+    if isinstance(raw_crew, (int, str)):
+        raw_crew = [raw_crew]
+    if isinstance(raw_crew, list):
+        for cr_id in raw_crew:
             try:
-                auth.assign_crew_to_project(cr_id, new_id)
-            except:
-                pass
+                auth.assign_crew_to_project(int(cr_id), new_id)
+            except Exception as e:
+                print(f"Error assigning crew {cr_id} to project {new_id}:", e)
 
     notify_all_admins(f"New project created: {project_name}.", "info")
     return jsonify({"message": "Project added successfully", "id": new_id}), 201
 
 
 @project_bp.route("/api/projects/<int:project_id>/status", methods=["PUT"])
-@permissions_required("project.edit")
+@login_required
 def update_project_status_endpoint(project_id):
+    user_id = get_current_user_id()
     data = request.get_json()
     status = data.get("status")
     if status not in ["in_progress", "completed"]:
         return jsonify({"error": "Invalid status"}), 400
+
+    has_perm = has_permission("project.edit")
+    is_assigned_client = has_role("client") and user_id in auth.get_project_clients(project_id)
+    if not (has_perm or is_assigned_client):
+        return jsonify({"error": "Forbidden: missing permission to update status"}), 403
+
     try:
         db.update_project_status(project_id, status)
         return jsonify({"message": f"Project marked as {status}"}), 200
@@ -145,24 +178,28 @@ def projects_put(project_id):
             route_locations,
         )
 
-        client_ids = data.get("client_ids", [])
-        if isinstance(client_ids, list):
+        raw_clients = data.get("client_ids", [])
+        if isinstance(raw_clients, (int, str)):
+            raw_clients = [raw_clients]
+        if isinstance(raw_clients, list):
             auth.clear_project_clients(project_id)
-            for c_id in client_ids:
+            for c_id in raw_clients:
                 try:
-                    auth.assign_client_to_project(c_id, project_id)
-                except:
-                    pass
+                    auth.assign_client_to_project(int(c_id), project_id)
+                except Exception as e:
+                    print(f"Error assigning client {c_id} to project {project_id}:", e)
 
         # assign crew
-        crew_ids = data.get("crew_ids", [])
-        if isinstance(crew_ids, list):
+        raw_crew = data.get("crew_ids", [])
+        if isinstance(raw_crew, (int, str)):
+            raw_crew = [raw_crew]
+        if isinstance(raw_crew, list):
             auth.clear_project_crew(project_id)
-            for cr_id in crew_ids:
+            for cr_id in raw_crew:
                 try:
-                    auth.assign_crew_to_project(cr_id, project_id)
-                except:
-                    pass
+                    auth.assign_crew_to_project(int(cr_id), project_id)
+                except Exception as e:
+                    print(f"Error assigning crew {cr_id} to project {project_id}:", e)
 
         return jsonify({"message": "Project updated successfully"}), 200
     except Exception as e:
@@ -183,7 +220,13 @@ def projects_delete(project_id):
 
 
 @project_bp.route("/api/projects/<int:project_id>/hierarchy", methods=["PUT"])
-@permissions_required("production.edit")
+@permissions_required(
+    "production.edit",
+    "hierarchy.node.edit",
+    "hierarchy.node.add",
+    "hierarchy.node.delete",
+    "hierarchy.node.drag",
+)
 @cross_origin(supports_credentials=True)
 def update_project_hierarchy_endpoint(project_id):
     import json

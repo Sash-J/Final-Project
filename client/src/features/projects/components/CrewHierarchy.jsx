@@ -4,6 +4,7 @@ import Icon from "../../../components/common/Icon";
 import HoverTooltip from "../../../components/common/HoverTooltip";
 import GlassSurface from "../../../components/effects/GlassSurface";
 import { projectService } from "../../../services/projectService";
+import { useAuth } from "../../auth/context/AuthContext";
 import "./CrewHierarchy.css";
 
 const OrgNode = ({
@@ -14,60 +15,76 @@ const OrgNode = ({
   onDrop,
   onAddNode,
   onEditNode,
+  canAddNode = false,
+  canEditNode = false,
+  canDragNode = false,
 }) => {
   const handleDragStart = (e) => {
+    if (!canDragNode) return;
     e.stopPropagation();
     onDragStart(e, node.id);
   };
 
   const handleDragOver = (e) => {
+    if (!canDragNode) return;
     e.preventDefault();
     e.stopPropagation();
     onDragOver(e, node.id);
   };
 
   const handleDragLeave = (e) => {
+    if (!canDragNode) return;
     e.preventDefault();
     e.stopPropagation();
     onDragLeave(e, node.id);
   };
 
   const handleDrop = (e) => {
+    if (!canDragNode) return;
     e.preventDefault();
     e.stopPropagation();
     onDrop(e, node.id);
   };
 
+  const cardClassName = [
+    "org-node-card",
+    canEditNode ? "is-clickable" : "is-readonly",
+    canDragNode ? "is-draggable" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <li>
       <div
-        className="org-node-card"
+        className={cardClassName}
         data-node-id={node.id}
-        draggable={true}
-        onDragStart={handleDragStart}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
+        draggable={canDragNode}
+        onDragStart={canDragNode ? handleDragStart : undefined}
+        onDragOver={canDragNode ? handleDragOver : undefined}
+        onDragLeave={canDragNode ? handleDragLeave : undefined}
+        onDrop={canDragNode ? handleDrop : undefined}
         onClick={(e) => {
           e.stopPropagation();
-          if (onEditNode) onEditNode(node.id, node, e);
+          if (canEditNode && onEditNode) onEditNode(node.id, node, e);
         }}
-        style={{ cursor: "pointer" }}
       >
         {node.department && (
           <div className="org-node-title">
             {node.department}
-            <HoverTooltip text="Add Child Node">
-              <button
-                className="add-node-btn"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onAddNode(node.id, e);
-                }}
-              >
-                +
-              </button>
-            </HoverTooltip>
+            {canAddNode && (
+              <HoverTooltip text="Add Child Node">
+                <button
+                  className="add-node-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAddNode(node.id, e);
+                  }}
+                >
+                  +
+                </button>
+              </HoverTooltip>
+            )}
           </div>
         )}
         <div className="org-node-members">
@@ -96,6 +113,9 @@ const OrgNode = ({
               onDrop={onDrop}
               onAddNode={onAddNode}
               onEditNode={onEditNode}
+              canAddNode={canAddNode}
+              canEditNode={canEditNode}
+              canDragNode={canDragNode}
             />
           ))}
         </ul>
@@ -113,6 +133,15 @@ const assignIds = (node) => ({
 });
 
 const CrewHierarchy = ({ project, onUpdateHierarchy, onSaveStatusChange }) => {
+  const { hasPermission, hasRole } = useAuth();
+
+  const isClient = hasRole("client");
+  const canAddNode = !isClient && hasPermission(["hierarchy.node.add", "Add child node"]);
+  const canEditNode = !isClient && hasPermission(["hierarchy.node.edit", "Edit node"]);
+  const canDeleteNode = !isClient && hasPermission(["hierarchy.node.delete", "Delete Node"]);
+  const canDragNode = !isClient && hasPermission(["hierarchy.node.drag", "Node draggable"]);
+  const canModifyHierarchy = canAddNode || canEditNode || canDeleteNode || canDragNode;
+
   const containerRef = useRef(null);
   const treeRef = useRef(null);
   const [scale, setScale] = useState(1);
@@ -228,6 +257,7 @@ const CrewHierarchy = ({ project, onUpdateHierarchy, onSaveStatusChange }) => {
     }
 
     if (!project?.id) return;
+    if (!canModifyHierarchy) return;
 
     const timer = setTimeout(async () => {
       if (onSaveStatusChange) onSaveStatusChange("saving");
@@ -253,12 +283,12 @@ const CrewHierarchy = ({ project, onUpdateHierarchy, onSaveStatusChange }) => {
 
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [treeData, project?.id, onSaveStatusChange]);
+  }, [treeData, project?.id, onSaveStatusChange, canModifyHierarchy]);
 
   // Save immediately on unmount if there are unsaved changes
   useEffect(() => {
     return () => {
-      if (project?.id && latestTreeData.current) {
+      if (project?.id && latestTreeData.current && canModifyHierarchy) {
         // Fire and forget save when closing the modal
         projectService
           .updateCrewHierarchy(project.id, latestTreeData.current)
@@ -274,7 +304,7 @@ const CrewHierarchy = ({ project, onUpdateHierarchy, onSaveStatusChange }) => {
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [project?.id]);
+  }, [project?.id, canModifyHierarchy]);
 
   // Helper to deep clone and modify tree
   const reparentNode = (tree, draggedId, targetId) => {
@@ -336,21 +366,25 @@ const CrewHierarchy = ({ project, onUpdateHierarchy, onSaveStatusChange }) => {
   };
 
   const onDragStart = (e, id) => {
+    if (!canDragNode) return;
     setDraggedNodeId(id);
     e.dataTransfer.effectAllowed = "move";
     e.target.style.opacity = "0.5";
   };
 
   const onDragOver = (e, id) => {
+    if (!canDragNode) return;
     e.dataTransfer.dropEffect = "move";
     e.currentTarget.classList.add("drag-over");
   };
 
   const onDragLeave = (e, id) => {
+    if (!canDragNode) return;
     e.currentTarget.classList.remove("drag-over");
   };
 
   const onDrop = (e, id) => {
+    if (!canDragNode) return;
     e.currentTarget.classList.remove("drag-over");
     if (draggedNodeId && draggedNodeId !== id) {
       setTreeData((prevTree) => reparentNode(prevTree, draggedNodeId, id));
@@ -388,6 +422,7 @@ const CrewHierarchy = ({ project, onUpdateHierarchy, onSaveStatusChange }) => {
   };
 
   const onAddNode = (parentId, e) => {
+    if (!canAddNode) return;
     if (e) {
       const buttonRect = e.currentTarget.getBoundingClientRect();
       const containerRect = containerRef.current.getBoundingClientRect();
@@ -404,6 +439,7 @@ const CrewHierarchy = ({ project, onUpdateHierarchy, onSaveStatusChange }) => {
   };
 
   const onEditNode = (nodeId, node, e) => {
+    if (!canEditNode) return;
     if (e && containerRef.current) {
       const cardRect = e.currentTarget.getBoundingClientRect();
       const containerRect = containerRef.current.getBoundingClientRect();
@@ -429,6 +465,7 @@ const CrewHierarchy = ({ project, onUpdateHierarchy, onSaveStatusChange }) => {
   };
 
   const handleDeleteNode = () => {
+    if (!canDeleteNode) return;
     const deleteNode = (node) => {
       if (!node.children) return node;
       // Filter out the child that matches editNodeId
@@ -453,6 +490,8 @@ const CrewHierarchy = ({ project, onUpdateHierarchy, onSaveStatusChange }) => {
   };
 
   const handleSaveNode = () => {
+    if (modalMode === "add" && !canAddNode) return;
+    if (modalMode === "edit" && !canEditNode) return;
     if (!newNodeData.department.trim()) return;
 
     // Ensure we don't save empty members
@@ -624,13 +663,12 @@ const CrewHierarchy = ({ project, onUpdateHierarchy, onSaveStatusChange }) => {
 
   return (
     <div
-      className="org-tree-wrapper"
+      className={`org-tree-wrapper ${isDraggingCanvas ? "is-canvas-dragging" : ""}`}
       ref={containerRef}
       onMouseDown={handleCanvasMouseDown}
       onMouseMove={handleCanvasMouseMove}
       onMouseUp={handleCanvasMouseUp}
       onMouseLeave={handleCanvasMouseUp}
-      style={{ cursor: isDraggingCanvas ? "grabbing" : "grab" }}
     >
       <div
         className="org-tree org-tree-scaled"
@@ -648,6 +686,9 @@ const CrewHierarchy = ({ project, onUpdateHierarchy, onSaveStatusChange }) => {
             onDrop={onDrop}
             onAddNode={(parentId, e) => onAddNode(parentId, e)}
             onEditNode={onEditNode}
+            canAddNode={canAddNode}
+            canEditNode={canEditNode}
+            canDragNode={canDragNode}
           />
         </ul>
       </div>
@@ -700,17 +741,17 @@ const CrewHierarchy = ({ project, onUpdateHierarchy, onSaveStatusChange }) => {
                 transformOrigin: modalPosition.transformOrigin || "top left",
               }}
             >
-              <div className="mm-header" style={{ position: "relative" }}>
+              <div className="mm-header">
                 <h2>{modalMode === "add" ? "Add Node" : "Edit Node"}</h2>
                 <p>
                   {modalMode === "add"
                     ? "Create new department"
                     : "Update department details"}
                 </p>
-                {modalMode === "edit" && treeData.id !== editNodeId && (
+                {modalMode === "edit" && treeData.id !== editNodeId && canDeleteNode && (
                   <HoverTooltip
                     text="Delete Node"
-                    style={{ position: "absolute", top: "-2px", right: "-2px" }}
+                    className="mm-delete-wrapper"
                   >
                     <button
                       className="mm-delete-btn"

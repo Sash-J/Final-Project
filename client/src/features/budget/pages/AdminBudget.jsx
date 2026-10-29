@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useBlocker } from "react-router-dom";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useBlocker, useSearchParams, useLocation } from "react-router-dom";
 import { useModal } from "../../../context/ModalContext";
 import { useProjects } from "../../projects/context/ProjectContext";
 import BudgetEntryForm from "../components/BudgetEntryForm";
 import GlassDropdown from "../../../components/common/GlassDropdown";
 import PageHeader from "../../../components/common/PageHeader";
+import { PageContainer, PageContentCard } from "../../../components/common/PageContainer";
 import ConfirmationModal from "../../../components/common/ConfirmationModal";
 
 import HoverTooltip from "../../../components/common/HoverTooltip";
@@ -17,9 +18,14 @@ import PublishBudgetModal from "../components/PublishBudgetModal";
 import { useAuth } from "../../auth/context/AuthContext";
 // ── Main AdminBudget Component ────────────────────────────────────────────────
 const AdminBudget = () => {
-  const { hasPermission } = useAuth();
-  const canEditBudget = hasPermission("budget.edit");
-  const canPublishBudget = hasPermission("budget.publish");
+  const { hasRole, hasPermission } = useAuth();
+  const isClient = hasRole("client");
+  const canEditBudget = hasPermission("budget.edit") && !isClient;
+  const canPublishBudget = hasPermission("budget.publish") && !isClient;
+
+  const [searchParams] = useSearchParams();
+  const queryProjectId = searchParams.get("projectId") || searchParams.get("project") || "";
+
   const {
     projects,
     refreshProjects,
@@ -52,12 +58,12 @@ const AdminBudget = () => {
     const tags = [];
     if (v.published_to_crew) tags.push("Crew");
     if (v.published_to_client) tags.push("Client");
-    const tagStr = tags.length > 0 ? ` [Published: ${tags.join(" & ")}]` : "";
+    const tagStr = tags.length > 0 && !isClient ? ` [Published: ${tags.join(" & ")}]` : "";
     return {
       value: String(v.id),
       label: `Version ${v.version_number}${tagStr}`,
     };
-  }), [versionsCache, projectId]);
+  }), [versionsCache, projectId, isClient]);
 
   const [selectedCatId, setSelectedCatId] = useState("");
   const [selectedDeptId, setSelectedDeptId] = useState("");
@@ -106,10 +112,25 @@ const AdminBudget = () => {
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
   const [pendingNav, setPendingNav] = useState(null); // { type, value }
 
+  const location = useLocation();
+  const prevLocationKeyRef = useRef(location.key);
+
+  useEffect(() => {
+    if (prevLocationKeyRef.current !== location.key) {
+      prevLocationKeyRef.current = location.key;
+      if (!budgetIsDirty && !searchParams.get("projectId")) {
+        setProjectId("");
+        setVersionId("");
+        setSelectedCatId("");
+        setSelectedDeptId("");
+      }
+    }
+  }, [location.key, budgetIsDirty, searchParams]);
+
   // Router-level navigation blocker (for Navbar, browser back, links)
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
-      budgetIsDirty && currentLocation.pathname !== nextLocation.pathname,
+      canEditBudget && budgetIsDirty && currentLocation.pathname !== nextLocation.pathname,
   );
 
   const { showConfirm } = useModal();
@@ -119,10 +140,46 @@ const AdminBudget = () => {
   }, []);
 
   useEffect(() => {
-    refreshProjects();
+    refreshProjects(true);
     getBudgetMetadata(refreshKey > 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshKey]);
+
+  const proceedWithProjectChange = useCallback(async (id) => {
+    setProjectId(id);
+    setVersionId("");
+    setSelectedCatId("");
+    setSelectedDeptId("");
+    if (id) {
+      await getBudgetVersions(id, true);
+    }
+  }, [getBudgetVersions]);
+
+  // Whenever projectId is set/changed, ensure versions are loaded
+  useEffect(() => {
+    if (projectId) {
+      getBudgetVersions(projectId, false);
+    }
+  }, [projectId, getBudgetVersions]);
+
+  // Auto-select project from query param or default for clients
+  useEffect(() => {
+    if (queryProjectId) {
+      const found = projects.find((p) => String(p.id) === String(queryProjectId));
+      if (found && String(projectId) !== String(found.id)) {
+        proceedWithProjectChange(found.id);
+      }
+    } else if (isClient && projects.length > 0 && !projectId) {
+      proceedWithProjectChange(projects[0].id);
+    }
+  }, [queryProjectId, projects, isClient, projectId, proceedWithProjectChange]);
+
+  // Auto-select latest version when project versions load
+  useEffect(() => {
+    if (projectId && !versionId && versionOptions.length > 0) {
+      setVersionId(versionOptions[versionOptions.length - 1].value);
+    }
+  }, [projectId, versionId, versionOptions]);
 
   // Fetch comparison data when Compare budget changes
   useEffect(() => {
@@ -175,15 +232,6 @@ const AdminBudget = () => {
     proceedWithProjectChange(id);
   };
 
-  const proceedWithProjectChange = async (id) => {
-    setProjectId(id);
-    setVersionId("");
-    setSelectedCatId("");
-    setSelectedDeptId("");
-    if (id) {
-      await getBudgetVersions(id);
-    }
-  };
 
   const handleVersionChange = (val) => {
     if (budgetIsDirty && String(val) !== String(versionId)) {
@@ -296,24 +344,28 @@ const AdminBudget = () => {
   };
 
   return (
-    <section id="admin-budget">
+    <PageContainer id="admin-budget">
       <PageHeader
-        category="Production Budget"
-        title="Entry"
-        description="Enhanced view for managing hierarchy and budget entry"
+        category={isClient ? "Client Portal" : "Production Budget"}
+        title={isClient ? "Project Budget" : "Entry"}
+        description={
+          isClient
+            ? "View published production budget breakdowns for your assigned projects"
+            : "Enhanced view for managing hierarchy and budget entry"
+        }
       />
 
-      <div className="admin-content-animated">
+      <PageContentCard>
         <div className="admin-budget-content">
           <div className={`admin-sidebar ${isSidebarExpanded ? 'expanded' : ''}`}>
             <div className="admin-sidebar-overlay">
               <div className={`sidebar-section admin-sidebar-glass ${isSidebarExpanded && !isProjectGroupActive ? 'group-collapsed' : ''}`} id="accordion-project">
-                <HoverTooltip text={isSidebarExpanded ? "" : "Select Project"} wrapperClassName="w-100" style={{ display: 'flex' }}>
+                <HoverTooltip text={isSidebarExpanded ? "" : (isClient ? "Project & Version" : "Select Project")} wrapperClassName="w-100" style={{ display: 'flex' }}>
                   <div className="sidebar-widget-header w-100" onClick={() => handleAccordionToggle('project')}>
                     <div className="sidebar-widget-icon-wrapper theme-blue">
                       <span className="material-symbols-outlined icon-root">account_tree</span>
                     </div>
-                    <h3 className="sidebar-widget-title">Select Project</h3>
+                    <h3 className="sidebar-widget-title">{isClient ? "Project & Version" : "Select Project"}</h3>
                     <WidgetOptionsMenu
                       autoCenterEnabled={autoCenterViewportEnabled}
                       onToggleAutoCenter={setAutoCenterViewportEnabled}
@@ -326,7 +378,7 @@ const AdminBudget = () => {
                   <div className="sidebar-widget-content-inner">
                     <div className="project-dropdown-wrapper">
                       <GlassDropdown
-                        label="Choose project to manage budgets"
+                        label={isClient ? "Choose project to view budget" : "Choose project to manage budgets"}
                         placeholder="- Select Project -"
                         options={projectOptions}
                         value={projectId}
@@ -339,30 +391,42 @@ const AdminBudget = () => {
                         <div className="version-controls">
                           <div className="version-select-container">
                             <GlassDropdown
-                              label="Select Budget Version"
-                              placeholder="— Select —"
+                              label={isClient ? "Published Budget Version" : "Select Budget Version"}
+                              placeholder={
+                                isClient
+                                  ? (versionOptions.length === 0 ? "— No Published Versions —" : "— Select Version —")
+                                  : "— Select —"
+                              }
                               modifiers="lg fluid"
                               options={versionOptions}
                               value={versionId}
                               onChange={(val) => handleVersionChange(val)}
+                              disabled={versionOptions.length === 0}
                             />
                           </div>
 
-                          <div className="version-actions-row">
-                            <HoverTooltip text="Delete selected version">
-                              <button
-                                type="button"
-                                className="btn-neo-cancel version-action-btn-delete"
-                                onClick={handleDeleteVersion}
-                                disabled={!versionId}
-                              >
-                                <span className="material-symbols-outlined version-action-icon-delete">
-                                  delete
-                                </span>
-                              </button>
-                            </HoverTooltip>
+                          {isClient && versionOptions.length === 0 && (
+                            <div className="client-budget-notice">
+                              <span className="material-symbols-outlined icon-root">info</span>
+                              <span>No published budget is available for this project yet. Published versions from the production team will appear here once released.</span>
+                            </div>
+                          )}
 
-                            {canEditBudget && (
+                          {canEditBudget && (
+                            <div className="version-actions-row">
+                              <HoverTooltip text="Delete selected version">
+                                <button
+                                  type="button"
+                                  className="btn-neo-cancel version-action-btn-delete"
+                                  onClick={handleDeleteVersion}
+                                  disabled={!versionId}
+                                >
+                                  <span className="material-symbols-outlined version-action-icon-delete">
+                                    delete
+                                  </span>
+                                </button>
+                              </HoverTooltip>
+
                               <HoverTooltip text="Clone current version to a new one">
                                 <button
                                   type="button"
@@ -372,8 +436,8 @@ const AdminBudget = () => {
                                   + New Version
                                 </button>
                               </HoverTooltip>
-                            )}
-                          </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
@@ -424,7 +488,7 @@ const AdminBudget = () => {
                   </div>
                 </div>
               )}
-              {versionId && (
+              {!isClient && versionId && (
                 <div className={`sidebar-section admin-sidebar-glass ${isSidebarExpanded && !isCompareGroupActive ? 'group-collapsed' : ''}`} style={{ gap: '12px' }}>
                   <div id="accordion-compare">
                     <CompareBudgetWidget
@@ -471,7 +535,7 @@ const AdminBudget = () => {
                 }
                 versionName={
                   (versionsCache[projectId] || []).find(
-                    (v) => v.id === versionId,
+                    (v) => String(v.id) === String(versionId),
                   )?.version_number || ""
                 }
                 refreshKey={refreshKey}
@@ -482,11 +546,12 @@ const AdminBudget = () => {
                 actionsContainer={sidebarActionsNode}
                 comparisonData={comparisonData}
                 isCompareLoading={isCompareLoading}
+                canEdit={canEditBudget}
               />
             </div>
           </div>
         </div>
-      </div>
+      </PageContentCard>
 
       <ConfirmationModal
         isOpen={showUnsavedModal || blocker.state === "blocked"}
@@ -508,7 +573,7 @@ const AdminBudget = () => {
         initialVersionId={versionId}
         onSuccess={() => getBudgetVersions(projectId, true)}
       />
-    </section>
+    </PageContainer>
   );
 };
 

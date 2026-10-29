@@ -296,8 +296,8 @@ def get_all_permissions():
 def assign_client_to_project(user_id, project_id):
     with db_cursor(commit=True) as cursor:
         cursor.execute(
-            "INSERT INTO client_projects (user_id, project_id) VALUES (%s, %s)",
-            (user_id, project_id),
+            "INSERT IGNORE INTO client_projects (user_id, project_id) VALUES (%s, %s)",
+            (int(user_id), int(project_id)),
         )
 
 
@@ -315,20 +315,57 @@ def clear_project_clients(project_id):
 
 
 def _get_user_assigned_projects(user_id, junction_table):
+    import json
     query = f"""
-    SELECT p.id, p.project_name, p.client_name, p.created_at, p.start_date, p.end_date, p.status, p.location, p.code_name,
+    SELECT p.*,
+           GROUP_CONCAT(DISTINCT u_client.username ORDER BY u_client.id SEPARATOR ', ') as client_usernames,
+           GROUP_CONCAT(DISTINCT u_client.id ORDER BY u_client.id SEPARATOR ',') as client_ids,
+           GROUP_CONCAT(DISTINCT COALESCE(u_client.verified_level, u_client.role) ORDER BY u_client.id SEPARATOR ', ') as client_verified_levels,
+           GROUP_CONCAT(DISTINCT u_client.role ORDER BY u_client.id SEPARATOR ', ') as client_roles,
+           GROUP_CONCAT(DISTINCT u_crew.username SEPARATOR ', ') as crew_usernames,
+           GROUP_CONCAT(DISTINCT u_crew.id SEPARATOR ',') as crew_ids,
+           (SELECT COUNT(*) FROM budget_versions bv WHERE bv.project_id = p.id) as version_count,
+           (SELECT JSON_ARRAYAGG(
+               JSON_OBJECT(
+                   'id', u.id,
+                   'username', u.username,
+                   'role', u.role,
+                   'verified_level', COALESCE(u.verified_level, u.role)
+               )
+            )
+            FROM client_projects cp2
+            JOIN users u ON cp2.user_id = u.id
+            WHERE cp2.project_id = p.id
+           ) as client_details,
            (SELECT COALESCE(SUM(total), 0) FROM project_budget_values 
             WHERE version_id = (SELECT id FROM budget_versions WHERE project_id = p.id ORDER BY version_number DESC LIMIT 1)
            ) as total_budget,
            (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE project_id = p.id) as total_paid
     FROM projects p
     JOIN {junction_table} j ON p.id = j.project_id
+    LEFT JOIN client_projects cp ON p.id = cp.project_id
+    LEFT JOIN users u_client ON cp.user_id = u_client.id
+    LEFT JOIN crew_projects crp ON p.id = crp.project_id
+    LEFT JOIN users u_crew ON crp.user_id = u_crew.id
     WHERE j.user_id = %s
+    GROUP BY p.id
     ORDER BY p.id DESC
     """
     with db_cursor() as cursor:
         cursor.execute(query, (user_id,))
-        return cursor.fetchall()
+        result = cursor.fetchall()
+
+    for row in result:
+        raw_cd = row.get("client_details")
+        if isinstance(raw_cd, str):
+            try:
+                row["client_details"] = json.loads(raw_cd)
+            except Exception:
+                row["client_details"] = []
+        elif not raw_cd:
+            row["client_details"] = []
+
+    return result
 
 
 def get_client_projects(user_id):
