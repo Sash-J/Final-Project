@@ -100,5 +100,32 @@ export const userService = {
     } catch (error) {
       handleApiError(error);
     }
+  },
+
+  getUserPermissions: async (userId) => {
+    try {
+      const response = await api.get(`/api/admin/users/${userId}/permissions`);
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  },
+
+  updateUserPermissions: async (userId, grants = [], revokes = []) => {
+    try {
+      const response = await api.put(`/api/admin/users/${userId}/permissions`, { grants, revokes });
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  },
+
+  resetUserPermissions: async (userId) => {
+    try {
+      const response = await api.post(`/api/admin/users/${userId}/permissions/reset`);
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
   }
 };

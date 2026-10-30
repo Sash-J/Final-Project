@@ -649,13 +649,15 @@ const ProjectDetailDashboard = () => {
                         <h2>Project Timeline</h2>
                         <p>Manage and track project milestones</p>
                       </div>
-                      <button
-                        className="btn-neo btn-neo-solid"
-                        onClick={() => setShowAddMilestone(true)}
-                      >
-                        <Icon name="add" modifiers="sm" />
-                        <span>Add Milestone</span>
-                      </button>
+                      {hasPermission("milestone.create") && (
+                        <button
+                          className="btn-neo btn-neo-solid"
+                          onClick={() => setShowAddMilestone(true)}
+                        >
+                          <Icon name="add" modifiers="sm" />
+                          <span>Add Milestone</span>
+                        </button>
+                      )}
                     </div>
 
                     <ViewToggle

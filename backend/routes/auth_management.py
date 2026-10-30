@@ -175,6 +175,10 @@ def get_me():
         roles, permissions = auth.get_user_roles_and_permissions(user_id)
         user_data["roles"] = roles
         user_data["permissions"] = permissions
+        session["user_roles"] = roles
+        session["user_permissions"] = permissions
+        if roles:
+            session["user_role"] = roles[0]
         return (
             jsonify(
                 {

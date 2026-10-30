@@ -287,7 +287,7 @@ def budget_item_breakdown_post():
 
 # Budget Versions
 @budget_bp.route("/api/projects/<int:project_id>/budget-versions", methods=["POST"])
-@permissions_required("budget.edit")
+@permissions_required("budget.create", "budget.edit")
 def budget_versions_post(project_id):
     data = request.get_json()
     source_version_id = data.get("source_version_id")

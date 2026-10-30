@@ -70,15 +70,37 @@ def permissions_required(*permissions):
             if request.method == "OPTIONS":
                 return f(*args, **kwargs)
 
-            if "user_id" not in session:
+            user_id = session.get("user_id")
+            if not user_id:
                 return jsonify({"error": "Login required"}), 401
 
             # Admins automatically have full access
             user_roles = [_normalize_role(r) for r in (session.get("user_roles") or [])]
-            if "admin" in user_roles or _normalize_role(session.get("user_role")) == "admin":
+            if session.get("user_role"):
+                user_roles.append(_normalize_role(session.get("user_role")))
+
+            if "admin" in user_roles:
                 return f(*args, **kwargs)
 
-            user_permissions = {p.strip().lower() for p in (session.get("user_permissions") or [])}
+            # Check cached session permissions, or hydrate from DB if missing
+            perms_in_session = session.get("user_permissions")
+            if perms_in_session is None:
+                try:
+                    from services.auth_operations import get_user_roles_and_permissions
+                    db_roles, db_perms = get_user_roles_and_permissions(user_id)
+                    session["user_roles"] = db_roles
+                    session["user_permissions"] = db_perms
+                    if db_roles:
+                        session["user_role"] = db_roles[0]
+                    norm_db_roles = [_normalize_role(r) for r in db_roles]
+                    if "admin" in norm_db_roles:
+                        return f(*args, **kwargs)
+                    user_permissions = {p.strip().lower() for p in db_perms}
+                except Exception:
+                    user_permissions = set()
+            else:
+                user_permissions = {p.strip().lower() for p in perms_in_session}
+
             if not (norm_required & user_permissions):
                 return jsonify({"error": "Forbidden: missing required permission"}), 403
             return f(*args, **kwargs)

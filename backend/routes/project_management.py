@@ -123,7 +123,7 @@ def update_project_status_endpoint(project_id):
     if status not in ["in_progress", "completed"]:
         return jsonify({"error": "Invalid status"}), 400
 
-    has_perm = has_permission("project.edit")
+    has_perm = has_permission("project.status", "project.edit")
     is_assigned_client = has_role("client") and user_id in auth.get_project_clients(project_id)
     if not (has_perm or is_assigned_client):
         return jsonify({"error": "Forbidden: missing permission to update status"}), 403
@@ -226,6 +226,7 @@ def projects_delete(project_id):
     "hierarchy.node.add",
     "hierarchy.node.delete",
     "hierarchy.node.drag",
+    "hierarchy.delete",
 )
 @cross_origin(supports_credentials=True)
 def update_project_hierarchy_endpoint(project_id):
@@ -310,7 +311,7 @@ def get_project_crew_members(project_id):
 # --- EQUIPMENT RELATIONAL DB ENDPOINTS ---
 
 @project_bp.route("/api/projects/<int:project_id>/equipment_full", methods=["GET"])
-@permissions_required("production.view")
+@permissions_required("production.view", "equipment.view")
 def get_project_equipment_full(project_id):
     try:
         data = db.get_project_equipment_full(project_id)
@@ -319,7 +320,7 @@ def get_project_equipment_full(project_id):
         return jsonify({"error": str(e)}), 500
 
 @project_bp.route("/api/projects/<int:project_id>/departments", methods=["POST"])
-@permissions_required("production.edit")
+@permissions_required("equipment.edit", "production.edit")
 def create_equipment_department(project_id):
     data = request.get_json()
     name = data.get('name', 'New Department')
@@ -330,7 +331,7 @@ def create_equipment_department(project_id):
         return jsonify({"error": str(e)}), 500
 
 @project_bp.route("/api/departments/<int:department_id>", methods=["PUT"])
-@permissions_required("production.edit")
+@permissions_required("equipment.edit", "production.edit")
 def update_equipment_department(department_id):
     data = request.get_json()
     name = data.get('name')
@@ -343,7 +344,7 @@ def update_equipment_department(department_id):
         return jsonify({"error": str(e)}), 500
 
 @project_bp.route("/api/departments/<int:department_id>", methods=["DELETE"])
-@permissions_required("production.edit")
+@permissions_required("equipment.edit", "production.edit")
 def delete_equipment_department(department_id):
     try:
         db.delete_equipment_department(department_id)
@@ -352,7 +353,7 @@ def delete_equipment_department(department_id):
         return jsonify({"error": str(e)}), 500
 
 @project_bp.route("/api/departments/<int:department_id>/items", methods=["POST"])
-@permissions_required("production.edit")
+@permissions_required("equipment.edit", "production.edit")
 def create_equipment_item(department_id):
     data = request.get_json()
     name = data.get('name', 'New Equipment')
@@ -364,7 +365,7 @@ def create_equipment_item(department_id):
         return jsonify({"error": str(e)}), 500
 
 @project_bp.route("/api/equipment/<int:item_id>", methods=["PUT"])
-@permissions_required("production.edit")
+@permissions_required("equipment.edit", "production.edit")
 def update_equipment_item(item_id):
     data = request.get_json()
     name = data.get('name')
@@ -376,7 +377,7 @@ def update_equipment_item(item_id):
         return jsonify({"error": str(e)}), 500
 
 @project_bp.route("/api/equipment/<int:item_id>", methods=["DELETE"])
-@permissions_required("production.edit")
+@permissions_required("equipment.edit", "production.edit")
 def delete_equipment_item(item_id):
     try:
         db.delete_equipment_item(item_id)
@@ -385,7 +386,7 @@ def delete_equipment_item(item_id):
         return jsonify({"error": str(e)}), 500
 
 @project_bp.route("/api/projects/<int:project_id>/routes/<string:route_id>", methods=["PUT"])
-@permissions_required("project.edit")
+@permissions_required("map.route.edit", "map.route.create", "project.edit")
 @cross_origin(supports_credentials=True)
 def update_route(project_id, route_id):
     route_data = request.json
@@ -398,7 +399,7 @@ def update_route(project_id, route_id):
         return jsonify({"status": "error", "message": str(e)}), 500
 
 @project_bp.route("/api/projects/<int:project_id>/routes/<string:route_id>", methods=["DELETE"])
-@permissions_required("project.edit")
+@permissions_required("map.route.delete", "project.edit")
 @cross_origin(supports_credentials=True)
 def delete_route(project_id, route_id):
     try:

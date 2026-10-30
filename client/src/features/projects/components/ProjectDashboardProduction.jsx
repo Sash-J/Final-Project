@@ -21,6 +21,7 @@ const ProjectDashboardProduction = ({
       "hierarchy.node.edit",
       "hierarchy.node.delete",
       "hierarchy.node.drag",
+      "hierarchy.delete",
       "Add child node",
       "Edit node",
       "Delete Node",
