@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { CheckmarkBadge01Icon, FingerPrintIcon } from "@hugeicons/core-free-icons";
@@ -6,6 +6,7 @@ import Icon from "../../../components/common/Icon";
 import ScrambleText from "../../../components/common/ScrambleText";
 import VerificationBadge from "../../../components/common/VerificationBadge";
 import ReflectiveCard from "../../../components/common/ReflectiveCard";
+import { useAuth } from "../../auth/context/AuthContext";
 import "./ProjectCard.css";
 
 const ProjectCard = ({
@@ -17,29 +18,20 @@ const ProjectCard = ({
   variant = "standard",
 }) => {
   const navigate = useNavigate();
+  const { hasPermission, theme } = useAuth();
+
   const isCompleted = project.status === "completed";
   const isCompact = variant === "compact";
+  const isLightTheme = theme === "light";
 
-  const [isLightTheme, setIsLightTheme] = useState(
-    typeof document !== "undefined" && document.body?.classList?.contains("light-theme")
+  const canEdit = Boolean(onEdit && hasPermission("project.edit"));
+  const canToggleStatus = Boolean(
+    onToggleStatus && (hasPermission("project.status") || hasPermission("project.edit"))
   );
-
-  useEffect(() => {
-    setIsLightTheme(document.body.classList.contains("light-theme"));
-    const observer = new MutationObserver(() => {
-      setIsLightTheme(document.body.classList.contains("light-theme"));
-    });
-    observer.observe(document.body, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-    return () => observer.disconnect();
-  }, []);
+  const canDelete = Boolean(onDelete && hasPermission("project.delete"));
 
   const handleCardClick = (e) => {
-    if (e?.target?.closest(".prc-actions")) {
-      return;
-    }
+    if (e?.target?.closest(".prc-actions")) return;
     if (onClick) {
       onClick(project);
     } else {
@@ -47,7 +39,7 @@ const ProjectCard = ({
     }
   };
 
-  const getClients = () => {
+  const clients = useMemo(() => {
     if (Array.isArray(project.client_details) && project.client_details.length > 0) {
       return project.client_details.map((c) => ({
         id: c.id,
@@ -63,9 +55,9 @@ const ProjectCard = ({
         .filter(Boolean);
       const tiers = project.client_verified_levels
         ? project.client_verified_levels
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean)
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
         : [];
       return names.map((name, i) => ({
         id: i,
@@ -75,9 +67,13 @@ const ProjectCard = ({
     }
 
     return [];
-  };
+  }, [
+    project.client_details,
+    project.client_usernames,
+    project.client_verified_levels,
+    project.client_roles,
+  ]);
 
-  const clients = getClients();
   const primaryClientTier = clients.length > 0 ? clients[0].tier : null;
   const isVerified = Boolean(
     primaryClientTier ||
@@ -87,12 +83,8 @@ const ProjectCard = ({
   );
 
   const statusLabel = isCompleted ? "Completed" : "Active";
+  const clientsCount = clients.length;
 
-  const clientsCount = project.client_usernames
-    ? project.client_usernames.split(",").filter(Boolean).length
-    : clients.length;
-
-  // ReflectiveCard powered Project Card
   return (
     <div
       className={`project-card-container fade-in ${isCompleted ? "archived" : ""} ${isCompact ? "compact" : ""}`}
@@ -105,7 +97,7 @@ const ProjectCard = ({
         blurStrength={6}
         shine={isCompleted ? 0.7 : 1}
         glare={isCompleted ? 0.3 : 0.5}
-        grayscale={isCompleted ? 1 : 1}
+        grayscale={isCompleted ? 1 : 0}
         warp={0.6}
         warpScale={1}
         bevel={0}
@@ -130,7 +122,7 @@ const ProjectCard = ({
         }
       >
         <div className={`project-reflective-layout ${isCompact ? "compact" : ""}`}>
-          {/* Top Header Row: Verified on Left, Active on Right */}
+          {/* Top Header Row */}
           <div className="reflective-card__header">
             {isCompact && project.project_image && (
               <img
@@ -151,9 +143,7 @@ const ProjectCard = ({
             </span>
           </div>
 
-          {/* Center: Left open for reflection visuals */}
-
-          {/* Bottom Section: Name & Role */}
+          {/* Bottom Section: Project Name & Client / Location Badges */}
           <div className="reflective-card__identity">
             <h3 className="reflective-card__name" title={project.project_name}>
               <ScrambleText text={project.project_name} as="span" />
@@ -188,7 +178,7 @@ const ProjectCard = ({
             )}
           </div>
 
-          {/* Bottom Footer: ID number & stats on left, action tiles on right */}
+          {/* Footer Row: Code Name & Metrics / Actions */}
           <div className="reflective-card__footer">
             <div className="reflective-card__id">
               <span className="reflective-card__value">
@@ -209,7 +199,7 @@ const ProjectCard = ({
             </div>
 
             <div className="prc-actions" onClick={(e) => e.stopPropagation()}>
-              {onEdit && (
+              {canEdit && (
                 <button
                   type="button"
                   className="reflective-card__tile prc-action-btn"
@@ -222,7 +212,7 @@ const ProjectCard = ({
                   <Icon name="edit" modifiers="xs" />
                 </button>
               )}
-              {onToggleStatus && (
+              {canToggleStatus && (
                 <button
                   type="button"
                   className={`reflective-card__tile prc-action-btn ${isCompleted ? "archived" : ""}`}
@@ -235,7 +225,7 @@ const ProjectCard = ({
                   <Icon name={isCompleted ? "undo" : "archive"} modifiers="xs" />
                 </button>
               )}
-              {onDelete && (
+              {canDelete && (
                 <button
                   type="button"
                   className="reflective-card__tile prc-action-btn danger"
@@ -248,7 +238,7 @@ const ProjectCard = ({
                   <Icon name="delete" modifiers="xs" />
                 </button>
               )}
-              {!onEdit && !onToggleStatus && !onDelete && (
+              {!canEdit && !canToggleStatus && !canDelete && (
                 <span className="reflective-card__tile" title="Vision Division Security Verified">
                   <HugeiconsIcon icon={FingerPrintIcon} size={22} strokeWidth={1.6} />
                 </span>
@@ -261,4 +251,4 @@ const ProjectCard = ({
   );
 };
 
-export default ProjectCard;
+export default React.memo(ProjectCard);

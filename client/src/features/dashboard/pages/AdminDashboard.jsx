@@ -16,7 +16,10 @@ import ModalPortal from "../../../components/common/ModalPortal";
 const AdminDashboard = () => {
   const { user, hasRole, hasPermission } = useAuth();
   const isClient = hasRole("client") && !hasRole(["admin", "manager", "director"]);
-  const canManageProjects = hasRole(["admin", "manager", "director"]) || hasPermission("project.create");
+  const canCreateProject = hasPermission("project.create");
+  const canEditProject = hasPermission("project.edit");
+  const canToggleProjectStatus = hasPermission("project.status") || hasPermission("project.edit");
+  const canManageProjects = canCreateProject || canEditProject;
 
   const {
     projects,
@@ -71,7 +74,7 @@ const AdminDashboard = () => {
             : "Centralized project management and system configuration."
         }
       >
-        {canManageProjects ? (
+        {canCreateProject ? (
           <button
             className="sui-btn sui-btn-save new-project-btn"
             onClick={() => {
@@ -111,7 +114,8 @@ const AdminDashboard = () => {
                 <ProjectCard
                   key={project.id}
                   project={project}
-                  onToggleStatus={canManageProjects ? handleToggleStatus : undefined}
+                  onToggleStatus={canToggleProjectStatus ? handleToggleStatus : undefined}
+                  onEdit={canEditProject ? (p) => { setEditingProject(p); setShowProjectModal(true); } : undefined}
                 />
               ))}
           </div>
@@ -142,7 +146,8 @@ const AdminDashboard = () => {
                   key={project.id}
                   project={project}
                   variant="compact"
-                  onToggleStatus={canManageProjects ? handleToggleStatus : undefined}
+                  onToggleStatus={canToggleProjectStatus ? handleToggleStatus : undefined}
+                  onEdit={canEditProject ? (p) => { setEditingProject(p); setShowProjectModal(true); } : undefined}
                 />
               ))}
             </div>

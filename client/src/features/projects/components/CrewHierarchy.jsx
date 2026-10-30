@@ -138,7 +138,7 @@ const CrewHierarchy = ({ project, onUpdateHierarchy, onSaveStatusChange }) => {
   const isClient = hasRole("client");
   const canAddNode = !isClient && hasPermission(["hierarchy.node.add", "Add child node"]);
   const canEditNode = !isClient && hasPermission(["hierarchy.node.edit", "Edit node"]);
-  const canDeleteNode = !isClient && hasPermission(["hierarchy.node.delete", "Delete Node"]);
+  const canDeleteNode = !isClient && hasPermission(["hierarchy.node.delete", "hierarchy.delete", "Delete Node"]);
   const canDragNode = !isClient && hasPermission(["hierarchy.node.drag", "Node draggable"]);
   const canModifyHierarchy = canAddNode || canEditNode || canDeleteNode || canDragNode;
 

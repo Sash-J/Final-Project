@@ -344,3 +344,29 @@ body.light-theme .user-modal-actions-footer {
     justify-content: center;
   }
 }
+
+
+/* Permissions Button Styling */
+.btn-neo-permissions {
+  background: rgba(0, 198, 230, 0.12) !important;
+  border-color: rgba(0, 198, 230, 0.35) !important;
+  color: #00c6e6 !important;
+}
+
+.btn-neo-permissions:hover {
+  background: rgba(0, 198, 230, 0.22) !important;
+  border-color: #00c6e6 !important;
+  box-shadow: 0 0 16px rgba(0, 198, 230, 0.35) !important;
+}
+
+body.light-theme .btn-neo-permissions {
+  background: rgba(2, 132, 199, 0.1) !important;
+  border-color: rgba(2, 132, 199, 0.3) !important;
+  color: #0284c7 !important;
+}
+
+body.light-theme .btn-neo-permissions:hover {
+  background: rgba(2, 132, 199, 0.18) !important;
+  border-color: #0284c7 !important;
+  box-shadow: 0 0 14px rgba(2, 132, 199, 0.25) !important;
+}

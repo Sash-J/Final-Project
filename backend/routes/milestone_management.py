@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from services.database import get_connection
 from core.session_handler import (
+    permissions_required,
     login_required,
     get_current_user_id,
     has_role,
@@ -126,13 +127,13 @@ def get_milestone_by_id(milestone_id):
 
 # Milestone Routes
 @milestone_bp.route("/api/projects/<int:project_id>/milestones", methods=["GET"])
-@login_required
+@permissions_required("milestone.view", "project.view")
 def get_milestones(project_id):
     return jsonify(get_project_milestones(project_id)), 200
 
 
 @milestone_bp.route("/api/projects/<int:project_id>/milestones", methods=["POST"])
-@login_required
+@permissions_required("milestone.create", "project.edit")
 def create_milestone(project_id):
     data = request.get_json()
     title = data.get("title", "").strip()
@@ -179,7 +180,7 @@ def create_milestone(project_id):
 
 
 @milestone_bp.route("/api/milestones/<int:milestone_id>", methods=["PUT"])
-@login_required
+@permissions_required("milestone.edit", "project.edit")
 def edit_milestone(milestone_id):
     if has_role("crew"):
         return jsonify({"error": "Crew cannot edit milestones"}), 403
@@ -250,7 +251,7 @@ def edit_milestone(milestone_id):
 
 
 @milestone_bp.route("/api/milestones/<int:milestone_id>", methods=["DELETE"])
-@login_required
+@permissions_required("milestone.delete", "project.edit")
 def remove_milestone(milestone_id):
     if has_role("client"):
         return jsonify({"error": "Clients cannot delete milestones"}), 403

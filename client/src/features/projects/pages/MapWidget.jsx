@@ -10,6 +10,7 @@ import Icon from "../../../components/common/Icon";
 import LiquidGlassCard from "../../../components/effects/LiquidGlassCard";
 import ModalPortal from "../../../components/common/ModalPortal";
 import { projectService } from "../../../services/projectService";
+import { useAuth } from "../../auth/context/AuthContext";
 import CrewAssignmentDropdown from "../../budget/components/CrewAssignmentDropdown";
 import LeafletRouteMap from "../components/LeafletRouteMap";
 import "./MapWidget.css";
@@ -198,6 +199,13 @@ const MapWidget = ({
   projectData = null,
   onUpdate = null,
 }) => {
+  const { hasPermission } = useAuth();
+  const canViewMap = hasPermission(["map.view", "project.view"]);
+  const canCreateRoute = hasPermission(["map.route.create", "map.route.edit", "project.edit"]);
+  const canEditRoute = hasPermission(["map.route.edit", "project.edit"]);
+  const canDeleteRoute = hasPermission(["map.route.delete", "project.edit"]);
+  const canAssignCrew = hasPermission(["map.crew.assign", "project.edit"]);
+
   const [showModal, setShowModal] = useState(false);
 
   const [editRoutes, setEditRoutes] = useState(() =>
@@ -450,8 +458,12 @@ const MapWidget = ({
   return (
     <>
       <div
-        className="map-widget-container global-glass-effect"
-        onClick={() => setShowModal(true)}
+        className={`map-widget-container global-glass-effect ${!canViewMap ? "map-widget-disabled" : ""}`}
+        onClick={() => {
+          if (canViewMap) {
+            setShowModal(true);
+          }
+        }}
       >
         <div className="map-view-section">
           <div className="map-real-bg">
@@ -486,54 +498,56 @@ const MapWidget = ({
                 activeLocationInfo={activeLocationInfo}
               />
 
-              <GlassSurface
-                className="map-add-route-glass"
-                width={45}
-                height={45}
-                borderRadius={16}
-                borderWidth={1}
-                mixBlendMode="screen"
-                blur={16}
-                displace={1}
-                greenOffset={0}
-                blueOffset={0}
-                distortionScale={-150}
-              >
-                <HoverTooltip
-                  text="Add Route"
-                  wrapperClassName="map-add-route-tooltip-wrapper"
+              {canCreateRoute && (
+                <GlassSurface
+                  className="map-add-route-glass"
+                  width={45}
+                  height={45}
+                  borderRadius={16}
+                  borderWidth={1}
+                  mixBlendMode="screen"
+                  blur={16}
+                  displace={1}
+                  greenOffset={0}
+                  blueOffset={0}
+                  distortionScale={-150}
                 >
-                  <button
-                    className="map-add-location-btn"
-                    onClick={() => {
-                      const newId = Math.random().toString();
-                      setEditRoutes([
-                        ...editRoutes,
-                        {
-                          id: newId,
-                          title: `Route ${editRoutes.length + 1}`,
-                          color:
-                            ROUTE_COLORS[
-                              editRoutes.length % ROUTE_COLORS.length
-                            ],
-                          startTime: "08:00",
-                          startDate: "",
-                          locations: [
-                            {
-                              id: Math.random().toString(),
-                              name: "",
-                              address: "",
-                            },
-                          ],
-                        },
-                      ]);
-                      setEditingRouteIds([...editingRouteIds, newId]);
-                    }}
+                  <HoverTooltip
+                    text="Add Route"
+                    wrapperClassName="map-add-route-tooltip-wrapper"
                   >
-                    <Icon name="add_road" modifiers="md" />
-                  </button>
-                </HoverTooltip>
-              </GlassSurface>
+                    <button
+                      className="map-add-location-btn"
+                      onClick={() => {
+                        const newId = Math.random().toString();
+                        setEditRoutes([
+                          ...editRoutes,
+                          {
+                            id: newId,
+                            title: `Route ${editRoutes.length + 1}`,
+                            color:
+                              ROUTE_COLORS[
+                                editRoutes.length % ROUTE_COLORS.length
+                              ],
+                            startTime: "08:00",
+                            startDate: "",
+                            locations: [
+                              {
+                                id: Math.random().toString(),
+                                name: "",
+                                address: "",
+                              },
+                            ],
+                          },
+                        ]);
+                        setEditingRouteIds([...editingRouteIds, newId]);
+                      }}
+                    >
+                      <Icon name="add_road" modifiers="md" />
+                    </button>
+                  </HoverTooltip>
+                </GlassSurface>
+              )}
 
               {/* Scroll Arrows */}
               {canScrollUp && (
@@ -833,60 +847,94 @@ const MapWidget = ({
                                 className="dept-crew-container"
                                 onClick={(e) => e.stopPropagation()}
                               >
-                                <CrewAssignmentDropdown
-                                  assignedCrew={
-                                    routeCrewAssignments[route.id] || []
-                                  }
-                                  projectCrew={projectData?.crew || []}
-                                  isActive={activeAssignRouteId === route.id}
-                                  onToggle={() =>
-                                    setActiveAssignRouteId(
-                                      activeAssignRouteId === route.id
-                                        ? null
-                                        : route.id,
-                                    )
-                                  }
-                                  onAssign={(crewId) =>
-                                    handleAssignCrewToRoute(route.id, crewId)
-                                  }
-                                  isCrewEditing={isCrewEditing}
-                                  setIsCrewEditing={setIsCrewEditing}
-                                  badgeSize={20}
-                                />
+                                {canAssignCrew ? (
+                                  <CrewAssignmentDropdown
+                                    assignedCrew={
+                                      routeCrewAssignments[route.id] || []
+                                    }
+                                    projectCrew={projectData?.crew || []}
+                                    isActive={activeAssignRouteId === route.id}
+                                    onToggle={() =>
+                                      setActiveAssignRouteId(
+                                        activeAssignRouteId === route.id
+                                          ? null
+                                          : route.id,
+                                      )
+                                    }
+                                    onAssign={(crewId) =>
+                                      handleAssignCrewToRoute(route.id, crewId)
+                                    }
+                                    isCrewEditing={isCrewEditing}
+                                    setIsCrewEditing={setIsCrewEditing}
+                                    badgeSize={20}
+                                  />
+                                ) : (
+                                  (() => {
+                                    const firstCrew =
+                                      routeCrewAssignments[route.id] &&
+                                      routeCrewAssignments[route.id].length > 0
+                                        ? routeCrewAssignments[route.id][0]
+                                        : projectData?.crew?.[0] || {
+                                            username: "A",
+                                          };
+                                    const initial = firstCrew.full_name
+                                      ? firstCrew.full_name.charAt(0).toUpperCase()
+                                      : firstCrew.username
+                                        ? firstCrew.username.charAt(0).toUpperCase()
+                                        : "?";
+                                    return (
+                                      <div className="crew-avatar-badge crew-avatar-badge-readonly">
+                                        {firstCrew.profile_image ? (
+                                          <img
+                                            src={firstCrew.profile_image}
+                                            alt={firstCrew.username}
+                                            className="crew-avatar-img"
+                                          />
+                                        ) : (
+                                          <div className="crew-avatar-text">
+                                            {initial}
+                                          </div>
+                                        )}
+                                      </div>
+                                    );
+                                  })()
+                                )}
                               </div>
                             </div>
                             <div className="map-route-btn-container">
-                              <button
-                                className={`org-metadata-nav save-status-indicator ${savingRouteIds.includes(route.id) ? "saving" : "saved"}`}
-                                disabled={savingRouteIds.includes(route.id)}
-                                onClick={() => handleSaveRoute(route)}
-                                style={{
-                                  padding: "8px 16px",
-                                  cursor: "pointer",
-                                  display: "flex",
-                                  gap: "6px",
-                                  alignItems: "center",
-                                  color: savingRouteIds.includes(route.id)
-                                    ? "#eab308"
-                                    : "#22c55e",
-                                }}
-                              >
-                                <Icon
-                                  name={
-                                    savingRouteIds.includes(route.id)
-                                      ? "sync"
-                                      : "check_circle"
-                                  }
-                                  modifiers={
-                                    savingRouteIds.includes(route.id)
-                                      ? "spin sm"
-                                      : "sm"
-                                  }
-                                />
-                                {savingRouteIds.includes(route.id)
-                                  ? "Saving..."
-                                  : "Save"}
-                              </button>
+                              {canEditRoute && (
+                                <button
+                                  className={`org-metadata-nav save-status-indicator ${savingRouteIds.includes(route.id) ? "saving" : "saved"}`}
+                                  disabled={savingRouteIds.includes(route.id)}
+                                  onClick={() => handleSaveRoute(route)}
+                                  style={{
+                                    padding: "8px 16px",
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    gap: "6px",
+                                    alignItems: "center",
+                                    color: savingRouteIds.includes(route.id)
+                                      ? "#eab308"
+                                      : "#22c55e",
+                                  }}
+                                >
+                                  <Icon
+                                    name={
+                                      savingRouteIds.includes(route.id)
+                                        ? "sync"
+                                        : "check_circle"
+                                    }
+                                    modifiers={
+                                      savingRouteIds.includes(route.id)
+                                        ? "spin sm"
+                                        : "sm"
+                                    }
+                                  />
+                                  {savingRouteIds.includes(route.id)
+                                    ? "Saving..."
+                                    : "Save"}
+                                </button>
+                              )}
                               <button
                                 className="modal-close-btn map-route-edit-close-btn"
                                 onClick={() => {
@@ -1016,12 +1064,14 @@ const MapWidget = ({
                                   </div>
 
                                   <div className="map-route-item-actions">
-                                    <Icon
-                                      name="drag_indicator"
-                                      className="map-route-item-drag-icon"
-                                      modifiers="sm"
-                                    />
-                                    {route.locations.length > 1 && (
+                                    {canEditRoute && (
+                                      <Icon
+                                        name="drag_indicator"
+                                        className="map-route-item-drag-icon"
+                                        modifiers="sm"
+                                      />
+                                    )}
+                                    {canEditRoute && route.locations.length > 1 && (
                                       <Icon
                                         name="delete"
                                         modifiers="sm"
@@ -1042,19 +1092,23 @@ const MapWidget = ({
                         </div>
 
                         <div className="map-route-edit-actions-row">
-                          <button
-                            className="btn-outline map-add-location-btn-custom"
-                            onClick={() => addLocationToRoute(route.id)}
-                          >
-                            <Icon name="add" modifiers="sm" /> Add Stop
-                          </button>
-                          <button
-                            className="btn-danger map-route-btn-delete-icon-only"
-                            onClick={() => setRouteToDelete(route.id)}
-                            title="Delete Route"
-                          >
-                            <Icon name="delete" modifiers="sm" />
-                          </button>
+                          {canEditRoute && (
+                            <button
+                              className="btn-outline map-add-location-btn-custom"
+                              onClick={() => addLocationToRoute(route.id)}
+                            >
+                              <Icon name="add" modifiers="sm" /> Add Stop
+                            </button>
+                          )}
+                          {canDeleteRoute && (
+                            <button
+                              className="btn-danger map-route-btn-delete-icon-only"
+                              onClick={() => setRouteToDelete(route.id)}
+                              title="Delete Route"
+                            >
+                              <Icon name="delete" modifiers="sm" />
+                            </button>
+                          )}
                         </div>
                       </LiquidGlassCard>
                     );
@@ -1079,20 +1133,22 @@ const MapWidget = ({
                           </span>
                         </h4>
                         <div className="map-route-display-actions">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setEditingRouteIds([
-                                ...editingRouteIds,
-                                route.id,
-                              ]);
-                            }}
-                            className="modal-close-btn map-route-edit-close-btn map-route-edit-action-btn"
-                            title="Edit Route"
-                          >
-                            <Icon name="edit" modifiers="sm" />
-                          </button>
+                          {canEditRoute && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingRouteIds([
+                                  ...editingRouteIds,
+                                  route.id,
+                                ]);
+                              }}
+                              className="modal-close-btn map-route-edit-close-btn map-route-edit-action-btn"
+                              title="Edit Route"
+                            >
+                              <Icon name="edit" modifiers="sm" />
+                            </button>
+                          )}
                           <button
                             className="modal-close-btn map-route-edit-close-btn"
                             title="Collapse Route"

@@ -80,23 +80,6 @@ app.register_blueprint(schedule_bp)
 app.register_blueprint(milestone_bp)
 app.register_blueprint(notifications_bp)
 
-try:
-    from services.db_operations import (
-        run_budget_migration,
-        run_project_locations_migration,
-        create_role_permissions,
-        create_user_roles,
-        sync_verified_levels_migration,
-    )
-
-    run_budget_migration()
-    run_project_locations_migration()
-    create_role_permissions()
-    create_user_roles()
-    sync_verified_levels_migration()
-except Exception as e:
-    print("Error running migrations on startup:", e)
-
 
 @app.route("/", methods=["GET"])
 def home():
@@ -104,5 +87,26 @@ def home():
 
 
 if __name__ == "__main__":
+    print("Server starting on port 5000...")
+    try:
+        from services.db_operations import (
+            run_budget_migration,
+            run_project_locations_migration,
+            create_role_permissions,
+            create_user_roles,
+            sync_verified_levels_migration,
+        )
+
+        run_budget_migration()
+        run_project_locations_migration()
+        create_role_permissions()
+        create_user_roles()
+        sync_verified_levels_migration()
+        print("Startup migrations successfully completed.")
+    except Exception as e:
+        print("Error running migrations on startup:", e)
+
     print("Server started on port 5000")
-    app.run(debug=False, host="127.0.0.1")
+    debug_mode = os.getenv("FLASK_DEBUG", "False").lower() in ("true", "1")
+    # use_reloader=False prevents subprocess duplication on Windows that locks the remote MySQL pool
+    app.run(debug=debug_mode, host="127.0.0.1", port=5000, use_reloader=False)

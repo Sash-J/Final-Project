@@ -482,7 +482,7 @@ def update_user_theme(user_id, theme_mode):
 
 
 def get_user_roles_and_permissions(user_id):
-    """Fetches assigned roles and aggregated permissions for a user."""
+    """Fetches assigned roles and aggregated permissions for a user, incorporating per-user overrides."""
     roles = []
     permissions = []
     try:
@@ -517,7 +517,14 @@ def get_user_roles_and_permissions(user_id):
                     if matched_role:
                         role_ids.append(matched_role["id"])
 
+            # Admins automatically receive all system permissions
+            if any(str(r).strip().lower() == "admin" for r in roles):
+                cursor.execute("SELECT name FROM permissions ORDER BY id ASC")
+                permissions = [row["name"] for row in cursor.fetchall()]
+                return roles, permissions
+
             # 2. Fetch unique permissions for assigned roles
+            role_permissions = set()
             if role_ids:
                 format_strings = ",".join(["%s"] * len(role_ids))
                 cursor.execute(
@@ -529,9 +536,241 @@ def get_user_roles_and_permissions(user_id):
                     """,
                     tuple(role_ids),
                 )
-                permissions = [row["name"] for row in cursor.fetchall()]
+                role_permissions = {row["name"] for row in cursor.fetchall()}
+
+            # 3. Apply custom per-user overrides from user_permissions
+            cursor.execute(
+                """
+                SELECT p.name, up.is_granted
+                FROM user_permissions up
+                INNER JOIN permissions p ON p.id = up.permission_id
+                WHERE up.user_id = %s
+                """,
+                (user_id,),
+            )
+            override_rows = cursor.fetchall()
+            effective_perms = set(role_permissions)
+            for row in override_rows:
+                perm_name = row["name"]
+                if row["is_granted"]:
+                    effective_perms.add(perm_name)
+                else:
+                    effective_perms.discard(perm_name)
+
+            permissions = sorted(list(effective_perms))
 
         return roles, permissions
     except Exception as e:
         print(f"Error fetching user roles and permissions: {e}")
         return roles, permissions
+
+
+PERMISSION_CATALOG = [
+    {
+        "category": "Projects",
+        "description": "Project lifecycle, metadata, routes, and archive management",
+        "permissions": [
+            {"key": "project.view", "label": "View Projects", "description": "Browse project directory, cards, and overview metrics"},
+            {"key": "project.create", "label": "Create Projects", "description": "Initialize new productions with initial crew and details"},
+            {"key": "project.edit", "label": "Edit Projects", "description": "Update project information, cover art, dates, and locations"},
+            {"key": "project.status", "label": "Archive / Restore Projects", "description": "Toggle project status between Active and Completed"},
+            {"key": "project.delete", "label": "Delete Projects", "description": "Permanently remove a project and all associated records"},
+        ],
+    },
+    {
+        "category": "Maps & Routes",
+        "description": "Project travel itineraries, shoot location waypoints, and transport crew assignments",
+        "permissions": [
+            {"key": "map.view", "label": "View Maps & Routes", "description": "View project route waypoints, driving paths, stopover metrics, and open the full route modal"},
+            {"key": "map.route.create", "label": "Create Routes", "description": "Add new transit and shooting routes to a project"},
+            {"key": "map.route.edit", "label": "Edit Routes & Waypoints", "description": "Modify stops, addresses, departure times, dates, and vehicle types"},
+            {"key": "map.route.delete", "label": "Delete Routes", "description": "Permanently remove routes from project itinerary"},
+            {"key": "map.crew.assign", "label": "Assign Crew to Routes", "description": "Assign or remove production crew members on transport routes"},
+        ],
+    },
+    {
+        "category": "Budgets",
+        "description": "Production budgeting, cost line items, and version publishing",
+        "permissions": [
+            {"key": "budget.view", "label": "View Budgets", "description": "Inspect budget summaries, version histories, and client vault"},
+            {"key": "budget.create", "label": "Create Budgets", "description": "Access the Budget Form and generate new budget versions"},
+            {"key": "budget.edit", "label": "Edit Budgets", "description": "Modify budget item rates, unit days, quantities, and expenses"},
+            {"key": "budget.publish", "label": "Publish Budgets", "description": "Lock and publish approved budget revisions to stakeholders"},
+        ],
+    },
+    {
+        "category": "Finances",
+        "description": "Client payments, cash flow, balances, and expenditures",
+        "permissions": [
+            {"key": "finance.view", "label": "View Financial Records", "description": "View financial dashboard metrics, paid amounts, and balances"},
+            {"key": "finance.edit", "label": "Record Payments & Expenses", "description": "Add client payment receipts, expenses, and transaction logs"},
+        ],
+    },
+    {
+        "category": "Schedules",
+        "description": "Production timelines, calendars, call sheets, and shifts",
+        "permissions": [
+            {"key": "schedule.view", "label": "View Schedules", "description": "View production timeline, calendar events, and call sheets"},
+            {"key": "schedule.edit", "label": "Edit Schedules", "description": "Create, modify, reschedule, or remove calendar entries and shifts"},
+        ],
+    },
+    {
+        "category": "Milestones",
+        "description": "Project target dates, deliverable tracking, and milestone notes",
+        "permissions": [
+            {"key": "milestone.view", "label": "View Milestones", "description": "View milestone roadmap and deliverable completion status"},
+            {"key": "milestone.create", "label": "Create Milestones", "description": "Add new deliverables and target milestones to project timeline"},
+            {"key": "milestone.edit", "label": "Edit Milestones", "description": "Update milestone status, dates, descriptions, and client notes"},
+            {"key": "milestone.delete", "label": "Delete Milestones", "description": "Remove milestone deliverables from the timeline"},
+        ],
+    },
+    {
+        "category": "Production & Equipment",
+        "description": "Gear inventory, department allocations, and camera assets",
+        "permissions": [
+            {"key": "production.view", "label": "View Production", "description": "View production gear allocations and department rosters"},
+            {"key": "production.edit", "label": "Edit Production", "description": "Update general production configurations and assignments"},
+            {"key": "equipment.view", "label": "View Equipment", "description": "View gear catalogs, department lists, and allocations"},
+            {"key": "equipment.edit", "label": "Edit Equipment", "description": "Add, modify, and delete equipment inventory and departments"},
+        ],
+    },
+    {
+        "category": "Crew Hierarchy",
+        "description": "Department tree nodes, structural reporting, and node dragging",
+        "permissions": [
+            {"key": "hierarchy.node.add", "label": "Add Hierarchy Node", "description": "Create new department and operational nodes in tree"},
+            {"key": "hierarchy.node.edit", "label": "Edit Hierarchy Node", "description": "Modify node names, assign personnel, and configure roles"},
+            {"key": "hierarchy.node.delete", "label": "Delete Hierarchy Node", "description": "Remove department nodes from organizational structure"},
+            {"key": "hierarchy.node.drag", "label": "Drag Hierarchy Nodes", "description": "Reparent and reorder nodes on interactive tree canvas"},
+            {"key": "hierarchy.delete", "label": "Delete Hierarchy", "description": "Remove complete hierarchy trees or department structures"},
+        ],
+    },
+    {
+        "category": "User Administration",
+        "description": "User moderation, roles, verification tiers, and permissions",
+        "permissions": [
+            {"key": "user.view", "label": "View Users", "description": "Access User Management pipeline and review user profiles"},
+            {"key": "user.approve", "label": "Approve Registrations", "description": "Approve pending account registrations into the system"},
+            {"key": "user.reject", "label": "Reject Registrations", "description": "Decline and remove pending registration applications"},
+            {"key": "user.edit", "label": "Edit User Profiles", "description": "Update user roles, contact numbers, skills, and details"},
+            {"key": "user.delete", "label": "Delete User Accounts", "description": "Permanently remove user accounts from the database"},
+            {"key": "employee.delete", "label": "Delete Employee Profiles", "description": "Delete employee accounts (legacy standard)"},
+            {"key": "user.verification", "label": "Assign Verification Levels", "description": "Assign Diamond, Gold, Silver, or White security tiers"},
+            {"key": "user.permissions", "label": "Manage Permissions", "description": "Customize granular permission overrides for any user"},
+        ],
+    },
+]
+
+
+def get_permission_catalog():
+    """Returns the organized permission catalog for UI presentation."""
+    return PERMISSION_CATALOG
+
+
+def get_user_permissions_detail(user_id):
+    """Fetches comprehensive permissions details for a user, including role baseline and overrides."""
+    user = get_user_profile(user_id)
+    if not user:
+        return None
+
+    roles, effective_permissions = get_user_roles_and_permissions(user_id)
+
+    with db_cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT DISTINCT p.name
+            FROM permissions p
+            INNER JOIN role_permissions rp ON rp.permission_id = p.id
+            INNER JOIN user_roles ur ON ur.role_id = rp.role_id
+            WHERE ur.user_id = %s
+            ORDER BY p.name ASC
+            """,
+            (user_id,),
+        )
+        role_permissions = [row["name"] for row in cursor.fetchall()]
+
+        cursor.execute(
+            """
+            SELECT p.name, up.is_granted
+            FROM user_permissions up
+            INNER JOIN permissions p ON p.id = up.permission_id
+            WHERE up.user_id = %s
+            """,
+            (user_id,),
+        )
+        overrides = {row["name"]: bool(row["is_granted"]) for row in cursor.fetchall()}
+
+        cursor.execute("SELECT id, name FROM permissions ORDER BY name ASC")
+        all_perms = cursor.fetchall()
+
+    is_admin_user = any(str(r).strip().lower() == "admin" for r in roles)
+
+    return {
+        "user_id": user["id"],
+        "username": user["username"],
+        "full_name": user.get("full_name") or user["username"],
+        "profile_image": user.get("profile_image") or "",
+        "roles": roles,
+        "is_admin": is_admin_user,
+        "verified_level": user.get("verified_level") or get_highest_tier_for_roles(roles),
+        "role_permissions": role_permissions,
+        "overrides": overrides,
+        "effective_permissions": effective_permissions,
+        "all_permissions": all_perms,
+        "catalog": PERMISSION_CATALOG,
+    }
+
+
+def update_user_permissions(user_id, grants=None, revokes=None):
+    """
+    Saves granular permission overrides for a user.
+    - grants: list of permission names to explicitly grant (is_granted = 1)
+    - revokes: list of permission names to explicitly revoke (is_granted = 0)
+    """
+    grants = grants or []
+    revokes = revokes or []
+
+    with db_cursor(commit=True) as cursor:
+        all_targets = list(set(grants + revokes))
+        if not all_targets:
+            return True
+
+        format_strings = ",".join(["%s"] * len(all_targets))
+        cursor.execute(
+            f"SELECT id, name FROM permissions WHERE name IN ({format_strings})",
+            tuple(all_targets),
+        )
+        perm_map = {row["name"]: row["id"] for row in cursor.fetchall()}
+
+        for p_name in grants:
+            p_id = perm_map.get(p_name)
+            if p_id:
+                cursor.execute(
+                    """
+                    INSERT INTO user_permissions (user_id, permission_id, is_granted)
+                    VALUES (%s, %s, 1)
+                    ON DUPLICATE KEY UPDATE is_granted = 1
+                    """,
+                    (user_id, p_id),
+                )
+
+        for p_name in revokes:
+            p_id = perm_map.get(p_name)
+            if p_id:
+                cursor.execute(
+                    """
+                    INSERT INTO user_permissions (user_id, permission_id, is_granted)
+                    VALUES (%s, %s, 0)
+                    ON DUPLICATE KEY UPDATE is_granted = 0
+                    """,
+                    (user_id, p_id),
+                )
+
+    return True
+
+
+def reset_user_permissions(user_id):
+    """Deletes all custom permission overrides for a user, restoring role defaults."""
+    with db_cursor(commit=True) as cursor:
+        cursor.execute("DELETE FROM user_permissions WHERE user_id = %s", (user_id,))
+    return True

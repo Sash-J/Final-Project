@@ -41,6 +41,19 @@ def run_rbac_migration():
             FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
         )
         """)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS user_permissions (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            permission_id INT NOT NULL,
+            is_granted TINYINT(1) NOT NULL DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            UNIQUE KEY uq_user_permission (user_id, permission_id),
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE CASCADE
+        )
+        """)
         conn.commit()
 
         # 1b. Ensure users table has gender, skill, verified_level columns
@@ -96,6 +109,7 @@ def run_rbac_migration():
             "hierarchy.node.edit",
             "hierarchy.node.delete",
             "hierarchy.node.drag",
+            "hierarchy.delete",
         ]
 
         # Purge plain-text duplicate permissions to maintain the canonical domain.entity.action standard
@@ -109,26 +123,46 @@ def run_rbac_migration():
         cursor.execute(f"DELETE FROM permissions WHERE name IN ({format_perm})", legacy_duplicate_permissions)
         conn.commit()
 
+        map_permissions = [
+            "map.view",
+            "map.route.create",
+            "map.route.edit",
+            "map.route.delete",
+            "map.crew.assign",
+        ]
+
         standard_permissions = [
             "user.view",
             "user.approve",
             "user.reject",
             "user.edit",
+            "user.delete",
             "employee.delete",
+            "user.verification",
+            "user.permissions",
             "project.view",
             "project.create",
             "project.edit",
+            "project.status",
             "project.delete",
             "budget.view",
+            "budget.create",
             "budget.edit",
             "budget.publish",
             "production.view",
             "production.edit",
+            "equipment.view",
+            "equipment.edit",
             "schedule.view",
             "schedule.edit",
+            "milestone.view",
+            "milestone.create",
+            "milestone.edit",
+            "milestone.delete",
             "finance.view",
             "finance.edit",
             *hierarchy_permissions,
+            *map_permissions,
         ]
         cursor.executemany("INSERT IGNORE INTO permissions (name) VALUES (%s)", [(p,) for p in standard_permissions])
         conn.commit()
@@ -143,40 +177,62 @@ def run_rbac_migration():
         role_permission_mappings = {
             "admin": standard_permissions,
             "director": [
-                "user.view", "user.approve", "user.reject", "user.edit",
-                "project.view", "project.edit", "budget.view", "production.view",
-                "production.edit", "schedule.view", "schedule.edit", "finance.view",
+                "user.view", "user.approve", "user.reject", "user.edit", "user.verification",
+                "project.view", "project.edit", "project.status",
+                "budget.view", "budget.edit",
+                "finance.view", "finance.edit",
+                "schedule.view", "schedule.edit",
+                "milestone.view", "milestone.create", "milestone.edit", "milestone.delete",
+                "production.view", "production.edit",
+                "equipment.view", "equipment.edit",
                 *hierarchy_permissions,
+                *map_permissions,
             ],
             "manager": [
-                "user.view", "project.view", "project.create", "project.edit",
-                "budget.view", "budget.edit", "production.view", "production.edit",
-                "schedule.view", "schedule.edit", "finance.view",
+                "user.view", "user.verification",
+                "project.view", "project.create", "project.edit", "project.status",
+                "budget.view", "budget.edit", "budget.publish",
+                "finance.view", "finance.edit",
+                "schedule.view", "schedule.edit",
+                "milestone.view", "milestone.create", "milestone.edit", "milestone.delete",
+                "production.view", "production.edit",
+                "equipment.view", "equipment.edit",
                 *hierarchy_permissions,
+                *map_permissions,
             ],
             "accountant": [
                 "project.view", "budget.view", "budget.edit", "finance.view", "finance.edit",
-                "schedule.view", "user.view", "production.view"
+                "schedule.view", "milestone.view", "user.view", "production.view", "equipment.view",
+                "map.view",
             ],
             "coordinator": [
                 "project.view", "budget.view", "schedule.view", "schedule.edit",
-                "production.view", "finance.view", "user.view"
+                "milestone.view", "milestone.create", "milestone.edit",
+                "production.view", "equipment.view", "finance.view", "user.view",
+                "map.view", "map.route.create", "map.route.edit", "map.crew.assign",
             ],
             "viewer": [
-                "project.view", "budget.view", "schedule.view", "production.view", "user.view"
+                "project.view", "budget.view", "schedule.view", "milestone.view",
+                "production.view", "equipment.view", "finance.view", "user.view",
+                "map.view",
             ],
             "department head": [
-                "project.view", "production.view", "production.edit", "schedule.view", "budget.view",
-                *hierarchy_permissions,
+                "project.view", "production.view", "production.edit",
+                "equipment.view", "equipment.edit", "schedule.view", "milestone.view",
+                "budget.view", *hierarchy_permissions,
+                "map.view", "map.route.create", "map.route.edit", "map.crew.assign",
             ],
             "crew": [
-                "project.view", "production.view", "schedule.view", "budget.view"
+                "project.view", "production.view", "equipment.view", "schedule.view", "milestone.view", "budget.view",
+                "map.view",
             ],
             "client (full access)": [
-                "project.view", "budget.view", "schedule.view", "production.view"
+                "project.view", "budget.view", "schedule.view", "milestone.view", "production.view",
+                "map.view",
             ],
             "client (half access)": [
-                "project.view", "budget.view", "schedule.view", "production.view"
+                "project.view", "budget.view", "schedule.view", "milestone.view", "production.view",
+                "map.view",
             ],
         }
 

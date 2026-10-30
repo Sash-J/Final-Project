@@ -1097,3 +1097,16 @@ body.light-theme .map-route-btn-delete-icon-only {
 .route-delay-4 {
   animation-delay: -24s;
 }
+
+/* Permission-gated map states */
+.map-widget-container.map-widget-disabled {
+  cursor: default;
+}
+.map-widget-container.map-widget-disabled:hover {
+  transform: none;
+  border-color: inherit;
+}
+.crew-avatar-badge-readonly {
+  --badge-size: 20px;
+  cursor: default;
+}

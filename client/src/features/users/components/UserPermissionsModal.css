@@ -1,0 +1,985 @@
+/* ==========================================================================
+   UserPermissionsModal.css - Granular RBAC Permission Modal Styles
+   Desktop constraints: strictly 80vw x 80vh, non-shrinking category pills,
+   responsive single-column layout for mobile, and complete theme support.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Modal Window & Content Container
+   -------------------------------------------------------------------------- */
+.user-permissions-modal-glass {
+  width: 80vw !important;
+  max-width: 80vw !important;
+  min-width: 320px;
+  height: 80vh !important;
+  max-height: 80vh !important;
+  min-height: 80vh !important;
+  padding: 28px 32px !important;
+  border-radius: 28px !important;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.75) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  position: relative;
+}
+
+.user-permissions-modal-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  flex: 1;
+  gap: 16px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   2. Horizontal Profile Header
+   -------------------------------------------------------------------------- */
+.upm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 16px;
+  padding-right: 48px; /* Clearance for modal close button */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.upm-user-profile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.upm-avatar-wrap {
+  position: relative;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  overflow: visible;
+  background: rgba(255, 255, 255, 0.06);
+  border: 2px solid rgba(0, 198, 230, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 16px rgba(0, 198, 230, 0.2);
+}
+
+.upm-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.upm-avatar-fallback {
+  font-size: 24px;
+  font-weight: 700;
+  color: #00c6e6;
+}
+
+.upm-avatar-badge {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upm-user-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.upm-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.upm-user-name {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: #ffffff;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.upm-user-handle {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  font-family: inherit;
+}
+
+.upm-badges-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+  flex-wrap: wrap;
+}
+
+.upm-role-chip {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  background: rgba(0, 198, 230, 0.12);
+  color: #00c6e6;
+  border: 1px solid rgba(0, 198, 230, 0.3);
+}
+
+.upm-role-chip.admin {
+  background: rgba(255, 179, 0, 0.15);
+  color: #ffb300;
+  border-color: rgba(255, 179, 0, 0.4);
+}
+
+.status-badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.status-approved {
+  background: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+  border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+.status-pending {
+  background: rgba(241, 196, 15, 0.15);
+  color: #f1c40f;
+  border: 1px solid rgba(241, 196, 15, 0.3);
+}
+
+.upm-header-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.upm-stat-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.85);
+  white-space: nowrap;
+}
+
+.upm-stat-pill strong {
+  color: #00c6e6;
+}
+
+.upm-stat-pill.has-overrides {
+  border-color: rgba(255, 179, 0, 0.4);
+  background: rgba(255, 179, 0, 0.08);
+}
+
+.upm-stat-pill.has-overrides strong {
+  color: #ffb300;
+}
+
+/* --------------------------------------------------------------------------
+   3. Controls Toolbar (Search & Reset)
+   -------------------------------------------------------------------------- */
+.upm-controls-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.upm-search-box {
+  position: relative;
+  flex: 1;
+  max-width: 420px;
+}
+
+.upm-search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+}
+
+.upm-search-input {
+  width: 100%;
+  padding: 10px 14px 10px 40px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  font-size: 13px;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.upm-search-input:focus {
+  outline: none;
+  border-color: #00c6e6;
+  background: rgba(0, 198, 230, 0.05);
+  box-shadow: 0 0 16px rgba(0, 198, 230, 0.2);
+}
+
+.upm-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.upm-reset-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px !important;
+  border-radius: 12px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.upm-reset-btn:hover:not(:disabled) {
+  background: rgba(255, 68, 68, 0.12) !important;
+  border-color: rgba(255, 68, 68, 0.4) !important;
+  color: #ff5555 !important;
+}
+
+.upm-reset-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. Category Filter Tabs (Strict Dimensions, Never Shrink)
+   -------------------------------------------------------------------------- */
+.upm-categories-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 4px 2px 8px 2px;
+  flex-shrink: 0;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.upm-categories-nav::-webkit-scrollbar {
+  height: 4px;
+}
+
+.upm-categories-nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+
+.upm-category-pill {
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.upm-category-pill:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.upm-category-pill.active {
+  background: rgba(0, 198, 230, 0.15);
+  border-color: rgba(0, 198, 230, 0.45);
+  color: #00c6e6;
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   5. Scrollable Body & Permissions Grid
+   -------------------------------------------------------------------------- */
+.upm-body-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.upm-body-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.upm-body-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+}
+
+.upm-category-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.upm-category-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.upm-category-title {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.upm-category-title::before {
+  content: "";
+  display: inline-block;
+  width: 4px;
+  height: 14px;
+  background: #00c6e6;
+  border-radius: 2px;
+}
+
+.upm-category-desc {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.upm-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 12px;
+}
+
+/* --------------------------------------------------------------------------
+   6. Permission Card & Neon Toggle Switch
+   -------------------------------------------------------------------------- */
+.upm-perm-card {
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  transition: all 0.2s ease;
+}
+
+.upm-perm-card:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.upm-perm-card.is-active {
+  border-color: rgba(0, 198, 230, 0.25);
+  background: rgba(0, 198, 230, 0.03);
+}
+
+.upm-perm-card.is-override-grant {
+  border-color: rgba(46, 204, 113, 0.35);
+  background: rgba(46, 204, 113, 0.04);
+}
+
+.upm-perm-card.is-override-revoke {
+  border-color: rgba(231, 76, 60, 0.35);
+  background: rgba(231, 76, 60, 0.04);
+}
+
+.upm-perm-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.upm-perm-top-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.upm-perm-label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.upm-perm-key {
+  font-size: 11px;
+  font-family: monospace;
+  color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.upm-perm-desc {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.35;
+  margin: 0;
+}
+
+/* Badges */
+.upm-perm-badge {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  padding: 2px 7px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  margin-top: 2px;
+  align-self: flex-start;
+}
+
+.upm-perm-badge.badge-admin {
+  background: rgba(255, 179, 0, 0.15);
+  color: #ffb300;
+  border: 1px solid rgba(255, 179, 0, 0.3);
+}
+
+.upm-perm-badge.badge-grant {
+  background: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+  border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+.upm-perm-badge.badge-revoke {
+  background: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+  border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.upm-perm-badge.badge-default {
+  background: rgba(0, 198, 230, 0.12);
+  color: #00c6e6;
+  border: 1px solid rgba(0, 198, 230, 0.25);
+}
+
+.upm-perm-badge.badge-disabled {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Neon Toggle Switch */
+.upm-toggle-switch {
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.25s ease;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.upm-toggle-switch:focus {
+  outline: none;
+}
+
+.upm-toggle-switch:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.upm-toggle-slider {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.upm-toggle-switch.active {
+  background: rgba(0, 198, 230, 0.35);
+  border-color: #00c6e6;
+  box-shadow: 0 0 12px rgba(0, 198, 230, 0.4);
+}
+
+.upm-toggle-switch.active .upm-toggle-slider {
+  left: 22px;
+  background: #00c6e6;
+  box-shadow: 0 0 8px rgba(0, 198, 230, 0.8);
+}
+
+.upm-toggle-switch.active.is-grant {
+  background: rgba(46, 204, 113, 0.35);
+  border-color: #2ecc71;
+  box-shadow: 0 0 12px rgba(46, 204, 113, 0.4);
+}
+
+.upm-toggle-switch.active.is-grant .upm-toggle-slider {
+  background: #2ecc71;
+  box-shadow: 0 0 8px rgba(46, 204, 113, 0.8);
+}
+
+/* --------------------------------------------------------------------------
+   7. Loading, Error & Empty States
+   -------------------------------------------------------------------------- */
+.upm-loading-state,
+.upm-empty-state,
+.upm-error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 50px 20px;
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+}
+
+.upm-error-message {
+  color: #e74c3c;
+  font-size: 13.5px;
+  margin: 0;
+}
+
+.upm-retry-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 22px !important;
+  font-size: 13px !important;
+}
+
+/* --------------------------------------------------------------------------
+   8. Modal Footer
+   -------------------------------------------------------------------------- */
+.upm-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.upm-footer-left {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.upm-footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.upm-btn-cancel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 22px !important;
+  font-size: 13px !important;
+}
+
+.upm-btn-cancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.upm-btn-save {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 24px !important;
+  font-size: 13px !important;
+}
+
+.upm-btn-save:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   9. Responsive Breakpoints
+   -------------------------------------------------------------------------- */
+@media (max-width: 1024px) {
+  .user-permissions-modal-glass {
+    width: 88vw !important;
+    max-width: 88vw !important;
+    height: 84vh !important;
+    max-height: 84vh !important;
+    min-height: 84vh !important;
+    padding: 24px 26px !important;
+  }
+
+  .upm-cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .user-permissions-modal-glass {
+    width: 94vw !important;
+    max-width: 94vw !important;
+    height: 88vh !important;
+    max-height: 88vh !important;
+    min-height: 88vh !important;
+    padding: 20px 16px !important;
+    border-radius: 20px !important;
+  }
+
+  .user-permissions-modal-glass .modal-close-btn {
+    top: 14px;
+    right: 14px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .user-permissions-modal-content {
+    gap: 14px;
+  }
+
+  /* Header Stacking */
+  .upm-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding-bottom: 12px;
+    padding-right: 36px;
+  }
+
+  .upm-user-profile {
+    gap: 12px;
+    width: 100%;
+  }
+
+  .upm-avatar-wrap {
+    width: 48px;
+    height: 48px;
+  }
+
+  .upm-avatar-fallback {
+    font-size: 20px;
+  }
+
+  .upm-user-name {
+    font-size: 17px;
+  }
+
+  .upm-header-stats {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .upm-stat-pill {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+
+  /* Controls Stacking */
+  .upm-controls-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .upm-search-box {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .upm-search-input {
+    padding: 9px 12px 9px 36px;
+    font-size: 12.5px;
+  }
+
+  .upm-reset-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 8px 14px;
+  }
+
+  .upm-categories-nav {
+    padding: 2px 0 8px 0;
+    gap: 8px;
+  }
+
+  .upm-category-pill {
+    padding: 7px 14px;
+    font-size: 12.5px;
+  }
+
+  .upm-category-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  /* Single Column Card Grid */
+  .upm-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .upm-perm-card {
+    padding: 12px 14px;
+    gap: 10px;
+  }
+
+  /* Mobile Footer */
+  .upm-footer {
+    flex-direction: column-reverse;
+    gap: 10px;
+    align-items: stretch;
+    padding-top: 12px;
+  }
+
+  .upm-footer-left {
+    text-align: center;
+    font-size: 11px;
+    line-height: 1.35;
+  }
+
+  .upm-footer-actions {
+    width: 100%;
+    display: flex;
+    gap: 10px;
+  }
+
+  .upm-btn-cancel,
+  .upm-btn-save {
+    flex: 1;
+    justify-content: center;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .user-permissions-modal-glass {
+    width: 96vw !important;
+    max-width: 96vw !important;
+    height: 92vh !important;
+    max-height: 92vh !important;
+    min-height: 92vh !important;
+    padding: 16px 12px !important;
+    border-radius: 16px !important;
+  }
+
+  .user-permissions-modal-glass .modal-close-btn {
+    top: 12px;
+    right: 12px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .upm-header {
+    padding-right: 32px;
+    padding-bottom: 10px;
+  }
+
+  .upm-avatar-wrap {
+    width: 42px;
+    height: 42px;
+  }
+
+  .upm-avatar-fallback {
+    font-size: 18px;
+  }
+
+  .upm-user-name {
+    font-size: 15px;
+  }
+
+  .upm-user-handle {
+    font-size: 12px;
+  }
+
+  .upm-category-pill {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .upm-perm-card {
+    padding: 10px 12px;
+  }
+
+  .upm-perm-label {
+    font-size: 12.5px;
+  }
+
+  .upm-perm-desc {
+    font-size: 11px;
+  }
+
+  .upm-toggle-switch {
+    width: 40px;
+    height: 22px;
+  }
+
+  .upm-toggle-slider {
+    width: 16px;
+    height: 16px;
+  }
+
+  .upm-toggle-switch.active .upm-toggle-slider {
+    left: 20px;
+  }
+
+  .upm-btn-cancel,
+  .upm-btn-save {
+    padding: 9px 12px;
+    font-size: 12px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   10. Light Theme Support
+   -------------------------------------------------------------------------- */
+body.light-theme .user-permissions-modal-glass {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.2) !important;
+}
+
+body.light-theme .upm-header,
+body.light-theme .upm-footer {
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .upm-user-name {
+  color: #111827;
+}
+
+body.light-theme .upm-user-handle {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+body.light-theme .upm-stat-pill {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #374151;
+}
+
+body.light-theme .upm-search-input {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #111827;
+}
+
+body.light-theme .upm-search-input::placeholder,
+body.light-theme .upm-search-icon {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+body.light-theme .upm-reset-btn {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #4b5563;
+}
+
+body.light-theme .upm-category-pill {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #4b5563;
+}
+
+body.light-theme .upm-category-pill:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: #111827;
+}
+
+body.light-theme .upm-category-pill.active {
+  background: rgba(0, 198, 230, 0.15);
+  border-color: rgba(0, 198, 230, 0.5);
+  color: #007799;
+}
+
+body.light-theme .upm-categories-nav::-webkit-scrollbar-thumb,
+body.light-theme .upm-body-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+}
+
+body.light-theme .upm-category-title {
+  color: #1f2937;
+}
+
+body.light-theme .upm-category-desc {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+body.light-theme .upm-perm-card {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.07);
+}
+
+body.light-theme .upm-perm-label {
+  color: #111827;
+}
+
+body.light-theme .upm-perm-key {
+  background: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.5);
+}
+
+body.light-theme .upm-perm-desc {
+  color: rgba(0, 0, 0, 0.6);
+}

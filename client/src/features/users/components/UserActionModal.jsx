@@ -4,6 +4,8 @@ import GlassDropdown from "../../../components/common/GlassDropdown";
 import Icon from "../../../components/common/Icon";
 import VerificationBadge from "../../../components/common/VerificationBadge";
 import { getPrimaryUserRole } from "../utils/roleUtils";
+import UserPermissionsModal from "./UserPermissionsModal";
+import { useAuth } from "../../auth/context/AuthContext";
 import "./UserActionModal.css";
 
 const UserActionModal = ({
@@ -25,6 +27,9 @@ const UserActionModal = ({
   const [selectedRole, setSelectedRole] = useState(userCurrentRole || fallbackRole);
 
   const [imgError, setImgError] = useState(false);
+  const [showPermissionsModal, setShowPermissionsModal] = useState(false);
+  const { hasPermission, hasRole } = useAuth();
+  const canManagePermissions = hasRole("admin") || hasPermission("user.permissions");
 
   useEffect(() => {
     if (user) {
@@ -205,6 +210,17 @@ const UserActionModal = ({
             </div>
           ) : (
             <div className="modal-approved-actions-group">
+              {canManagePermissions && (
+                <button
+                  type="button"
+                  className="btn-neo btn-neo-permissions modal-action-btn"
+                  onClick={() => setShowPermissionsModal(true)}
+                  title="Customize granular user permissions"
+                >
+                  <Icon name="security" modifiers="sm" />
+                  <span>Permissions</span>
+                </button>
+              )}
               {!isAdmin && canDelete && (
                 <button
                   type="button"
@@ -226,6 +242,13 @@ const UserActionModal = ({
           )}
         </div>
       </div>
+      {showPermissionsModal && (
+        <UserPermissionsModal
+          user={user}
+          isOpen={showPermissionsModal}
+          onClose={() => setShowPermissionsModal(false)}
+        />
+      )}
     </ModalPortal>
   );
 };

@@ -64,7 +64,7 @@ def reject_user_post():
 
 
 @user_mgmt_bp.route("/api/admin/delete-user", methods=["POST"])
-@permissions_required("employee.delete")
+@permissions_required("user.delete", "employee.delete")
 def delete_user_post():
     data = request.get_json() or {}
     user_id = data.get("user_id")
@@ -147,3 +147,38 @@ def remove_client_post():
 @permissions_required("user.view", "project.view")
 def project_clients_get(project_id):
     return jsonify(auth.get_project_clients(project_id)), 200
+
+
+@user_mgmt_bp.route("/api/admin/users/<int:user_id>/permissions", methods=["GET"])
+@permissions_required("user.permissions", "user.view", "user.edit")
+def get_user_permissions_endpoint(user_id):
+    try:
+        detail = auth.get_user_permissions_detail(user_id)
+        if not detail:
+            return jsonify({"error": "User not found"}), 404
+        return jsonify(detail), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to retrieve user permissions: {str(e)}"}), 500
+
+
+@user_mgmt_bp.route("/api/admin/users/<int:user_id>/permissions", methods=["PUT"])
+@permissions_required("user.permissions", "user.edit")
+def update_user_permissions_endpoint(user_id):
+    data = request.get_json() or {}
+    grants = data.get("grants", [])
+    revokes = data.get("revokes", [])
+    try:
+        auth.update_user_permissions(user_id, grants=grants, revokes=revokes)
+        return jsonify({"message": "User permissions updated successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@user_mgmt_bp.route("/api/admin/users/<int:user_id>/permissions/reset", methods=["POST"])
+@permissions_required("user.permissions", "user.edit")
+def reset_user_permissions_endpoint(user_id):
+    try:
+        auth.reset_user_permissions(user_id)
+        return jsonify({"message": "User permissions reset to role defaults"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

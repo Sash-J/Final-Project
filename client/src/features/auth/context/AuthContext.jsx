@@ -15,6 +15,14 @@ const PERMISSION_ALIASES = {
   "hierarchy.node.delete": "delete node",
   "node draggable": "hierarchy.node.drag",
   "hierarchy.node.drag": "node draggable",
+  "hierarchy.delete": "hierarchy.node.delete",
+  "user.delete": "employee.delete",
+  "employee.delete": "user.delete",
+  "map.view": "project.view",
+  "map.route.create": "project.edit",
+  "map.route.edit": "project.edit",
+  "map.route.delete": "project.edit",
+  "map.crew.assign": "project.edit",
 };
 
 export const AuthProvider = ({ children }) => {
@@ -227,8 +235,9 @@ export const AuthProvider = ({ children }) => {
       return required.some((p) => {
         const norm = String(p).trim().toLowerCase();
         if (userPermissions.includes(norm)) return true;
+        if (norm === "hierarchy.node.delete" && userPermissions.includes("hierarchy.delete")) return true;
         const alias = PERMISSION_ALIASES[norm];
-        return alias && userPermissions.includes(alias.toLowerCase());
+        return Boolean(alias && userPermissions.includes(alias.toLowerCase()));
       });
     },
     [user, hasRole]
