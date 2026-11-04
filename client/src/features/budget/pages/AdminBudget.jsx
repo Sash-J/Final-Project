@@ -25,6 +25,7 @@ const AdminBudget = () => {
 
   const [searchParams] = useSearchParams();
   const queryProjectId = searchParams.get("projectId") || searchParams.get("project") || "";
+  const queryVersionId = searchParams.get("versionId") || searchParams.get("version") || "";
 
   const {
     projects,
@@ -61,6 +62,7 @@ const AdminBudget = () => {
     const tagStr = tags.length > 0 && !isClient ? ` [Published: ${tags.join(" & ")}]` : "";
     return {
       value: String(v.id),
+      versionNumber: String(v.version_number),
       label: `Version ${v.version_number}${tagStr}`,
     };
   }), [versionsCache, projectId, isClient]);
@@ -174,12 +176,21 @@ const AdminBudget = () => {
     }
   }, [queryProjectId, projects, isClient, projectId, proceedWithProjectChange]);
 
-  // Auto-select latest version when project versions load
+  // Auto-select specified version from query param or latest version when project versions load
   useEffect(() => {
     if (projectId && !versionId && versionOptions.length > 0) {
+      if (queryVersionId && String(projectId) === String(queryProjectId)) {
+        const matched = versionOptions.find(
+          (v) => String(v.value) === String(queryVersionId) || String(v.versionNumber) === String(queryVersionId)
+        );
+        if (matched) {
+          setVersionId(matched.value);
+          return;
+        }
+      }
       setVersionId(versionOptions[versionOptions.length - 1].value);
     }
-  }, [projectId, versionId, versionOptions]);
+  }, [projectId, versionId, versionOptions, queryVersionId, queryProjectId]);
 
   // Fetch comparison data when Compare budget changes
   useEffect(() => {

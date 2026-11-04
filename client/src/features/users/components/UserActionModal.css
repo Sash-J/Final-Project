@@ -236,8 +236,8 @@
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.modal-pending-actions-group,
-.modal-approved-actions-group {
+.user-action-modal-content .modal-pending-actions-group,
+.user-action-modal-content .modal-approved-actions-group {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -245,7 +245,7 @@
   justify-content: flex-end;
 }
 
-.modal-action-btn {
+.user-action-modal-content .modal-action-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -253,7 +253,7 @@
   font-size: 0.88rem !important;
 }
 
-.modal-action-btn.btn-approve {
+.user-action-modal-content .modal-action-btn.btn-approve {
   background: rgba(16, 185, 129, 0.18) !important;
   border: 1px solid rgba(16, 185, 129, 0.45) !important;
   color: #34d399 !important;
@@ -262,7 +262,7 @@
     inset 0 1px 2px rgba(255, 255, 255, 0.2) !important;
 }
 
-.modal-action-btn.btn-approve:hover {
+.user-action-modal-content .modal-action-btn.btn-approve:hover {
   background: rgba(16, 185, 129, 0.28) !important;
   border-color: rgba(16, 185, 129, 0.7) !important;
   color: #fff !important;
@@ -271,17 +271,17 @@
     inset 0 1px 3px rgba(255, 255, 255, 0.3) !important;
 }
 
-.modal-action-btn.btn-delete {
+.user-action-modal-content .modal-action-btn.btn-delete {
   margin-right: auto;
 }
 
-body.light-theme .modal-action-btn.btn-approve {
+body.light-theme .user-action-modal-content .modal-action-btn.btn-approve {
   background: #10b981 !important;
   border-color: #10b981 !important;
   color: #fff !important;
 }
 
-body.light-theme .modal-action-btn.btn-approve:hover {
+body.light-theme .user-action-modal-content .modal-action-btn.btn-approve:hover {
   background: #059669 !important;
   border-color: #059669 !important;
 }
@@ -335,11 +335,11 @@ body.light-theme .user-modal-actions-footer {
   .user-modal-form-group.full-width {
     grid-column: span 1;
   }
-  .modal-pending-actions-group,
-  .modal-approved-actions-group {
+  .user-action-modal-content .modal-pending-actions-group,
+  .user-action-modal-content .modal-approved-actions-group {
     flex-direction: column;
   }
-  .modal-action-btn {
+  .user-action-modal-content .modal-action-btn {
     width: 100%;
     justify-content: center;
   }

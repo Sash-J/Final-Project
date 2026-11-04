@@ -13,7 +13,7 @@
   /* Responsive configuration */
   --pill-height: 70px;
   --gap: 10px;
-  --right-width: 45%;
+  --right-width: clamp(126px, 38%, 180px);
   /* Right L-shape takes up 45% of width */
   --corner-radius: 32px;
   --pill-corner-radius: 100px;
@@ -333,6 +333,7 @@ body.light-theme .composite-bento-card:hover .composite-bridge-stroke {
   pointer-events: none;
 }
 
+
 .composite-pill-content {
   position: absolute;
   left: 0;
@@ -342,8 +343,8 @@ body.light-theme .composite-bento-card:hover .composite-bridge-stroke {
   pointer-events: auto;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 0 10px;
+  justify-content: flex-start;
+  padding: 0 14px;
   box-sizing: border-box;
 
   background:
@@ -354,7 +355,7 @@ body.light-theme .composite-bento-card:hover .composite-bridge-stroke {
       rgba(0, 150, 200, 0.5) 0%,
       transparent 70%),
     linear-gradient(135deg, #001622 0%, #00040a 100%) !important;
-  border-radius: var(--corner-radius);
+  border-radius: var(--pill-corner-radius);
   overflow: hidden;
 }
 
@@ -378,26 +379,21 @@ body.light-theme .composite-pill-content {
   top: calc(var(--pill-height) + var(--gap));
   width: 100%;
   bottom: 0;
-  padding: 24px;
+  padding: 16px 18px 18px 18px;
   pointer-events: none;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: flex-start;
   box-sizing: border-box;
   overflow: hidden;
 }
 
-.composite-bottom-content>* {
+.composite-bottom-content > * {
   pointer-events: auto;
 }
 
 .composite-bottom-content .summary-bento-middle {
-  transform: translateY(-13px);
-  /* Use transform because flex auto margin absorbs negative margins */
-}
-
-.composite-bottom-content .summary-progress-container {
-  transform: translateY(28px);
+  width: 100%;
 }
 
 .composite-right-content {
@@ -405,15 +401,17 @@ body.light-theme .composite-pill-content {
   right: 0;
   top: 0;
   width: var(--right-width);
-  height: 100%;
-  padding: 24px;
+  height: var(--pill-height);
+  padding: 0 8px;
   pointer-events: none;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
-.composite-right-content>* {
+.composite-right-content > * {
   pointer-events: auto;
 }
 
@@ -438,23 +436,24 @@ body.light-theme .composite-pill-content {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
+  min-width: 0;
 }
 
 .summary-avatar {
-  width: 44px;
-  height: 44px;
-  min-width: 44px;
-  min-height: 44px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
   flex-shrink: 0;
   border-radius: 50%;
   background: rgba(var(--accent-color-rgb, 0, 198, 230), 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  font-size: 1.2rem;
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-h3);
   color: var(--accent-color, #00c6e6);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
@@ -467,55 +466,91 @@ body.light-theme .composite-pill-content {
 .summary-lead-text {
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .summary-lead-name {
-  font-weight: 600;
-  font-size: 0.9rem;
+  font-size: var(--fs-body);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-body);
+  letter-spacing: var(--ls-body);
   text-align: left;
   margin-bottom: 2px;
   color: #fff;
-  letter-spacing: -0.2px;
-  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .summary-lead-role {
-  font-size: 0.6rem;
-  text-align: left;
-  color: rgba(255, 255, 255, 0.6);
-  font-weight: 400;
+  font-size: var(--fs-overline);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-overline);
+  letter-spacing: var(--ls-overline);
   text-transform: uppercase;
-  letter-spacing: 0.4px;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .summary-bento-middle {
-  margin-bottom: 12px;
+  margin-bottom: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.summary-bento-header-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .summary-bento-title {
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-size: var(--fs-h2);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-h2);
+  letter-spacing: var(--ls-h2);
   text-align: left;
-  margin: 0 0 4px 0;
+  margin: 0;
   color: #fff;
-  letter-spacing: -0.3px;
 }
 
 .summary-bento-subtitle {
-  display: block;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
   text-align: left;
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.6);
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-caption);
+  letter-spacing: var(--ls-caption);
+  color: rgba(255, 255, 255, 0.65);
+  margin: 0;
+}
+
+.summary-stat-item {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
 }
 
 .summary-bento-subtitle strong {
   color: var(--accent-color, #00c6e6);
-  font-weight: 500;
+  font-weight: var(--fw-semibold);
+  margin-left: 3px;
 }
 
 .summary-progress-container {
-  margin-top: 14px;
-  margin-bottom: 0;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .summary-progress-bar {
@@ -523,8 +558,7 @@ body.light-theme .composite-pill-content {
   height: 8px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 4px;
-  margin-top: 8px;
-  margin-bottom: 8px;
+  margin: 6px 0;
   overflow: hidden;
 }
 
@@ -539,41 +573,57 @@ body.light-theme .composite-pill-content {
 .summary-progress-labels {
   display: flex;
   justify-content: space-between;
-  font-size: 0.8rem;
-  font-weight: 600;
+  align-items: center;
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-caption);
+  letter-spacing: var(--ls-caption);
   color: rgba(255, 255, 255, 0.7);
 }
 
 .summary-progress-labels span:last-child,
 .summary-progress-value {
   color: var(--accent-color, #00c6e6);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
 }
 
 .summary-bento-top-right {
   display: flex;
-  justify-content: flex-end;
-  margin-bottom: 20px;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 0;
 }
 
 .summary-selector {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  padding: 6px 6px 6px 6px;
+  justify-content: center;
+  padding: 5px 12px 5px 8px;
   width: max-content;
+  max-width: 100%;
   flex: 0 0 auto;
-  justify-content: flex-start;
   border-radius: 30px !important;
-  font-size: 0.8rem;
-  font-weight: 500;
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-caption);
+  letter-spacing: var(--ls-caption);
   gap: 6px;
   color: #fff;
   white-space: nowrap;
-  transform: scale(0.9) translateY(0px);
-  transform-origin: top right;
   cursor: pointer;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.2s ease, border-color 0.2s ease;
   border: 1.5px solid rgba(255, 255, 255, 0.1) !important;
+  box-sizing: border-box;
+}
+
+.summary-selector:hover {
+  transform: translateY(-1px);
+  border-color: rgba(var(--accent-color-rgb, 0, 198, 230), 0.4) !important;
+}
+
+.summary-selector-text {
+  white-space: nowrap;
 }
 
 /* Remove premium-glass-card matrix animations from the selector */
@@ -583,17 +633,123 @@ body.light-theme .composite-pill-content {
 }
 
 .summary-selector-icon {
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
-  min-height: 28px;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
   flex-shrink: 0;
-  background: rgba(var(--accent-color-rgb), 0.1);
+  background: rgba(var(--accent-color-rgb), 0.15);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 8px;
+}
+
+/* -------------------------------------------------------------
+   Department Bento Slot Elements (Shared)
+------------------------------------------------------------- */
+.dept-title-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  min-width: 0;
+}
+
+.dept-title-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.dept-title-main {
+  font-size: var(--fs-body);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-body);
+  letter-spacing: var(--ls-body);
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body.light-theme .dept-title-main {
+  color: #24292f;
+}
+
+.dept-title-sub {
+  font-size: var(--fs-overline);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-overline);
+  letter-spacing: var(--ls-overline);
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+body.light-theme .dept-title-sub {
+  color: #57606a;
+}
+
+.eq-summary-lead-text {
+  margin-right: 4px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 90px;
+}
+
+.eq-summary-lead-name {
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-caption);
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.light-theme .eq-summary-lead-name {
+  color: #24292f;
+}
+
+.eq-summary-lead-role {
+  font-size: var(--fs-overline);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-overline);
+  color: rgba(255, 255, 255, 0.6);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.light-theme .eq-summary-lead-role {
+  color: #57606a;
+}
+
+.dept-empty-items {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 100%;
+  min-height: 120px;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-caption);
+  letter-spacing: var(--ls-caption);
+  text-align: center;
+}
+
+body.light-theme .dept-empty-items {
+  color: #8c959f;
 }
 
 /* Light Theme Overrides */
@@ -646,4 +802,75 @@ body.light-theme .summary-selector {
   background: rgba(0, 0, 0, 0.04);
   color: #24292f;
   border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* -------------------------------------------------------------
+   Financial Snapshot Composite Bento Card Styles
+------------------------------------------------------------- */
+.summary-avatar.finance-avatar {
+  background: rgba(16, 185, 129, 0.12) !important;
+  color: #10b981 !important;
+  border-color: rgba(16, 185, 129, 0.25) !important;
+}
+
+body.light-theme .summary-avatar.finance-avatar {
+  background: rgba(5, 150, 105, 0.1) !important;
+  color: #059669 !important;
+  border-color: rgba(5, 150, 105, 0.2) !important;
+}
+
+.finance-progress-fill {
+  background: linear-gradient(90deg, #10b981, #00c6e6) !important;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4) !important;
+}
+
+body.light-theme .finance-progress-fill {
+  background: linear-gradient(90deg, #059669, #0284c7) !important;
+  box-shadow: 0 0 10px rgba(5, 150, 105, 0.3) !important;
+}
+
+.summary-bento-subtitle strong.finance-stat-highlight {
+  color: #10b981;
+}
+
+body.light-theme .summary-bento-subtitle strong.finance-stat-highlight {
+  color: #059669;
+}
+
+/* -------------------------------------------------------------
+   Mobile & Small Screen Tuning for Composite Bento Card
+------------------------------------------------------------- */
+@media (max-width: 480px) {
+  .composite-bento-card {
+    --pill-height: 64px;
+    --right-width: clamp(105px, 35%, 128px);
+    --gap: 8px;
+  }
+
+  .composite-bottom-content {
+    padding: 12px 14px 14px 14px;
+  }
+
+  .summary-bento-middle {
+    gap: 12px;
+  }
+
+  .summary-avatar {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  .summary-selector {
+    padding: 4px 8px 4px 6px;
+    font-size: var(--fs-overline);
+  }
+
+  .summary-selector-icon {
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    min-height: 22px;
+  }
 }

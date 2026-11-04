@@ -82,6 +82,24 @@ export const projectService = {
     }
   },
 
+  updateProjectPayment: async (projectId, paymentId, paymentData) => {
+    try {
+      const response = await api.put(`/api/projects/${projectId}/payments/${paymentId}`, paymentData);
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  },
+
+  getFinanceSignatories: async () => {
+    try {
+      const response = await api.get('/api/finance/signatories');
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  },
+
   getProjectMilestones: async (id) => {
     try {
       const response = await api.get(`/api/projects/${id}/milestones`);

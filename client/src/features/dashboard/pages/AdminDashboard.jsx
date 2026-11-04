@@ -3,7 +3,6 @@ import PageHeader from "../../../components/common/PageHeader";
 import { PageContainer, PageContentCard } from "../../../components/common/PageContainer";
 import "./AdminDashboard.css";
 import ProjectCard from "../../projects/components/ProjectCard";
-import "../../../components/Skeleton/Skeleton";
 import { ProjectCardSkeleton } from "../../../components/Skeleton/DashboardSkeleton";
 import Icon from "../../../components/common/Icon";
 import { useAuth } from "../../auth/context/AuthContext";

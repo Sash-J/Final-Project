@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Funnel+Sans:ital,wght@0,300..800;1,300..800&display=swap");
+@import "./typography.css";
 
 .material-symbols-outlined {
   font-family: "Material Symbols Outlined" !important;
@@ -70,17 +71,17 @@ code {
   background: var(--accent-color);
 }
 
-/*Master Neo-Button*/
+/*Master Neo-Button - Premium Glass-Surface Integration*/
 .btn-neo {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 12px 28px;
-  background: rgba(255, 255, 255, 0.05) !important;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255, 255, 255, 0.07) !important;
+  backdrop-filter: blur(12px) saturate(180%) brightness(1.1);
+  -webkit-backdrop-filter: blur(12px) saturate(180%) brightness(1.1);
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
   border-radius: 12px !important;
   color: #ffffff !important;
   font-size: 0.9rem !important;
@@ -88,10 +89,11 @@ code {
   text-transform: none !important;
   letter-spacing: 0.5px !important;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow:
-    0 4px 15px rgba(0, 0, 0, 0.2),
-    inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
+    0 4px 18px rgba(0, 0, 0, 0.25),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 0 12px 1px rgba(255, 255, 255, 0.05) !important;
   overflow: hidden;
   white-space: nowrap;
   outline: none;
@@ -99,12 +101,13 @@ code {
 }
 
 .btn-neo:hover {
-  background: rgba(255, 255, 255, 0.08) !important;
-  border-color: rgba(255, 255, 255, 0.3) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.35) !important;
   box-shadow:
-    0 8px 25px rgba(0, 0, 0, 0.3),
-    inset 0 1px 2px rgba(255, 255, 255, 0.2) !important;
-  transform: translateY(-2px) scale(1.02);
+    0 8px 25px rgba(0, 0, 0, 0.35),
+    inset 0 1px 2px 0 rgba(255, 255, 255, 0.5),
+    inset 0 0 16px 2px rgba(255, 255, 255, 0.08) !important;
+  transform: translateY(-2px);
 }
 
 .btn-neo:active {
@@ -112,22 +115,28 @@ code {
 }
 
 .btn-neo-solid {
-  background: rgba(0, 198, 230, 0.1) !important;
-  border: 1px solid rgba(0, 198, 230, 0.3) !important;
+  background: linear-gradient(135deg, rgba(var(--accent-color-rgb, 0, 198, 230), 0.22) 0%, rgba(0, 102, 204, 0.16) 100%) !important;
+  backdrop-filter: blur(12px) saturate(180%) brightness(1.15);
+  -webkit-backdrop-filter: blur(12px) saturate(180%) brightness(1.15);
+  border: 1px solid rgba(var(--accent-color-rgb, 0, 198, 230), 0.45) !important;
   box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.3),
-    inset 0 1px 2px rgba(255, 255, 255, 0.2) !important;
+    0 8px 26px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(var(--accent-color-rgb, 0, 198, 230), 0.2),
+    inset 0 1px 2px rgba(255, 255, 255, 0.45),
+    inset 0 0 12px rgba(var(--accent-color-rgb, 0, 198, 230), 0.2) !important;
   color: #fff !important;
   font-weight: 600 !important;
 }
 
 .btn-neo-solid:hover {
-  background: rgba(0, 198, 230, 0.18) !important;
-  border-color: rgba(0, 198, 230, 0.5) !important;
+  background: linear-gradient(135deg, rgba(var(--accent-color-rgb, 0, 198, 230), 0.32) 0%, rgba(0, 102, 204, 0.25) 100%) !important;
+  border-color: rgba(var(--accent-color-rgb, 0, 198, 230), 0.7) !important;
   box-shadow:
-    0 15px 35px rgba(0, 198, 230, 0.15),
-    inset 0 1px 3px rgba(255, 255, 255, 0.3) !important;
-  transform: translateY(-2px) scale(1.02);
+    0 12px 32px rgba(0, 0, 0, 0.35),
+    0 0 25px rgba(var(--accent-color-rgb, 0, 198, 230), 0.35),
+    inset 0 1px 2px rgba(255, 255, 255, 0.65),
+    inset 0 0 16px rgba(var(--accent-color-rgb, 0, 198, 230), 0.3) !important;
+  transform: translateY(-2px);
 }
 
 .btn-neo::after,
@@ -151,41 +160,54 @@ code {
   z-index: 2;
 }
 
-/* Global Light Theme for Neo Buttons */
+/* Global Light Theme */
 body.light-theme {
   color-scheme: light;
+  --bg-color: #ffffff;
+  --surface-color: rgba(0, 0, 0, 0.04);
+  --text-primary: #1f2328;
+  --text-secondary: #656d76;
+  --accent-color: #0969da;
+  --accent-color-rgb: 9, 105, 218;
 }
 
 body.light-theme .btn-neo {
-  background: rgba(0, 0, 0, 0.05) !important;
+  background: rgba(255, 255, 255, 0.6) !important;
+  backdrop-filter: blur(12px) saturate(160%) brightness(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(160%) brightness(1.2);
   border: 1px solid rgba(0, 0, 0, 0.1) !important;
   color: #24292f !important;
   box-shadow:
-    0 4px 15px rgba(0, 0, 0, 0.05),
-    inset 0 1px 1px rgba(255, 255, 255, 0.5) !important;
+    0 4px 14px rgba(0, 0, 0, 0.06),
+    inset 0 1px 1px rgba(255, 255, 255, 0.9) !important;
 }
 
 body.light-theme .btn-neo:hover {
-  background: rgba(0, 0, 0, 0.08) !important;
-  border-color: rgba(0, 0, 0, 0.2) !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  border-color: rgba(0, 0, 0, 0.22) !important;
   color: #000 !important;
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.1),
+    inset 0 1px 2px rgba(255, 255, 255, 1) !important;
 }
 
 body.light-theme .btn-neo-solid {
-  background: #0969da !important;
-  border-color: #0969da !important;
+  background: linear-gradient(135deg, rgba(9, 105, 218, 0.88) 0%, rgba(3, 80, 175, 0.92) 100%) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(9, 105, 218, 0.6) !important;
   color: #fff !important;
   box-shadow:
-    0 10px 30px rgba(9, 105, 218, 0.2),
-    inset 0 1px 2px rgba(255, 255, 255, 0.2) !important;
+    0 8px 25px rgba(9, 105, 218, 0.25),
+    inset 0 1px 2px rgba(255, 255, 255, 0.4) !important;
 }
 
 body.light-theme .btn-neo-solid:hover {
-  background: #1f883d !important;
-  border-color: #1f883d !important;
+  background: linear-gradient(135deg, rgba(31, 136, 61, 0.9) 0%, rgba(20, 110, 48, 0.95) 100%) !important;
+  border-color: rgba(31, 136, 61, 0.7) !important;
   box-shadow:
-    0 15px 40px rgba(31, 136, 61, 0.3),
-    inset 0 1px 3px rgba(255, 255, 255, 0.3) !important;
+    0 12px 35px rgba(31, 136, 61, 0.35),
+    inset 0 1px 3px rgba(255, 255, 255, 0.5) !important;
 }
 
 /* ==========================================================================

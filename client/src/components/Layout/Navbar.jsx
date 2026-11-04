@@ -81,7 +81,7 @@ const Navbar = () => {
         {user && hasPermission("budget.view") && !hasRole(["crew", "department head"]) && (
           <li>
             <Link
-              to={hasRole("client") ? "/budget" : (location.pathname.startsWith("/budget") ? "/budget" : "/admin-budget")}
+              to={hasRole("client") ? "/budget" : "/admin-budget"}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               <Icon name="payments" modifiers="md" />

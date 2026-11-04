@@ -1,0 +1,132 @@
+/* ==========================================================================
+   Typography System - 8-Level Scalable Type Scale
+   Ensures uniform visual hierarchy, cadence, line-height, letter-spacing,
+   and weight across all pages, bento cards, and modals.
+   ========================================================================== */
+
+:root {
+  /* ------------------------------------------------------------------------
+     1. Font Family & Weights
+     ------------------------------------------------------------------------ */
+  --font-main: "Funnel Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* ------------------------------------------------------------------------
+     2. The 8 Font Size Levels
+     ------------------------------------------------------------------------ */
+  --fs-display:  2.25rem;   /* Level 1: 36px - Hero titles, major stats */
+  --fs-h1:       1.75rem;   /* Level 2: 28px - Page titles, modal primary headers */
+  --fs-h2:       1.375rem;  /* Level 3: 22px - Section titles, bento cards */
+  --fs-h3:       1.125rem;  /* Level 4: 18px - Card subheads, drawer headings */
+  --fs-subhead:  0.9375rem; /* Level 5: 15px - Lead text, emphasized labels */
+  --fs-body:     0.875rem;  /* Level 6: 14px - Primary UI text, inputs, buttons */
+  --fs-caption:  0.75rem;   /* Level 7: 12px - Timestamps, badges, secondary notes */
+  --fs-overline: 0.625rem;  /* Level 8: 10px - Micro labels, uppercase tags */
+
+  /* ------------------------------------------------------------------------
+     3. Line Heights (Cadence)
+     ------------------------------------------------------------------------ */
+  --lh-display:  1.15;
+  --lh-h1:       1.2;
+  --lh-h2:       1.25;
+  --lh-h3:       1.3;
+  --lh-subhead:  1.4;
+  --lh-body:     1.5;
+  --lh-caption:  1.4;
+  --lh-overline: 1.2;
+
+  /* ------------------------------------------------------------------------
+     4. Letter Spacing (Tracking)
+     ------------------------------------------------------------------------ */
+  --ls-display:  -0.035em;
+  --ls-h1:       -0.025em;
+  --ls-h2:       -0.02em;
+  --ls-h3:       -0.015em;
+  --ls-subhead:  -0.01em;
+  --ls-body:      0em;
+  --ls-caption:   0.015em;
+  --ls-overline:  0.06em;
+}
+
+/* ==========================================================================
+   Level Utility Classes
+   ========================================================================== */
+
+/* Level 1: Display */
+.type-display {
+  font-family: var(--font-main);
+  font-size: var(--fs-display);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-display);
+  letter-spacing: var(--ls-display);
+}
+
+/* Level 2: Heading 1 */
+.type-h1 {
+  font-family: var(--font-main);
+  font-size: var(--fs-h1);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-h1);
+  letter-spacing: var(--ls-h1);
+}
+
+/* Level 3: Heading 2 */
+.type-h2 {
+  font-family: var(--font-main);
+  font-size: var(--fs-h2);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-h2);
+  letter-spacing: var(--ls-h2);
+}
+
+/* Level 4: Heading 3 */
+.type-h3 {
+  font-family: var(--font-main);
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-h3);
+  letter-spacing: var(--ls-h3);
+}
+
+/* Level 5: Subhead */
+.type-subhead {
+  font-family: var(--font-main);
+  font-size: var(--fs-subhead);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-subhead);
+  letter-spacing: var(--ls-subhead);
+}
+
+/* Level 6: Body */
+.type-body {
+  font-family: var(--font-main);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-body);
+  letter-spacing: var(--ls-body);
+}
+
+/* Level 7: Caption */
+.type-caption {
+  font-family: var(--font-main);
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-caption);
+  letter-spacing: var(--ls-caption);
+}
+
+/* Level 8: Overline */
+.type-overline {
+  font-family: var(--font-main);
+  font-size: var(--fs-overline);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-overline);
+  letter-spacing: var(--ls-overline);
+  text-transform: uppercase;
+}
+

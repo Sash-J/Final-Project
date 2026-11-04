@@ -775,17 +775,10 @@ const EquipmentVisualization = ({
             <div className="equipment-grid">
               {data.departments.map((dept) => {
                 const { leadName, leadRole } = getDeptLead(dept.name);
-
-                const itemCount = dept.items ? dept.items.length : 0;
-                // Calculate height tightly wrapped to content:
-                // Pill & Gap (~80px) + Padding (~48px) + Items (~30px each)
-                const dynamicHeight = 128 + itemCount * 35;
-
                 return (
                   <div
                     key={dept.id}
                     className="dept-bento-wrapper"
-                    style={{ height: `${dynamicHeight}px` }}
                   >
                     <CompositeBentoCard
                       singleOverlay={true}
@@ -806,8 +799,9 @@ const EquipmentVisualization = ({
                       bottomContent={
                         <>
                           <div className="dept-bento-content-scroll">
-                            <ul className="equipment-list">
-                              {(dept.items || []).map((item) => {
+                            {(dept.items || []).length > 0 ? (
+                              <ul className="equipment-list">
+                                {(dept.items || []).map((item) => {
                                 return (
                                   <li key={item.id} className="equipment-item">
                                     <div
@@ -830,6 +824,12 @@ const EquipmentVisualization = ({
                                 );
                               })}
                             </ul>
+                            ) : (
+                              <div className="dept-empty-items">
+                                <Icon name="inventory_2" modifiers="sm" />
+                                <span>No equipment assigned</span>
+                              </div>
+                            )}
                           </div>
                         </>
                       }
@@ -838,7 +838,7 @@ const EquipmentVisualization = ({
                           <div className="summary-bento-top-right">
                             <GlassSurface
                               className="summary-selector"
-                              width="100%"
+                              width="max-content"
                               height="auto"
                               borderRadius="20px"
                               blur={8}

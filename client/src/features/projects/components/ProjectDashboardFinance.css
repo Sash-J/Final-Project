@@ -1,174 +1,369 @@
-.budget-version-bar {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 10px 16px;
-  margin-bottom: 16px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 14px;
-  flex-wrap: wrap;
-}
-
-.bvb-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: rgba(255, 255, 255, 0.45);
-  white-space: nowrap;
-  cursor: default;
-}
-
-.bvb-pills {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.bvb-pill {
-  padding: 5px 16px;
-  border-radius: 50px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  font-family: monospace;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.55);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.bvb-pill:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.bvb-pill.active {
-  background: linear-gradient(135deg, var(--accent-color), #00b8d4);
-  border-color: transparent;
-  color: #fff;
-  box-shadow: 0 0 14px rgba(0, 198, 230, 0.35);
-}
-
-.finance-sub-nav {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
-  background: transparent;
-  border-radius: 14px;
-  width: fit-content;
-  align-items: center;
-  justify-content: center;
-}
-
-.finance-sub-nav .btn-neo {
-  gap: 8px;
-}
-
-.finance-integrated-section {
-  margin-top: 20px;
-}
-
-.sub-nav-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-  gap: 0;
-  height: 45px;
-  padding: 0 12px;
-  border: none;
-  background: rgba(255, 255, 255, 0.061);
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 0.85rem;
-  font-weight: 400;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.sub-nav-btn span:not(.icon-root) {
-  max-width: 0;
-  opacity: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  transition: max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, margin-left 0.3s ease;
-  margin-left: 0;
-}
-
-.sub-nav-btn:hover span:not(.icon-root),
-.sub-nav-btn.active span:not(.icon-root) {
-  max-width: 150px;
-  opacity: 1;
-  margin-left: 8px;
-}
-
-.sub-nav-btn:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.sub-nav-btn:nth-child(1).active {
-  background: rgba(255, 255, 255, 0.1);
-  color: #00ffa0;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
-
-.sub-nav-btn:nth-child(2).active {
-  background: rgba(255, 255, 255, 0.1);
-  color: #ff5353;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
-
-body.light-theme .budget-version-bar {
-  background: #f6f8fa;
-  border-color: #d0d7de;
-}
-
-body.light-theme .bvb-label {
-  color: #57606a;
-}
-
-body.light-theme .bvb-pill {
-  background: #ffffff;
-  border-color: #d0d7de;
-  color: #57606a;
-}
-
-body.light-theme .bvb-pill:hover {
-  background: #f6f8fa;
-  color: #24292f;
-}
-
-body.light-theme .sub-nav-btn {
-  background: #f6f8fa;
-  color: #57606a;
-  border: 1px solid #d0d7de;
-}
-
-body.light-theme .sub-nav-btn:hover {
-  background: #e1e4e8;
-  color: #24292f;
-}
-
-.finance-modal-container {
-  width: calc(100% + 40px); /* Expand the width by 40px (20px each side) */
-  box-sizing: border-box;
-  margin: 0 -20px; /* Pull the container left and right by 20px */
-  padding: 0 20px; /* Push the actual content back to its exact original alignment */
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
+/* Project Dashboard Finance - Ultra-Minimal Premium Glass Nav + Standard Header */
 
 .finance-glass-override {
-  max-width: 1200px !important;
+  width: 80vw !important;
+  max-width: 80vw !important;
   height: 90vh !important;
+  max-height: 90vh !important;
+  padding: 40px !important;
+  border-radius: 32px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
+  overflow: visible !important; /* Enables detached navigation bar to float outside modal */
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* Dynamically balances the combined [Dock + Modal] unit on the screen when pinned */
+.finance-glass-override.is-dock-pinned {
+  transform: translateX(44px) !important;
+}
+
+@media (max-width: 1200px) {
+  .finance-glass-override {
+    width: 94vw !important;
+    max-width: 94vw !important;
+    height: 94vh !important;
+    max-height: 94vh !important;
+    padding: 24px 20px !important;
+  }
+
+  .finance-glass-override.is-dock-pinned {
+    transform: none !important;
+  }
+}
+
+/* 1. macOS-Style Spring Physics Dock Navigation (Aligned with horizontal center) */
+.finance-dock.dock--left {
+  position: absolute;
+  left: auto;
+  right: calc(100% + 16px); /* Floating 16px to the left of the modal */
+  top: 50%;
+  transform: translateY(-50%); /* Aligned with the horizontal centerline of the modal */
+  z-index: 30;
+  background: rgba(10, 12, 18, 0.05);
+  backdrop-filter: blur(60px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  box-shadow: none !important;
+  user-select: none;
+  transition:
+    translate 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.28s ease,
+    box-shadow 0.3s ease;
+}
+
+/* Auto-Hide Slide & Fade Out State */
+.finance-dock.dock--left[data-hidden] {
+  translate: calc(-100% - 16px) 0;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    translate 0.38s cubic-bezier(0.55, 0, 0.75, 0.15),
+    opacity 0.22s ease 0.08s;
+}
+
+/* Dock Tile & Face Styling */
+.finance-dock .dock-tile {
+  border-radius: calc(var(--dock-base) * var(--dock-round) * 0.5);
+}
+
+.finance-dock .dock-face {
+  border-radius: calc(var(--dock-base) * var(--dock-round) * 0.5);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 4px 10px -4px rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.65);
+  transition:
+    background 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.2s ease;
+}
+
+.finance-dock .dock-face .icon-root {
+  font-size: 1.15rem !important;
+  line-height: 1;
+}
+
+.finance-dock .dock-face .icon-root.sm {
+  font-size: 1.15rem !important;
+}
+
+.finance-dock .dock-item:hover .dock-face {
+  background: rgba(255, 255, 255, 0.09);
+  color: #ffffff;
+  box-shadow: 
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14),
+    0 6px 14px -3px rgba(0, 0, 0, 0.6);
+}
+
+/* Premium Luminous Cyan Active State */
+.finance-dock .dock-item[data-active] .dock-face {
+  background: linear-gradient(135deg, rgba(0, 198, 230, 0.25), rgba(0, 198, 230, 0.08));
+  box-shadow: 
+    inset 0 0 0 1px rgba(0, 198, 230, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    0 0 14px rgba(0, 198, 230, 0.28);
+  color: var(--accent-color, #00c6e6);
+}
+
+/* Dock Dot indicator matching active cyan */
+.finance-dock .dock-dot {
+  background: var(--accent-color, #00c6e6);
+  box-shadow: 0 0 6px rgba(0, 198, 230, 0.6);
+}
+
+/* Micro-divider Separator */
+.finance-dock .dock-separator {
+  background: rgba(255, 255, 255, 0.09);
+  width: 22px;
+  height: 1px;
+}
+
+/* Pin Toggle Item */
+.finance-dock .dock-toggle-item.is-pinned .dock-face {
+  color: var(--accent-color, #00c6e6);
+  background: rgba(0, 198, 230, 0.12);
+  box-shadow: 
+    inset 0 0 0 1px rgba(0, 198, 230, 0.35),
+    0 0 10px rgba(0, 198, 230, 0.18);
+}
+
+/* Disabled Dock Items */
+.finance-dock .dock-item[data-disabled] {
+  opacity: 0.25;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Tooltip Labels */
+.finance-dock .dock-label {
+  background: rgba(18, 22, 33, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  color: #f4f4f5;
+  font-size: 12px;
+  font-weight: 500;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 9px;
+  padding: 6px 11px;
+}
+
+/* 2. Dock Presence Indicator (Left edge handle when auto-hidden) */
+.finance-dock-indicator {
+  position: absolute;
+  left: -12px; /* Peeking out from the left edge of the modal */
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 24;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 60px;
+  padding: 0;
+  border-radius: 10px;
+  background: rgba(13, 17, 26, 0.75);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(0, 198, 230, 0.38);
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.45),
+    0 0 14px rgba(0, 198, 230, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  outline: none;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.28s ease,
+    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    left 0.25s ease;
+}
+
+/* Shown when dock is auto-hidden */
+.finance-dock[data-hidden] ~ .finance-dock-indicator {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Hover effect on the indicator */
+.finance-dock-indicator:hover {
+  left: -15px;
+  border-color: rgba(0, 198, 230, 0.7);
+  box-shadow: 
+    0 10px 28px rgba(0, 0, 0, 0.55),
+    0 0 20px rgba(0, 198, 230, 0.55);
+}
+
+.indicator-handle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  pointer-events: none;
+}
+
+.indicator-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent-color, #00c6e6);
+  box-shadow: 0 0 8px rgba(0, 198, 230, 0.9);
+}
+
+.indicator-chevron {
+  color: var(--accent-color, #00c6e6) !important;
+  font-size: 13px !important;
+  opacity: 0.85;
+  transition: transform 0.2s ease;
+}
+
+.finance-dock-indicator:hover .indicator-chevron {
+  transform: translateX(-2px);
+  opacity: 1;
+}
+
+/* Fallback for screens where 80vw doesn't leave enough margin */
+@media (max-width: 1200px) {
+  .finance-dock.dock--left {
+    position: static;
+    transform: none;
+    flex-direction: row;
+    width: fit-content;
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 14px;
+    gap: 6px;
+  }
+
+  .finance-dock.dock--left[data-hidden] {
+    translate: 0 -20px;
+  }
+
+  .finance-dock .dock-separator {
+    width: 1px;
+    height: 20px;
+  }
+
+  .finance-dock-indicator {
+    display: none;
+  }
+}
+
+/* 2. Modal Body & Stage */
+.finance-modal-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  flex: 1;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: transparent;
+}
+
+.finance-main-stage {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
+}
+
+.finance-stage-content {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Light Theme Overrides */
+body.light-theme .finance-dock.dock--left {
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(60px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: none !important;
+}
+
+body.light-theme .finance-dock .dock-face {
+  background: rgba(0, 0, 0, 0.03);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+  color: rgba(0, 0, 0, 0.55);
+}
+
+body.light-theme .finance-dock .dock-item:hover .dock-face {
+  background: rgba(0, 0, 0, 0.06);
+  color: #111111;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+
+body.light-theme .finance-dock .dock-item[data-active] .dock-face {
+  background: linear-gradient(135deg, rgba(9, 105, 218, 0.16), rgba(9, 105, 218, 0.05));
+  box-shadow: 
+    inset 0 0 0 1px rgba(9, 105, 218, 0.35),
+    0 2px 10px rgba(9, 105, 218, 0.2);
+  color: #0969da;
+}
+
+body.light-theme .finance-dock .dock-dot {
+  background: #0969da;
+  box-shadow: 0 0 6px rgba(9, 105, 218, 0.6);
+}
+
+body.light-theme .finance-dock .dock-toggle-item.is-pinned .dock-face {
+  color: #0969da;
+  background: rgba(9, 105, 218, 0.1);
+  box-shadow: 
+    inset 0 0 0 1px rgba(9, 105, 218, 0.3),
+    0 2px 8px rgba(9, 105, 218, 0.15);
+}
+
+body.light-theme .finance-dock .dock-separator {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .finance-dock .dock-label {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #18181b;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+body.light-theme .finance-dock-indicator {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(9, 105, 218, 0.35);
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.1),
+    0 0 10px rgba(9, 105, 218, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+body.light-theme .finance-dock-indicator:hover {
+  border-color: rgba(9, 105, 218, 0.7);
+  box-shadow: 
+    0 10px 28px rgba(0, 0, 0, 0.15),
+    0 0 16px rgba(9, 105, 218, 0.35);
+}
+
+body.light-theme .indicator-dot {
+  background: #0969da;
+  box-shadow: 0 0 6px rgba(9, 105, 218, 0.7);
+}
+
+body.light-theme .indicator-chevron {
+  color: #0969da !important;
 }

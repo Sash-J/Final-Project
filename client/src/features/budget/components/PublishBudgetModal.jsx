@@ -1,154 +1,232 @@
-import React, { useState, useEffect } from "react";
-import ModalPortal from "../../../components/common/ModalPortal";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import PropTypes from "prop-types";
+import PublishModal from "../../../components/common/PublishModal";
 import { budgetService } from "../../../services/budgetService";
 
+/**
+ * PublishBudgetModal - Budget Revision publishing adapter for PublishModal.
+ * Cleanly separates concerns, removes legacy browser alerts, and handles version switching.
+ */
 const PublishBudgetModal = ({
   isOpen,
   onClose,
   projectId,
-  versionsCache,
+  versionsCache = {},
   initialVersionId,
-  onSuccess
+  onSuccess,
 }) => {
   const [selectedPublishVersionId, setSelectedPublishVersionId] = useState("");
   const [publishToCrew, setPublishToCrew] = useState(false);
   const [publishToClient, setPublishToClient] = useState(false);
+  const [transmittalNote, setTransmittalNote] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const versionList = useMemo(
+    () => (projectId ? versionsCache[projectId] || [] : []),
+    [projectId, versionsCache]
+  );
+
+  // Sync state whenever modal opens or target version changes
   useEffect(() => {
     if (isOpen && initialVersionId) {
       setSelectedPublishVersionId(initialVersionId);
-      const versionList = versionsCache[projectId] || [];
-      const currentVersion = versionList.find((v) => String(v.id) === String(initialVersionId));
+      const currentVersion = versionList.find(
+        (v) => String(v.id) === String(initialVersionId)
+      );
       if (currentVersion) {
-        setPublishToCrew(!!currentVersion.published_to_crew);
-        setPublishToClient(!!currentVersion.published_to_client);
+        setPublishToCrew(Boolean(currentVersion.published_to_crew));
+        setPublishToClient(Boolean(currentVersion.published_to_client));
       } else {
         setPublishToCrew(false);
         setPublishToClient(false);
       }
+      setTransmittalNote("");
     }
-  }, [isOpen, initialVersionId, projectId, versionsCache]);
+  }, [isOpen, initialVersionId, versionList]);
 
-  const handlePublishVersionChange = (targetVersionId) => {
-    setSelectedPublishVersionId(targetVersionId);
-    const versionList = versionsCache[projectId] || [];
-    const targetVersion = versionList.find((v) => String(v.id) === String(targetVersionId));
-    if (targetVersion) {
-      setPublishToCrew(!!targetVersion.published_to_crew);
-      setPublishToClient(!!targetVersion.published_to_client);
-    } else {
-      setPublishToCrew(false);
-      setPublishToClient(false);
-    }
-  };
+  const handlePublishVersionChange = useCallback(
+    (targetVersionId) => {
+      setSelectedPublishVersionId(targetVersionId);
+      const targetVersion = versionList.find(
+        (v) => String(v.id) === String(targetVersionId)
+      );
+      if (targetVersion) {
+        setPublishToCrew(Boolean(targetVersion.published_to_crew));
+        setPublishToClient(Boolean(targetVersion.published_to_client));
+      } else {
+        setPublishToCrew(false);
+        setPublishToClient(false);
+      }
+    },
+    [versionList]
+  );
 
-  const handleSavePublishSettings = async () => {
+  const currentSelectedVersion = useMemo(
+    () =>
+      versionList.find(
+        (v) => String(v.id) === String(selectedPublishVersionId)
+      ) || null,
+    [versionList, selectedPublishVersionId]
+  );
+
+  const activeEditorVersion = useMemo(
+    () =>
+      versionList.find((v) => String(v.id) === String(initialVersionId)) ||
+      null,
+    [versionList, initialVersionId]
+  );
+
+  const versionOptions = useMemo(
+    () =>
+      versionList.map((v) => {
+        const tags = [];
+        if (v.published_to_crew) tags.push("Crew");
+        if (v.published_to_client) tags.push("Client");
+        const tagStr = tags.length > 0 ? ` [Published: ${tags.join(" & ")}]` : "";
+        return {
+          id: v.id,
+          label: `Version ${v.version_number}${tagStr}`,
+        };
+      }),
+    [versionList]
+  );
+
+  const documentData = useMemo(() => {
+    if (!currentSelectedVersion) return {};
+    const isPub = Boolean(
+      currentSelectedVersion.published_to_crew ||
+        currentSelectedVersion.published_to_client
+    );
+    return {
+      id: currentSelectedVersion.id,
+      code: `VER-${String(currentSelectedVersion.version_number).padStart(2, "0")}`,
+      title: `Budget Revision v${currentSelectedVersion.version_number}`,
+      subtitle: activeEditorVersion
+        ? `Editor Active: Version ${activeEditorVersion.version_number}`
+        : "Budget Statement",
+      isPublished: isPub,
+      publishedAt: currentSelectedVersion.published_at,
+    };
+  }, [currentSelectedVersion, activeEditorVersion]);
+
+  const audiences = useMemo(
+    () => [
+      {
+        id: "client",
+        title: "Client Portal & Organization",
+        description:
+          "Release approved budget statement into the client's financial vault and dashboard.",
+        icon: "apartment",
+        badge: "External Client",
+        checked: publishToClient,
+        onChange: setPublishToClient,
+      },
+      {
+        id: "crew",
+        title: "Production Crew & Department Heads",
+        description:
+          "Grant assigned crew visibility into shooting budget phases and department allocations.",
+        icon: "groups",
+        badge: "Internal Crew",
+        checked: publishToCrew,
+        onChange: setPublishToCrew,
+      },
+    ],
+    [publishToClient, publishToCrew]
+  );
+
+  const handleSavePublishSettings = useCallback(async () => {
+    if (!selectedPublishVersionId) return;
+    setIsSubmitting(true);
     try {
-      const data = await budgetService.publishBudgetVersion(selectedPublishVersionId, {
-        published_to_crew: publishToCrew,
-        published_to_client: publishToClient,
-      });
+      const data = await budgetService.publishBudgetVersion(
+        selectedPublishVersionId,
+        {
+          published_to_crew: publishToCrew,
+          published_to_client: publishToClient,
+          transmittal_note: transmittalNote.trim() || undefined,
+        }
+      );
 
       if (data && !data.error) {
-        alert("Publish settings saved!");
-        onSuccess && await onSuccess();
+        if (onSuccess) {
+          await onSuccess();
+        }
         onClose();
       } else {
-        alert(`Failed to update publish settings: ${data?.error || "Unknown error"}`);
+        console.error("Failed to update budget publish settings:", data?.error);
       }
     } catch (err) {
-      console.error(err);
-      alert("Error saving publish settings");
+      console.error("Error saving publish settings:", err);
+    } finally {
+      setIsSubmitting(false);
     }
-  };
+  }, [
+    selectedPublishVersionId,
+    publishToCrew,
+    publishToClient,
+    transmittalNote,
+    onSuccess,
+    onClose,
+  ]);
+
+  const handleRevokePublication = useCallback(async () => {
+    if (!selectedPublishVersionId) return;
+    setIsSubmitting(true);
+    try {
+      const data = await budgetService.publishBudgetVersion(
+        selectedPublishVersionId,
+        {
+          published_to_crew: false,
+          published_to_client: false,
+        }
+      );
+
+      if (data && !data.error) {
+        setPublishToCrew(false);
+        setPublishToClient(false);
+        if (onSuccess) {
+          await onSuccess();
+        }
+        onClose();
+      }
+    } catch (err) {
+      console.error("Error revoking publish settings:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [selectedPublishVersionId, onSuccess, onClose]);
 
   if (!isOpen) return null;
 
   return (
-    <ModalPortal className="no-glass" showClose={false}>
-      <div className="publish-modal-overlay" onClick={onClose}>
-        <div className="publish-modal-content" onClick={(e) => e.stopPropagation()}>
-          <div className="publish-modal-header">
-            <h3>Publish Budget Version</h3>
-            <button className="publish-modal-close" onClick={onClose}>&times;</button>
-          </div>
-          <div className="publish-modal-body">
-            <div className="publish-modal-field">
-              <label className="publish-modal-label">Select Version to Publish</label>
-              <select
-                className="publish-version-select"
-                value={selectedPublishVersionId}
-                onChange={(e) => handlePublishVersionChange(e.target.value)}
-              >
-                {(versionsCache[projectId] || []).map((v) => {
-                  const tags = [];
-                  if (v.published_to_crew) tags.push("Crew");
-                  if (v.published_to_client) tags.push("Client");
-                  const tagStr = tags.length > 0 ? ` [Published: ${tags.join(" & ")}]` : "";
-                  return (
-                    <option key={v.id} value={v.id}>
-                      Version {v.version_number}{tagStr}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
-
-            <div className="publish-version-details">
-              <div className="detail-item">
-                <span className="detail-label">Active Version in Editor:</span>
-                <span className="detail-value active-highlight">
-                  Version {(versionsCache[projectId] || []).find((v) => String(v.id) === String(initialVersionId))?.version_number || "None"}
-                </span>
-              </div>
-              <div className="detail-item">
-                <span className="detail-label">Last Published:</span>
-                <span className="detail-value">
-                  {(() => {
-                    const selVer = (versionsCache[projectId] || []).find((v) => String(v.id) === String(selectedPublishVersionId));
-                    if (selVer && selVer.published_at) {
-                      return new Date(selVer.published_at).toLocaleString();
-                    }
-                    return "Not published yet";
-                  })()}
-                </span>
-              </div>
-            </div>
-
-            <div className="publish-options-group">
-              <div className="publish-option">
-                <label className="publish-checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={publishToCrew}
-                    onChange={(e) => setPublishToCrew(e.target.checked)}
-                    className="publish-checkbox-input"
-                  />
-                  <span>Publish to Production Crew</span>
-                </label>
-              </div>
-
-              <div className="publish-option">
-                <label className="publish-checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={publishToClient}
-                    onChange={(e) => setPublishToClient(e.target.checked)}
-                    className="publish-checkbox-input"
-                  />
-                  <span>Publish to Client</span>
-                </label>
-              </div>
-            </div>
-          </div>
-          <div className="publish-modal-footer">
-            <button className="btn-cancel" onClick={onClose}>Cancel</button>
-            <button className="btn-save" onClick={handleSavePublishSettings}>Save Settings</button>
-          </div>
-        </div>
-      </div>
-    </ModalPortal>
+    <PublishModal
+      isOpen={isOpen}
+      onClose={onClose}
+      entityType="budget"
+      documentData={documentData}
+      versionOptions={versionOptions}
+      selectedVersionId={selectedPublishVersionId}
+      onVersionChange={handlePublishVersionChange}
+      audiences={audiences}
+      transmittalNote={transmittalNote}
+      onTransmittalNoteChange={setTransmittalNote}
+      onPublish={handleSavePublishSettings}
+      onUnpublish={
+        documentData.isPublished ? handleRevokePublication : undefined
+      }
+      isSubmitting={isSubmitting}
+    />
   );
+};
+
+PublishBudgetModal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  versionsCache: PropTypes.object,
+  initialVersionId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  onSuccess: PropTypes.func,
 };
 
 export default PublishBudgetModal;

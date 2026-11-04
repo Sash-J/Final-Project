@@ -42,7 +42,10 @@
   background: transparent;
   border: none;
   color: rgba(255, 255, 255, 0.6);
-  font-size: 0.95rem;
+  font-size: var(--fs-subhead);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-subhead);
+  letter-spacing: var(--ls-subhead);
   padding: 10px 15px;
   cursor: pointer;
   display: flex;
@@ -68,8 +71,10 @@
 
 .org-metadata-nav {
   color: rgba(255, 255, 255, 0.6);
-  font-size: 0.75rem;
-  font-weight: 400;
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-caption);
+  letter-spacing: var(--ls-caption);
   padding: 4px 12px;
   background: rgba(255, 255, 255, 0.03);
   border-radius: 6px;
