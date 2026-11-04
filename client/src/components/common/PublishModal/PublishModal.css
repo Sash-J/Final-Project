@@ -1,0 +1,880 @@
+@import "../../../styles/typography.css";
+
+/* ==========================================================================
+   PublishModal.css - Spacious, Breathable Executive Publish Modal
+   Inspired by the layout and airy geometry of Project Finances & Payment Receipt.
+   Features: Glassmorphism, 2-Column Responsive Grid, 8-Level Typography,
+   Strict CSS Separation, Zero Hover Jumps, and Dual-Theme Support.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Modal Overlay Backdrop (Smooth GPU-accelerated blur)
+   -------------------------------------------------------------------------- */
+.modal-portal-overlay:has(.publish-modal-glass) {
+  background: rgba(4, 9, 18, 0.6) !important;
+  backdrop-filter: blur(16px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 30px 20px !important;
+}
+
+body.light-theme .modal-portal-overlay:has(.publish-modal-glass),
+[data-theme="light"] .modal-portal-overlay:has(.publish-modal-glass) {
+  background: rgba(240, 244, 250, 0.6) !important;
+  backdrop-filter: blur(16px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. Glass Container Geometry - Breathable, Roomy Footprint
+   -------------------------------------------------------------------------- */
+.publish-modal-glass {
+  width: 88vw !important;
+  max-width: 980px !important;
+  height: auto !important;
+  max-height: 90vh !important;
+  padding: 0 !important;
+  border-radius: 32px !important;
+  box-shadow: 0 30px 80px -15px rgba(0, 0, 0, 0.8) !important;
+  position: relative !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  font-family: var(--font-main);
+  animation: fadeIn 0.35s ease-out;
+}
+
+body.light-theme .publish-modal-glass,
+[data-theme="light"] .publish-modal-glass {
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.09) !important;
+}
+
+/* Top-right Modal Close Button Alignment */
+.publish-modal-glass .modal-close-btn {
+  top: 18px;
+  right: 24px;
+  z-index: 20;
+}
+
+.publish-modal-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* --------------------------------------------------------------------------
+   3. Header Actions Bar - Compact, Matching PaymentReceiptModal
+   -------------------------------------------------------------------------- */
+.publish-modal-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  padding-right: 84px; /* Uncluttered clearance matching PaymentReceiptModal */
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-top-left-radius: 32px;
+  border-top-right-radius: 32px;
+  flex-shrink: 0;
+  gap: 16px;
+  box-sizing: border-box;
+}
+
+body.light-theme .publish-modal-header-actions,
+[data-theme="light"] .publish-modal-header-actions {
+  background: rgba(0, 0, 0, 0.02);
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+.publish-header-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.publish-header-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(0, 198, 230, 0.12);
+  color: var(--accent-color, #00c6e6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid rgba(0, 198, 230, 0.22);
+}
+
+body.light-theme .publish-header-icon,
+[data-theme="light"] .publish-header-icon {
+  background: rgba(0, 198, 230, 0.14);
+  border-color: rgba(0, 198, 230, 0.3);
+}
+
+.publish-header-title {
+  font-family: var(--font-main);
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-h3);
+  letter-spacing: var(--ls-h3);
+  color: #fff;
+  margin: 0;
+}
+
+body.light-theme .publish-header-title,
+[data-theme="light"] .publish-header-title {
+  color: #111827;
+}
+
+/* --------------------------------------------------------------------------
+   4. Scrollable Modal Body
+   -------------------------------------------------------------------------- */
+.publish-modal-body {
+  padding: 30px 36px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+  max-height: calc(90vh - 92px);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+}
+
+body.light-theme .publish-modal-body,
+[data-theme="light"] .publish-modal-body {
+  scrollbar-color: rgba(0, 0, 0, 0.16) transparent;
+}
+
+/* --------------------------------------------------------------------------
+   5. Expansive Two-Column Main Grid
+   -------------------------------------------------------------------------- */
+.publish-main-grid {
+  display: grid;
+  grid-template-columns: 1.08fr 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.publish-column-dossier,
+.publish-column-governance {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* --------------------------------------------------------------------------
+   6. Section Labels (Level 8: Overline)
+   -------------------------------------------------------------------------- */
+.publish-section-label {
+  font-family: var(--font-main);
+  font-size: var(--fs-overline, 0.625rem);
+  font-weight: var(--fw-bold, 700);
+  line-height: var(--lh-overline, 1.2);
+  letter-spacing: var(--ls-overline, 0.06em);
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  margin: 0;
+  display: block;
+}
+
+body.light-theme .publish-section-label,
+[data-theme="light"] .publish-section-label {
+  color: #6b7280;
+}
+
+/* --------------------------------------------------------------------------
+   7. Document Specifications Card (Left Column)
+   -------------------------------------------------------------------------- */
+.publish-doc-card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 22px 24px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-sizing: border-box;
+  transition: border-color 0.25s ease, background 0.25s ease;
+}
+
+body.light-theme .publish-doc-card,
+[data-theme="light"] .publish-doc-card {
+  background: rgba(0, 0, 0, 0.015);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+.publish-doc-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.publish-doc-code {
+  font-family: var(--font-mono, monospace);
+  font-size: var(--fs-caption, 0.75rem);
+  font-weight: var(--fw-bold, 700);
+  line-height: var(--lh-caption, 1.4);
+  color: var(--accent-color, #00c6e6);
+  background: rgba(0, 198, 230, 0.08);
+  padding: 3px 9px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 198, 230, 0.22);
+  letter-spacing: 0.02em;
+}
+
+body.light-theme .publish-doc-code,
+[data-theme="light"] .publish-doc-code {
+  background: rgba(0, 198, 230, 0.1);
+  border-color: rgba(0, 198, 230, 0.3);
+}
+
+.publish-status-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-caption, 0.75rem);
+  font-weight: var(--fw-semibold, 600);
+  line-height: var(--lh-caption, 1.4);
+  padding: 3px 10px;
+  border-radius: 12px;
+}
+
+.publish-status-tag.is-published {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.publish-status-tag.is-draft {
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.publish-doc-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.publish-doc-title {
+  font-family: var(--font-main);
+  font-size: var(--fs-h3, 1.125rem);
+  font-weight: var(--fw-semibold, 600);
+  line-height: var(--lh-h3, 1.3);
+  letter-spacing: var(--ls-h3, -0.015em);
+  color: #fff;
+  margin: 0;
+}
+
+body.light-theme .publish-doc-title,
+[data-theme="light"] .publish-doc-title {
+  color: #111827;
+}
+
+/* --------------------------------------------------------------------------
+   8. Amount / Stat Highlight Card (Inspired by Project Finances Stat Cards)
+   -------------------------------------------------------------------------- */
+.publish-amount-stat {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-radius: 16px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  box-sizing: border-box;
+}
+
+body.light-theme .publish-amount-stat,
+[data-theme="light"] .publish-amount-stat {
+  background: rgba(16, 185, 129, 0.09);
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
+.publish-stat-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.publish-stat-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.publish-stat-label {
+  font-family: var(--font-main);
+  font-size: var(--fs-overline, 0.625rem);
+  font-weight: var(--fw-bold, 700);
+  line-height: var(--lh-overline, 1.2);
+  letter-spacing: var(--ls-overline, 0.06em);
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+body.light-theme .publish-stat-label,
+[data-theme="light"] .publish-stat-label {
+  color: #4b5563;
+}
+
+.publish-stat-value {
+  font-family: var(--font-main);
+  font-size: var(--fs-h2, 1.375rem);
+  font-weight: var(--fw-bold, 700);
+  line-height: var(--lh-h2, 1.25);
+  letter-spacing: var(--ls-h2, -0.02em);
+  color: #10b981;
+}
+
+/* --------------------------------------------------------------------------
+   9. Structured Metadata Tiles
+   -------------------------------------------------------------------------- */
+.publish-doc-meta-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.publish-meta-tile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 9px 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+body.light-theme .publish-meta-tile,
+[data-theme="light"] .publish-meta-tile {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+.publish-meta-label {
+  font-family: var(--font-main);
+  font-size: var(--fs-caption, 0.75rem);
+  font-weight: var(--fw-medium, 500);
+  line-height: var(--lh-caption, 1.4);
+  color: rgba(255, 255, 255, 0.48);
+}
+
+body.light-theme .publish-meta-label,
+[data-theme="light"] .publish-meta-label {
+  color: #6b7280;
+}
+
+.publish-meta-value {
+  font-family: var(--font-main);
+  font-size: var(--fs-body, 0.875rem);
+  font-weight: var(--fw-semibold, 600);
+  line-height: var(--lh-body, 1.5);
+  color: #f3f4f6;
+  text-align: right;
+  word-break: break-word;
+}
+
+body.light-theme .publish-meta-value,
+[data-theme="light"] .publish-meta-value {
+  color: #111827;
+}
+
+/* --------------------------------------------------------------------------
+   10. Version Dropdown Selector (Budgets)
+   -------------------------------------------------------------------------- */
+.publish-version-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.publish-select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.publish-select-control {
+  width: 100%;
+  font-family: var(--font-main);
+  font-size: var(--fs-body, 0.875rem);
+  line-height: var(--lh-body, 1.5);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 12px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+}
+
+body.light-theme .publish-select-control,
+[data-theme="light"] .publish-select-control {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #111827;
+}
+
+.publish-select-control:focus {
+  border-color: var(--accent-color, #00c6e6);
+  box-shadow: 0 0 0 2px rgba(0, 198, 230, 0.2);
+}
+
+/* --------------------------------------------------------------------------
+   11. Delivery Protocol & Gatekeeping Strip
+   -------------------------------------------------------------------------- */
+.publish-channel-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.publish-channel-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.publish-channel-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-caption, 0.75rem);
+  font-weight: var(--fw-medium, 500);
+  line-height: var(--lh-caption, 1.4);
+  padding: 9px 13px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: #9ca3af;
+  box-sizing: border-box;
+}
+
+body.light-theme .publish-channel-item,
+[data-theme="light"] .publish-channel-item {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #6b7280;
+}
+
+.publish-channel-item.is-enabled {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.22);
+}
+
+.publish-channel-item.is-future {
+  color: #6b7280;
+  opacity: 0.8;
+}
+
+body.light-theme .publish-channel-item.is-future,
+[data-theme="light"] .publish-channel-item.is-future {
+  color: #9ca3af;
+}
+
+/* --------------------------------------------------------------------------
+   12. Target Audience & Visibility Matrix (Right Column)
+   -------------------------------------------------------------------------- */
+.publish-audience-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.publish-audience-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.publish-audience-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: background 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+body.light-theme .publish-audience-card,
+[data-theme="light"] .publish-audience-card {
+  background: rgba(0, 0, 0, 0.015);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+.publish-audience-card:hover {
+  background: rgba(255, 255, 255, 0.045);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+body.light-theme .publish-audience-card:hover,
+[data-theme="light"] .publish-audience-card:hover {
+  background: rgba(0, 0, 0, 0.035);
+  border-color: rgba(0, 0, 0, 0.14);
+}
+
+.publish-audience-card.is-checked {
+  background: rgba(0, 198, 230, 0.06);
+  border-color: rgba(0, 198, 230, 0.38);
+  box-shadow: 0 0 16px rgba(0, 198, 230, 0.08);
+}
+
+body.light-theme .publish-audience-card.is-checked,
+[data-theme="light"] .publish-audience-card.is-checked {
+  background: rgba(0, 198, 230, 0.08);
+  border-color: rgba(0, 198, 230, 0.45);
+}
+
+.publish-audience-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  flex: 1;
+}
+
+.publish-audience-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.publish-audience-card.is-checked .publish-audience-icon {
+  background: rgba(0, 198, 230, 0.15);
+  color: var(--accent-color, #00c6e6);
+}
+
+.publish-audience-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.publish-audience-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.publish-audience-name {
+  font-family: var(--font-main);
+  font-size: var(--fs-subhead, 0.9375rem);
+  font-weight: var(--fw-semibold, 600);
+  line-height: var(--lh-subhead, 1.4);
+  color: #fff;
+}
+
+body.light-theme .publish-audience-name,
+[data-theme="light"] .publish-audience-name {
+  color: #111827;
+}
+
+.publish-audience-badge {
+  font-size: var(--fs-overline, 0.625rem);
+  font-weight: var(--fw-bold, 700);
+  line-height: var(--lh-overline, 1.2);
+  letter-spacing: var(--ls-overline, 0.06em);
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #9ca3af;
+  text-transform: uppercase;
+}
+
+body.light-theme .publish-audience-badge,
+[data-theme="light"] .publish-audience-badge {
+  background: rgba(0, 0, 0, 0.06);
+  color: #4b5563;
+}
+
+.publish-audience-desc {
+  font-family: var(--font-main);
+  font-size: var(--fs-caption, 0.75rem);
+  font-weight: var(--fw-regular, 400);
+  line-height: var(--lh-caption, 1.4);
+  color: rgba(255, 255, 255, 0.52);
+}
+
+body.light-theme .publish-audience-desc,
+[data-theme="light"] .publish-audience-desc {
+  color: #6b7280;
+}
+
+.publish-audience-target {
+  font-family: var(--font-main);
+  font-size: var(--fs-caption, 0.75rem);
+  font-weight: var(--fw-medium, 500);
+  color: var(--accent-color, #00c6e6);
+  margin-top: 2px;
+}
+
+.publish-audience-target strong {
+  color: #e5e7eb;
+}
+
+body.light-theme .publish-audience-target strong,
+[data-theme="light"] .publish-audience-target strong {
+  color: #111827;
+}
+
+/* Minimalist Toggle Switch */
+.publish-toggle-switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.14);
+  transition: background 0.25s ease;
+  flex-shrink: 0;
+}
+
+body.light-theme .publish-toggle-switch,
+[data-theme="light"] .publish-toggle-switch {
+  background: rgba(0, 0, 0, 0.16);
+}
+
+.publish-toggle-switch.is-active {
+  background: var(--accent-color, #00c6e6);
+}
+
+.publish-toggle-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.publish-toggle-switch.is-active .publish-toggle-knob {
+  transform: translateX(20px);
+}
+
+/* --------------------------------------------------------------------------
+   13. Transmittal Note / Executive Message
+   -------------------------------------------------------------------------- */
+.publish-note-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.publish-note-input {
+  width: 100%;
+  min-height: 110px;
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  color: #fff;
+  font-family: var(--font-main);
+  font-size: var(--fs-body, 0.875rem);
+  line-height: var(--lh-body, 1.5);
+  resize: vertical;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+body.light-theme .publish-note-input,
+[data-theme="light"] .publish-note-input {
+  background: rgba(0, 0, 0, 0.015);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #111827;
+}
+
+.publish-note-input:focus {
+  border-color: var(--accent-color, #00c6e6);
+  box-shadow: 0 0 0 2px rgba(0, 198, 230, 0.2);
+}
+
+.publish-note-hint {
+  font-family: var(--font-main);
+  font-size: var(--fs-caption, 0.75rem);
+  font-weight: var(--fw-regular, 400);
+  line-height: var(--lh-caption, 1.4);
+  color: rgba(255, 255, 255, 0.42);
+}
+
+body.light-theme .publish-note-hint,
+[data-theme="light"] .publish-note-hint {
+  color: #6b7280;
+}
+
+/* --------------------------------------------------------------------------
+   14. Modal Footer Actions - Spacious Executive Bar
+   -------------------------------------------------------------------------- */
+.publish-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: 4px;
+}
+
+body.light-theme .publish-modal-footer,
+[data-theme="light"] .publish-modal-footer {
+  border-top-color: rgba(0, 0, 0, 0.08);
+}
+
+.publish-footer-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.btn-publish-cancel {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #d1d5db;
+  padding: 10px 22px;
+  border-radius: 10px;
+  font-family: var(--font-main);
+  font-size: var(--fs-body, 0.875rem);
+  font-weight: var(--fw-medium, 500);
+  line-height: var(--lh-body, 1.5);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+body.light-theme .btn-publish-cancel,
+[data-theme="light"] .btn-publish-cancel {
+  border-color: rgba(0, 0, 0, 0.14);
+  color: #4b5563;
+}
+
+.btn-publish-cancel:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+body.light-theme .btn-publish-cancel:hover,
+[data-theme="light"] .btn-publish-cancel:hover {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.22);
+  color: #111827;
+}
+
+.btn-publish-revoke {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #f87171;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-family: var(--font-main);
+  font-size: var(--fs-caption, 0.75rem);
+  font-weight: var(--fw-semibold, 600);
+  line-height: var(--lh-caption, 1.4);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-publish-revoke:hover {
+  background: rgba(239, 68, 68, 0.16);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+}
+
+.btn-publish-submit {
+  background: var(--accent-color, #00c6e6);
+  border: none;
+  color: #0b0f19;
+  padding: 10px 28px;
+  border-radius: 10px;
+  font-family: var(--font-main);
+  font-size: var(--fs-body, 0.875rem);
+  font-weight: var(--fw-semibold, 600);
+  line-height: var(--lh-body, 1.5);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 198, 230, 0.28);
+  transition: opacity 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-publish-submit:hover:not(:disabled) {
+  opacity: 0.94;
+  box-shadow: 0 6px 22px rgba(0, 198, 230, 0.4);
+}
+
+.btn-publish-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------------
+   15. Responsive Adaptations
+   -------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+  .publish-modal-glass {
+    width: 94vw !important;
+    max-width: 94vw !important;
+    border-radius: 24px !important;
+  }
+
+  .publish-modal-header-actions {
+    padding: 20px 24px;
+    padding-right: 80px;
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+  }
+
+  .publish-modal-body {
+    padding: 24px 24px 28px;
+    gap: 20px;
+  }
+
+  .publish-main-grid {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+
+  .publish-modal-footer {
+    padding-top: 18px;
+  }
+}

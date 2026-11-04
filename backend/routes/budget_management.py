@@ -350,7 +350,43 @@ def budget_version_publish(version_id):
         data = request.get_json() or {}
         published_to_crew = data.get("published_to_crew", False)
         published_to_client = data.get("published_to_client", False)
+        transmittal_note = data.get("transmittal_note")
         db.publish_budget_version(version_id, published_to_crew, published_to_client)
+
+        try:
+            from routes.notifications_management import create_notification
+            from services.database import get_connection
+            conn = get_connection()
+            cur = conn.cursor(dictionary=True)
+            cur.execute("SELECT project_id, version_number FROM budget_versions WHERE id = %s", (version_id,))
+            ver_row = cur.fetchone()
+            cur.close()
+            conn.close()
+
+            if ver_row:
+                p_id = ver_row["project_id"]
+                v_num = ver_row["version_number"]
+                proj = db.get_project_by_id(p_id) or {}
+                p_name = proj.get("project_name", "Project")
+                note_suffix = f" Note: {transmittal_note}" if transmittal_note else ""
+
+                if published_to_client:
+                    for c_id in auth.get_project_clients(p_id):
+                        create_notification(
+                            c_id,
+                            f"Budget Version {v_num} has been published to your client portal for {p_name}.{note_suffix}",
+                            "info"
+                        )
+                if published_to_crew:
+                    for cr_id in auth.get_project_crew(p_id):
+                        create_notification(
+                            cr_id,
+                            f"Budget Version {v_num} has been released to production crew for {p_name}.{note_suffix}",
+                            "info"
+                        )
+        except Exception as b_notify_err:
+            print(f"Notice: Failed to dispatch budget publication notifications: {b_notify_err}")
+
         return jsonify({"message": "Budget version publish status updated successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

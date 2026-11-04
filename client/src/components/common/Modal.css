@@ -21,6 +21,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -67,20 +68,23 @@
     opacity: 0;
     transform: translateY(40px) scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
 }
 
-/*master closeBtn*/
+/* Master Close Button - Premium Glass-Surface Integration */
 .modal-close-btn {
   position: absolute;
   top: 25px;
   right: 25px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(12px) saturate(180%) brightness(1.1);
+  -webkit-backdrop-filter: blur(12px) saturate(180%) brightness(1.1);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.9);
   width: 38px;
   height: 38px;
   border-radius: 50%;
@@ -89,14 +93,31 @@
   align-items: center;
   justify-content: center;
   z-index: 10;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.25),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 0 10px 1px rgba(255, 255, 255, 0.05);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
 }
 
 .modal-close-btn:hover {
-  background: rgba(213, 1, 1, 1);
-  color: #feeeee;
-  border-color: rgba(239, 68, 68, 0.8);
-  transform: rotate(90deg);
+  background: rgba(239, 68, 68, 0.22);
+  backdrop-filter: blur(14px) saturate(200%) brightness(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(200%) brightness(1.2);
+  border-color: rgba(239, 68, 68, 0.55);
+  color: #ff6b6b;
+  box-shadow:
+    0 6px 22px rgba(239, 68, 68, 0.35),
+    0 0 12px rgba(239, 68, 68, 0.25),
+    inset 0 1px 2px 0 rgba(255, 255, 255, 0.5),
+    inset 0 0 12px rgba(239, 68, 68, 0.2);
+  transform: rotate(90deg) scale(1.06);
+}
+
+.modal-close-btn:active {
+  transform: rotate(90deg) scale(0.95);
+  background: rgba(239, 68, 68, 0.3);
 }
 
 .modal-close-btn .icon-root {
@@ -104,23 +125,28 @@
 }
 
 .modal-header-section {
-  margin-bottom: 30px;
+  margin-bottom: 24px;
 }
 
 .modal-header-section h2,
 .modal-header-section h3 {
-  font-size: 1.6rem;
+  font-size: var(--fs-h1);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-h1);
+  letter-spacing: var(--ls-h1);
   margin: 0;
-  color: #fff;
+  padding: 0;
   text-transform: uppercase;
-  letter-spacing: -0.3px;
 }
 
 .modal-header-section p {
   color: rgba(255, 255, 255, 0.4);
-  font-size: 0.85rem;
-  font-weight: 500;
-  margin-top: 10px;
+  font-size: var(--fs-subhead);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-subhead);
+  letter-spacing: var(--ls-subhead);
+  margin: 4px 0 0 0;
+  padding: 0;
 }
 
 /* Custom Override for Edit Profile Modal Glass */
@@ -153,15 +179,24 @@ body.light-theme .modal-portal-overlay:has(.global-modal-glass) {
 }
 
 body.light-theme .modal-close-btn {
-  background: rgba(0, 0, 0, 0.05);
-  border-color: rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(12px) saturate(160%) brightness(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(160%) brightness(1.2);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   color: #24292f;
+  box-shadow:
+    0 3px 12px rgba(0, 0, 0, 0.06),
+    inset 0 1px 1px rgba(255, 255, 255, 0.95);
 }
 
 body.light-theme .modal-close-btn:hover {
-  background: #ffebe9;
+  background: rgba(255, 235, 233, 0.92);
   color: #cf222e;
-  border-color: rgba(207, 34, 46, 0.2);
+  border-color: rgba(207, 34, 46, 0.4);
+  box-shadow:
+    0 4px 18px rgba(207, 34, 46, 0.2),
+    inset 0 1px 1px rgba(255, 255, 255, 1);
+  transform: rotate(90deg) scale(1.06);
 }
 
 @media (max-width: 768px) {

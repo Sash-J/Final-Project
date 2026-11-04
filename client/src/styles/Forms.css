@@ -1,30 +1,67 @@
+@import "../components/common/FloatingInput.css";
+
 /* ==========================================================================
-   GLOBAL NEO FORM CONTROLS
-   Standardized styles for labels, inputs, selects, textareas, and cancel buttons
+   GLOBAL NEO FORM CONTROLS & SPACING SYSTEM
+   Standardized layout, typography, and vertical rhythm across all forms
    ========================================================================== */
+
+:root {
+  --neo-form-gap: 26px;
+  --neo-label-gap: 8px;
+  --neo-label-size: 0.8rem;
+  --neo-label-weight: 500;
+  --neo-label-color: rgba(255, 255, 255, 0.7);
+  --neo-control-height: 44px;
+  --neo-control-padding: 12px 16px;
+  --neo-control-radius: 12px;
+  --neo-input-font-size: 0.86rem;
+  --neo-input-bg: rgba(255, 255, 255, 0.03);
+  --neo-input-border: rgba(255, 255, 255, 0.12);
+  --neo-input-hover-bg: rgba(255, 255, 255, 0.05);
+  --neo-input-hover-border: rgba(255, 255, 255, 0.22);
+  --neo-input-text: #ffffff;
+}
+
+body.light-theme {
+  --neo-label-color: #57606a;
+  --neo-input-bg: #f6f8fa;
+  --neo-input-border: #d0d7de;
+  --neo-input-hover-bg: #ffffff;
+  --neo-input-hover-border: #afb8c1;
+  --neo-input-text: #24292f;
+}
+
+.neo-form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
 
 .neo-form-group {
   display: flex;
   flex-direction: column;
-  margin-bottom: 20px;
+  margin-top: 0;
+  margin-bottom: var(--neo-form-gap, 26px);
 }
 
 .neo-label {
   display: block;
   text-align: left;
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.65);
-  font-weight: 400;
-  margin-bottom: 8px;
+  font-size: var(--neo-label-size, 0.8rem);
+  color: var(--neo-label-color, rgba(255, 255, 255, 0.7));
+  font-weight: var(--neo-label-weight, 500);
+  margin-bottom: var(--neo-label-gap, 8px);
+  line-height: 1.25;
 }
 
 .neo-input {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  color: #fff;
-  padding: 12px 16px;
-  font-size: 0.85rem;
+  background: var(--neo-input-bg);
+  border: 1px solid var(--neo-input-border);
+  border-radius: var(--neo-input-radius, 12px);
+  color: var(--neo-input-text);
+  padding: var(--neo-input-padding, 12px 16px);
+  min-height: var(--neo-input-height, 44px);
+  font-size: var(--neo-input-font-size, 0.86rem);
   font-family: inherit;
   outline: none;
   width: 100%;
@@ -37,14 +74,35 @@
 }
 
 .neo-input:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: var(--neo-input-hover-bg);
+  border-color: var(--neo-input-hover-border);
 }
 
 .neo-input:focus {
   background: rgba(255, 255, 255, 0.06);
   border-color: var(--accent-color);
   box-shadow: 0 0 0 3px rgba(0, 198, 230, 0.15);
+}
+
+/* Global Form Grid Rows */
+.neo-form-row,
+.payment-form-row,
+.project-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 10px;
+  margin-bottom: var(--neo-form-gap, 26px);
+}
+
+.neo-form-row > .neo-form-group,
+.neo-form-row > .floating-field,
+.payment-form-row > .neo-form-group,
+.payment-form-row > .floating-field,
+.project-form-row > .neo-form-group,
+.project-form-row > .floating-field {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
 }
 
 /* Remove up/down spin arrows from number inputs */
@@ -74,31 +132,41 @@
 
 .btn-neo-cancel {
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.7);
   border-radius: 12px;
   padding: 12px 24px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   font-size: 0.9rem;
 }
 
 .btn-neo-cancel:hover {
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(239, 68, 68, 0.15);
   color: #ef4444;
-  border-color: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.35);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.22), inset 0 1px 1px rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
 }
 
 /* Light Theme Overrides */
 body.light-theme .neo-label {
-  color: #57606a;
+  color: var(--neo-label-color);
 }
 
 body.light-theme .neo-input {
-  background: #f6f8fa;
-  border-color: #d0d7de;
-  color: #24292f;
+  background: var(--neo-input-bg);
+  border-color: var(--neo-input-border);
+  color: var(--neo-input-text);
+}
+
+body.light-theme .neo-input:hover {
+  background: var(--neo-input-hover-bg);
+  border-color: var(--neo-input-hover-border);
 }
 
 body.light-theme .neo-input:focus {
@@ -108,15 +176,20 @@ body.light-theme .neo-input:focus {
 }
 
 body.light-theme .btn-neo-cancel {
-  background: #f6f8fa;
-  border-color: #d0d7de;
+  background: rgba(246, 248, 250, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   color: #57606a;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.9);
 }
 
 body.light-theme .btn-neo-cancel:hover {
-  background: #ffebe9;
+  background: rgba(255, 235, 233, 0.9);
   color: #cf222e;
-  border-color: rgba(207, 34, 46, 0.2);
+  border-color: rgba(207, 34, 46, 0.3);
+  box-shadow: 0 4px 12px rgba(207, 34, 46, 0.15);
+  transform: translateY(-1px);
 }
 
 .icon-field-wrapper {

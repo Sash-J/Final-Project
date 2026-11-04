@@ -1,7 +1,37 @@
+@import "../../../styles/typography.css";
+
+/* ==========================================================================
+   Client Payments Component Styling
+   Features: Glassmorphism, 8-Level Typography, Strict CSS separation,
+   Zero Hover Jumps, Light & Dark Theme Support.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Root & Card Stability (Disable hover jumps)
+   -------------------------------------------------------------------------- */
 .client-payments-root {
+  font-family: var(--font-main);
   animation: fadeIn 0.4s ease-out;
 }
 
+.client-payments-root .payment-stat-card,
+.client-payments-root .payment-history-panel,
+.client-payments-root .record-payment-panel,
+.client-payments-root .glass-card {
+  transform: none !important;
+  transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease !important;
+}
+
+.client-payments-root .payment-stat-card:hover,
+.client-payments-root .payment-history-panel:hover,
+.client-payments-root .record-payment-panel:hover,
+.client-payments-root .glass-card:hover {
+  transform: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. Stat Overview Grid & Cards
+   -------------------------------------------------------------------------- */
 .payments-overview-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -35,23 +65,35 @@
   color: #3b82f6;
 }
 
+/* Level 7: Caption (Stats Label) */
 .stat-content label {
   display: block;
   text-align: left;
-  font-size: 0.8rem;
+  font-family: var(--font-main);
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-caption);
+  letter-spacing: var(--ls-caption);
   color: rgba(255, 255, 255, 0.4);
   margin-bottom: 5px;
 }
 
+/* Level 3: Heading 2 (Stats Amount) */
 .stat-content h3 {
-  font-size: 1.4rem;
+  font-family: var(--font-main);
+  font-size: var(--fs-h2);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-h2);
+  letter-spacing: var(--ls-h2);
   text-align: left;
   margin: 0;
 }
 
+/* --------------------------------------------------------------------------
+   3. Main Layout Structure
+   -------------------------------------------------------------------------- */
 .payments-main-layout {
   display: grid;
-  margin-top: 0 ;
   grid-template-columns: 1fr 350px;
   gap: 20px;
   align-items: start;
@@ -63,6 +105,9 @@
   }
 }
 
+/* --------------------------------------------------------------------------
+   4. Payment History Panel & Table
+   -------------------------------------------------------------------------- */
 .payment-history-panel {
   padding: 30px;
   min-height: 400px;
@@ -77,9 +122,23 @@
   padding-left: 12px;
 }
 
+/* Level 4: Heading 3 (Panel Title) */
+.panel-header h3 {
+  font-family: var(--font-main);
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-h3);
+  letter-spacing: var(--ls-h3);
+  margin: 0;
+}
+
+/* Level 7: Caption (Counter Badge) */
 .count-badge {
-  font-size: 0.75rem;
-  font-weight: 200;
+  font-family: var(--font-main);
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-caption);
+  letter-spacing: var(--ls-caption);
   background: rgba(255, 255, 255, 0.05);
   padding: 4px 12px;
   border-radius: 20px;
@@ -95,10 +154,14 @@
   border-collapse: collapse;
 }
 
+/* Level 7: Caption (Table Header) */
 .payment-table th {
   text-align: left;
-  font-size: 0.8rem;
-  font-weight: 200;
+  font-family: var(--font-main);
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-caption);
+  letter-spacing: var(--ls-caption);
   color: rgba(255, 255, 255, 0.3);
   padding: 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
@@ -106,22 +169,30 @@
 }
 
 .payment-row {
-  transition: background 0.2s;
+  transition: background 0.2s ease;
 }
 
 .payment-row:hover {
   background: rgba(255, 255, 255, 0.04);
 }
 
+/* Level 6: Body (Table Cell) */
 .payment-row td {
   text-align: left;
   padding: 14px 12px;
-  font-size: 0.95rem;
+  font-family: var(--font-main);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-body);
+  letter-spacing: var(--ls-body);
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
   cursor: default !important;
 }
 
+/* Level 7: Caption (Date Cell) */
 .date-cell {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
   color: rgba(255, 255, 255, 0.6);
   white-space: nowrap;
 }
@@ -131,67 +202,301 @@
   font-style: italic;
 }
 
+/* Level 5: Subhead (Amount Cell) */
 .amount-cell {
-  font-weight: 600;
+  font-family: var(--font-main);
+  font-size: var(--fs-subhead);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-subhead);
+  letter-spacing: var(--ls-subhead);
   color: #10b981;
-  font-family: "Outfit", sans-serif;
 }
 
+.text-right {
+  text-align: right !important;
+}
+
+.text-center {
+  text-align: center !important;
+}
+
+/* Description & Metadata */
+.notes-cell {
+  max-width: 320px;
+}
+
+/* Level 5: Subhead (Description Title) */
+.payment-desc-title {
+  font-family: var(--font-main);
+  font-size: var(--fs-subhead);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-subhead);
+  letter-spacing: var(--ls-subhead);
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.payment-sub-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.status-cell {
+  white-space: nowrap;
+}
+
+.method-cell {
+  white-space: nowrap;
+}
+
+/* Level 7: Caption (Method Pill) */
+.payment-method-pill {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-main);
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-caption);
+  letter-spacing: var(--ls-caption);
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: rgba(59, 130, 246, 0.12);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  white-space: nowrap;
+}
+
+/* Level 7: Caption (Mono Reference Code) */
+.payment-ref-code {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-caption);
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Level 7: Caption (Extra Notes) */
+.payment-extra-notes {
+  font-family: var(--font-main);
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-caption);
+  color: rgba(255, 255, 255, 0.4);
+  font-style: italic;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   5. Signatory Column & Inline Table Dropdown
+   -------------------------------------------------------------------------- */
+.signatory-cell {
+  min-width: 200px;
+  max-width: 240px;
+}
+
+/* Level 7: Caption (Inline Signatory Trigger) */
+.table-signatory-dropdown .glass-dropdown-trigger {
+  padding: 6px 10px;
+  font-family: var(--font-main);
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-caption);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.table-signatory-dropdown .glass-dropdown-trigger:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(0, 198, 230, 0.35);
+}
+
+.signatory-badge-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+/* Level 7: Caption (Signatory Badge Name) */
+.signatory-badge-name {
+  font-family: var(--font-main);
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-caption);
+  color: #fff;
+}
+
+/* Level 8: Overline (Signatory Badge Role) */
+.signatory-badge-role {
+  font-family: var(--font-main);
+  font-size: var(--fs-overline);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-overline);
+  letter-spacing: var(--ls-overline);
+  text-transform: uppercase;
+  color: var(--accent-color, #00c6e6);
+}
+
+/* --------------------------------------------------------------------------
+   6. Receipt Action Column & Button (GlassSurface Integration)
+   -------------------------------------------------------------------------- */
+.action-cell {
+  width: 120px;
+}
+
+.btn-receipt-action {
+  cursor: pointer;
+  margin: 0 auto;
+  border: 1.5px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 30px !important;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.btn-receipt-action:hover {
+  transform: translateY(-1px);
+  border-color: rgba(16, 185, 129, 0.45) !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3), 0 0 12px rgba(16, 185, 129, 0.25);
+}
+
+.btn-receipt-action:active {
+  transform: translateY(0);
+}
+
+.receipt-action-tooltip-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.receipt-action-content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 3px 10px 3px 5px;
+  white-space: nowrap;
+}
+
+.receipt-action-icon {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
+  flex-shrink: 0;
+  background: rgba(16, 185, 129, 0.18);
+  color: #10b981;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+/* Level 7: Caption (Receipt Action Button Text) */
+.receipt-action-text {
+  font-family: var(--font-main);
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-medium);
+  line-height: 1;
+  letter-spacing: var(--ls-caption);
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+}
+
+.btn-receipt-action:hover .receipt-action-icon {
+  background: #10b981;
+  color: #032b1a;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+}
+
+/* --------------------------------------------------------------------------
+   7. Record New Payment Panel & Form Controls
+   -------------------------------------------------------------------------- */
 .record-payment-panel {
   padding: 30px;
   position: sticky;
   top: 20px;
 }
 
+/* Level 4: Heading 3 (Record Panel Title) */
 .record-payment-panel h3 {
-  font-weight: 500;
+  font-family: var(--font-main);
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-h3);
+  letter-spacing: var(--ls-h3);
+  margin: 0 0 6px 0;
 }
 
+/* Level 7: Caption (Record Panel Subtext) */
 .panel-subtext {
-  font-size: 0.85rem;
+  font-family: var(--font-main);
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-caption);
+  letter-spacing: var(--ls-caption);
   color: rgba(255, 255, 255, 0.4);
-  margin-top: -10px;
-  margin-bottom: 25px;
-  font-weight: 200;
+  margin-top: 0;
+  margin-bottom: 40px;
 }
 
-.input-with-icon {
-  position: relative;
+.payment-status-wrap {
+  margin-bottom: 16px;
+}
+
+/* Level 6: Body (Capture Submit Button) */
+.btn-capture-submit {
+  width: 100%;
+  margin-top: 10px;
+  justify-content: center;
   display: flex;
   align-items: center;
+  gap: 8px;
+  font-family: var(--font-main);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-body);
+  letter-spacing: var(--ls-body);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.28) 0%, rgba(5, 150, 105, 0.22) 100%) !important;
+  backdrop-filter: blur(12px) saturate(180%) brightness(1.15);
+  -webkit-backdrop-filter: blur(12px) saturate(180%) brightness(1.15);
+  border: 1px solid rgba(16, 185, 129, 0.45) !important;
+  box-shadow:
+    0 8px 26px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(16, 185, 129, 0.2),
+    inset 0 1px 2px rgba(255, 255, 255, 0.45),
+    inset 0 0 12px rgba(16, 185, 129, 0.2) !important;
 }
 
-.currency-tag {
-  position: absolute;
-  left: 15px;
-  color: rgba(255, 255, 255, 0.3);
-  font-size: 0.9rem;
+.btn-capture-submit:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.38) 0%, rgba(5, 150, 105, 0.3) 100%) !important;
+  border-color: rgba(16, 185, 129, 0.7) !important;
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.35),
+    0 0 25px rgba(16, 185, 129, 0.35),
+    inset 0 1px 2px rgba(255, 255, 255, 0.65),
+    inset 0 0 16px rgba(16, 185, 129, 0.3) !important;
+  transform: translateY(-2px);
 }
 
-.input-with-icon input {
-  padding-left: 45px !important;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
+/* --------------------------------------------------------------------------
+   8. Empty States & Loading Spinners
+   -------------------------------------------------------------------------- */
 .empty-payments {
   display: flex;
   flex-direction: column;
@@ -201,9 +506,14 @@
   color: rgba(255, 255, 255, 0.2);
 }
 
+/* Level 6: Body (Empty State Text) */
 .empty-payments p {
   margin-top: 15px;
-  font-size: 0.9rem;
+  font-family: var(--font-main);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-body);
+  letter-spacing: var(--ls-body);
 }
 
 .payments-loading {
@@ -231,28 +541,16 @@
   }
 }
 
-/* ==========================================
-   Light Theme Styling Overrides for Client Payments Page
-   ========================================== */
+/* --------------------------------------------------------------------------
+   9. Light Theme Styling Overrides (Consolidated & Clashes Removed)
+   -------------------------------------------------------------------------- */
 body.light-theme .client-payments-root {
   color: #24292f;
 }
 
-body.light-theme .payment-stat-card {
-  background: #ffffff;
-  border-color: #d0d7de;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-}
-
-body.light-theme .stat-content label {
-  color: #57606a;
-}
-
-body.light-theme .stat-content h3 {
-  color: #24292f;
-}
-
-body.light-theme .payment-history-panel {
+body.light-theme .payment-stat-card,
+body.light-theme .payment-history-panel,
+body.light-theme .record-payment-panel {
   background: #ffffff;
   border-color: #d0d7de;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
@@ -262,8 +560,22 @@ body.light-theme .panel-header {
   border-bottom-color: #d0d7de;
 }
 
-body.light-theme .panel-header h3 {
+body.light-theme .stat-content h3,
+body.light-theme .panel-header h3,
+body.light-theme .record-payment-panel h3,
+body.light-theme .payment-desc-title,
+body.light-theme .payment-row td,
+body.light-theme .btn-receipt-action .receipt-action-text {
   color: #24292f;
+}
+
+body.light-theme .stat-content label,
+body.light-theme .panel-subtext,
+body.light-theme .payment-table th,
+body.light-theme .date-cell,
+body.light-theme .empty-payments,
+body.light-theme .payments-loading {
+  color: #57606a;
 }
 
 body.light-theme .count-badge {
@@ -272,54 +584,50 @@ body.light-theme .count-badge {
   border: 1px solid #d0d7de;
 }
 
-body.light-theme .currency-tag {
-  color: #57606a;
-}
-
-body.light-theme .payment-table th {
-  color: #57606a;
-  border-bottom-color: #d0d7de;
-}
-
 body.light-theme .payment-row:hover {
   background: #f6f8fa;
 }
 
 body.light-theme .payment-row td {
-  color: #24292f;
   border-bottom-color: #e1e4e8;
-}
-
-body.light-theme .date-cell {
-  color: #57606a;
 }
 
 body.light-theme .no-notes {
   opacity: 0.5;
 }
 
-body.light-theme .record-payment-panel {
-  background: #ffffff;
+body.light-theme .payment-method-pill {
+  background: rgba(9, 105, 218, 0.1);
+  color: #0969da;
+  border-color: rgba(9, 105, 218, 0.2);
+}
+
+body.light-theme .payment-ref-code {
+  color: #57606a;
+  background: #f6f8fa;
   border-color: #d0d7de;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
-body.light-theme .record-payment-panel h3 {
-  color: #24292f;
+body.light-theme .payment-extra-notes {
+  color: #6e7781;
 }
 
-body.light-theme .panel-subtext {
-  color: #57606a;
+body.light-theme .btn-receipt-action {
+  border-color: rgba(0, 0, 0, 0.08) !important;
 }
 
-
-
-body.light-theme .empty-payments {
-  color: #57606a;
+body.light-theme .btn-receipt-action:hover {
+  border-color: rgba(16, 185, 129, 0.35) !important;
 }
 
-body.light-theme .payments-loading {
-  color: #57606a;
+body.light-theme .btn-receipt-action .receipt-action-icon {
+  background: rgba(16, 185, 129, 0.15);
+  color: #059669;
+}
+
+body.light-theme .btn-receipt-action:hover .receipt-action-icon {
+  background: #10b981;
+  color: #ffffff;
 }
 
 body.light-theme .spinner-simple {
@@ -327,3 +635,52 @@ body.light-theme .spinner-simple {
   border-top-color: #0969da;
 }
 
+/* Publication Badges in Payments Ledger Table */
+.payment-meta-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.payment-pub-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-main);
+  font-size: var(--fs-caption, 0.75rem);
+  font-weight: var(--fw-semibold, 600);
+  line-height: var(--lh-caption, 1.4);
+  padding: 3px 9px;
+  border-radius: 12px;
+  letter-spacing: 0.02em;
+  user-select: none;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.payment-pub-badge.is-published {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.payment-pub-badge.is-draft {
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+body.light-theme .payment-pub-badge.is-published,
+[data-theme="light"] .payment-pub-badge.is-published {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+body.light-theme .payment-pub-badge.is-draft,
+[data-theme="light"] .payment-pub-badge.is-draft {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+  border-color: rgba(245, 158, 11, 0.3);
+}

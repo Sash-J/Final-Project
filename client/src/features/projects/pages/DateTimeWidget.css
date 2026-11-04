@@ -81,16 +81,20 @@
 }
 
 .weather-temp {
-  font-size: 2.2rem;
-  font-weight: 500;
+  font-size: var(--fs-display);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-display);
+  letter-spacing: var(--ls-display);
   color: #fff;
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 
 .weather-cond {
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-size: var(--fs-subhead);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-subhead);
+  letter-spacing: var(--ls-subhead);
   color: rgba(255, 255, 255, 0.7);
 }
 
@@ -101,8 +105,10 @@
 }
 
 .datetime-time {
-  font-size: 2.2rem;
-  font-weight: 500;
+  font-size: var(--fs-display);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-display);
+  letter-spacing: var(--ls-display);
   color: #fff;
   font-variant-numeric: tabular-nums;
   text-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
@@ -112,18 +118,20 @@
 }
 
 .datetime-date {
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: var(--fs-body);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-body);
+  letter-spacing: var(--ls-body);
   color: rgba(255, 255, 255, 0.75);
   margin-top: 8px;
   margin-bottom: 4px;
 }
 
 .datetime-timezone {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.5);
-  letter-spacing: 0.5px;
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-caption);
+  letter-spacing: var(--ls-caption);
 }
 
 .sun-cycle-indicator {
@@ -146,9 +154,10 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.75rem;
-  line-height: 1 !important;
-  font-weight: 500;
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-caption);
+  letter-spacing: var(--ls-caption);
   color: rgba(255, 255, 255, 0.6);
 }
 
@@ -186,8 +195,10 @@ body.light-theme .sun-cycle-text {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 0.75rem;
-  font-weight: 500;
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-caption);
+  letter-spacing: var(--ls-caption);
   color: rgba(255, 255, 255, 0.6);
 }
 

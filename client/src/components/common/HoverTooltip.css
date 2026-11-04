@@ -5,35 +5,35 @@
   justify-content: center;
 }
 
-.hover-tooltip-positioner {
+.hover-tooltip-modal {
+  --htt-bg: rgba(4, 9, 18, 0.7);
+  --htt-border: rgba(255, 255, 255, 0.14);
+  --htt-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+  --htt-title-color: #ffffff;
+  --htt-text-color: #ffffff;
+  --htt-desc-color: rgba(255, 255, 255, 0.7);
+  --htt-icon-color: #ffffff;
+
   position: fixed;
-  width: 0;
-  height: 0;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
   z-index: 999999;
   pointer-events: none;
-  animation: fadeInTooltipModal 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.hover-tooltip-positioner.position-flipped {
-  align-items: flex-start;
-}
-
-.hover-tooltip-modal {
+  transform: translate(-50%, -100%);
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 8px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--htt-border);
   border-radius: 8px;
-  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
+  box-shadow: var(--htt-shadow);
   white-space: nowrap;
-  background: rgba(18, 19, 26, 0.75);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  position: relative;
+  background: var(--htt-bg);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  max-width: calc(100vw - 32px);
+}
+
+.hover-tooltip-modal.position-flipped {
+  transform: translate(-50%, 0);
 }
 
 .hover-tooltip-modal.hover-tooltip-rich {
@@ -42,7 +42,7 @@
   padding: 10px 14px;
   border-radius: 12px;
   white-space: normal;
-  max-width: 280px;
+  max-width: min(280px, calc(100vw - 32px));
 }
 
 .hover-tooltip-modal.hover-tooltip-rich .hover-tooltip-icon {
@@ -62,7 +62,7 @@
 .hover-tooltip-title {
   font-size: 0.82rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--htt-title-color);
   letter-spacing: 0.2px;
   line-height: 1.25;
 }
@@ -70,73 +70,47 @@
 .hover-tooltip-desc {
   font-size: 0.72rem;
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--htt-desc-color);
   line-height: 1.35;
 }
 
-.hover-tooltip-modal::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border-width: 5px;
-  border-style: solid;
-  border-color: rgba(18, 19, 26, 0.75) transparent transparent transparent;
-}
-
-.hover-tooltip-positioner.position-flipped .hover-tooltip-modal::after {
-  top: auto;
-  bottom: 100%;
-  border-color: transparent transparent rgba(18, 19, 26, 0.75) transparent;
-}
-
 .hover-tooltip-icon {
-  color: #ffffff;
+  color: var(--htt-icon-color);
   font-size: 0.8rem !important;
 }
 
 .hover-tooltip-text {
   font-size: 0.8rem;
-  color: #fff;
+  color: var(--htt-text-color);
   font-weight: 500;
 }
 
-@keyframes fadeInTooltipModal {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.hover-tooltip-modal::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+}
+
+.hover-tooltip-modal:not(.position-flipped)::after {
+  top: 100%;
+  border-color: var(--htt-bg) transparent transparent transparent;
+}
+
+.hover-tooltip-modal.position-flipped::after {
+  bottom: 100%;
+  border-color: transparent transparent var(--htt-bg) transparent;
 }
 
 /* Light Theme Styling Overrides */
 body.light-theme .hover-tooltip-modal {
-  background: rgba(255, 255, 255, 0.96);
-  border-color: #d0d7de;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
+  --htt-bg: rgba(255, 255, 255, 0.85);
+  --htt-border: rgba(0, 0, 0, 0.12);
+  --htt-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
+  --htt-title-color: #0f172a;
+  --htt-text-color: #24292f;
+  --htt-desc-color: #64748b;
+  --htt-icon-color: #0f172a;
 }
-
-body.light-theme .hover-tooltip-text {
-  color: #24292f;
-}
-
-body.light-theme .hover-tooltip-title {
-  color: #0f172a;
-}
-
-body.light-theme .hover-tooltip-desc {
-  color: #64748b;
-}
-
-body.light-theme .hover-tooltip-modal::after {
-  border-color: rgba(255, 255, 255, 0.96) transparent transparent transparent;
-}
-
-body.light-theme .hover-tooltip-positioner.position-flipped .hover-tooltip-modal::after {
-  border-color: transparent transparent rgba(255, 255, 255, 0.96) transparent;
-}
-

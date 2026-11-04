@@ -3,6 +3,10 @@ from flask_cors import cross_origin
 from routes.notifications_management import notify_all_admins
 import services.db_operations as db
 import services.auth_operations as auth
+try:
+    from services.query_auditor import get_performance_audit_summary
+except ImportError:
+    from backend.services.query_auditor import get_performance_audit_summary
 from core.session_handler import (
     permissions_required,
     login_required,
@@ -18,6 +22,13 @@ project_bp = Blueprint("project_management", __name__)
 @permissions_required("project.view")
 def getTable():
     return jsonify({"tables": db.get_tables()}), 200
+
+
+@project_bp.route("/api/audit/database-performance", methods=["GET"])
+@permissions_required("project.view")
+def database_performance_audit_get():
+    """Returns database query performance metrics and slow query audit history."""
+    return jsonify(get_performance_audit_summary()), 200
 
 
 @project_bp.route("/api/projects", methods=["GET"])
@@ -271,6 +282,16 @@ def get_project_payments(project_id):
         return jsonify({"error": str(e)}), 500
 
 
+@project_bp.route("/api/finance/signatories", methods=["GET"])
+@permissions_required("finance.view")
+def get_finance_signatories():
+    try:
+        signatories = db.get_eligible_signatories()
+        return jsonify(signatories), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @project_bp.route("/api/projects/<int:project_id>/payments", methods=["POST"])
 @permissions_required("finance.edit")
 def post_project_payment(project_id):
@@ -279,12 +300,65 @@ def post_project_payment(project_id):
         amount = data.get("amount")
         payment_date = data.get("payment_date")
         notes = data.get("notes", "")
+        bank_ref = data.get("bank_ref")
+        payment_method = data.get("payment_method", "Bank Transfer")
+        description = data.get("description")
+        signatory_id = data.get("signatory_id")
+        signatory_name = data.get("signatory_name")
+        signatory_role = data.get("signatory_role")
 
         if not amount or not payment_date:
             return jsonify({"error": "Amount and Payment Date are required"}), 400
 
-        new_id = db.insert_payment(project_id, amount, payment_date, notes)
+        new_id = db.insert_payment(
+            project_id, amount, payment_date, notes, bank_ref, payment_method, description,
+            signatory_id=signatory_id, signatory_name=signatory_name, signatory_role=signatory_role
+        )
         return jsonify({"message": "Payment recorded successfully", "id": new_id}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@project_bp.route("/api/projects/<int:project_id>/payments/<int:payment_id>", methods=["PUT"])
+@permissions_required("finance.edit")
+def put_project_payment(project_id, payment_id):
+    try:
+        data = request.get_json()
+        amount = data.get("amount")
+        payment_date = data.get("payment_date")
+        notes = data.get("notes")
+        bank_ref = data.get("bank_ref")
+        payment_method = data.get("payment_method")
+        description = data.get("description")
+        signatory_id = data.get("signatory_id")
+        signatory_name = data.get("signatory_name")
+        signatory_role = data.get("signatory_role")
+
+        published_to_client = data.get("published_to_client")
+        transmittal_note = data.get("transmittal_note")
+
+        db.update_payment(
+            payment_id, project_id, amount, payment_date, notes, bank_ref, payment_method, description,
+            signatory_id=signatory_id, signatory_name=signatory_name, signatory_role=signatory_role,
+            published_to_client=published_to_client
+        )
+
+        if published_to_client is True:
+            try:
+                from routes.notifications_management import create_notification
+                client_ids = auth.get_project_clients(project_id)
+                proj = db.get_project_by_id(project_id) or {}
+                p_name = proj.get("project_name", "Project")
+                note_suffix = f" Note: {transmittal_note}" if transmittal_note else ""
+                for c_id in client_ids:
+                    create_notification(
+                        c_id,
+                        f"Official payment confirmation receipt has been published for {p_name}.{note_suffix}",
+                        "success"
+                    )
+            except Exception as notify_err:
+                print(f"Notice: Failed to dispatch payment publication notifications: {notify_err}")
+        return jsonify({"message": "Payment updated successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

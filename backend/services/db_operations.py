@@ -1441,12 +1441,12 @@ def save_budget_item_breakdowns_batch(
         conn.close()
 
 
-def insert_payment(project_id, amount, payment_date, notes=""):
+def insert_payment(project_id, amount, payment_date, notes="", bank_ref=None, payment_method="Bank Transfer", description=None, signatory_id=None, signatory_name=None, signatory_role=None):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO payments (project_id, amount, payment_date, notes) VALUES (%s, %s, %s, %s)",
-        (project_id, amount, payment_date, notes),
+        "INSERT INTO payments (project_id, amount, payment_date, notes, bank_ref, payment_method, description, signatory_id, signatory_name, signatory_role) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+        (project_id, amount, payment_date, notes, bank_ref, payment_method, description, signatory_id, signatory_name, signatory_role),
     )
     conn.commit()
     new_id = cursor.lastrowid
@@ -1455,11 +1455,64 @@ def insert_payment(project_id, amount, payment_date, notes=""):
     return new_id
 
 
+def update_payment(payment_id, project_id, amount=None, payment_date=None, notes=None, bank_ref=None, payment_method=None, description=None, signatory_id=None, signatory_name=None, signatory_role=None, published_to_client=None):
+    conn = get_connection()
+    cursor = conn.cursor()
+    fields = []
+    params = []
+    if amount is not None:
+        fields.append("amount = %s")
+        params.append(amount)
+    if payment_date is not None:
+        fields.append("payment_date = %s")
+        params.append(payment_date)
+    if notes is not None:
+        fields.append("notes = %s")
+        params.append(notes)
+    if bank_ref is not None:
+        fields.append("bank_ref = %s")
+        params.append(bank_ref)
+    if payment_method is not None:
+        fields.append("payment_method = %s")
+        params.append(payment_method)
+    if description is not None:
+        fields.append("description = %s")
+        params.append(description)
+    if signatory_id is not None:
+        fields.append("signatory_id = %s")
+        params.append(signatory_id)
+    if signatory_name is not None:
+        fields.append("signatory_name = %s")
+        params.append(signatory_name)
+    if signatory_role is not None:
+        fields.append("signatory_role = %s")
+        params.append(signatory_role)
+    if published_to_client is not None:
+        pub_val = 1 if published_to_client else 0
+        fields.append("published_to_client = %s")
+        params.append(pub_val)
+        fields.append("published_at = CASE WHEN %s = 1 THEN CURRENT_TIMESTAMP ELSE NULL END")
+        params.append(pub_val)
+
+    if not fields:
+        cursor.close()
+        conn.close()
+        return True
+
+    params.extend([payment_id, project_id])
+    query = f"UPDATE payments SET {', '.join(fields)} WHERE id = %s AND project_id = %s"
+    cursor.execute(query, tuple(params))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return True
+
+
 def get_payments_for_project(project_id):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute(
-        "SELECT id, amount, payment_date, status, notes FROM payments WHERE project_id = %s ORDER BY payment_date DESC",
+        "SELECT id, amount, payment_date, status, notes, bank_ref, payment_method, description, signatory_id, signatory_name, signatory_role, published_to_client, published_at FROM payments WHERE project_id = %s ORDER BY payment_date DESC, id DESC",
         (project_id,),
     )
     result = cursor.fetchall()
@@ -1468,19 +1521,54 @@ def get_payments_for_project(project_id):
     return result
 
 
+def get_eligible_signatories():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT DISTINCT u.id, u.username, u.full_name, r.name as role_name
+        FROM users u
+        JOIN user_roles ur ON u.id = ur.user_id
+        JOIN roles r ON ur.role_id = r.id
+        WHERE LOWER(r.name) IN ('director', 'manager', 'accountant') AND u.is_approved = 1
+        ORDER BY 
+            CASE 
+                WHEN LOWER(r.name) = 'director' THEN 1
+                WHEN LOWER(r.name) = 'manager' THEN 2
+                WHEN LOWER(r.name) = 'accountant' THEN 3
+                ELSE 4 
+            END,
+            COALESCE(u.full_name, u.username) ASC
+    """)
+    signatories = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return signatories
+
+
 def get_admin_financial_summary():
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
+    # Optimized derived join: aggregates latest versions across all projects in 1 single pass
     query = """
         SELECT 
-            SUM((SELECT COALESCE(SUM(total), 0) FROM project_budget_values pbv 
-                 WHERE pbv.version_id = (SELECT id FROM budget_versions WHERE project_id = p.id ORDER BY version_number DESC LIMIT 1)
-            )) as gross_revenue,
-            SUM((SELECT COALESCE(SUM(gross_revenue), 0) FROM project_budget_values pbv 
-                 WHERE pbv.version_id = (SELECT id FROM budget_versions WHERE project_id = p.id ORDER BY version_number DESC LIMIT 1)
-            )) as gross_profit,
-            (SELECT COALESCE(SUM(amount), 0) FROM payments) as total_received
+            COALESCE(SUM(latest_bv.total), 0) as gross_revenue,
+            COALESCE(SUM(latest_bv.gross_revenue), 0) as gross_profit,
+            COALESCE((SELECT SUM(amount) FROM payments), 0) as total_received
         FROM projects p
+        LEFT JOIN (
+            SELECT 
+                bv.project_id,
+                SUM(pbv.gross_revenue) as gross_revenue,
+                SUM(pbv.total) as total
+            FROM budget_versions bv
+            JOIN (
+                SELECT project_id, MAX(version_number) as max_version
+                FROM budget_versions
+                GROUP BY project_id
+            ) latest ON bv.project_id = latest.project_id AND bv.version_number = latest.max_version
+            JOIN project_budget_values pbv ON pbv.version_id = bv.id
+            GROUP BY bv.project_id
+        ) latest_bv ON latest_bv.project_id = p.id
     """
     cursor.execute(query)
     result = cursor.fetchone()
@@ -1499,20 +1587,36 @@ def get_admin_financial_summary():
 def get_all_projects_financials():
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
+    # Optimized derived join: eliminates N filesorts and dependent subqueries
     query = """
         SELECT 
             p.id, 
             p.project_name, 
             p.code_name,
             p.status,
-            (SELECT COALESCE(SUM(gross_revenue), 0) FROM project_budget_values pbv 
-             WHERE pbv.version_id = (SELECT id FROM budget_versions WHERE project_id = p.id ORDER BY version_number DESC LIMIT 1)
-            ) as latest_gross_total,
-            (SELECT COALESCE(SUM(total), 0) FROM project_budget_values pbv 
-             WHERE pbv.version_id = (SELECT id FROM budget_versions WHERE project_id = p.id ORDER BY version_number DESC LIMIT 1)
-            ) as latest_budget_total,
-            (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE project_id = p.id) as total_paid
+            COALESCE(latest_bv.gross_revenue, 0) as latest_gross_total,
+            COALESCE(latest_bv.total, 0) as latest_budget_total,
+            COALESCE(pay.total_paid, 0) as total_paid
         FROM projects p
+        LEFT JOIN (
+            SELECT 
+                bv.project_id,
+                SUM(pbv.gross_revenue) as gross_revenue,
+                SUM(pbv.total) as total
+            FROM budget_versions bv
+            JOIN (
+                SELECT project_id, MAX(version_number) as max_version
+                FROM budget_versions
+                GROUP BY project_id
+            ) latest ON bv.project_id = latest.project_id AND bv.version_number = latest.max_version
+            JOIN project_budget_values pbv ON pbv.version_id = bv.id
+            GROUP BY bv.project_id
+        ) latest_bv ON latest_bv.project_id = p.id
+        LEFT JOIN (
+            SELECT project_id, SUM(amount) as total_paid
+            FROM payments
+            GROUP BY project_id
+        ) pay ON pay.project_id = p.id
         ORDER BY p.id DESC
     """
     cursor.execute(query)
@@ -1731,6 +1835,18 @@ def run_budget_migration():
             )
         """
         )
+
+        print("Migration: Checking for published_to_client column in payments...")
+        cursor.execute("SHOW COLUMNS FROM payments LIKE 'published_to_client'")
+        if not cursor.fetchone():
+            print("Migration: Adding published_to_client column to payments...")
+            cursor.execute("ALTER TABLE payments ADD COLUMN published_to_client TINYINT(1) DEFAULT 0")
+
+        print("Migration: Checking for published_at column in payments...")
+        cursor.execute("SHOW COLUMNS FROM payments LIKE 'published_at'")
+        if not cursor.fetchone():
+            print("Migration: Adding published_at column to payments...")
+            cursor.execute("ALTER TABLE payments ADD COLUMN published_at TIMESTAMP NULL DEFAULT NULL")
 
         print("Migration: Creating budget_item_crew_assignments table...")
         cursor.execute(
@@ -2272,3 +2388,54 @@ def get_budget_crew_init(project_id):
         "project_crew": project_crew,
         "budget_versions": version_rows
     }
+
+
+def run_indexing_migration():
+    """
+    Idempotently verifies and creates performance indexes across all critical tables.
+    Eliminates full table scans, filesorts, and un-indexed foreign key queries.
+    """
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("""
+            SELECT TABLE_NAME, INDEX_NAME 
+            FROM INFORMATION_SCHEMA.STATISTICS 
+            WHERE TABLE_SCHEMA = 'visiondi_production'
+        """)
+        existing = {(r['TABLE_NAME'], r['INDEX_NAME']) for r in cursor.fetchall()}
+
+        indexes_to_ensure = [
+            ('budget_versions', 'idx_bv_project_version', 'CREATE INDEX idx_bv_project_version ON budget_versions (project_id, version_number DESC)'),
+            ('payments', 'idx_payments_project_date', 'CREATE INDEX idx_payments_project_date ON payments (project_id, payment_date DESC, id DESC)'),
+            ('notifications', 'idx_notifications_user_unread', 'CREATE INDEX idx_notifications_user_unread ON notifications (user_id, is_read, created_at DESC)'),
+            ('projects', 'idx_projects_status', 'CREATE INDEX idx_projects_status ON projects (status)'),
+            ('projects', 'idx_projects_color', 'CREATE INDEX idx_projects_color ON projects (color)'),
+            ('projects', 'idx_projects_code_name', 'CREATE INDEX idx_projects_code_name ON projects (code_name)'),
+            ('users', 'idx_users_email', 'CREATE INDEX idx_users_email ON users (email)'),
+            ('users', 'idx_users_role', 'CREATE INDEX idx_users_role ON users (role)'),
+            ('users', 'idx_users_is_approved', 'CREATE INDEX idx_users_is_approved ON users (is_approved)'),
+            ('schedule_tasks', 'idx_tasks_project_date', 'CREATE INDEX idx_tasks_project_date ON schedule_tasks (project_id, task_date)'),
+            ('project_milestones', 'idx_milestones_project_target', 'CREATE INDEX idx_milestones_project_target ON project_milestones (project_id, target_date)'),
+            ('project_map_route_locations', 'idx_route_locations_seq', 'CREATE INDEX idx_route_locations_seq ON project_map_route_locations (route_id, sequence)'),
+            ('user_moderation_logs', 'idx_mod_logs_target', 'CREATE INDEX idx_mod_logs_target ON user_moderation_logs (target_user_id)'),
+            ('user_moderation_logs', 'idx_mod_logs_created', 'CREATE INDEX idx_mod_logs_created ON user_moderation_logs (created_at)'),
+            ('project_equipment_items', 'idx_eq_items_dept_created', 'CREATE INDEX idx_eq_items_dept_created ON project_equipment_items (department_id, created_at)'),
+        ]
+
+        created_count = 0
+        for tbl, idx_name, ddl in indexes_to_ensure:
+            if (tbl, idx_name) not in existing:
+                try:
+                    cursor.execute(ddl)
+                    conn.commit()
+                    created_count += 1
+                except Exception as err:
+                    print(f"[INDEX MIGRATION ERROR] {idx_name}: {err}")
+        if created_count > 0:
+            print(f"DEBUG: Database indexing migration created {created_count} missing performance indexes.")
+    except Exception as e:
+        print("[INDEX MIGRATION EXCEPTION]", e)
+    finally:
+        cursor.close()
+        conn.close()

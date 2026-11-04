@@ -1,0 +1,575 @@
+/* Budget Version Trajectory Line Graph - Category Comparisons */
+.budget-comparison-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 22px 24px;
+  box-sizing: border-box;
+  overflow: visible;
+  /* Strictly static - no hover transform or lag */
+  transform: none !important;
+  transition: none;
+}
+
+/* Header & Controls */
+.comparison-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding-bottom: 14px;
+}
+
+.comparison-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.comparison-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+}
+
+.comparison-title-row .app-icon {
+  color: var(--accent-color, #00c6e6);
+}
+
+.comparison-main-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.01em;
+  color: #fff;
+}
+
+.comparison-subtitle {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.45);
+  margin: 0;
+}
+
+.comparison-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+/* Dropdown cluster when > 2 versions */
+.version-dropdown-cluster {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 30px;
+  padding: 3px 10px;
+}
+
+.version-select-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.version-select-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot-orange {
+  background: #f97316;
+  box-shadow: 0 0 8px rgba(249, 115, 22, 0.6);
+}
+
+.dot-cyan {
+  background: #00c6e6;
+  box-shadow: 0 0 8px rgba(0, 198, 230, 0.6);
+}
+
+.version-select-label {
+  font-size: 0.74rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 600;
+}
+
+.version-compare-select {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+  font-family: var(--font-mono, monospace);
+}
+
+.version-compare-select:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.version-compare-select:focus {
+  border-color: var(--accent-color, #00c6e6);
+  box-shadow: 0 0 8px rgba(0, 198, 230, 0.3);
+}
+
+.version-compare-select option {
+  background: #181c24;
+  color: #fff;
+}
+
+.version-compare-vs {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.35);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* Legend Badges - Static display (non-button) */
+.comparison-legend-cluster {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.legend-badge {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.78rem;
+}
+
+.legend-badge-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-badge-name {
+  color: rgba(255, 255, 255, 0.65);
+  font-weight: 600;
+  font-family: var(--font-mono, monospace);
+}
+
+.legend-badge-val {
+  color: #fff;
+  font-weight: 700;
+}
+
+.badge-ver-a {
+  border-color: rgba(249, 115, 22, 0.25);
+}
+
+.badge-ver-b {
+  border-color: rgba(0, 198, 230, 0.25);
+}
+
+/* Chart Canvas Wrapper - Lightweight GPU rendering */
+.comparison-chart-wrapper {
+  position: relative;
+  width: 100%;
+  height: 240px;
+  user-select: none;
+  overflow: visible;
+}
+
+.comparison-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  display: block;
+  cursor: crosshair;
+}
+
+/* Empty State */
+.comparison-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 100%;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.85rem;
+}
+
+/* Gridlines & Baseline */
+.chart-grid-line {
+  stroke: rgba(255, 255, 255, 0.05);
+  stroke-dasharray: 4 4;
+  stroke-width: 1;
+}
+
+.chart-grid-label {
+  fill: rgba(255, 255, 255, 0.35);
+  font-size: 10px;
+  font-family: var(--font-mono, monospace);
+  text-anchor: end;
+  font-weight: 500;
+}
+
+.chart-baseline {
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 1.5;
+}
+
+/* Area Fills */
+.chart-area-fill {
+  pointer-events: none;
+}
+
+/* Spline Lines - Hardware-accelerated CSS drop-shadow instead of heavy SVG filters */
+.chart-line-stroke {
+  fill: none;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.stroke-ver-a {
+  stroke: #f97316;
+  filter: drop-shadow(0 4px 6px rgba(249, 115, 22, 0.35));
+}
+
+.stroke-ver-b {
+  stroke: #00c6e6;
+  filter: drop-shadow(0 4px 6px rgba(0, 198, 230, 0.35));
+}
+
+/* Data Points */
+.chart-point-circle {
+  stroke: #fff;
+  stroke-width: 2;
+  pointer-events: none;
+  transition: r 0.15s ease;
+}
+
+.point-ver-a {
+  fill: #f97316;
+}
+
+.point-ver-b {
+  fill: #00c6e6;
+}
+
+.chart-point-pulse {
+  fill: none;
+  stroke-width: 2;
+  animation: pulsePoint 1.5s infinite;
+  pointer-events: none;
+}
+
+.pulse-ver-a {
+  stroke: rgba(249, 115, 22, 0.5);
+}
+
+.pulse-ver-b {
+  stroke: rgba(0, 198, 230, 0.5);
+}
+
+@keyframes pulsePoint {
+  0% {
+    r: 7px;
+    opacity: 0.8;
+  }
+  100% {
+    r: 14px;
+    opacity: 0;
+  }
+}
+
+/* Crosshair */
+.chart-crosshair-line {
+  stroke: rgba(255, 255, 255, 0.22);
+  stroke-dasharray: 4 4;
+  stroke-width: 1.5;
+  pointer-events: none;
+}
+
+/* X-Axis Labels */
+.chart-xaxis-label {
+  fill: rgba(255, 255, 255, 0.45);
+  font-size: 11px;
+  font-weight: 500;
+  pointer-events: none;
+  transition: fill 0.15s ease;
+}
+
+.chart-xaxis-label.active {
+  fill: #fff;
+  font-weight: 700;
+}
+
+/* Floating Glass Tooltip - Fast rendering without blur thrashing */
+.chart-tooltip-glass {
+  position: absolute;
+  background: rgba(18, 22, 32, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  padding: 10px 14px;
+  min-width: 175px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  z-index: 50;
+  will-change: left, top;
+}
+
+.tooltip-align-center {
+  transform: translate(-50%, -105%);
+}
+
+.tooltip-align-right {
+  transform: translate(-94%, -105%);
+}
+
+.tooltip-align-left {
+  transform: translate(-6%, -105%);
+}
+
+.tooltip-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 6px;
+}
+
+.tooltip-cat-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.tooltip-phase-chip {
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 1px 6px;
+  border-radius: 8px;
+}
+
+.tooltip-rows-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+}
+
+.tooltip-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tooltip-label {
+  color: rgba(255, 255, 255, 0.5);
+  font-family: var(--font-mono, monospace);
+  font-weight: 500;
+}
+
+.tooltip-val {
+  color: #fff;
+  font-weight: 700;
+  margin-left: auto;
+}
+
+.tooltip-diff-row {
+  margin-top: 6px;
+  padding-top: 5px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.tooltip-diff-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 12px;
+}
+
+.tooltip-diff-chip.positive {
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.tooltip-diff-chip.negative {
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Light Theme Support */
+body.light-theme .budget-comparison-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+body.light-theme .comparison-card-header {
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+}
+
+body.light-theme .comparison-title-row {
+  color: #111827;
+}
+
+body.light-theme .comparison-main-title {
+  color: #111827;
+}
+
+body.light-theme .comparison-subtitle {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+body.light-theme .version-dropdown-cluster {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .version-select-label {
+  color: rgba(0, 0, 0, 0.55);
+}
+
+body.light-theme .version-compare-select {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.15);
+  color: #111827;
+}
+
+body.light-theme .version-compare-select option {
+  background: #fff;
+  color: #111827;
+}
+
+body.light-theme .legend-badge {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .legend-badge-name {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+body.light-theme .legend-badge-val {
+  color: #111827;
+}
+
+body.light-theme .chart-grid-line {
+  stroke: rgba(0, 0, 0, 0.06);
+}
+
+body.light-theme .chart-grid-label {
+  fill: rgba(0, 0, 0, 0.45);
+}
+
+body.light-theme .chart-baseline {
+  stroke: rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .chart-xaxis-label {
+  fill: rgba(0, 0, 0, 0.55);
+}
+
+body.light-theme .chart-xaxis-label.active {
+  fill: #111827;
+}
+
+body.light-theme .chart-crosshair-line {
+  stroke: rgba(0, 0, 0, 0.25);
+}
+
+body.light-theme .chart-tooltip-glass {
+  background: rgba(255, 255, 255, 0.96);
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+body.light-theme .tooltip-header {
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .tooltip-cat-name {
+  color: #111827;
+}
+
+body.light-theme .tooltip-phase-chip {
+  color: rgba(0, 0, 0, 0.55);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+body.light-theme .tooltip-label {
+  color: rgba(0, 0, 0, 0.55);
+}
+
+body.light-theme .tooltip-val {
+  color: #111827;
+}
+
+body.light-theme .tooltip-diff-row {
+  border-top-color: rgba(0, 0, 0, 0.06);
+}
+
+body.light-theme .budget-comparison-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .comparison-title-row {
+  color: #111827;
+}
+
+body.light-theme .comparison-title-row .app-icon {
+  color: #0969da;
+}
+
+body.light-theme .dot-cyan {
+  background: #0969da;
+  box-shadow: 0 0 8px rgba(9, 105, 218, 0.5);
+}
+
+body.light-theme .stroke-ver-b {
+  stroke: #0969da;
+  filter: drop-shadow(0 4px 6px rgba(9, 105, 218, 0.25));
+}
+
+body.light-theme .point-ver-b {
+  fill: #0969da;
+}
+
+body.light-theme .pulse-ver-b {
+  stroke: rgba(9, 105, 218, 0.5);
+}

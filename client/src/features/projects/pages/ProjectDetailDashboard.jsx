@@ -91,6 +91,9 @@ const ProjectDetailDashboard = () => {
     milestonesCache,
   } = useProjects();
   const { user, hasPermission, hasRole } = useAuth();
+  const isClient = hasRole("client");
+  const canEditBudget = hasPermission("budget.edit") && !isClient;
+  const canViewClientBudget = isClient && hasPermission("budget.view");
   const currentRole = (user?.roles && user?.roles[0]) || user?.role || "admin";
 
   const [activeTab] = useState("overview");
@@ -178,6 +181,33 @@ const ProjectDetailDashboard = () => {
       maxLevel,
     };
   }, [project?.crew_hierarchy_data]);
+
+  const financialStats = useMemo(() => {
+    const totalBudget = Number(project?.latest_budget_total) || 0;
+    const totalPaid = Number(project?.total_paid) || 0;
+    const balance =
+      typeof project?.balance === "number"
+        ? project.balance
+        : Math.max(0, totalBudget - totalPaid);
+    const paidPercentage =
+      totalBudget > 0
+        ? Math.min(100, Math.round((totalPaid / totalBudget) * 100))
+        : 0;
+
+    return {
+      totalBudget,
+      totalPaid,
+      balance,
+      paidPercentage,
+      versionCount: project?.version_count || 1,
+    };
+  }, [
+    project?.latest_budget_total,
+    project?.total_paid,
+    project?.balance,
+    project?.version_count,
+  ]);
+
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "TBD";
@@ -322,13 +352,21 @@ const ProjectDetailDashboard = () => {
                 <span className="warning-text">{remainingCount}</span>
               </div>
               <div
-                className={`hero-stat-box ${hasPermission("budget.view") ? "clickable" : ""}`}
+                className={`hero-stat-box ${canEditBudget || canViewClientBudget ? "clickable" : ""}`}
                 onClick={() => {
-                  if (hasPermission("budget.view")) {
+                  if (canEditBudget) {
+                    navigate(`/admin-budget?projectId=${projectId}`);
+                  } else if (canViewClientBudget) {
                     navigate(`/budget?projectId=${projectId}`);
                   }
                 }}
-                title={hasPermission("budget.view") ? "View project budget" : undefined}
+                title={
+                  canEditBudget
+                    ? "Open full interactive budget view"
+                    : canViewClientBudget
+                      ? "View project budget"
+                      : undefined
+                }
               >
                 <label>Budget</label>
                 <span>{formatCurrency(project.latest_budget_total)}</span>
@@ -387,8 +425,8 @@ const ProjectDetailDashboard = () => {
                   <div className="summary-lead-container">
                     <GlassSurface
                       className="summary-avatar"
-                      width="44px"
-                      height="44px"
+                      width="40px"
+                      height="40px"
                       borderRadius="50%"
                       blur={6}
                       opacity={0}
@@ -412,12 +450,18 @@ const ProjectDetailDashboard = () => {
                 }
                 bottomContent={
                   <div className="summary-bento-middle">
-                    <h3 className="summary-bento-title">Crew Hierarchy</h3>
-                    <span className="summary-bento-subtitle">
-                      Nodes: <strong>{crewStats.deptCount}</strong>{" "}
-                      <span style={{ margin: "0 10px" }}></span> Levels:{" "}
-                      <strong>{crewStats.maxLevel}</strong>
-                    </span>
+                    <div className="summary-bento-header-group">
+                      <h3 className="summary-bento-title">Crew Hierarchy</h3>
+                      <div className="summary-bento-subtitle">
+                        <span className="summary-stat-item">
+                          Nodes: <strong>{crewStats.deptCount}</strong>
+                        </span>
+                        <span className="bento-stat-spacer"></span>
+                        <span className="summary-stat-item">
+                          Levels: <strong>{crewStats.maxLevel}</strong>
+                        </span>
+                      </div>
+                    </div>
                     <div className="summary-progress-container">
                       <div className="summary-progress-bar">
                         <div
@@ -442,15 +486,16 @@ const ProjectDetailDashboard = () => {
                       blur={10}
                       opacity={0.4}
                       backgroundOpacity={0.2}
+                      title={`${crewStats.memberCount} Crew Members`}
                     >
                       <div className="summary-selector-icon">
                         <Icon name="groups" modifiers="sm" />
                       </div>
-                      <span>{crewStats.memberCount} Crew</span>
+                      <span className="summary-selector-text">{crewStats.memberCount} Crew</span>
                       <Icon
                         name="expand_more"
                         modifiers="sm"
-                        style={{ marginLeft: "5px" }}
+                        className="summary-selector-caret"
                       />
                     </GlassSurface>
                   </div>
@@ -463,39 +508,11 @@ const ProjectDetailDashboard = () => {
                   setProductionViewMode("equipment");
                   setShowProductionModal(true);
                 }}
-                style={{ position: "relative", overflow: "hidden" }}
               >
-                <div
-                  className="equipment-grainient-wrapper"
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: "100%",
-                    zIndex: 0,
-                    pointerEvents: "none",
-                    borderRadius: "inherit",
-                  }}
-                >
-                  <Grainient
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      borderRadius: "inherit",
-                    }}
-                  />
+                <div className="equipment-grainient-wrapper">
+                  <Grainient className="equipment-grainient-canvas" />
                 </div>
-                <div
-                  style={{
-                    position: "relative",
-                    zIndex: 1,
-                    width: "100%",
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
+                <div className="equipment-bento-inner">
                   <div className="summary-bento-top">
                     {(() => {
                       let heroImg = null;
@@ -576,7 +593,7 @@ const ProjectDetailDashboard = () => {
                             <Icon
                               name="expand_more"
                               modifiers="sm"
-                              style={{ marginLeft: "5px" }}
+                              className="summary-selector-caret"
                             />
                           </GlassSurface>
                         </>
@@ -606,32 +623,91 @@ const ProjectDetailDashboard = () => {
                 </div>
               </div>
 
-              <div
-                className="bento-item sm-square glass-card clickable-bento-card"
+              <CompositeBentoCard
+                className="finance-bento-card"
                 onClick={() => setShowFinanceModal(true)}
-              >
-                <h3>Financial Snapshot</h3>
-                <div className="mini-chart">
-                  <div className="chart-bar-wrap">
-                    <div
-                      className="chart-bar bg-received"
-                      style={{
-                        height: `${(project.total_paid / project.latest_budget_total) * 100 || 0}%`,
-                      }}
-                    />
+                pillContent={
+                  <div className="summary-lead-container">
+                    <GlassSurface
+                      className="summary-avatar finance-avatar"
+                      width="40px"
+                      height="40px"
+                      borderRadius="50%"
+                      blur={6}
+                      opacity={0}
+                      backgroundOpacity={0}
+                    >
+                      <Icon name="payments" modifiers="sm" />
+                    </GlassSurface>
+                    <div className="summary-lead-text">
+                      <span className="summary-lead-name">
+                        {formatCurrency(financialStats.totalBudget)}
+                      </span>
+                      <span className="summary-lead-role">Total Budget</span>
+                    </div>
                   </div>
-                  <div className="chart-info">
-                    <p>
-                      Paid:{" "}
-                      {Math.round(
-                        (project.total_paid / project.latest_budget_total) *
-                          100,
-                      ) || 0}
-                      %
-                    </p>
+                }
+                bottomContent={
+                  <div className="summary-bento-middle">
+                    <div className="summary-bento-header-group">
+                      <h3 className="summary-bento-title">Financial Snapshot</h3>
+                      <div className="summary-bento-subtitle">
+                        <span className="summary-stat-item">
+                          Paid:{" "}
+                          <strong className="finance-stat-highlight">
+                            {formatCurrency(financialStats.totalPaid, true, 0)}
+                          </strong>
+                        </span>
+                        <span className="bento-stat-spacer"></span>
+                        <span className="summary-stat-item">
+                          Balance:{" "}
+                          <strong>{formatCurrency(financialStats.balance, true, 0)}</strong>
+                        </span>
+                      </div>
+                    </div>
+                    <div className="summary-progress-container">
+                      <div className="summary-progress-bar">
+                        <div
+                          className="summary-progress-fill finance-progress-fill"
+                          style={{
+                            width: `${financialStats.paidPercentage}%`,
+                          }}
+                        ></div>
+                      </div>
+                      <div className="summary-progress-labels">
+                        <span>Disbursement Progress</span>
+                        <span className="summary-progress-value">
+                          {financialStats.paidPercentage}%
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                }
+                rightContent={
+                  <div className="summary-bento-top-right">
+                    <GlassSurface
+                      className="summary-selector"
+                      width="max-content"
+                      height="auto"
+                      borderRadius="30px"
+                      blur={10}
+                      opacity={0.4}
+                      backgroundOpacity={0.2}
+                      title={`Version ${financialStats.versionCount} Budget`}
+                    >
+                      <div className="summary-selector-icon">
+                        <Icon name="receipt_long" modifiers="sm" />
+                      </div>
+                      <span className="summary-selector-text">v{financialStats.versionCount} Budget</span>
+                      <Icon
+                        name="expand_more"
+                        modifiers="sm"
+                        className="summary-selector-caret"
+                      />
+                    </GlassSurface>
+                  </div>
+                }
+              />
             </div>
           )}
 

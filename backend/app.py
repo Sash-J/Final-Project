@@ -1,6 +1,6 @@
 import sys
 import os
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, g
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 
@@ -28,6 +28,17 @@ CORS(app, supports_credentials=True)
 
 @app.after_request
 def add_cors_headers(response):
+    # Attach database query audit diagnostic headers
+    try:
+        db_count = getattr(g, "db_query_count", 0)
+        db_time = getattr(g, "db_total_time_ms", 0.0)
+        if db_count > 0:
+            response.headers["X-DB-Queries"] = str(db_count)
+            response.headers["X-DB-Time-MS"] = f"{db_time:.1f}"
+            if db_count >= 10:
+                print(f"[DB AUDIT ALERT] Potential N+1 query loop: {request.method} {request.path} executed {db_count} DB queries in {db_time:.1f}ms")
+    except Exception:
+        pass
 
     origin = request.headers.get("Origin")
     if origin:
@@ -95,8 +106,10 @@ if __name__ == "__main__":
             create_role_permissions,
             create_user_roles,
             sync_verified_levels_migration,
+            run_indexing_migration,
         )
 
+        run_indexing_migration()
         run_budget_migration()
         run_project_locations_migration()
         create_role_permissions()

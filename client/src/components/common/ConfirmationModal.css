@@ -16,14 +16,14 @@
   }
 }
 
-.modal-header {
+.confirmation-modal-glass .modal-header {
   display: flex;
   align-items: center;
   gap: 15px;
   margin-bottom: 20px;
 }
 
-.modal-header h3 {
+.confirmation-modal-glass .modal-header h3 {
   margin: 0;
   font-size: 1.4rem;
   font-weight: 700;
@@ -34,7 +34,7 @@
   border: none;
 }
 
-.modal-body p {
+.confirmation-modal-glass .modal-body p {
   color: rgba(255, 255, 255, 0.7);
   line-height: 1.5;
   margin: 0;
@@ -42,70 +42,50 @@
   font-weight: 400;
 }
 
-.modal-footer {
+.confirmation-modal-glass .modal-footer {
   display: flex;
   gap: 12px;
   margin-top: 30px;
 }
 
-.btn-modal-cancel,
-.btn-modal-confirm {
+.confirmation-modal-glass .btn-modal-cancel,
+.confirmation-modal-glass .btn-modal-confirm {
   flex: 1;
   padding: 12px 20px !important;
   font-size: 0.92rem !important;
 }
 
-.variant-danger {
+.confirmation-modal-glass .variant-danger {
   background: rgba(239, 68, 68, 0.15) !important;
   border: 1px solid rgba(239, 68, 68, 0.4) !important;
   color: #f87171 !important;
 }
 
-.variant-danger:hover {
+.confirmation-modal-glass .variant-danger:hover {
   background: rgba(239, 68, 68, 0.3) !important;
   border-color: rgba(239, 68, 68, 0.7) !important;
   color: #ffffff !important;
 }
 
-.variant-accent {
+.confirmation-modal-glass .variant-accent {
   background: rgba(0, 198, 230, 0.12) !important;
   border: 1px solid rgba(0, 198, 230, 0.35) !important;
   color: #00f0ff !important;
 }
 
-.variant-accent:hover {
+.confirmation-modal-glass .variant-accent:hover {
   background: rgba(0, 198, 230, 0.25) !important;
   border-color: rgba(0, 198, 230, 0.6) !important;
   color: #ffffff !important;
 }
 
-.variant-glass {
+.confirmation-modal-glass .variant-glass {
   background: rgba(255, 255, 255, 0.05) !important;
   color: #fff !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
-.variant-glass:hover {
+.confirmation-modal-glass .variant-glass:hover {
   background: rgba(255, 255, 255, 0.1) !important;
   border-color: rgba(255, 255, 255, 0.25) !important;
-}
-
-@keyframes modalSlideUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes modalFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
 }

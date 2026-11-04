@@ -295,9 +295,9 @@ const UserManagement = () => {
                   <div className="summary-lead-container">
                     <GlassSurface
                       className="summary-avatar"
-                      width="44px"
-                      height="44px"
-                      borderRadius={22}
+                      width="40px"
+                      height="40px"
+                      borderRadius="50%"
                       blur={6}
                       opacity={0}
                       backgroundOpacity={0}

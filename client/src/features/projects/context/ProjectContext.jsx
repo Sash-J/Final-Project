@@ -154,6 +154,24 @@ export const ProjectProvider = ({ children }) => {
     [getProjectPayments, getProjectDetails],
   );
 
+  const updatePayment = useCallback(
+    async (projectId, paymentId, paymentData) => {
+      try {
+        const data = await projectService.updateProjectPayment(projectId, paymentId, paymentData);
+
+        if (data && !data.error) {
+          await getProjectPayments(projectId, true);
+          await getProjectDetails(projectId, true);
+          return { success: true };
+        }
+        return { success: false, error: data?.error || "Failed to update payment" };
+      } catch (err) {
+        return { success: false, error: err.message };
+      }
+    },
+    [getProjectPayments, getProjectDetails],
+  );
+
   const getBudgetMetadata = useCallback(
     async (force = false) => {
       if (hierarchyCache && phasesCache && deptsCache && catsCache && !force) {
@@ -340,6 +358,7 @@ export const ProjectProvider = ({ children }) => {
         paymentsLoading,
         getProjectPayments,
         recordPayment,
+        updatePayment,
 
         budgetCache,
         budgetLoading,

@@ -38,8 +38,10 @@
   display: flex;
   align-content: center;
   gap: 8px;
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-size: var(--fs-body);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-body);
+  letter-spacing: var(--ls-body);
   cursor: pointer;
   transition:
     transform 0.3s ease,
@@ -74,9 +76,11 @@
 }
 
 .project-title-stack h1 {
-  font-size: 2.5rem;
+  font-size: var(--fs-display);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-display);
+  letter-spacing: var(--ls-display);
   margin: 0;
-  letter-spacing: -1px;
   text-align: left;
 }
 
@@ -91,16 +95,20 @@
   display: flex;
   text-align: normal;
   color: var(--accent-color);
-  font-family: monospace;
-  font-weight: 500;
-  font-size: 0.8rem;
-  letter-spacing: 10px;
+  font-family: var(--font-mono);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  letter-spacing: 6px;
   padding-bottom: 5px;
 }
 
 .project-location-text {
   color: rgba(255, 255, 255, 0.722);
-  font-size: 0.85rem;
+  font-size: var(--fs-subhead);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-subhead);
+  letter-spacing: var(--ls-subhead);
   display: flex;
   align-items: center;
   margin-top: 3px;
@@ -120,8 +128,10 @@
   gap: 8px;
   padding: 10px 10px;
   border-radius: 12px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-caption);
+  letter-spacing: var(--ls-caption);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: none;
@@ -206,15 +216,20 @@
 }
 
 .hero-stat-box label {
-  font-size: 0.8rem;
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-caption);
+  letter-spacing: var(--ls-caption);
+  text-transform: uppercase;
   color: rgba(255, 255, 255, 0.3);
   margin-bottom: 4px;
 }
 
 .hero-stat-box span {
-  font-size: 2rem;
-  font-weight: 700;
-  letter-spacing: -0.5px;
+  font-size: var(--fs-h1);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-h1);
+  letter-spacing: var(--ls-h1);
 }
 
 .dashboard-content-grid {
@@ -240,7 +255,7 @@
     color 0.3s ease;
 }
 
-.glass-card:hover {
+.bento-item.glass-card:hover {
   transform: translateY(-5px);
   border-color: rgba(var(--accent-color-rgb), 0.3);
 }
@@ -411,10 +426,57 @@
   background: rgba(var(--accent-color-rgb), 0.5);
 }
 
-@media (max-width: 1100px) {
+/* -------------------------------------------------------------
+   Responsive Bento Grid Breakpoints
+------------------------------------------------------------- */
+@media (max-width: 1300px) {
   .dashboard-content-grid {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 14px;
+  }
+
+  .bento-layout {
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: 230px;
+    gap: 18px;
+  }
+
+  .lg-rect {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+}
+
+@media (max-width: 640px) {
+  .project-detail-root {
+    padding: 16px;
+    border-radius: 20px;
+    margin: 4px auto;
+  }
+
+  .bento-layout {
+    grid-template-columns: 1fr;
+    grid-auto-rows: auto;
+    gap: 14px;
+  }
+
+  .lg-rect {
+    grid-column: span 1;
+    grid-row: auto;
+    min-height: 340px;
+    height: auto;
+  }
+
+  .composite-bento-card {
+    grid-column: span 1;
+    height: 230px;
+    min-height: 230px;
+  }
+
+  .sm-square {
+    grid-column: span 1;
+    grid-row: auto;
+    min-height: 180px;
   }
 }
 
@@ -556,8 +618,10 @@ body.light-theme .timeline-status-legend {
 
 .timeline-legend-label {
   color: rgba(255, 255, 255, 0.6);
-  font-size: 0.75rem;
-  font-weight: 400;
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-caption);
+  letter-spacing: var(--ls-caption);
   text-transform: capitalize;
 }
 
@@ -614,16 +678,47 @@ body.light-theme .timeline-legend-label {
 }
 
 .equipment-preview-title {
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-caption);
+  letter-spacing: var(--ls-caption);
   color: light-dark(#24292f, #fff);
-  line-height: 1.1;
   text-align: center;
 }
 
-.equipment-bento-card .summary-bento-title,
-.equipment-bento-card .summary-bento-subtitle {
+.equipment-bento-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.equipment-bento-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.equipment-bento-card .summary-bento-middle {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-left: auto;
+  width: auto;
+}
+
+.equipment-bento-card .summary-bento-title {
   text-align: right;
+  margin: 0;
+}
+
+.equipment-bento-card .summary-bento-subtitle {
+  display: flex;
+  justify-content: flex-end;
+  text-align: right;
+  width: 100%;
 }
 
 .summary-selector-icon .timeline-legend-dot {
@@ -650,8 +745,10 @@ body.light-theme .timeline-legend-label {
 
 .timeline-legend-label {
   color: rgba(255, 255, 255, 0.6);
-  font-size: 0.75rem;
-  font-weight: 400;
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-caption);
+  letter-spacing: var(--ls-caption);
   text-transform: capitalize;
 }
 
@@ -766,8 +863,22 @@ body.light-theme .equipment-icon-opacity {
 
 /* Equipment Grainient Hover Effect */
 .equipment-grainient-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
   opacity: 0;
   transition: opacity 0.3s ease;
+}
+
+.equipment-grainient-canvas {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
 }
 
 .equipment-bento-card:hover .equipment-grainient-wrapper {

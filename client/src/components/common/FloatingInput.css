@@ -1,0 +1,282 @@
+/* ==========================================================================
+   GLOBAL FLOATING INPUT & FORM FIELD COMPONENT
+   Outlined floating label with smooth translateY translation (No black box)
+   ========================================================================== */
+
+.floating-field {
+  --ff-bg: var(--neo-input-bg, rgba(255, 255, 255, 0.03));
+  --ff-border: var(--neo-input-border, rgba(255, 255, 255, 0.12));
+  --ff-border-hover: var(--neo-input-hover-border, rgba(255, 255, 255, 0.22));
+  --ff-border-focus: var(--accent-color, #00c6e6);
+  --ff-focus-glow: rgba(0, 198, 230, 0.15);
+  --ff-label-color: rgba(255, 255, 255, 0.45);
+  --ff-label-float-color: var(--neo-label-color, rgba(255, 255, 255, 0.7));
+  --ff-label-focus-color: var(--accent-color, #00c6e6);
+  --ff-text-color: var(--neo-input-text, #ffffff);
+  --ff-prefix-color: rgba(255, 255, 255, 0.4);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-top: 10px;
+  margin-bottom: var(--neo-form-gap, 26px);
+}
+
+.floating-field:first-child {
+  margin-top: 0;
+}
+
+.floating-field-control-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.floating-input {
+  background: var(--ff-bg);
+  border: 1px solid var(--ff-border);
+  border-radius: var(--neo-input-radius, 12px);
+  color: var(--ff-text-color);
+  padding: 12px 16px;
+  min-height: var(--neo-input-height, 44px);
+  font-size: var(--neo-input-font-size, 0.86rem);
+  font-family: inherit;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.floating-input::placeholder {
+  color: transparent;
+  transition: color 0.2s ease;
+}
+
+/* When focused, if a hint placeholder is provided, reveal it */
+.floating-field.is-focused .floating-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.floating-input:hover {
+  background: var(--ff-border-hover);
+  border-color: var(--ff-border-hover);
+}
+
+.floating-field.is-focused .floating-input {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--ff-border-focus);
+  box-shadow: 0 0 0 3px var(--ff-focus-glow);
+}
+
+/* Floating Label - resting position (looks like placeholder) */
+.floating-label {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: var(--neo-input-font-size, 0.86rem);
+  font-weight: 400;
+  color: var(--ff-label-color);
+  pointer-events: none;
+  user-select: none;
+  background: transparent;
+  padding: 0;
+  line-height: 1;
+  z-index: 2;
+  white-space: nowrap;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              top 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              left 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              font-size 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              color 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Offset resting label when prefix is present */
+.floating-field.has-prefix:not(.is-floating) .floating-label {
+  left: 44px;
+}
+
+/* Floating Label - translated top position (Clean, transparent, no black box) */
+.floating-field.is-floating .floating-label {
+  top: -6px;
+  left: 2px;
+  transform: translateY(-100%);
+  font-size: var(--neo-label-size, 0.78rem);
+  font-weight: var(--neo-label-weight, 500);
+  color: var(--ff-label-float-color);
+  background: transparent;
+  padding: 0;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.floating-field.is-focused.is-floating .floating-label {
+  color: var(--ff-label-focus-color);
+}
+
+/* Required asterisk */
+.floating-label-required {
+  color: #ef4444;
+  margin-left: 3px;
+  font-weight: 600;
+}
+
+/* Prefix and Suffix */
+.floating-prefix {
+  position: absolute;
+  left: 15px;
+  color: var(--ff-prefix-color);
+  font-size: 0.88rem;
+  font-weight: 500;
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
+}
+
+.floating-field.has-prefix .floating-input {
+  padding-left: 44px;
+}
+
+.floating-suffix {
+  position: absolute;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  color: var(--ff-prefix-color);
+  z-index: 1;
+}
+
+.floating-field.has-suffix .floating-input {
+  padding-right: 44px;
+}
+
+/* Custom control wrapper (for GlassDatePicker, GlassDropdown, etc.) */
+.floating-custom-control {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.floating-custom-control > * {
+  width: 100% !important;
+}
+
+.floating-custom-control .glass-dropdown-trigger {
+  min-height: var(--neo-input-height, 44px);
+  border-radius: var(--neo-input-radius, 12px);
+  padding: 12px 16px;
+  box-sizing: border-box;
+}
+
+/* Textarea styling */
+.floating-input.floating-textarea {
+  min-height: 80px;
+  resize: vertical;
+  line-height: 1.45;
+}
+
+.floating-field.is-textarea:not(.is-floating) .floating-label {
+  top: 18px;
+  transform: none;
+}
+
+/* Select element styling */
+.floating-input.floating-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  padding-right: 36px;
+}
+
+.floating-input.floating-select option {
+  background: #141a26;
+  color: #ffffff;
+}
+
+.floating-select-arrow {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+}
+
+/* Error state */
+.floating-field.has-error .floating-input {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
+}
+
+.floating-field.has-error .floating-label {
+  color: #ef4444 !important;
+}
+
+.floating-error-msg {
+  color: #ef4444;
+  font-size: 0.75rem;
+  margin-top: 5px;
+  text-align: left;
+}
+
+/* Disabled state */
+.floating-field.is-disabled {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* Number input spin button removal */
+.floating-input[type="number"]::-webkit-outer-spin-button,
+.floating-input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.floating-input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Light Theme Overrides */
+body.light-theme .floating-field {
+  --ff-bg: var(--neo-input-bg);
+  --ff-border: var(--neo-input-border);
+  --ff-border-hover: var(--neo-input-hover-border);
+  --ff-border-focus: var(--accent-color, #0969da);
+  --ff-focus-glow: rgba(9, 105, 218, 0.12);
+  --ff-label-color: var(--neo-label-color);
+  --ff-label-float-color: var(--neo-label-color);
+  --ff-label-focus-color: var(--accent-color, #0969da);
+  --ff-text-color: var(--neo-input-text);
+  --ff-prefix-color: var(--neo-label-color);
+}
+
+body.light-theme .floating-input:hover {
+  background: var(--neo-input-hover-bg);
+}
+
+body.light-theme .floating-field.is-focused .floating-input {
+  background: #ffffff;
+}
+
+body.light-theme .floating-field.is-focused .floating-input::placeholder {
+  color: #8c959f;
+}
+
+body.light-theme .floating-input.floating-select option {
+  background: #ffffff;
+  color: #24292f;
+}
+
+body.light-theme .floating-select-arrow {
+  color: #57606a;
+}
+
+body.light-theme .floating-label-required {
+  color: #cf222e;
+}
