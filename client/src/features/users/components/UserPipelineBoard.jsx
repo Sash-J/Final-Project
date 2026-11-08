@@ -103,7 +103,7 @@ const UserPipelineBoard = ({
               placeholder="Search user, skill, role..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pipeline-search-input"
+              className="no-global-input pipeline-search-input"
             />
             {searchQuery && (
               <button

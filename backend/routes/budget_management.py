@@ -1,4 +1,5 @@
 # pyrefly: ignore [missing-import]
+import re
 from flask import Blueprint, jsonify, request
 from routes.notifications_management import (
     notify_all_admins,
@@ -432,7 +433,22 @@ def payments_post():
         )
 
     try:
-        new_id = db.insert_payment(project_id, amount, payment_date, notes)
+        amount_val = float(amount)
+    except (ValueError, TypeError):
+        return jsonify({"error": "Payment amount must be a valid number"}), 400
+
+    if amount_val <= 0:
+        return jsonify({"error": "Payment amount must be greater than 0"}), 400
+
+    if amount_val > 1000000000:
+        return jsonify({"error": "Payment amount exceeds allowable limit"}), 400
+
+    payment_date_str = str(payment_date).strip()
+    if not re.match(r"^\d{4}-\d{2}-\d{2}$", payment_date_str):
+        return jsonify({"error": "Payment date must be in YYYY-MM-DD format"}), 400
+
+    try:
+        new_id = db.insert_payment(project_id, amount_val, payment_date_str, notes)
 
         proj_name = db.get_project_name(project_id)
         sender_id = get_current_user_id()

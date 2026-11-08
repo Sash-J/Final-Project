@@ -404,7 +404,7 @@ body.light-theme .publish-meta-value,
 .publish-version-bar {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  margin-top: var(--neo-form-gap, 28px);
 }
 
 .publish-select-wrapper {
@@ -693,7 +693,7 @@ body.light-theme .publish-toggle-switch,
 .publish-note-section {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  margin-top: var(--neo-form-gap, 28px);
 }
 
 .publish-note-input {

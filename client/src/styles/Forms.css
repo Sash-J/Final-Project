@@ -6,7 +6,7 @@
    ========================================================================== */
 
 :root {
-  --neo-form-gap: 26px;
+  --neo-form-gap: 36px;
   --neo-label-gap: 8px;
   --neo-label-size: 0.8rem;
   --neo-label-weight: 500;
@@ -34,6 +34,7 @@ body.light-theme {
 .neo-form {
   display: flex;
   flex-direction: column;
+  gap: var(--neo-form-gap, 30px);
   width: 100%;
 }
 
@@ -41,7 +42,11 @@ body.light-theme {
   display: flex;
   flex-direction: column;
   margin-top: 0;
-  margin-bottom: var(--neo-form-gap, 26px);
+  margin-bottom: var(--neo-form-gap, 30px);
+}
+
+.neo-form>.neo-form-group {
+  margin-bottom: 0;
 }
 
 .neo-label {
@@ -54,7 +59,11 @@ body.light-theme {
   line-height: 1.25;
 }
 
-.neo-input {
+/* Global Form Inputs (Neo + Native Fallbacks) */
+.neo-input,
+input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="hidden"]):not(.no-global-input):not(.floating-input):not(table input):not(.slider):not(.switch input):not(.pipeline-search-input):not(.upm-search-input):not(.hero-inline-input):not(.eq-qty-input):not(.eq-item-name-input):not(.mm-input),
+select:not(.no-global-input):not(.floating-input):not(table select),
+textarea:not(.no-global-input):not(.floating-input):not(table textarea) {
   background: var(--neo-input-bg);
   border: 1px solid var(--neo-input-border);
   border-radius: var(--neo-input-radius, 12px);
@@ -69,18 +78,36 @@ body.light-theme {
   transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
 }
 
-.neo-input::placeholder {
+select:not(.no-global-input) option {
+  background: #141a26;
+  color: #ffffff;
+}
+
+body.light-theme select:not(.no-global-input) option {
+  background: #ffffff;
+  color: #24292f;
+}
+
+.neo-input::placeholder,
+input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="hidden"]):not(.no-global-input):not(.floating-input):not(table input):not(.slider):not(.switch input):not(.pipeline-search-input):not(.upm-search-input):not(.hero-inline-input):not(.eq-qty-input):not(.eq-item-name-input):not(.mm-input)::placeholder,
+textarea:not(.no-global-input):not(.floating-input):not(table textarea)::placeholder {
   color: rgba(255, 255, 255, 0.35);
 }
 
-.neo-input:hover {
+.neo-input:hover,
+input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="hidden"]):not(.no-global-input):not(.floating-input):not(table input):not(.slider):not(.switch input):not(.pipeline-search-input):not(.upm-search-input):not(.hero-inline-input):not(.eq-qty-input):not(.eq-item-name-input):not(.mm-input):hover,
+select:not(.no-global-input):not(.floating-input):not(table select):hover,
+textarea:not(.no-global-input):not(.floating-input):not(table textarea):hover {
   background: var(--neo-input-hover-bg);
   border-color: var(--neo-input-hover-border);
 }
 
-.neo-input:focus {
+.neo-input:focus,
+input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="hidden"]):not(.no-global-input):not(.floating-input):not(table input):not(.slider):not(.switch input):not(.pipeline-search-input):not(.upm-search-input):not(.hero-inline-input):not(.eq-qty-input):not(.eq-item-name-input):not(.mm-input):focus,
+select:not(.no-global-input):not(.floating-input):not(table select):focus,
+textarea:not(.no-global-input):not(.floating-input):not(table textarea):focus {
   background: rgba(255, 255, 255, 0.06);
-  border-color: var(--accent-color);
+  border-color: var(--accent-color, #00c6e6);
   box-shadow: 0 0 0 3px rgba(0, 198, 230, 0.15);
 }
 
@@ -91,36 +118,42 @@ body.light-theme {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
-  margin-top: 10px;
-  margin-bottom: var(--neo-form-gap, 26px);
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.neo-form-row > .neo-form-group,
-.neo-form-row > .floating-field,
-.payment-form-row > .neo-form-group,
-.payment-form-row > .floating-field,
-.project-form-row > .neo-form-group,
-.project-form-row > .floating-field {
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
+.neo-form-row>.neo-form-group,
+.neo-form-row>.floating-field,
+.payment-form-row>.neo-form-group,
+.payment-form-row>.floating-field,
+.project-form-row>.neo-form-group,
+.project-form-row>.floating-field {
+  margin: 0;
 }
 
 /* Remove up/down spin arrows from number inputs */
 .neo-input[type="number"]::-webkit-outer-spin-button,
-.neo-input[type="number"]::-webkit-inner-spin-button {
+.neo-input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]:not(.no-global-input)::-webkit-outer-spin-button,
+input[type="number"]:not(.no-global-input)::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-.neo-input[type="number"] {
+.neo-input[type="number"],
+input[type="number"]:not(.no-global-input) {
   -moz-appearance: textfield;
   appearance: textfield;
 }
 
-/* Hide native calendar icon so we can use custom Material icons */
+/* Hide native calendar icon so custom Material icons are used */
 .neo-input[type="date"]::-webkit-calendar-picker-indicator,
 .neo-input[type="time"]::-webkit-calendar-picker-indicator,
-.neo-input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+.neo-input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+input[type="date"]:not(.no-global-input)::-webkit-calendar-picker-indicator,
+input[type="time"]:not(.no-global-input)::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]:not(.no-global-input)::-webkit-calendar-picker-indicator {
   opacity: 0;
   cursor: pointer;
   position: absolute;
@@ -130,19 +163,30 @@ body.light-theme {
   height: 100%;
 }
 
+/* Action Buttons */
 .btn-neo-cancel {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(12px) saturate(160%);
   -webkit-backdrop-filter: blur(12px) saturate(160%);
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: rgba(255, 255, 255, 0.7);
   border-radius: 12px;
-  padding: 12px 24px;
+  padding: 10px 24px;
+  min-height: var(--neo-control-height, 44px) !important;
+  box-sizing: border-box !important;
   font-weight: 500;
   cursor: pointer;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18), inset 0 1px 1px rgba(255, 255, 255, 0.2);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   font-size: 0.9rem;
+  outline: none;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 .btn-neo-cancel:hover {
@@ -153,24 +197,88 @@ body.light-theme {
   transform: translateY(-1px);
 }
 
+.btn-neo-cancel:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Rule 5: Accessible Keyboard Focus Ring */
+.btn-neo-cancel:focus-visible {
+  outline: 2px solid rgba(239, 68, 68, 0.6) !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.35) !important;
+}
+
+/* Rule 6: Disabled State */
+.btn-neo-cancel:disabled {
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+  pointer-events: auto !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Rule 4: Preserved Width Loading Spinner State */
+.btn-neo-cancel.is-loading {
+  pointer-events: none !important;
+  cursor: wait !important;
+  position: relative;
+}
+
+.btn-neo-cancel.is-loading > * {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+.btn-neo-cancel.is-loading::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  width: 18px !important;
+  height: 18px !important;
+  margin-left: -9px !important;
+  margin-top: -9px !important;
+  border: 2px solid rgba(255, 255, 255, 0.25) !important;
+  border-top-color: #ef4444 !important;
+  border-radius: 50% !important;
+  animation: btnNeoSpinner 0.7s linear infinite !important;
+  z-index: 10 !important;
+  box-sizing: border-box !important;
+}
+
 /* Light Theme Overrides */
 body.light-theme .neo-label {
   color: var(--neo-label-color);
 }
 
-body.light-theme .neo-input {
+body.light-theme .neo-input,
+body.light-theme input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="hidden"]):not(.no-global-input):not(.floating-input):not(table input):not(.slider):not(.switch input):not(.pipeline-search-input):not(.upm-search-input):not(.hero-inline-input):not(.eq-qty-input):not(.eq-item-name-input):not(.mm-input),
+body.light-theme select:not(.no-global-input):not(.floating-input):not(table select),
+body.light-theme textarea:not(.no-global-input):not(.floating-input):not(table textarea) {
   background: var(--neo-input-bg);
   border-color: var(--neo-input-border);
   color: var(--neo-input-text);
 }
 
-body.light-theme .neo-input:hover {
+body.light-theme .neo-input::placeholder,
+body.light-theme input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="hidden"]):not(.no-global-input):not(.floating-input):not(table input):not(.slider):not(.switch input):not(.pipeline-search-input):not(.upm-search-input):not(.hero-inline-input):not(.eq-qty-input):not(.eq-item-name-input):not(.mm-input)::placeholder,
+body.light-theme textarea:not(.no-global-input):not(.floating-input):not(table textarea)::placeholder {
+  color: #8c959f;
+}
+
+body.light-theme .neo-input:hover,
+body.light-theme input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="hidden"]):not(.no-global-input):not(.floating-input):not(table input):not(.slider):not(.switch input):not(.pipeline-search-input):not(.upm-search-input):not(.hero-inline-input):not(.eq-qty-input):not(.eq-item-name-input):not(.mm-input):hover,
+body.light-theme select:not(.no-global-input):not(.floating-input):not(table select):hover,
+body.light-theme textarea:not(.no-global-input):not(.floating-input):not(table textarea):hover {
   background: var(--neo-input-hover-bg);
   border-color: var(--neo-input-hover-border);
 }
 
-body.light-theme .neo-input:focus {
-  background: #fff;
+body.light-theme .neo-input:focus,
+body.light-theme input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="hidden"]):not(.no-global-input):not(.floating-input):not(table input):not(.slider):not(.switch input):not(.pipeline-search-input):not(.upm-search-input):not(.hero-inline-input):not(.eq-qty-input):not(.eq-item-name-input):not(.mm-input):focus,
+body.light-theme select:not(.no-global-input):not(.floating-input):not(table select):focus,
+body.light-theme textarea:not(.no-global-input):not(.floating-input):not(table textarea):focus {
+  background: #ffffff;
   border-color: #0969da;
   box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.1);
 }
@@ -192,6 +300,18 @@ body.light-theme .btn-neo-cancel:hover {
   transform: translateY(-1px);
 }
 
+body.light-theme .btn-neo-cancel:focus-visible {
+  outline: 2px solid #cf222e !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 10px rgba(207, 34, 46, 0.25) !important;
+}
+
+body.light-theme .btn-neo-cancel.is-loading::before {
+  border-color: rgba(0, 0, 0, 0.15) !important;
+  border-top-color: #cf222e !important;
+}
+
+/* Icon Field Wrapper */
 .icon-field-wrapper {
   position: relative;
   display: flex;
@@ -212,6 +332,7 @@ body.light-theme .icon-field-wrapper .icon-root {
   color: rgba(0, 0, 0, 0.4);
 }
 
+/* Status Notifications */
 .neo-status-messages {
   display: flex;
   flex-direction: column;
@@ -236,7 +357,12 @@ body.light-theme .icon-field-wrapper .icon-root {
   box-sizing: border-box;
 }
 
+.neo-status:not(.show) {
+  display: none !important;
+}
+
 .neo-status.show {
+  display: flex !important;
   padding: 10px 14px;
   max-height: 80px;
   opacity: 1;

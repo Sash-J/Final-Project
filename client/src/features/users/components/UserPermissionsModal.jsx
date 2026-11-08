@@ -323,7 +323,7 @@ const UserPermissionsModal = ({
             </span>
             <input
               type="text"
-              className="upm-search-input"
+              className="no-global-input upm-search-input"
               placeholder="Search permissions by name, key, or category..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}

@@ -1,0 +1,46 @@
+/* ==========================================================================
+   NeoButton Component Styles
+   Implements 6-Rule Button Architecture:
+   1. 44px Minimum Tap Target
+   2. Accessible Action Hierarchy
+   3. Single Primary Action (Solid vs Ghost Cancel vs Danger)
+   4. Width-Preserved Loading State (0px layout shift)
+   5. Accessible Focus Ring
+   6. Disabled State with Tooltip Support
+   ========================================================================== */
+
+.neo-button-wrapper {
+  display: inline-flex;
+  position: relative;
+  vertical-align: middle;
+}
+
+.neo-button-wrapper.is-full-width {
+  width: 100%;
+}
+
+.neo-button-wrapper.is-full-width .btn-neo {
+  width: 100%;
+}
+
+.neo-button-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.neo-button-icon.icon-left {
+  margin-right: 2px;
+}
+
+.neo-button-icon.icon-right {
+  margin-left: 2px;
+}
+
+.neo-button-label {
+  display: inline-flex;
+  align-items: center;
+}
+

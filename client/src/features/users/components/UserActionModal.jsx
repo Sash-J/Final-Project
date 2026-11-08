@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ModalPortal from "../../../components/common/ModalPortal";
 import GlassDropdown from "../../../components/common/GlassDropdown";
+import FloatingInput from "../../../components/common/FloatingInput";
 import Icon from "../../../components/common/Icon";
 import VerificationBadge from "../../../components/common/VerificationBadge";
 import { getPrimaryUserRole } from "../utils/roleUtils";
@@ -114,70 +115,61 @@ const UserActionModal = ({
 
         {/* User Details Form Grid */}
         <div className="user-modal-details-grid">
-          <div className="user-modal-form-group">
-            <label className="neo-label">Assigned Role</label>
-            <div className="user-modal-field-control">
-              {isAdmin ? (
-                <div className="neo-input user-modal-display-input">
-                  <span className="role-chip admin-chip">ADMIN (System Owner)</span>
-                </div>
-              ) : canEdit ? (
-                <GlassDropdown
-                  className="user-modal-role-dropdown"
-                  modifiers="fluid"
-                  options={
-                    roleOptions.length > 0
-                      ? roleOptions
-                      : [{ value: "", label: "NO ROLES AVAILABLE" }]
-                  }
-                  value={currentRoleValue}
-                  onChange={handleRoleSelect}
-                  disabled={roleOptions.length === 0}
-                />
-              ) : (
-                <div className="neo-input user-modal-display-input">
-                  <span className="role-chip">{currentRoleValue}</span>
-                </div>
-              )}
-            </div>
-          </div>
+          <FloatingInput
+            label="Assigned Role"
+            hasValue={true}
+          >
+            {isAdmin ? (
+              <div className="neo-input user-modal-display-input">
+                <span className="role-chip admin-chip">ADMIN (System Owner)</span>
+              </div>
+            ) : canEdit ? (
+              <GlassDropdown
+                className="user-modal-role-dropdown"
+                modifiers="fluid"
+                options={
+                  roleOptions.length > 0
+                    ? roleOptions
+                    : [{ value: "", label: "NO ROLES AVAILABLE" }]
+                }
+                value={currentRoleValue}
+                onChange={handleRoleSelect}
+                disabled={roleOptions.length === 0}
+              />
+            ) : (
+              <div className="neo-input user-modal-display-input">
+                <span className="role-chip">{currentRoleValue}</span>
+              </div>
+            )}
+          </FloatingInput>
 
-          <div className="user-modal-form-group">
-            <label className="neo-label">Primary Skill / Department</label>
+          <FloatingInput
+            label="Primary Skill / Department"
+            hasValue={true}
+          >
             <div className="neo-input user-modal-display-input text-highlight">
               {user.skill || "Standard User"}
             </div>
-          </div>
+          </FloatingInput>
 
-          <div className="user-modal-form-group">
-            <label className="neo-label">Contact Telephone</label>
-            <input
-              type="text"
-              className="neo-input user-modal-readonly-input"
-              readOnly
-              value={user.telephone || "Not Provided"}
-            />
-          </div>
+          <FloatingInput
+            label="Contact Telephone"
+            value={user.telephone || "Not Provided"}
+            readOnly
+          />
 
-          <div className="user-modal-form-group">
-            <label className="neo-label">Gender</label>
-            <input
-              type="text"
-              className="neo-input user-modal-readonly-input"
-              readOnly
-              value={user.gender || "Unspecified"}
-            />
-          </div>
+          <FloatingInput
+            label="Gender"
+            value={user.gender || "Unspecified"}
+            readOnly
+          />
 
-          <div className="user-modal-form-group full-width">
-            <label className="neo-label">Account Identification</label>
-            <input
-              type="text"
-              className="neo-input user-modal-readonly-input code-font"
-              readOnly
-              value={`System ID #${user.id} • DB Account`}
-            />
-          </div>
+          <FloatingInput
+            className="full-width"
+            label="Account Identification"
+            value={`System ID #${user.id} • DB Account`}
+            readOnly
+          />
         </div>
 
         {/* Modal Action Controls */}

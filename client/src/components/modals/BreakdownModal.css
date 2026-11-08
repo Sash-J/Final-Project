@@ -1,3 +1,5 @@
+@import "../../styles/typography.css";
+
 .breakdown-modal-container {
   background: rgba(10, 12, 18, 0.06);
   backdrop-filter: blur(25px) saturate(180%);
@@ -13,9 +15,38 @@
   flex-direction: column;
   overflow: hidden;
   color: #fff;
-  font-family: inherit;
+  font-family: var(--font-main);
   position: relative;
   padding: 32px;
+}
+
+.breakdown-modal-container .modal-header-section h2 {
+  font-family: var(--font-main);
+  font-size: var(--fs-h1);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-h1);
+  letter-spacing: var(--ls-h1);
+  color: #ffffff;
+  margin: 0 0 4px 0;
+  text-transform: uppercase;
+}
+
+.breakdown-modal-container .modal-header-section p {
+  font-family: var(--font-main);
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-caption);
+  letter-spacing: var(--ls-caption);
+  color: rgba(255, 255, 255, 0.45);
+  margin: 0;
+}
+
+body.light-theme .breakdown-modal-container .modal-header-section h2 {
+  color: #111827;
+}
+
+body.light-theme .breakdown-modal-container .modal-header-section p {
+  color: #57606a;
 }
 
 .bdm-body {
@@ -33,13 +64,15 @@
 
 .bdm-table th {
   text-align: left;
-  font-size: 0.65rem;
+  font-family: var(--font-main);
+  font-size: var(--fs-overline);
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.4);
   padding: 0 8px 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  font-weight: 700;
-  letter-spacing: 0.8px;
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-overline);
+  letter-spacing: var(--ls-overline);
 }
 
 .bdm-table .col-desc {
@@ -96,7 +129,8 @@
   border-radius: 4px;
   color: #ddd;
   padding: 0 8px;
-  font-size: 0.8rem;
+  font-family: var(--font-main);
+  font-size: var(--fs-body);
   outline: none;
   transition: all 0.15s ease;
   box-sizing: border-box;
@@ -151,19 +185,21 @@
 }
 
 .bdm-readonly {
-  font-size: 0.8rem;
+  font-family: var(--font-main);
+  font-size: var(--fs-body);
   color: rgba(255, 255, 255, 0.3);
   text-align: right;
-  font-weight: 500;
+  font-weight: var(--fw-medium);
   padding-right: 8px !important;
   line-height: 28px;
 }
 
 .bdm-total-cell {
-  font-size: 0.8rem;
+  font-family: var(--font-main);
+  font-size: var(--fs-body);
   color: var(--accent-color);
   text-align: right;
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   padding-right: 8px !important;
   line-height: 28px;
 }
@@ -184,17 +220,22 @@
 }
 
 .bdm-grand-total span {
-  font-size: 0.75rem;
+  font-family: var(--font-main);
+  font-size: var(--fs-overline);
   color: #888;
   text-transform: uppercase;
-  font-weight: 700;
-  letter-spacing: 0.5px;
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-overline);
+  letter-spacing: var(--ls-overline);
 }
 
 .bdm-grand-total strong {
-  font-size: 1.25rem;
+  font-family: var(--font-main);
+  font-size: var(--fs-h2);
   color: #fff;
-  font-weight: 700;
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-h2);
+  letter-spacing: var(--ls-h2);
 }
 
 .bdm-actions {

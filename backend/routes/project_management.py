@@ -1,3 +1,4 @@
+import re
 from flask import Blueprint, jsonify, request
 from flask_cors import cross_origin
 from routes.notifications_management import notify_all_admins
@@ -74,8 +75,20 @@ def projects_post():
     color = data.get("color", "#00c6e6")
     project_image_base64 = data.get("project_image")
 
-    if not project_name:
-        return jsonify({"error": "project_name is required"}), 400
+    if not project_name or len(project_name) < 2 or len(project_name) > 100:
+        return jsonify({"error": "Project name must be between 2 and 100 characters"}), 400
+
+    if code_name and len(code_name) > 30:
+        return jsonify({"error": "Code name cannot exceed 30 characters"}), 400
+
+    if start_date and not re.match(r"^\d{4}-\d{2}-\d{2}$", str(start_date).strip()):
+        return jsonify({"error": "Start date must be in YYYY-MM-DD format"}), 400
+
+    if end_date and not re.match(r"^\d{4}-\d{2}-\d{2}$", str(end_date).strip()):
+        return jsonify({"error": "Target delivery date must be in YYYY-MM-DD format"}), 400
+
+    if start_date and end_date and str(end_date).strip() < str(start_date).strip():
+        return jsonify({"error": "Target delivery date cannot precede project start date"}), 400
 
     existing_project = db.check_color_exists(color)
     if existing_project:
@@ -86,7 +99,14 @@ def projects_post():
             400,
         )
 
-    project_image_url = project_image_base64 if project_image_base64 else None
+    project_image_input = data.get("project_image") or data.get("project_image_url")
+    project_image_url = None
+    if project_image_input:
+        img_str = str(project_image_input).strip()
+        if img_str.startswith("image/"):
+            img_str = f"data:{img_str}"
+        if img_str:
+            project_image_url = img_str
     
     route_locations = data.get("route_locations", [])
 
@@ -161,8 +181,20 @@ def projects_put(project_id):
         color = data.get("color", "#00c6e6")
         project_image_base64 = data.get("project_image")
 
-        if not project_name:
-            return jsonify({"error": "project_name is required"}), 400
+        if not project_name or len(project_name) < 2 or len(project_name) > 100:
+            return jsonify({"error": "Project name must be between 2 and 100 characters"}), 400
+
+        if code_name and len(code_name) > 30:
+            return jsonify({"error": "Code name cannot exceed 30 characters"}), 400
+
+        if start_date and not re.match(r"^\d{4}-\d{2}-\d{2}$", str(start_date).strip()):
+            return jsonify({"error": "Start date must be in YYYY-MM-DD format"}), 400
+
+        if end_date and not re.match(r"^\d{4}-\d{2}-\d{2}$", str(end_date).strip()):
+            return jsonify({"error": "Target delivery date must be in YYYY-MM-DD format"}), 400
+
+        if start_date and end_date and str(end_date).strip() < str(start_date).strip():
+            return jsonify({"error": "Target delivery date cannot precede project start date"}), 400
 
         existing_project = db.check_color_exists(color, exclude_project_id=project_id)
         if existing_project:
@@ -172,9 +204,21 @@ def projects_put(project_id):
                 ),
                 400,
             )
-        project_image_url = data.get("project_image_url")
-        if project_image_base64 and project_image_base64.startswith("data:image"):
-            project_image_url = project_image_base64
+        # Handle cover image persistence on project update
+        project_image_url = None
+        if "project_image" in data or "project_image_url" in data:
+            incoming_img = data.get("project_image") if "project_image" in data else data.get("project_image_url")
+            if incoming_img:
+                img_str = str(incoming_img).strip()
+                if img_str.startswith("image/"):
+                    img_str = f"data:{img_str}"
+                project_image_url = img_str
+            else:
+                project_image_url = None
+        else:
+            # Not in payload, preserve existing image from database
+            existing_proj = db.get_project_by_id(project_id) or {}
+            project_image_url = existing_proj.get("project_image")
             
         route_locations = data.get("route_locations")
         
@@ -307,11 +351,32 @@ def post_project_payment(project_id):
         signatory_name = data.get("signatory_name")
         signatory_role = data.get("signatory_role")
 
-        if not amount or not payment_date:
+        if amount is None or not payment_date:
             return jsonify({"error": "Amount and Payment Date are required"}), 400
 
+        try:
+            amount_val = float(amount)
+        except (ValueError, TypeError):
+            return jsonify({"error": "Payment amount must be a valid number"}), 400
+
+        if amount_val <= 0:
+            return jsonify({"error": "Payment amount must be greater than 0"}), 400
+
+        if amount_val > 1000000000:
+            return jsonify({"error": "Payment amount exceeds maximum allowable limit (1,000,000,000)"}), 400
+
+        payment_date_str = str(payment_date).strip()
+        if not re.match(r"^\d{4}-\d{2}-\d{2}$", payment_date_str):
+            return jsonify({"error": "Payment date must be in YYYY-MM-DD format"}), 400
+
+        if description and len(str(description).strip()) > 150:
+            return jsonify({"error": "Description cannot exceed 150 characters"}), 400
+
+        if bank_ref and len(str(bank_ref).strip()) > 50:
+            return jsonify({"error": "Bank reference cannot exceed 50 characters"}), 400
+
         new_id = db.insert_payment(
-            project_id, amount, payment_date, notes, bank_ref, payment_method, description,
+            project_id, amount_val, payment_date_str, notes, bank_ref, payment_method, description,
             signatory_id=signatory_id, signatory_name=signatory_name, signatory_role=signatory_role
         )
         return jsonify({"message": "Payment recorded successfully", "id": new_id}), 201
@@ -336,6 +401,29 @@ def put_project_payment(project_id, payment_id):
 
         published_to_client = data.get("published_to_client")
         transmittal_note = data.get("transmittal_note")
+
+        if amount is not None:
+            try:
+                amount_val = float(amount)
+                if amount_val <= 0:
+                    return jsonify({"error": "Payment amount must be greater than 0"}), 400
+                if amount_val > 1000000000:
+                    return jsonify({"error": "Payment amount exceeds maximum allowable limit (1,000,000,000)"}), 400
+                amount = amount_val
+            except (ValueError, TypeError):
+                return jsonify({"error": "Payment amount must be a valid number"}), 400
+
+        if payment_date is not None:
+            payment_date_str = str(payment_date).strip()
+            if not re.match(r"^\d{4}-\d{2}-\d{2}$", payment_date_str):
+                return jsonify({"error": "Payment date must be in YYYY-MM-DD format"}), 400
+            payment_date = payment_date_str
+
+        if description is not None and len(str(description).strip()) > 150:
+            return jsonify({"error": "Description cannot exceed 150 characters"}), 400
+
+        if bank_ref is not None and len(str(bank_ref).strip()) > 50:
+            return jsonify({"error": "Bank reference cannot exceed 50 characters"}), 400
 
         db.update_payment(
             payment_id, project_id, amount, payment_date, notes, bank_ref, payment_method, description,

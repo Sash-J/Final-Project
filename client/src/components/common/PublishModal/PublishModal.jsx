@@ -2,6 +2,7 @@ import React, { useCallback } from "react";
 import PropTypes from "prop-types";
 import ModalPortal from "../ModalPortal";
 import Icon from "../Icon";
+import FloatingInput from "../FloatingInput";
 import "./PublishModal.css";
 
 /**
@@ -164,23 +165,19 @@ const PublishModal = ({
               {/* Optional Version Switcher (Budget Workflow) */}
               {versionOptions.length > 0 && onVersionChange && (
                 <div className="publish-version-bar">
-                  <label className="publish-section-label">
-                    Select Version to Publish
-                  </label>
-                  <div className="publish-select-wrapper">
-                    <select
-                      className="publish-select-control"
-                      value={selectedVersionId}
-                      onChange={(e) => onVersionChange(e.target.value)}
-                      disabled={isSubmitting}
-                    >
-                      {versionOptions.map((v) => (
-                        <option key={v.id} value={v.id}>
-                          {v.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  <FloatingInput
+                    as="select"
+                    label="Select Version to Publish"
+                    value={selectedVersionId}
+                    onChange={(e) => onVersionChange(e.target.value)}
+                    disabled={isSubmitting}
+                  >
+                    {versionOptions.map((v) => (
+                      <option key={v.id} value={v.id}>
+                        {v.label}
+                      </option>
+                    ))}
+                  </FloatingInput>
                 </div>
               )}
 
@@ -258,11 +255,9 @@ const PublishModal = ({
 
               {/* Transmittal Note / Executive Message */}
               <div className="publish-note-section">
-                <label className="publish-section-label">
-                  Transmittal Note / Executive Message
-                </label>
-                <textarea
-                  className="publish-note-input"
+                <FloatingInput
+                  as="textarea"
+                  label="Transmittal Note / Executive Message"
                   rows={4}
                   placeholder="Add an optional executive dispatch note or instructions for the recipient..."
                   value={transmittalNote}

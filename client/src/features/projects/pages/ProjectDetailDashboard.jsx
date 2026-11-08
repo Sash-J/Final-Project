@@ -301,7 +301,11 @@ const ProjectDetailDashboard = () => {
             {project.project_image && (
               <div className="project-hero-bg-image-wrap">
                 <img
-                  src={project.project_image}
+                  src={
+                    project.project_image.startsWith("image/")
+                      ? `data:${project.project_image}`
+                      : project.project_image
+                  }
                   alt=""
                   className="project-hero-bg-image"
                 />

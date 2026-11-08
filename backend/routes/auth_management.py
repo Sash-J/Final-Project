@@ -302,6 +302,9 @@ def update_profile():
             400,
         )
 
+    if email and not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
+        return jsonify({"error": "Please enter a valid email address format"}), 400
+
     # Check if username is taken by someone else
     existing = auth.get_user_by_username(username)
     if existing and existing["id"] != user_id:
@@ -314,6 +317,11 @@ def update_profile():
         if len(new_password) < 8 or len(new_password) > 20:
             return (
                 jsonify({"error": "Password must be between 8 and 20 characters"}),
+                400,
+            )
+        if not any(c.isupper() for c in new_password) or not any(c.islower() for c in new_password):
+            return (
+                jsonify({"error": "Password must contain both uppercase and lowercase letters"}),
                 400,
             )
         hashed_pass = _bcrypt.generate_password_hash(new_password).decode("utf-8")

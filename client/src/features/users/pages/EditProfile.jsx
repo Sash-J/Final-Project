@@ -4,6 +4,8 @@ import { useAuth } from "../../auth/context/AuthContext";
 import { validateEditProfileForm } from "../../../utils/validators";
 import HoverTooltip from "../../../components/common/HoverTooltip";
 import Icon from "../../../components/common/Icon";
+import FloatingInput from "../../../components/common/FloatingInput";
+import NeoButton from "../../../components/common/NeoButton";
 import "./EditProfile.css";
 
 const EditProfile = ({ onClose }) => {
@@ -141,9 +143,9 @@ const EditProfile = ({ onClose }) => {
         {loading ? (
           <div className="profile-skeleton-wrapper">
             {/* Header Section Skeleton */}
-            <div className="modal-header-section" style={{ marginBottom: "25px" }}>
-              <div className="skeleton-line" style={{ height: "24px", width: "160px", marginBottom: "10px" }}></div>
-              <div className="skeleton-line" style={{ height: "14px", width: "320px" }}></div>
+            <div className="modal-header-section profile-skeleton-header">
+              <div className="skeleton-line skeleton-header-title"></div>
+              <div className="skeleton-line skeleton-header-sub"></div>
             </div>
             <div className="profile-modal-split">
               {/* Left Side Panel Skeleton */}
@@ -182,13 +184,13 @@ const EditProfile = ({ onClose }) => {
                   </div>
                 </div>
 
-                <div className="notifications-section" style={{ borderTop: "none", marginTop: "20px" }}>
+                <div className="notifications-section skeleton-notifications">
                   <div className="skeleton-line skeleton-subtitle"></div>
-                  <div className="skeleton-toggle-item" style={{ height: "30px", margin: "12px 0" }}></div>
-                  <div className="skeleton-toggle-item" style={{ height: "30px", margin: "12px 0" }}></div>
+                  <div className="skeleton-toggle-item"></div>
+                  <div className="skeleton-toggle-item"></div>
                 </div>
 
-                <div className="profile-form-actions" style={{ marginTop: "20px" }}>
+                <div className="profile-form-actions skeleton-actions">
                   <div className="skeleton-button"></div>
                   <div className="skeleton-button"></div>
                 </div>
@@ -227,12 +229,11 @@ const EditProfile = ({ onClose }) => {
                   )}
                   <HoverTooltip 
                     text="Upload New Photo" 
-                    style={{ position: 'absolute', bottom: 0, right: 0, zIndex: 10, display: 'flex' }}
+                    wrapperClassName="avatar-tooltip-wrapper"
                   >
                     <label 
                       htmlFor="avatar-file-input" 
-                      className="avatar-edit-badge" 
-                      style={{ position: 'static' }}
+                      className="avatar-edit-badge avatar-badge-static"
                     >
                       <Icon name="edit" modifiers="sm" />
                     </label>
@@ -243,7 +244,7 @@ const EditProfile = ({ onClose }) => {
                   type="file"
                   accept="image/*"
                   onChange={handleImageChange}
-                  style={{ display: "none" }}
+                  className="avatar-hidden-file-input"
                 />
                 <span className="avatar-upload-label">Max 2MB</span>
               </div>
@@ -253,82 +254,58 @@ const EditProfile = ({ onClose }) => {
             <div className="profile-modal-main">
               <div className="form-grid">
                 {/* Change Name */}
-                <div className="profile-form-group">
-                  <label className="neo-label">Full Name</label>
-                  <input
-                    type="text"
-                    className="neo-input"
-                    placeholder="Your full name"
-                    value={profile.full_name}
-                    onChange={(e) => handleChange("full_name", e.target.value)}
-                  />
-                </div>
+                <FloatingInput
+                  label="Full Name"
+                  placeholder="Your full name"
+                  value={profile.full_name}
+                  onChange={(e) => handleChange("full_name", e.target.value)}
+                />
 
-                 {/* Change Username */}
-                <div className="profile-form-group">
-                  <label className="neo-label">Username</label>
-                  <input
-                    type="text"
-                    className="neo-input"
-                    required
-                    value={profile.username}
-                    onChange={(e) => handleChange("username", e.target.value)}
-                  />
-                  {touched.username && validationErrors.username && (
-                    <span className="neo-field-error-msg">{validationErrors.username}</span>
-                  )}
-                </div>
+                {/* Change Username */}
+                <FloatingInput
+                  label="Username"
+                  required
+                  value={profile.username}
+                  onChange={(e) => handleChange("username", e.target.value)}
+                  error={touched.username && validationErrors.username ? validationErrors.username : ""}
+                />
 
-                  {/* Change Email */}
-                <div className="profile-form-group email-group">
-                  <label className="neo-label">Email Address</label>
-                  <input
-                    type="email"
-                    className="neo-input"
-                    placeholder="name@example.com"
-                    value={profile.email}
-                    onChange={(e) => handleChange("email", e.target.value)}
-                  />
-                  {touched.email && validationErrors.email && (
-                    <span className="neo-field-error-msg">{validationErrors.email}</span>
-                  )}
-                </div>
+                {/* Change Email */}
+                <FloatingInput
+                  className="email-group"
+                  type="email"
+                  label="Email Address"
+                  placeholder="name@example.com"
+                  value={profile.email}
+                  onChange={(e) => handleChange("email", e.target.value)}
+                  error={touched.email && validationErrors.email ? validationErrors.email : ""}
+                />
 
                 <div className="profile-form-group password-group">
                   <div className="password-fields-grid">
-                    <div className="password-field-item">
-                      <label className="neo-label">New Password (Optional)</label>
-                      <input
-                        type="password"
-                        className="neo-input"
-                        placeholder="Leave blank to keep current"
-                        value={password}
-                        onChange={(e) => {
-                          setPassword(e.target.value);
-                          setTouched((prev) => ({ ...prev, password: true }));
-                        }}
-                      />
-                      {touched.password && validationErrors.password && (
-                        <span className="neo-field-error-msg">{validationErrors.password}</span>
-                      )}
-                    </div>
+                    <FloatingInput
+                      type="password"
+                      label="New Password (Optional)"
+                      placeholder="Leave blank to keep current"
+                      value={password}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        setTouched((prev) => ({ ...prev, password: true }));
+                      }}
+                      error={touched.password && validationErrors.password ? validationErrors.password : ""}
+                    />
 
-                    <div className="password-field-item">
-                      <label className="neo-label">Confirm Password</label>
-                      <input
-                        type="password"
-                        className="neo-input"
-                        placeholder="Confirm new password"
-                        value={confirmPassword}
-                        onChange={(e) => {
-                          setConfirmPassword(e.target.value);
-                          setTouched((prev) => ({ ...prev, confirmPassword: true }));
-                        }}
-                      />
-                      {touched.confirmPassword && validationErrors.confirmPassword && (
-                        <span className="neo-field-error-msg">{validationErrors.confirmPassword}</span>
-                      )}
-                    </div>
+                    <FloatingInput
+                      type="password"
+                      label="Confirm Password"
+                      placeholder="Confirm new password"
+                      value={confirmPassword}
+                      onChange={(e) => {
+                        setConfirmPassword(e.target.value);
+                        setTouched((prev) => ({ ...prev, confirmPassword: true }));
+                      }}
+                      error={touched.confirmPassword && validationErrors.confirmPassword ? validationErrors.confirmPassword : ""}
+                    />
                   </div>
                 </div>
               </div>
@@ -370,13 +347,25 @@ const EditProfile = ({ onClose }) => {
 
               <div className="profile-form-actions">
                 {onClose && (
-                  <button type="button" className="btn-neo-cancel" onClick={onClose}>
+                  <NeoButton type="button" variant="cancel" onClick={onClose} disabled={submitting}>
                     Cancel
-                  </button>
+                  </NeoButton>
                 )}
-                <button type="submit" className="btn-neo btn-neo-solid" disabled={submitting}>
-                  {submitting ? "Saving Changes..." : "Save Profile"}
-                </button>
+                <NeoButton 
+                  type="submit" 
+                  variant="solid" 
+                  loading={submitting}
+                  disabled={hasErrors || !profile.username.trim()}
+                  disabledReason={
+                    !profile.username.trim()
+                      ? "Username is required"
+                      : hasErrors
+                      ? "Please resolve form validation errors"
+                      : ""
+                  }
+                >
+                  Save Profile
+                </NeoButton>
               </div>
             </div>
           </div>

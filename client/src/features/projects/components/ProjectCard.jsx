@@ -9,6 +9,15 @@ import ReflectiveCard from "../../../components/common/ReflectiveCard";
 import { useAuth } from "../../auth/context/AuthContext";
 import "./ProjectCard.css";
 
+const normalizeImageSrc = (img) => {
+  if (!img) return null;
+  const str = String(img).trim();
+  if (str.startsWith("image/")) {
+    return `data:${str}`;
+  }
+  return str;
+};
+
 const ProjectCard = ({
   project,
   onDelete,
@@ -84,6 +93,7 @@ const ProjectCard = ({
 
   const statusLabel = isCompleted ? "Completed" : "Active";
   const clientsCount = clients.length;
+  const coverImageSrc = normalizeImageSrc(project.project_image);
 
   return (
     <div
@@ -110,10 +120,10 @@ const ProjectCard = ({
         className={`project-card-reflective ${isCompleted ? "archived" : ""} ${isCompact ? "compact" : ""}`}
         onClick={handleCardClick}
         backdrop={
-          !isCompact && project.project_image ? (
+          !isCompact && coverImageSrc ? (
             <div className="prc-image-backdrop">
               <img
-                src={project.project_image}
+                src={coverImageSrc}
                 alt={project.project_name}
                 className="prc-backdrop-img"
               />
@@ -124,9 +134,9 @@ const ProjectCard = ({
         <div className={`project-reflective-layout ${isCompact ? "compact" : ""}`}>
           {/* Top Header Row */}
           <div className="reflective-card__header">
-            {isCompact && project.project_image && (
+            {isCompact && coverImageSrc && (
               <img
-                src={project.project_image}
+                src={coverImageSrc}
                 alt=""
                 className="prc-compact-thumb"
               />

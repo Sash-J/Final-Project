@@ -1,34 +1,36 @@
-.add-milestone-panel {
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 20px;
-  animation: milestoneSlideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+@import "../../../styles/typography.css";
 
-@keyframes milestoneSlideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* ==========================================================================
+   AddMilestonePanel.css - Global Typography & Form Layout
+   Implements 8-Level Typography Scale, Strict CSS Separation,
+   and Dual-Theme Support for the Milestone Modal.
+   ========================================================================== */
+
+.add-milestone-panel {
+  font-family: var(--font-main);
+  display: flex;
+  flex-direction: column;
+  gap: var(--neo-form-gap, 30px);
+  width: 100%;
 }
 
 .add-milestone-panel-row {
-  display: flex;  
-  gap: 20px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
+.add-milestone-panel-row > .floating-field,
 .add-milestone-panel-row .neo-form-group {
-  flex: 1;
-  min-width: 160px;
+  margin: 0;
 }
 
+/* --------------------------------------------------------------------------
+   Header Typography
+   -------------------------------------------------------------------------- */
 .add-milestone-header-row {
   display: flex;
   justify-content: space-between;
@@ -41,10 +43,40 @@
   gap: 15px;
 }
 
-.add-milestone-form-top {
-  margin-top: 20px;
+/* Level 2: Heading 1 (Modal Title) */
+.add-milestone-header-row h2 {
+  font-family: var(--font-main);
+  font-size: var(--fs-h1);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-h1);
+  letter-spacing: var(--ls-h1);
+  color: #ffffff;
+  margin: 0 0 6px 0;
+  text-transform: uppercase;
 }
 
+/* Level 7: Caption (Modal Subtitle) */
+.add-milestone-header-row p {
+  font-family: var(--font-main);
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-caption);
+  letter-spacing: var(--ls-caption);
+  color: rgba(255, 255, 255, 0.45);
+  margin: 0;
+}
+
+body.light-theme .add-milestone-header-row h2 {
+  color: #111827;
+}
+
+body.light-theme .add-milestone-header-row p {
+  color: #57606a;
+}
+
+/* --------------------------------------------------------------------------
+   Badges and Labels
+   -------------------------------------------------------------------------- */
 .add-milestone-label-row {
   display: flex;
   justify-content: space-between;
@@ -52,15 +84,130 @@
 }
 
 .add-milestone-label-with-badge {
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  font-family: var(--font-main);
+  font-size: inherit;
 }
 
+/* Level 8: Overline (Provenance Badge) */
+.provenance-badge {
+  font-family: var(--font-main);
+  font-size: var(--fs-overline);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-overline);
+  letter-spacing: var(--ls-overline);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-left: 10px;
+  text-transform: uppercase;
+}
+
+.provenance-badge.role-client {
+  background: #2dd4bf;
+}
+
+.provenance-badge.role-visiondivision {
+  background: #6366f1;
+}
+
+/* --------------------------------------------------------------------------
+   Readonly State Typography
+   -------------------------------------------------------------------------- */
+.sui-milestone-readonly {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+}
+
+body.light-theme .sui-milestone-readonly {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+/* Level 4: Heading 3 (Readonly Milestone Title) */
+.sui-milestone-readonly-title {
+  font-family: var(--font-main);
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-h3);
+  letter-spacing: var(--ls-h3);
+  color: #ffffff;
+  display: block;
+  margin-bottom: 6px;
+}
+
+body.light-theme .sui-milestone-readonly-title {
+  color: #111827;
+}
+
+/* Level 6: Body (Readonly Milestone Description) */
+.sui-milestone-readonly-desc {
+  font-family: var(--font-main);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-body);
+  letter-spacing: var(--ls-body);
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 12px 0;
+}
+
+body.light-theme .sui-milestone-readonly-desc {
+  color: #24292f;
+}
+
+/* Level 7: Caption (Readonly Status, Date, Notes) */
+.sui-milestone-readonly-status,
+.sui-milestone-readonly-date,
+.sui-milestone-readonly-notes {
+  font-family: var(--font-main);
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-caption);
+  letter-spacing: var(--ls-caption);
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 4px;
+}
+
+body.light-theme .sui-milestone-readonly-status,
+body.light-theme .sui-milestone-readonly-date,
+body.light-theme .sui-milestone-readonly-notes {
+  color: #57606a;
+}
+
+.sui-milestone-readonly-status strong,
+.sui-milestone-readonly-date strong {
+  font-weight: var(--fw-semibold);
+  color: #ffffff;
+}
+
+body.light-theme .sui-milestone-readonly-status strong,
+body.light-theme .sui-milestone-readonly-date strong {
+  color: #111827;
+}
+
+/* --------------------------------------------------------------------------
+   Action Buttons Typography
+   -------------------------------------------------------------------------- */
 .add-milestone-panel-actions {
   display: flex;
   justify-content: flex-end;
   gap: 15px;
-  margin-top: 10px;
+  margin-top: 0;
+}
+
+/* Level 6: Body (Action Buttons) */
+.add-milestone-panel-actions button,
+.btn-milestone-delete {
+  font-family: var(--font-main);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-body);
+  letter-spacing: var(--ls-body);
 }
 
 .milestone-delete-tooltip {
@@ -93,29 +240,20 @@ body.light-theme .btn-milestone-delete:hover {
   color: #a40e26;
 }
 
-.provenance-badge {
-  color: #fff;
-  padding: 2px 10px;
-  border-radius: 4px;
-  margin-left: 10px;
-  font-size: 0.75rem;
-  font-weight: bold;
-}
-
-.provenance-badge.role-client {
-  background: #2dd4bf;
-}
-
-.provenance-badge.role-visiondivision {
-  background: #6366f1;
+/* --------------------------------------------------------------------------
+   Responsive & Interactive Extras
+   -------------------------------------------------------------------------- */
+.milestone-sync-tooltip {
+  display: inline-flex;
 }
 
 @media (max-width: 768px) {
   .add-milestone-panel-row {
-    flex-direction: column;
-    gap: 0;
+    grid-template-columns: 1fr;
+    gap: var(--neo-form-gap, 30px);
   }
 }
+
 /* Morphing Sync Button */
 .btn-morph-sync {
   display: flex;
@@ -130,7 +268,6 @@ body.light-theme .btn-milestone-delete:hover {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   margin-top: -10px;
   margin-left: 20px;
-
 }
 
 .btn-morph-sync:hover {

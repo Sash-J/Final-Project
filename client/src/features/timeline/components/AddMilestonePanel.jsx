@@ -1,8 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { projectService } from "../../../services/projectService";
 import { validateAddMilestoneForm, validateMilestoneNote } from "../../../utils/validators";
 import Icon from "../../../components/common/Icon";
 import HoverTooltip from "../../../components/common/HoverTooltip";
+import FloatingInput from "../../../components/common/FloatingInput";
+import GlassDatePicker from "../../../components/common/GlassDatePicker";
+import NeoButton from "../../../components/common/NeoButton";
 import "./AddMilestonePanel.css";
 import { useAuth } from "../../auth/context/AuthContext";
 
@@ -38,7 +41,6 @@ const AddMilestonePanel = ({
     description: false,
     note: false,
   });
-  const dateRef = useRef(null);
 
   useEffect(() => {
     if (mode === "edit" && milestone) {
@@ -171,7 +173,7 @@ const AddMilestonePanel = ({
   };
 
   return (
-    <>
+    <div className="add-milestone-panel">
       <div className="modal-header-section add-milestone-header-row">
         <div className="add-milestone-header-title-block">
           <div>
@@ -189,7 +191,7 @@ const AddMilestonePanel = ({
             </p>
           </div>
           {!isCrew && !isClient && (
-            <HoverTooltip text="Push to schedule" icon="event" style={{ display: "inline-flex" }}>
+            <HoverTooltip text="Push to schedule" icon="event" className="milestone-sync-tooltip">
               <button 
                 type="button" 
                 className={`btn-morph-sync ${pushToSchedule ? 'synced' : ''}`}
@@ -204,114 +206,87 @@ const AddMilestonePanel = ({
         </div>
       </div>
       
-      <div className="neo-status-messages">
-        <div className={`neo-status error ${errorMsg ? "show" : ""}`}>
-          <Icon name="error" modifiers="sm" /> <span>{errorMsg}</span>
+      {(errorMsg || successMsg) && (
+        <div className="neo-status-messages">
+          {errorMsg && (
+            <div className="neo-status error show">
+              <Icon name="error" modifiers="sm" /> <span>{errorMsg}</span>
+            </div>
+          )}
+          {successMsg && (
+            <div className="neo-status success show">
+              <Icon name="check_circle" modifiers="sm" /> <span>{successMsg}</span>
+            </div>
+          )}
         </div>
-        <div className={`neo-status success ${successMsg ? "show" : ""}`}>
-          <Icon name="check_circle" modifiers="sm" /> <span>{successMsg}</span>
-        </div>
-      </div>
+      )}
 
       {!isClient || mode === "add" ? (
         <>
-          <div className="neo-form-group add-milestone-form-top">
-            <div className="add-milestone-label-row">
-              <label className="neo-label">Title</label>
-              <span className="char-counter">{milestoneTitle.length}/25</span>
-            </div>
-            <input
-              type="text"
-              className="neo-input" 
-              maxLength={25}
-              placeholder="e.g. Pre-Production Complete"
-              value={milestoneTitle}
-              onChange={(e) => {
-                setMilestoneTitle(e.target.value);
-                setTouched((prev) => ({ ...prev, title: true }));
-              }}
-            />
-            {touched.title && validationErrors.title && (
-              <span className="neo-field-error-msg">
-                {validationErrors.title}
-              </span>
-            )}
-          </div>
+          <FloatingInput
+            label={`Title (${milestoneTitle.length}/25)`}
+            maxLength={25}
+            placeholder="e.g. Pre-Production Complete"
+            value={milestoneTitle}
+            onChange={(e) => {
+              setMilestoneTitle(e.target.value);
+              setTouched((prev) => ({ ...prev, title: true }));
+            }}
+            error={touched.title && validationErrors.title ? validationErrors.title : ""}
+          />
 
           <div className="add-milestone-panel-row">
-            <div className="neo-form-group">
-              <label className="neo-label">Target Date</label>
-              <div className="icon-field-wrapper">
-                <Icon
-                  name="calendar_month"
-                  modifiers="md"
-                  onClick={() => dateRef.current?.showPicker()}
-                  style={{ cursor: "pointer", pointerEvents: "auto" }}
-                />
-                <input
-                  type="date"
-                  ref={dateRef}
-                  className="neo-input"
-                  value={milestoneDate}
-                  onChange={(e) => {
-                    setMilestoneDate(e.target.value);
-                    setTouched((prev) => ({ ...prev, target_date: true }));
-                  }}
-                />
-              </div>
-              {touched.target_date && validationErrors.target_date && (
-                <span className="neo-field-error-msg">
-                  {validationErrors.target_date}
-                </span>
-              )}
-            </div>
-            <div className="neo-form-group">
-              <label className="neo-label">Assignee</label>
-              <select
-                className="neo-input"
-                value={milestoneAssignee}
-                onChange={(e) => setMilestoneAssignee(Number(e.target.value))}
-              >
-                <option value={1}>VisionDivision</option>
-                <option value={0}>Client</option>
-              </select>
-            </div>
-            <div className="neo-form-group">
-              <label className="neo-label">Status</label>
-              <select
-                className="neo-input"
-                value={milestoneStatus}
-                onChange={(e) => setMilestoneStatus(e.target.value)}
-              >
-                <option value="pending">Pending</option>
-                <option value="in_progress">In Progress</option>
-                <option value="completed">Completed</option>
-              </select>
-            </div>
+            <FloatingInput
+              label="Target Date"
+              hasValue={Boolean(milestoneDate)}
+              required
+              error={touched.target_date && validationErrors.target_date ? validationErrors.target_date : ""}
+            >
+              <GlassDatePicker
+                value={milestoneDate}
+                onChange={(val) => {
+                  setMilestoneDate(val);
+                  setTouched((prev) => ({ ...prev, target_date: true }));
+                }}
+                required
+              />
+            </FloatingInput>
+
+            <FloatingInput
+              as="select"
+              label="Assignee"
+              value={milestoneAssignee}
+              onChange={(e) => setMilestoneAssignee(Number(e.target.value))}
+            >
+              <option value={1}>VisionDivision</option>
+              <option value={0}>Client</option>
+            </FloatingInput>
+
+            <FloatingInput
+              as="select"
+              label="Status"
+              value={milestoneStatus}
+              onChange={(e) => setMilestoneStatus(e.target.value)}
+            >
+              <option value="pending">Pending</option>
+              <option value="in_progress">In Progress</option>
+              <option value="completed">Completed</option>
+            </FloatingInput>
           </div>
 
-          <div className="neo-form-group">
-            <div className="add-milestone-label-row">
-              <label className="neo-label">Description (Optional)</label>
-              <span className="char-counter">{milestoneDesc.length}/75</span>
-            </div>
-            <textarea
-              className="neo-input"
-              maxLength={75}
-              rows="2"
-              placeholder="Enter milestone details..."
-              value={milestoneDesc}
-              onChange={(e) => {
-                setMilestoneDesc(e.target.value);
-                setTouched((prev) => ({ ...prev, description: true }));
-              }}
-            />
-            {touched.description && validationErrors.description && (
-              <span className="neo-field-error-msg">
-                {validationErrors.description}
-              </span>
-            )}
-          </div>
+          <FloatingInput
+            as="textarea"
+            label={`Description (Optional) (${milestoneDesc.length}/75)`}
+            maxLength={75}
+            rows={2}
+            placeholder="Enter milestone details..."
+            value={milestoneDesc}
+            onChange={(e) => {
+              setMilestoneDesc(e.target.value);
+              setTouched((prev) => ({ ...prev, description: true }));
+            }}
+            error={touched.description && validationErrors.description ? validationErrors.description : ""}
+          />
         </>
       ) : isCrew ? (
         <div className="sui-milestone-readonly">
@@ -341,69 +316,69 @@ const AddMilestonePanel = ({
       )}
 
       {mode === "edit" && !isCrew && (
-        <div className="neo-form-group">
-          <div className="add-milestone-label-row">
-            <label className="neo-label add-milestone-label-with-badge">
-              Timeline Notes (Optional)
+        <FloatingInput
+          as="textarea"
+          label={
+            <span className="add-milestone-label-with-badge">
+              Timeline Notes ({clientNote.length}/50)
               {renderProvenanceBadge()}
-            </label>
-            <span className="char-counter">{clientNote.length}/50</span>
-          </div>
-          <textarea
-            className="neo-input"
-            maxLength={50}
-            rows="2"
-            value={clientNote}
-            onChange={(e) => {
-              setClientNote(e.target.value);
-              setTouched((prev) => ({ ...prev, note: true }));
-            }}
-            placeholder="Add latest update or feedback here..."
-          ></textarea>
-          {touched.note && validationErrors.note && (
-            <span className="neo-field-error-msg">
-              {validationErrors.note}
             </span>
-          )}
-        </div>
+          }
+          maxLength={50}
+          rows={2}
+          value={clientNote}
+          onChange={(e) => {
+            setClientNote(e.target.value);
+            setTouched((prev) => ({ ...prev, note: true }));
+          }}
+          placeholder="Add latest update or feedback here..."
+          error={touched.note && validationErrors.note ? validationErrors.note : ""}
+        />
       )}
 
       <div className="add-milestone-panel-actions">
         {mode === "edit" && !isClient && !isCrew && onDelete && (
           <HoverTooltip text="Delete Milestone" wrapperClassName="milestone-delete-tooltip">
-            <button
+            <NeoButton
               type="button"
-              className="btn-neo-cancel btn-milestone-delete"
+              variant="danger"
+              className="btn-milestone-delete"
               onClick={onDelete}
               disabled={milestoneSaving}
-            >
-              <Icon name="delete" modifiers="sm" />
-            </button>
+              icon="delete"
+            />
           </HoverTooltip>
         )}
-        <button 
+        <NeoButton 
           type="button" 
-          className="btn-neo-cancel" 
+          variant="cancel" 
           onClick={onClose}
           disabled={milestoneSaving}
         >
           {mode === "edit" && isCrew ? "Close" : "Cancel"}
-        </button>
+        </NeoButton>
         {!isCrew && (
-          <button
+          <NeoButton
             type="button"
-            className="btn-neo btn-neo-solid"
+            variant="solid"
             onClick={handleSaveMilestone}
-            disabled={milestoneSaving}
-          >
-            {milestoneSaving 
-              ? (mode === "add" ? "Adding..." : "Saving Changes...") 
-              : (mode === "add" ? "Add Milestone" : "Save Changes")
+            loading={milestoneSaving}
+            disabled={!milestoneTitle.trim() || !milestoneDate || (!isClient && hasErrors)}
+            disabledReason={
+              !milestoneTitle.trim()
+                ? "Milestone title is required"
+                : !milestoneDate
+                ? "Target date is required"
+                : (!isClient && hasErrors)
+                ? "Please fix form validation errors"
+                : ""
             }
-          </button>
+          >
+            {mode === "add" ? "Add Milestone" : "Save Changes"}
+          </NeoButton>
         )}
       </div>
-    </>
+    </div>
   );
 };
 

@@ -7,9 +7,11 @@ import GlassDropdown from "../../../components/common/GlassDropdown";
 import GlassSurface from "../../../components/effects/GlassSurface";
 import HoverTooltip from "../../../components/common/HoverTooltip";
 import FloatingInput from "../../../components/common/FloatingInput";
+import NeoButton from "../../../components/common/NeoButton";
 import { projectService } from "../../../services/projectService";
 import PaymentReceiptModal from "./PaymentReceiptModal";
 import { formatCurrency, getCurrencySymbol } from "../../../utils/currencyUtils";
+import { validatePaymentForm } from "../../../utils/validators";
 import "./ClientPayments.css";
 
 const PAYMENT_METHODS = [
@@ -57,8 +59,36 @@ const ClientPayments = ({ projectId }) => {
 
   // Consolidated form state to eliminate 6 individual state re-render cascades
   const [form, setForm] = useState(INITIAL_FORM_STATE);
+  const [touched, setTouched] = useState({
+    description: false,
+    amount: false,
+    bank_ref: false,
+    payment_date: false,
+  });
   const [recording, setRecording] = useState(false);
   const [msg, setMsg] = useState(null);
+
+  // Real-time validation computation
+  const validationErrors = useMemo(() => validatePaymentForm(form), [form]);
+  const isFormValid = useMemo(
+    () =>
+      !validationErrors.description &&
+      !validationErrors.amount &&
+      !validationErrors.payment_date &&
+      !validationErrors.bank_ref,
+    [validationErrors]
+  );
+
+  const submitDisabledReason = useMemo(() => {
+    if (!form.description.trim()) return "Enter payment description first";
+    if (!form.amount || parseFloat(form.amount) <= 0) return "Enter valid payment amount";
+    if (!form.payment_date) return "Select payment date";
+    if (validationErrors.description) return validationErrors.description;
+    if (validationErrors.amount) return validationErrors.amount;
+    if (validationErrors.payment_date) return validationErrors.payment_date;
+    if (validationErrors.bank_ref) return validationErrors.bank_ref;
+    return "";
+  }, [form, validationErrors]);
 
   // Signatory State
   const [signatories, setSignatories] = useState([]);
@@ -189,15 +219,22 @@ const ClientPayments = ({ projectId }) => {
   const handleSubmit = useCallback(
     async (e) => {
       e.preventDefault();
-      const parsedAmount = parseFloat(form.amount);
-      if (!parsedAmount || isNaN(parsedAmount) || parsedAmount <= 0 || !form.payment_date) {
+      setTouched({
+        description: true,
+        amount: true,
+        bank_ref: true,
+        payment_date: true,
+      });
+
+      if (!isFormValid) {
         setMsg({
           type: "error",
-          text: "Please provide a valid payment amount and date.",
+          text: "Please correct the form errors before capturing payment.",
         });
         return;
       }
 
+      const parsedAmount = parseFloat(form.amount);
       setRecording(true);
       setMsg(null);
 
@@ -230,10 +267,16 @@ const ClientPayments = ({ projectId }) => {
           status: "Completed",
         });
 
-        // Reset form
+        // Reset form & touched state
         setForm({
           ...INITIAL_FORM_STATE,
           payment_date: getTodayDateString(),
+        });
+        setTouched({
+          description: false,
+          amount: false,
+          bank_ref: false,
+          payment_date: false,
         });
       } else {
         setMsg({
@@ -243,7 +286,7 @@ const ClientPayments = ({ projectId }) => {
       }
       setRecording(false);
     },
-    [form, selectedSignatoryId, signatoriesById, recordPayment, projectId]
+    [form, isFormValid, selectedSignatoryId, signatoriesById, recordPayment, projectId]
   );
 
   return (
@@ -448,6 +491,8 @@ const ClientPayments = ({ projectId }) => {
                 required
                 value={form.description}
                 onChange={(e) => handleFormFieldChange("description", e.target.value)}
+                onBlur={() => setTouched((prev) => ({ ...prev, description: true }))}
+                error={touched.description ? validationErrors.description : ""}
               />
 
               <FloatingInput
@@ -459,6 +504,8 @@ const ClientPayments = ({ projectId }) => {
                 required
                 value={form.amount}
                 onChange={(e) => handleFormFieldChange("amount", e.target.value)}
+                onBlur={() => setTouched((prev) => ({ ...prev, amount: true }))}
+                error={touched.amount ? validationErrors.amount : ""}
               />
 
               <div className="payment-form-row">
@@ -480,6 +527,8 @@ const ClientPayments = ({ projectId }) => {
                   placeholder="e.g. TXN-8823901"
                   value={form.bank_ref}
                   onChange={(e) => handleFormFieldChange("bank_ref", e.target.value)}
+                  onBlur={() => setTouched((prev) => ({ ...prev, bank_ref: true }))}
+                  error={touched.bank_ref ? validationErrors.bank_ref : ""}
                 />
               </div>
 
@@ -487,10 +536,14 @@ const ClientPayments = ({ projectId }) => {
                 label="Payment Date"
                 hasValue={Boolean(form.payment_date)}
                 required
+                error={touched.payment_date ? validationErrors.payment_date : ""}
               >
                 <GlassDatePicker
                   value={form.payment_date}
-                  onChange={(val) => handleFormFieldChange("payment_date", val)}
+                  onChange={(val) => {
+                    handleFormFieldChange("payment_date", val);
+                    setTouched((prev) => ({ ...prev, payment_date: true }));
+                  }}
                   required
                 />
               </FloatingInput>
@@ -517,14 +570,18 @@ const ClientPayments = ({ projectId }) => {
                 onChange={(e) => handleFormFieldChange("notes", e.target.value)}
               />
 
-              <button
+              <NeoButton
                 type="submit"
-                className="btn-neo btn-neo-solid btn-capture-submit"
-                disabled={recording}
+                variant="solid"
+                fullWidth
+                loading={recording}
+                disabled={!isFormValid}
+                disabledReason={submitDisabledReason}
+                icon="verified"
+                className="btn-capture-submit"
               >
-                <Icon name="verified" modifiers="sm" />
-                <span>{recording ? "Recording..." : "Capture Payment"}</span>
-              </button>
+                Capture Payment
+              </NeoButton>
             </form>
           </div>
         )}

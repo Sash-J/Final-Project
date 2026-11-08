@@ -5,9 +5,12 @@ import Icon from "../../../components/common/Icon";
 import HoverTooltip from "../../../components/common/HoverTooltip";
 import GlassDatePicker from "../../../components/common/GlassDatePicker";
 import GlassDropdown from "../../../components/common/GlassDropdown";
+import FloatingInput from "../../../components/common/FloatingInput";
+import NeoButton from "../../../components/common/NeoButton";
 import PublishModal from "../../../components/common/PublishModal";
 import { downloadReceiptVectorPDF } from "../utils/generateReceiptPDF";
 import { formatCurrency, getCurrencySymbol } from "../../../utils/currencyUtils";
+import { validatePaymentForm } from "../../../utils/validators";
 import { useProjects } from "../context/ProjectContext";
 import { projectService } from "../../../services/projectService";
 import {
@@ -89,6 +92,34 @@ const PaymentReceiptModal = ({
     signatory_name: payment?.signatory_name || "",
     signatory_role: payment?.signatory_role || "",
   });
+
+  const [editTouched, setEditTouched] = useState({
+    description: false,
+    amount: false,
+    bank_ref: false,
+    payment_date: false,
+  });
+
+  const validationErrors = useMemo(() => validatePaymentForm(form), [form]);
+  const isFormValid = useMemo(
+    () =>
+      !validationErrors.description &&
+      !validationErrors.amount &&
+      !validationErrors.payment_date &&
+      !validationErrors.bank_ref,
+    [validationErrors]
+  );
+
+  const editDisabledReason = useMemo(() => {
+    if (!form.description.trim()) return "Payment description is required";
+    if (!form.amount || parseFloat(form.amount) <= 0) return "Valid payment amount required";
+    if (!form.payment_date) return "Select payment date";
+    if (validationErrors.description) return validationErrors.description;
+    if (validationErrors.amount) return validationErrors.amount;
+    if (validationErrors.payment_date) return validationErrors.payment_date;
+    if (validationErrors.bank_ref) return validationErrors.bank_ref;
+    return "";
+  }, [form, validationErrors]);
 
   const activeProjectId = project?.id || payment?.project_id;
   const projectData = (activeProjectId && detailsCache?.[activeProjectId])
@@ -249,6 +280,18 @@ const PaymentReceiptModal = ({
     e.preventDefault();
     if (!project?.id || !payment?.id) return;
 
+    setEditTouched({
+      description: true,
+      amount: true,
+      bank_ref: true,
+      payment_date: true,
+    });
+
+    if (!isFormValid) {
+      setErrorMsg("Please fix validation errors before saving.");
+      return;
+    }
+
     setIsSaving(true);
     setErrorMsg(null);
 
@@ -279,7 +322,7 @@ const PaymentReceiptModal = ({
     }
 
     setIsSaving(false);
-  }, [project?.id, payment, form, updatePayment, onUpdate]);
+  }, [project?.id, payment, form, isFormValid, updatePayment, onUpdate]);
 
   // 5. Publish to Client Handlers
   const handlePublishReceipt = useCallback(async () => {
@@ -551,67 +594,72 @@ const PaymentReceiptModal = ({
             )}
 
             <div className="receipt-edit-grid">
-              <div className="neo-form-group">
-                <label className="neo-label">Payment Description / Milestone</label>
-                <input
-                  type="text"
-                  className="neo-input"
-                  required
-                  placeholder="e.g. Initial Milestone Advance"
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                />
-              </div>
+              <FloatingInput
+                label="Payment Description / Milestone"
+                placeholder="e.g. Initial Milestone Advance"
+                required
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                onBlur={() => setEditTouched((prev) => ({ ...prev, description: true }))}
+                error={editTouched.description ? validationErrors.description : ""}
+              />
 
-              <div className="neo-form-group">
-                <label className="neo-label">Amount ({getCurrencySymbol()})</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  className="neo-input"
-                  required
-                  value={form.amount}
-                  onChange={(e) => setForm({ ...form, amount: e.target.value })}
-                />
-              </div>
+              <FloatingInput
+                type="number"
+                step="0.01"
+                label={`Amount (${getCurrencySymbol()})`}
+                prefix={getCurrencySymbol()}
+                required
+                value={form.amount}
+                onChange={(e) => setForm({ ...form, amount: e.target.value })}
+                onBlur={() => setEditTouched((prev) => ({ ...prev, amount: true }))}
+                error={editTouched.amount ? validationErrors.amount : ""}
+              />
 
-              <div className="neo-form-group">
-                <label className="neo-label">Bank Reference / Slip No</label>
-                <input
-                  type="text"
-                  className="neo-input"
-                  placeholder="e.g. TXN-8823901"
-                  value={form.bank_ref}
-                  onChange={(e) => setForm({ ...form, bank_ref: e.target.value })}
-                />
-              </div>
+              <FloatingInput
+                label="Bank Reference / Slip No"
+                placeholder="e.g. TXN-8823901"
+                value={form.bank_ref}
+                onChange={(e) => setForm({ ...form, bank_ref: e.target.value })}
+                onBlur={() => setEditTouched((prev) => ({ ...prev, bank_ref: true }))}
+                error={editTouched.bank_ref ? validationErrors.bank_ref : ""}
+              />
 
-              <div className="neo-form-group">
-                <label className="neo-label">Payment Method</label>
-                <select
-                  className="neo-input"
-                  value={form.payment_method}
-                  onChange={(e) => setForm({ ...form, payment_method: e.target.value })}
-                >
-                  {PAYMENT_METHODS.map((m) => (
-                    <option key={m} value={m}>
-                      {m}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <FloatingInput
+                as="select"
+                label="Payment Method"
+                value={form.payment_method}
+                onChange={(e) => setForm({ ...form, payment_method: e.target.value })}
+              >
+                {PAYMENT_METHODS.map((m) => (
+                  <option key={m} value={m}>
+                    {m}
+                  </option>
+                ))}
+              </FloatingInput>
 
-              <div className="neo-form-group receipt-form-full">
-                <label className="neo-label">Payment Date</label>
+              <FloatingInput
+                className="receipt-form-full"
+                label="Payment Date"
+                hasValue={Boolean(form.payment_date)}
+                required
+                error={editTouched.payment_date ? validationErrors.payment_date : ""}
+              >
                 <GlassDatePicker
                   value={form.payment_date}
-                  onChange={(val) => setForm({ ...form, payment_date: val })}
+                  onChange={(val) => {
+                    setForm({ ...form, payment_date: val });
+                    setEditTouched((prev) => ({ ...prev, payment_date: true }));
+                  }}
                   required
                 />
-              </div>
+              </FloatingInput>
 
-              <div className="neo-form-group receipt-form-full">
-                <label className="neo-label">Authorizing Signatory</label>
+              <FloatingInput
+                className="receipt-form-full"
+                label="Authorizing Signatory"
+                hasValue={Boolean(form.signatory_id)}
+              >
                 <GlassDropdown
                   options={signatoryOptions}
                   value={form.signatory_id}
@@ -629,36 +677,37 @@ const PaymentReceiptModal = ({
                   placeholder="Select Authorizing Signatory..."
                   modifiers="fluid"
                 />
-              </div>
+              </FloatingInput>
 
-              <div className="neo-form-group receipt-form-full">
-                <label className="neo-label">Notes & Remarks</label>
-                <textarea
-                  className="neo-input"
-                  rows="3"
-                  placeholder="Additional notes for receipt and records"
-                  value={form.notes}
-                  onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                />
-              </div>
+              <FloatingInput
+                className="receipt-form-full"
+                as="textarea"
+                label="Notes & Remarks"
+                rows={3}
+                placeholder="Additional notes for receipt and records"
+                value={form.notes}
+                onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              />
             </div>
 
             <div className="receipt-edit-actions">
-              <button
+              <NeoButton
                 type="button"
-                className="btn-neo"
+                variant="cancel"
                 onClick={() => setIsEditing(false)}
                 disabled={isSaving}
               >
                 Cancel
-              </button>
-              <button
+              </NeoButton>
+              <NeoButton
                 type="submit"
-                className="btn-neo btn-neo-solid"
-                disabled={isSaving}
+                variant="solid"
+                loading={isSaving}
+                disabled={!isFormValid}
+                disabledReason={editDisabledReason}
               >
-                {isSaving ? "Saving Changes..." : "Save Receipt Changes"}
-              </button>
+                Save Receipt Changes
+              </NeoButton>
             </div>
           </form>
         ) : (

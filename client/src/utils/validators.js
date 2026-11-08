@@ -196,3 +196,256 @@ export function validateAddMilestoneForm(title, date, desc) {
     description: validateMilestoneDescription(desc),
   };
 }
+
+// ─── Payment validators ────────────────────────────────────────────────────
+
+/**
+ * Validates a monetary payment amount.
+ * @param {string|number} value
+ * @param {{ required?: boolean, max?: number }} [opts]
+ * @returns {string} error message or ""
+ */
+export function validatePaymentAmount(value, { required = true, max = 1000000000 } = {}) {
+  const strVal = String(value ?? "").trim();
+  if (!strVal) {
+    return required ? "Payment amount is required." : "";
+  }
+  const num = parseFloat(strVal);
+  if (isNaN(num) || !isFinite(num)) {
+    return "Please enter a valid numeric amount.";
+  }
+  if (num <= 0) {
+    return "Payment amount must be greater than 0.";
+  }
+  if (num > max) {
+    return `Amount cannot exceed ${max.toLocaleString()}.`;
+  }
+  // Check decimal places (max 2 decimals)
+  if (strVal.includes(".")) {
+    const decimals = strVal.split(".")[1];
+    if (decimals && decimals.length > 2) {
+      return "Amount cannot have more than 2 decimal places.";
+    }
+  }
+  return "";
+}
+
+/**
+ * Validates a payment description or milestone reference.
+ * @param {string} value
+ * @param {{ required?: boolean, min?: number, max?: number }} [opts]
+ * @returns {string} error message or ""
+ */
+export function validatePaymentDescription(
+  value,
+  { required = true, min = 2, max = 150 } = {}
+) {
+  const strVal = String(value ?? "").trim();
+  if (!strVal) {
+    return required ? "Payment description is required." : "";
+  }
+  if (strVal.length < min) {
+    return `Description must be at least ${min} characters.`;
+  }
+  if (strVal.length > max) {
+    return `Description cannot exceed ${max} characters.`;
+  }
+  if (/[<>{}[\]]/.test(strVal)) {
+    return "Special characters < > { } [ ] are prohibited for security.";
+  }
+  return "";
+}
+
+/**
+ * Validates a bank transfer or slip reference code.
+ * @param {string} value
+ * @returns {string} error message or ""
+ */
+export function validateBankRef(value) {
+  const strVal = String(value ?? "").trim();
+  if (!strVal) return "";
+  if (strVal.length > 50) {
+    return "Reference code cannot exceed 50 characters.";
+  }
+  if (!/^[a-zA-Z0-9_\-/#\s]+$/.test(strVal)) {
+    return "Reference may only contain letters, numbers, hyphens, and slashes.";
+  }
+  return "";
+}
+
+/**
+ * Validates a payment date string (YYYY-MM-DD).
+ * @param {string} value
+ * @param {{ required?: boolean }} [opts]
+ * @returns {string} error message or ""
+ */
+export function validatePaymentDate(value, { required = true } = {}) {
+  const strVal = String(value ?? "").trim();
+  if (!strVal) {
+    return required ? "Payment date is required." : "";
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(strVal)) {
+    return "Date must be in YYYY-MM-DD format.";
+  }
+  const d = new Date(strVal);
+  if (isNaN(d.getTime())) {
+    return "Invalid calendar date.";
+  }
+  return "";
+}
+
+/**
+ * Batch validator for payment form.
+ * @param {{ amount: any, description: string, payment_date: string, bank_ref?: string }} form
+ * @returns {{ amount: string, description: string, payment_date: string, bank_ref: string }}
+ */
+export function validatePaymentForm(form) {
+  return {
+    amount: validatePaymentAmount(form?.amount, { required: true }),
+    description: validatePaymentDescription(form?.description, { required: true }),
+    payment_date: validatePaymentDate(form?.payment_date, { required: true }),
+    bank_ref: validateBankRef(form?.bank_ref),
+  };
+}
+
+// ─── Project validators ────────────────────────────────────────────────────
+
+/**
+ * Validates a project title/name.
+ * @param {string} value
+ * @param {{ required?: boolean, min?: number, max?: number }} [opts]
+ * @returns {string} error message or ""
+ */
+export function validateProjectName(
+  value,
+  { required = true, min = 2, max = 100 } = {}
+) {
+  const strVal = String(value ?? "").trim();
+  if (!strVal) {
+    return required ? "Project name is required." : "";
+  }
+  if (strVal.length < min) {
+    return `Project name must be at least ${min} characters.`;
+  }
+  if (strVal.length > max) {
+    return `Project name cannot exceed ${max} characters.`;
+  }
+  if (/[<>{}[\]]/.test(strVal)) {
+    return "Special characters < > { } [ ] are prohibited for security.";
+  }
+  return "";
+}
+
+/**
+ * Validates an internal project code name (e.g. MIRROR-2026).
+ * @param {string} value
+ * @returns {string} error message or ""
+ */
+export function validateProjectCodeName(value) {
+  const strVal = String(value ?? "").trim();
+  if (!strVal) return "";
+  if (strVal.length < 2 || strVal.length > 30) {
+    return "Code name must be between 2 and 30 characters.";
+  }
+  if (!/^[a-zA-Z0-9_\-\s]+$/.test(strVal)) {
+    return "Code name may only contain letters, numbers, hyphens, and underscores.";
+  }
+  return "";
+}
+
+/**
+ * Validates logical ordering between start date and target delivery date.
+ * @param {string} startDate
+ * @param {string} endDate
+ * @returns {{ startDate: string, endDate: string }}
+ */
+export function validateProjectDates(startDate, endDate) {
+  const errors = { startDate: "", endDate: "" };
+  const s = String(startDate ?? "").trim();
+  const e = String(endDate ?? "").trim();
+
+  if (s && !/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    errors.startDate = "Start date must be in YYYY-MM-DD format.";
+  }
+  if (e && !/^\d{4}-\d{2}-\d{2}$/.test(e)) {
+    errors.endDate = "Target delivery date must be in YYYY-MM-DD format.";
+  }
+
+  if (!errors.startDate && !errors.endDate && s && e) {
+    if (new Date(e) < new Date(s)) {
+      errors.endDate = "Target delivery date cannot precede project start date.";
+    }
+  }
+
+  return errors;
+}
+
+/**
+ * Batch validator for project creation and edit profile form.
+ * @param {object} formData
+ * @returns {{ project_name: string, code_name: string, start_date: string, end_date: string }}
+ */
+export function validateProjectForm(formData) {
+  const dateErrors = validateProjectDates(formData?.start_date, formData?.end_date);
+  return {
+    project_name: validateProjectName(formData?.project_name, { required: true }),
+    code_name: validateProjectCodeName(formData?.code_name),
+    start_date: dateErrors.startDate,
+    end_date: dateErrors.endDate,
+  };
+}
+
+// ─── Equipment and itemization validators ──────────────────────────────────
+
+/**
+ * Validates equipment or camera item name.
+ * @param {string} value
+ * @returns {string} error message or ""
+ */
+export function validateEquipmentName(value) {
+  const strVal = String(value ?? "").trim();
+  if (!strVal) return "Camera/equipment name is required.";
+  if (strVal.length < 2 || strVal.length > 80) {
+    return "Name must be between 2 and 80 characters.";
+  }
+  if (/[<>{}[\]]/.test(strVal)) {
+    return "Prohibited characters < > { } [ ] detected.";
+  }
+  return "";
+}
+
+/**
+ * Validates a positive quantity value.
+ * @param {any} value
+ * @returns {string} error message or ""
+ */
+export function validateQuantity(value) {
+  const strVal = String(value ?? "").trim();
+  if (!strVal) return "";
+  const num = parseInt(strVal, 10);
+  if (isNaN(num) || num < 0) {
+    return "Quantity must be 0 or greater.";
+  }
+  if (num > 10000) {
+    return "Quantity exceeds allowable threshold (max 10,000).";
+  }
+  return "";
+}
+
+/**
+ * Validates a positive rate or price value.
+ * @param {any} value
+ * @returns {string} error message or ""
+ */
+export function validateRate(value) {
+  const strVal = String(value ?? "").trim();
+  if (!strVal) return "";
+  const num = parseFloat(strVal);
+  if (isNaN(num) || num < 0) {
+    return "Rate must be 0 or greater.";
+  }
+  if (num > 100000000) {
+    return "Rate cannot exceed 100,000,000.";
+  }
+  return "";
+}

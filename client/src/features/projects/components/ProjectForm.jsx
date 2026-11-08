@@ -1,9 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import Icon from "../../../components/common/Icon";
 import GlassDropdown from "../../../components/common/GlassDropdown";
 import GlassDatePicker from "../../../components/common/GlassDatePicker";
+import FloatingInput from "../../../components/common/FloatingInput";
+import NeoButton from "../../../components/common/NeoButton";
 import { userService } from "../../../services/userService";
 import { projectService } from "../../../services/projectService";
+import { validateProjectForm } from "../../../utils/validators";
 import "./ProjectForm.css";
 
 import toast from "react-hot-toast";
@@ -25,8 +28,33 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
   const [clients, setClients] = useState([]);
   const [crew, setCrew] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [touched, setTouched] = useState({
+    project_name: false,
+    code_name: false,
+    start_date: false,
+    end_date: false,
+  });
   const fileInputRef = useRef(null);
   const colorInputRef = useRef(null);
+
+  const validationErrors = useMemo(() => validateProjectForm(formData), [formData]);
+  const isFormValid = useMemo(
+    () =>
+      !validationErrors.project_name &&
+      !validationErrors.code_name &&
+      !validationErrors.start_date &&
+      !validationErrors.end_date,
+    [validationErrors]
+  );
+
+  const submitDisabledReason = useMemo(() => {
+    if (!formData.project_name.trim()) return "Project name is required";
+    if (validationErrors.project_name) return validationErrors.project_name;
+    if (validationErrors.code_name) return validationErrors.code_name;
+    if (validationErrors.start_date) return validationErrors.start_date;
+    if (validationErrors.end_date) return validationErrors.end_date;
+    return "";
+  }, [formData.project_name, validationErrors]);
 
   const formatDateForInput = (dateStr) => {
     if (!dateStr) return "";
@@ -109,7 +137,7 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
       }
       const reader = new FileReader();
       reader.onloadend = () => {
-        setFormData({ ...formData, project_image: reader.result });
+        setFormData((prev) => ({ ...prev, project_image: reader.result }));
       };
       reader.readAsDataURL(file);
     }
@@ -117,6 +145,18 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setTouched({
+      project_name: true,
+      code_name: true,
+      start_date: true,
+      end_date: true,
+    });
+
+    if (!isFormValid) {
+      toast.error("Please fix project form errors.");
+      return;
+    }
+
     setLoading(true);
     const payload = {
       ...formData,
@@ -176,7 +216,11 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
           >
             {formData.project_image ? (
               <img
-                src={formData.project_image}
+                src={
+                  formData.project_image.startsWith("image/")
+                    ? `data:${formData.project_image}`
+                    : formData.project_image
+                }
                 alt="Preview"
                 className="project-image-preview"
               />
@@ -229,68 +273,74 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
           <form onSubmit={handleSubmit}>
             <div className="project-form-row">
               <div className="project-form-col">
-                <div className="project-form-group">
-                  <label className="neo-label">Project Name</label>
-                  <input
-                    type="text"
-                    className="neo-input"
-                    required
-                    value={formData.project_name}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        project_name: e.target.value,
-                      })
-                    }
-                  />
-                </div>
+                <FloatingInput
+                  label="Project Name"
+                  required
+                  placeholder="e.g. Inception Commercial"
+                  value={formData.project_name}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      project_name: e.target.value,
+                    })
+                  }
+                  onBlur={() => setTouched((prev) => ({ ...prev, project_name: true }))}
+                  error={touched.project_name ? validationErrors.project_name : ""}
+                />
               </div>
               <div className="project-form-col">
-                <div className="project-form-group">
-                  <label className="neo-label">Code Name</label>
-                  <input
-                    type="text"
-                    className="neo-input"
-                    value={formData.code_name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, code_name: e.target.value })
-                    }
-                  />
-                </div>
+                <FloatingInput
+                  label="Code Name"
+                  placeholder="e.g. INCP-2026"
+                  value={formData.code_name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, code_name: e.target.value })
+                  }
+                  onBlur={() => setTouched((prev) => ({ ...prev, code_name: true }))}
+                  error={touched.code_name ? validationErrors.code_name : ""}
+                />
               </div>
             </div>
 
             <div className="project-form-row">
               <div className="project-form-col">
-                <div className="project-form-group">
-                  <label className="neo-label">Start Date</label>
+                <FloatingInput
+                  label="Start Date"
+                  hasValue={Boolean(formData.start_date)}
+                  error={touched.start_date ? validationErrors.start_date : ""}
+                >
                   <GlassDatePicker
                     value={formData.start_date}
-                    onChange={(val) =>
-                      setFormData({ ...formData, start_date: val })
-                    }
-                    placeholder="YYYY-MM-DD"
+                    onChange={(val) => {
+                      setFormData({ ...formData, start_date: val });
+                      setTouched((prev) => ({ ...prev, start_date: true }));
+                    }}
                   />
-                </div>
+                </FloatingInput>
               </div>
               <div className="project-form-col">
-                <div className="project-form-group">
-                  <label className="neo-label">Target Delivery</label>
+                <FloatingInput
+                  label="Target Delivery"
+                  hasValue={Boolean(formData.end_date)}
+                  error={touched.end_date ? validationErrors.end_date : ""}
+                >
                   <GlassDatePicker
                     value={formData.end_date}
-                    onChange={(val) =>
-                      setFormData({ ...formData, end_date: val })
-                    }
-                    placeholder="YYYY-MM-DD"
+                    onChange={(val) => {
+                      setFormData({ ...formData, end_date: val });
+                      setTouched((prev) => ({ ...prev, end_date: true }));
+                    }}
                   />
-                </div>
+                </FloatingInput>
               </div>
             </div>
 
             <div className="project-form-row">
               <div className="project-form-col">
-                <div className="project-form-group">
-                  <label className="neo-label">Associate Client</label>
+                <FloatingInput
+                  label="Associate Client"
+                  hasValue={Boolean(formData.client_ids && formData.client_ids.length > 0)}
+                >
                   <GlassDropdown
                     multiple
                     isMulti
@@ -307,11 +357,13 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
                     }
                     placeholder="Add Client"
                   />
-                </div>
+                </FloatingInput>
               </div>
               <div className="project-form-col">
-                <div className="project-form-group">
-                  <label className="neo-label">Assign Production Crew</label>
+                <FloatingInput
+                  label="Assign Production Crew"
+                  hasValue={Boolean(formData.crew_ids && formData.crew_ids.length > 0)}
+                >
                   <GlassDropdown
                     multiple
                     isMulti
@@ -328,29 +380,28 @@ const ProjectForm = ({ onAdded, editingProject, onCancelEdit, projects }) => {
                     }
                     placeholder="Add Prod. Crew"
                   />
-                </div>
+                </FloatingInput>
               </div>
             </div>
 
             <div className="project-form-actions">
-              <button
+              <NeoButton
                 type="button"
-                className="btn-neo-cancel"
+                variant="cancel"
                 onClick={onCancelEdit}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="btn-neo btn-neo-solid"
                 disabled={loading}
               >
-                {loading
-                  ? "Processing..."
-                  : editingProject
-                    ? "Save Changes"
-                    : "Create Production"}
-              </button>
+                Cancel
+              </NeoButton>
+              <NeoButton
+                type="submit"
+                variant="solid"
+                loading={loading}
+                disabled={!isFormValid}
+                disabledReason={submitDisabledReason}
+              >
+                {editingProject ? "Save Changes" : "Create Production"}
+              </NeoButton>
             </div>
           </form>
         </div>

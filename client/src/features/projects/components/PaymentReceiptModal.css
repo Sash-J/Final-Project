@@ -655,7 +655,15 @@
 .receipt-edit-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  row-gap: var(--neo-form-gap, 30px);
+  column-gap: 16px;
+  margin-top: var(--neo-form-gap, 28px);
+  margin-bottom: var(--neo-form-gap, 28px);
+}
+
+.receipt-edit-grid > .floating-field,
+.receipt-edit-grid > .neo-form-group {
+  margin: 0;
 }
 
 .receipt-form-full {

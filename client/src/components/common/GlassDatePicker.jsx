@@ -6,10 +6,9 @@ import "./GlassDatePicker.css";
 const GlassDatePicker = ({
   value,
   onChange,
-  placeholder = "YYYY-MM-DD",
+  placeholder = "",
   required = false,
   className,
-  style,
   iconOnly = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -159,33 +158,23 @@ const GlassDatePicker = ({
       <div
         className="glass-datepicker-trigger"
         onClick={() => setIsOpen(!isOpen)}
-        style={{ cursor: "pointer" }}
       >
         {iconOnly ? (
           <div
             className={`neo-input glass-datepicker-icon-only-btn ${className || ""}`}
           >
-            <Icon name="calendar_month" modifiers="md" style={{ color: "#fff" }} />
+            <Icon name="calendar_month" modifiers="md" />
           </div>
         ) : (
           <>
             <Icon
               name="calendar_month"
               modifiers="md"
-              style={{
-                position: "absolute",
-                right: "12px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                zIndex: 10,
-                display: "flex",
-                cursor: "pointer",
-                pointerEvents: "auto",
-              }}
+              className="glass-datepicker-icon"
             />
             <input
               type="text"
-              className={`neo-input ${className || ""}`}
+              className={`neo-input glass-datepicker-input ${className || ""}`}
               value={value || ""}
               onChange={(e) => {
                 const rawValue = e.target.value.replace(/[^\d]/g, "");
@@ -200,7 +189,6 @@ const GlassDatePicker = ({
               }}
               placeholder={placeholder}
               required={required}
-              style={{ cursor: "text", ...style }}
               onClick={(e) => {
                 // Let it bubble, but we can also ensure it opens
               }}

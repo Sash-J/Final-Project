@@ -5,6 +5,7 @@ from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from services.sanitizer import sanitize_data
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "super_secret_key")
@@ -24,6 +25,23 @@ if is_production:
 app.config.update(cookie_settings)
 
 CORS(app, supports_credentials=True)
+
+
+@app.before_request
+def sanitize_incoming_requests():
+    """
+    Defense-in-depth sanitization for all incoming JSON requests.
+    Strips XSS vectors, script tags, dangerous protocols, and HTML markup
+    before payloads reach route handlers, services, or the database.
+    """
+    if request.is_json:
+        try:
+            data = request.get_json(silent=True)
+            if data is not None:
+                sanitized = sanitize_data(data)
+                request._cached_json = (sanitized, sanitized)
+        except Exception:
+            pass
 
 
 @app.after_request
