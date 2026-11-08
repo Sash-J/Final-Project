@@ -53,6 +53,7 @@ const BudgetSearchWidget = ({
             <input
               ref={searchInputRef}
               type="text"
+              className="no-global-input"
               placeholder="Find items..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}

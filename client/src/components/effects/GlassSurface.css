@@ -33,8 +33,7 @@
 /* DARK THEME (DEFAULT) */
 .glass-surface--svg {
   background: hsl(0 0% 0% / var(--glass-frost, 0)) !important;
-  backdrop-filter: var(--filter-id, url(#glass-filter))
-    saturate(var(--glass-saturation, 1));
+  backdrop-filter: var(--filter-id, url(#glass-filter)) saturate(var(--glass-saturation, 1));
   box-shadow:
     0 0 2px 1px color-mix(in oklch, white, transparent 90%) inset,
     0 0 10px 4px color-mix(in oklch, white, transparent 90%) inset,
@@ -49,8 +48,7 @@
 /* LIGHT THEME EXPLICIT OVERRIDES */
 body.light-theme .glass-surface--svg {
   background: hsl(0 0% 100% / calc(var(--glass-frost, 0) * 2.5)) !important;
-  backdrop-filter: var(--filter-id, url(#glass-filter))
-    saturate(var(--glass-saturation, 0.5)) brightness(1.4) !important;
+  backdrop-filter: var(--filter-id, url(#glass-filter)) saturate(var(--glass-saturation, 0.5)) brightness(1.4) !important;
   box-shadow:
     0 0 2px 1px color-mix(in oklch, black, transparent 92%) inset,
     0 0 10px 4px color-mix(in oklch, black, transparent 97%) inset,

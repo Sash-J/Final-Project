@@ -152,7 +152,17 @@
 .user-modal-details-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px 20px;
+  row-gap: var(--neo-form-gap, 30px);
+  column-gap: 20px;
+  margin-top: var(--neo-form-gap, 30px);
+}
+
+.user-modal-details-grid > .floating-field {
+  margin: 0;
+}
+
+.user-modal-details-grid > .floating-field.full-width {
+  grid-column: span 2;
 }
 
 .user-modal-form-group {

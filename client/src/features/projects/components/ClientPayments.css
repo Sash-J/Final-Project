@@ -452,17 +452,17 @@
   letter-spacing: var(--ls-caption);
   color: rgba(255, 255, 255, 0.4);
   margin-top: 0;
-  margin-bottom: 40px;
+  margin-bottom: var(--neo-form-gap, 30px);
 }
 
 .payment-status-wrap {
-  margin-bottom: 16px;
+  margin-bottom: 0;
 }
 
 /* Level 6: Body (Capture Submit Button) */
 .btn-capture-submit {
   width: 100%;
-  margin-top: 10px;
+  margin-top: 0;
   justify-content: center;
   display: flex;
   align-items: center;

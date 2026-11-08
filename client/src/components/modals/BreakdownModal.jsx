@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { formatCurrency } from "../../utils/currencyUtils";
 import Icon from "../common/Icon";
 import ModalPortal from "../common/ModalPortal";
+import NeoButton from "../common/NeoButton";
 import "./BreakdownModal.css";
 
 const BreakdownModal = ({
@@ -54,10 +55,16 @@ const BreakdownModal = ({
   };
 
   const handleRowChange = (id, field, value) => {
+    let sanitizedVal = value;
+    if (["quantity", "rate_multiplier", "rate", "additional1"].includes(field)) {
+      if (sanitizedVal !== "" && parseFloat(sanitizedVal) < 0) {
+        sanitizedVal = "0";
+      }
+    }
     setItems((prev) =>
       prev.map((item) => {
         if (item.id === id) {
-          const updated = { ...item, [field]: value };
+          const updated = { ...item, [field]: sanitizedVal };
           return calculateRow(updated);
         }
         return item;
@@ -158,6 +165,7 @@ const BreakdownModal = ({
                 <td>
                   <input
                     type="number"
+                    min="0"
                     placeholder="0"
                     value={item.quantity}
                     disabled={isReadOnly}
@@ -182,6 +190,7 @@ const BreakdownModal = ({
                 <td>
                   <input
                     type="number"
+                    min="0"
                     placeholder="1"
                     value={item.rate_multiplier}
                     disabled={isReadOnly}
@@ -197,6 +206,8 @@ const BreakdownModal = ({
                 <td>
                   <input
                     type="number"
+                    min="0"
+                    step="0.01"
                     placeholder="0.00"
                     value={item.rate}
                     disabled={isReadOnly}
@@ -211,6 +222,8 @@ const BreakdownModal = ({
                 <td>
                   <input
                     type="number"
+                    min="0"
+                    step="0.01"
                     placeholder="0.00"
                     value={item.additional1}
                     disabled={isReadOnly}
@@ -253,17 +266,17 @@ const BreakdownModal = ({
         </div>
         <div className="bdm-actions">
           {isReadOnly ? (
-            <button className="btn-neo btn-neo-solid" onClick={onClose}>
+            <NeoButton variant="solid" onClick={onClose}>
               Close
-            </button>
+            </NeoButton>
           ) : (
             <>
-              <button className="btn-neo btn-neo-cancel" onClick={onClose}>
+              <NeoButton variant="cancel" onClick={onClose}>
                 Cancel
-              </button>
-              <button className="btn-neo btn-neo-solid" onClick={handleSave}>
+              </NeoButton>
+              <NeoButton variant="solid" onClick={handleSave}>
                 Save & Apply
-              </button>
+              </NeoButton>
             </>
           )}
         </div>

@@ -16,20 +16,31 @@
   flex: 1;
 }
 
+.modal-main-content form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--neo-form-gap, 30px);
+}
+
 .project-form-row {
   display: flex;
   gap: 20px;
   width: 100%;
+  margin: 0;
 }
 
 .project-form-group {
   display: flex;
   flex-direction: column;
-  margin-bottom: 20px;
+  margin-bottom: 0;
 }
 
 .project-form-col {
   flex: 1;
+}
+
+.project-form-col > .floating-field {
+  margin: 0;
 }
 
 .icon-field-wrapper {

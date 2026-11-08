@@ -10,6 +10,7 @@ import HoverTooltip from "../../../components/common/HoverTooltip";
 import Icon from "../../../components/common/Icon";
 import DarkVeil from "../../../components/effects/DarkVeil";
 import BreakdownModal from "../../../components/modals/BreakdownModal";
+import FloatingInput from "../../../components/common/FloatingInput";
 import api from "../../../services/api";
 import "./EquipmentVisualization.css";
 
@@ -354,14 +355,20 @@ const EquipmentVisualization = ({
     );
 
     const saveHero = useCallback(async () => {
-      const newData = { ...data, hero: heroForm };
+      const name = (heroForm.name || "").trim();
+      if (!name) {
+        handleError(new Error("Camera name is required."));
+        return;
+      }
+      const cleanHero = { ...heroForm, name };
+      const newData = { ...data, hero: cleanHero };
       setData(newData);
       setEditingHero(false);
 
       if (onSaveStatusChange) onSaveStatusChange("saving");
       try {
         await api.put(`/api/projects/${project.id}/equipment`, {
-          equipmentData: { hero: heroForm, heroSecondary: data.heroSecondary },
+          equipmentData: { hero: cleanHero, heroSecondary: data.heroSecondary },
         });
         notifySave();
       } catch (err) {
@@ -377,14 +384,20 @@ const EquipmentVisualization = ({
     ]);
 
     const saveHeroSecondary = useCallback(async () => {
-      const newData = { ...data, heroSecondary: heroSecondaryForm };
+      const name = (heroSecondaryForm.name || "").trim();
+      if (!name) {
+        handleError(new Error("Secondary camera name is required."));
+        return;
+      }
+      const cleanSecondary = { ...heroSecondaryForm, name };
+      const newData = { ...data, heroSecondary: cleanSecondary };
       setData(newData);
       setEditingHeroSecondary(false);
 
       if (onSaveStatusChange) onSaveStatusChange("saving");
       try {
         await api.put(`/api/projects/${project.id}/equipment`, {
-          equipmentData: { hero: data.hero, heroSecondary: heroSecondaryForm },
+          equipmentData: { hero: data.hero, heroSecondary: cleanSecondary },
         });
         notifySave();
       } catch (err) {
@@ -441,147 +454,147 @@ const EquipmentVisualization = ({
                 <div className="hero-camera-details">
                   <span className="hero-label">{data.hero.label}</span>
 
-                  <div className="hero-name-row">
-                    {editingHero ? (
-                      <input
-                        className="hero-inline-input h2-input"
-                        value={heroForm.name || ""}
-                        placeholder="Camera Name"
-                        onChange={(e) =>
-                          setHeroForm({ ...heroForm, name: e.target.value })
-                        }
-                      />
-                    ) : (
-                      <h2>{data.hero.name}</h2>
-                    )}
-
-                    {editingHero ? (
-                      <div className="hero-action-buttons">
-                        <HoverTooltip text="Save Changes">
-                          <button
-                            className="project-hero-btn edit hero-action-btn-save"
-                            onClick={saveHero}
-                          >
-                            <Icon name="check" modifiers="sm" />
-                          </button>
-                        </HoverTooltip>
-                        <HoverTooltip text="Cancel">
-                          <button
-                            className="project-hero-btn delete"
-                            onClick={() => setEditingHero(false)}
-                          >
-                            <Icon name="close" modifiers="sm" />
-                          </button>
-                        </HoverTooltip>
-                      </div>
-                    ) : (
-                      <>
-                        <HoverTooltip text="Edit Camera">
-                          <button
-                            className="project-hero-btn edit"
-                            onClick={() => {
-                              setHeroForm(data.hero);
-                              setEditingHero(true);
-                              setEditingHeroSecondary(false);
-                            }}
-                          >
-                            <Icon name="edit" modifiers="sm" />
-                          </button>
-                        </HoverTooltip>
-                        {!data.heroSecondary && (
-                          <HoverTooltip text="Add Secondary Camera">
+                  {editingHero ? (
+                    <div className="hero-edit-form">
+                      <div className="hero-name-edit-wrap">
+                        <FloatingInput
+                          label="Camera Name"
+                          value={heroForm.name || ""}
+                          placeholder="e.g. Sony FX III"
+                          onChange={(e) =>
+                            setHeroForm({ ...heroForm, name: e.target.value })
+                          }
+                          required
+                        />
+                        <div className="hero-action-buttons">
+                          <HoverTooltip text="Save Changes">
                             <button
-                              className="project-hero-btn edit add-secondary"
-                              onClick={() => {
-                                const newSecondary = {
-                                  label: "Secondary Camera",
-                                  name: "Add Camera Name",
-                                  details: "Add camera details...",
-                                  status: "Add rental details...",
-                                };
-                                setData({
-                                  ...data,
-                                  heroSecondary: newSecondary,
-                                });
-                                setHeroSecondaryForm(newSecondary);
-                                setEditingHeroSecondary(true);
-                                setEditingHero(false);
-                              }}
+                              type="button"
+                              className="project-hero-btn edit hero-action-btn-save"
+                              onClick={saveHero}
                             >
-                              <Icon name="add" modifiers="sm" />
+                              <Icon name="check" modifiers="sm" />
                             </button>
                           </HoverTooltip>
-                        )}
-                      </>
-                    )}
-                  </div>
+                          <HoverTooltip text="Cancel">
+                            <button
+                              type="button"
+                              className="project-hero-btn delete"
+                              onClick={() => setEditingHero(false)}
+                            >
+                              <Icon name="close" modifiers="sm" />
+                            </button>
+                          </HoverTooltip>
+                        </div>
+                      </div>
 
-                  {editingHero ? (
-                    <div className="hero-format-edit-row">
-                      <span className="hero-format-label">Resolution:</span>
-                      <input
-                        className="hero-inline-input p-input format-input"
-                        value={heroForm.resolution || ""}
-                        placeholder="4K"
+                      <div className="hero-format-grid">
+                        <FloatingInput
+                          label="Resolution"
+                          value={heroForm.resolution || ""}
+                          placeholder="e.g. 4K"
+                          onChange={(e) =>
+                            setHeroForm({
+                              ...heroForm,
+                              resolution: e.target.value,
+                            })
+                          }
+                        />
+                        <FloatingInput
+                          label="Format"
+                          value={heroForm.format || ""}
+                          placeholder="e.g. RAW"
+                          onChange={(e) =>
+                            setHeroForm({ ...heroForm, format: e.target.value })
+                          }
+                        />
+                      </div>
+
+                      <FloatingInput
+                        label="Rental Details / Provider"
+                        value={heroForm.status || ""}
+                        placeholder="e.g. Pathi Camera Rental"
                         onChange={(e) =>
-                          setHeroForm({
-                            ...heroForm,
-                            resolution: e.target.value,
-                          })
+                          setHeroForm({ ...heroForm, status: e.target.value })
                         }
                       />
-                      <span className="hero-format-label spacing">Format:</span>
-                      <input
-                        className="hero-inline-input p-input format-input"
-                        value={heroForm.format || ""}
-                        placeholder="RAW"
+
+                      <FloatingInput
+                        label="Image URL (Optional)"
+                        value={heroForm.image || ""}
+                        placeholder="https://..."
                         onChange={(e) =>
-                          setHeroForm({ ...heroForm, format: e.target.value })
+                          setHeroForm({ ...heroForm, image: e.target.value })
                         }
                       />
                     </div>
                   ) : (
-                    <div className="hero-format-display-row">
-                      <span className="hero-format-text">
-                        Resolution:{" "}
-                        <strong className="hero-format-value">
-                          {data.hero.resolution || "N/A"}
-                        </strong>
-                      </span>
-                      <span className="hero-format-divider">|</span>
-                      <span className="hero-format-text">
-                        Format:{" "}
-                        <strong className="hero-format-value">
-                          {data.hero.format || "N/A"}
-                        </strong>
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="hero-status">
-                    {editingHero ? (
-                      <div className="hero-edit-inputs">
-                        <input
-                          className="hero-inline-input hero-status-input"
-                          value={heroForm.status || ""}
-                          onChange={(e) =>
-                            setHeroForm({ ...heroForm, status: e.target.value })
-                          }
-                          placeholder="Rental details..."
-                        />
-                        <input
-                          className="hero-inline-input p-input"
-                          value={heroForm.image || ""}
-                          onChange={(e) =>
-                            setHeroForm({ ...heroForm, image: e.target.value })
-                          }
-                          placeholder="Paste image URL here..."
-                        />
+                    <>
+                      <div className="hero-name-row">
+                        <h2>{data.hero.name}</h2>
+                        <div className="hero-action-buttons">
+                          <HoverTooltip text="Edit Camera">
+                            <button
+                              type="button"
+                              className="project-hero-btn edit"
+                              onClick={() => {
+                                setHeroForm(data.hero);
+                                setEditingHero(true);
+                                setEditingHeroSecondary(false);
+                              }}
+                            >
+                              <Icon name="edit" modifiers="sm" />
+                            </button>
+                          </HoverTooltip>
+                          {!data.heroSecondary && (
+                            <HoverTooltip text="Add Secondary Camera">
+                              <button
+                                type="button"
+                                className="project-hero-btn edit add-secondary"
+                                onClick={() => {
+                                  const newSecondary = {
+                                    label: "Secondary Camera",
+                                    name: "Add Camera Name",
+                                    details: "Add camera details...",
+                                    status: "Add rental details...",
+                                  };
+                                  setData({
+                                    ...data,
+                                    heroSecondary: newSecondary,
+                                  });
+                                  setHeroSecondaryForm(newSecondary);
+                                  setEditingHeroSecondary(true);
+                                  setEditingHero(false);
+                                }}
+                              >
+                                <Icon name="add" modifiers="sm" />
+                              </button>
+                            </HoverTooltip>
+                          )}
+                        </div>
                       </div>
-                    ) : (
-                      <span>{data.hero.status}</span>
-                    )}
-                  </div>
+
+                      <div className="hero-format-display-row">
+                        <span className="hero-format-text">
+                          Resolution:{" "}
+                          <strong className="hero-format-value">
+                            {data.hero.resolution || "N/A"}
+                          </strong>
+                        </span>
+                        <span className="hero-format-divider">|</span>
+                        <span className="hero-format-text">
+                          Format:{" "}
+                          <strong className="hero-format-value">
+                            {data.hero.format || "N/A"}
+                          </strong>
+                        </span>
+                      </div>
+
+                      <div className="hero-status">
+                        <span>{data.hero.status}</span>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -597,175 +610,173 @@ const EquipmentVisualization = ({
                         {data.heroSecondary.label}
                       </span>
 
-                      <div className="hero-name-row">
-                        {editingHeroSecondary ? (
-                          <input
-                            className="hero-inline-input h2-input secondary"
-                            value={heroSecondaryForm.name || ""}
-                            placeholder="Camera Name"
-                            onChange={(e) =>
-                              setHeroSecondaryForm({
-                                ...heroSecondaryForm,
-                                name: e.target.value,
-                              })
-                            }
-                          />
-                        ) : (
-                          <h2>{data.heroSecondary.name}</h2>
-                        )}
-
-                        {editingHeroSecondary ? (
-                          <div className="hero-action-buttons">
-                            <HoverTooltip text="Save Changes">
-                              <button
-                                className="project-hero-btn edit hero-action-btn-save"
-                                onClick={saveHeroSecondary}
-                              >
-                                <Icon name="check" modifiers="sm" />
-                              </button>
-                            </HoverTooltip>
-                            <HoverTooltip text="Cancel">
-                              <button
-                                className="project-hero-btn delete"
-                                onClick={() => {
-                                  if (
-                                    data.heroSecondary.name ===
-                                    "Add Camera Name"
-                                  ) {
-                                    setData({ ...data, heroSecondary: null });
-                                  }
-                                  setEditingHeroSecondary(false);
-                                }}
-                              >
-                                <Icon name="close" modifiers="sm" />
-                              </button>
-                            </HoverTooltip>
-                          </div>
-                        ) : (
-                          <div className="hero-action-buttons">
-                            <HoverTooltip text="Edit Camera">
-                              <button
-                                className="project-hero-btn edit"
-                                onClick={() => {
-                                  setHeroSecondaryForm(data.heroSecondary);
-                                  setEditingHeroSecondary(true);
-                                  setEditingHero(false);
-                                }}
-                              >
-                                <Icon name="edit" modifiers="sm" />
-                              </button>
-                            </HoverTooltip>
-                            <HoverTooltip text="Remove Camera">
-                              <button
-                                className="project-hero-btn delete"
-                                onClick={async () => {
-                                  const newData = {
-                                    ...data,
-                                    heroSecondary: null,
-                                  };
-                                  setData(newData);
-                                  if (onSaveStatusChange)
-                                    onSaveStatusChange("saving");
-                                  try {
-                                    await api.put(
-                                      `/api/projects/${project.id}/equipment`,
-                                      {
-                                        equipmentData: {
-                                          hero: data.hero,
-                                          heroSecondary: null,
-                                        },
-                                      },
-                                    );
-                                    notifySave();
-                                  } catch (err) {
-                                    handleError(err);
-                                  }
-                                }}
-                              >
-                                <Icon name="delete" modifiers="sm" />
-                              </button>
-                            </HoverTooltip>
-                          </div>
-                        )}
-                      </div>
-
                       {editingHeroSecondary ? (
-                        <div className="hero-format-edit-row">
-                          <span className="hero-format-label">Resolution:</span>
-                          <input
-                            className="hero-inline-input p-input format-input"
-                            value={heroSecondaryForm.resolution || ""}
-                            placeholder="e.g. 4K"
+                        <div className="hero-edit-form">
+                          <div className="hero-name-edit-wrap">
+                            <FloatingInput
+                              label="Camera Name"
+                              value={heroSecondaryForm.name || ""}
+                              placeholder="e.g. Secondary Camera"
+                              onChange={(e) =>
+                                setHeroSecondaryForm({
+                                  ...heroSecondaryForm,
+                                  name: e.target.value,
+                                })
+                              }
+                              required
+                            />
+                            <div className="hero-action-buttons">
+                              <HoverTooltip text="Save Changes">
+                                <button
+                                  type="button"
+                                  className="project-hero-btn edit hero-action-btn-save"
+                                  onClick={saveHeroSecondary}
+                                >
+                                  <Icon name="check" modifiers="sm" />
+                                </button>
+                              </HoverTooltip>
+                              <HoverTooltip text="Cancel">
+                                <button
+                                  type="button"
+                                  className="project-hero-btn delete"
+                                  onClick={() => {
+                                    if (
+                                      data.heroSecondary.name ===
+                                      "Add Camera Name"
+                                    ) {
+                                      setData({ ...data, heroSecondary: null });
+                                    }
+                                    setEditingHeroSecondary(false);
+                                  }}
+                                >
+                                  <Icon name="close" modifiers="sm" />
+                                </button>
+                              </HoverTooltip>
+                            </div>
+                          </div>
+
+                          <div className="hero-format-grid">
+                            <FloatingInput
+                              label="Resolution"
+                              value={heroSecondaryForm.resolution || ""}
+                              placeholder="e.g. 4K"
+                              onChange={(e) =>
+                                setHeroSecondaryForm({
+                                  ...heroSecondaryForm,
+                                  resolution: e.target.value,
+                                })
+                              }
+                            />
+                            <FloatingInput
+                              label="Format"
+                              value={heroSecondaryForm.format || ""}
+                              placeholder="e.g. RAW"
+                              onChange={(e) =>
+                                setHeroSecondaryForm({
+                                  ...heroSecondaryForm,
+                                  format: e.target.value,
+                                })
+                              }
+                            />
+                          </div>
+
+                          <FloatingInput
+                            label="Rental Details / Provider"
+                            value={heroSecondaryForm.status || ""}
+                            placeholder="e.g. Rental details..."
                             onChange={(e) =>
                               setHeroSecondaryForm({
                                 ...heroSecondaryForm,
-                                resolution: e.target.value,
+                                status: e.target.value,
                               })
                             }
                           />
-                          <span className="hero-format-label spacing">
-                            Format:
-                          </span>
-                          <input
-                            className="hero-inline-input p-input format-input"
-                            value={heroSecondaryForm.format || ""}
-                            placeholder="e.g. RAW"
+
+                          <FloatingInput
+                            label="Image URL (Optional)"
+                            value={heroSecondaryForm.image || ""}
+                            placeholder="https://..."
                             onChange={(e) =>
                               setHeroSecondaryForm({
                                 ...heroSecondaryForm,
-                                format: e.target.value,
+                                image: e.target.value,
                               })
                             }
                           />
                         </div>
                       ) : (
-                        <div className="hero-format-display-row">
-                          <span className="hero-format-text">
-                            Resolution:{" "}
-                            <strong className="hero-format-value">
-                              {data.heroSecondary.resolution || "N/A"}
-                            </strong>
-                          </span>
-                          <span className="hero-format-divider">|</span>
-                          <span className="hero-format-text">
-                            Format:{" "}
-                            <strong className="hero-format-value">
-                              {data.heroSecondary.format || "N/A"}
-                            </strong>
-                          </span>
-                        </div>
-                      )}
-
-                      <div className="hero-status">
-                        {editingHeroSecondary ? (
-                          <div className="hero-edit-inputs">
-                            <input
-                              className="hero-inline-input hero-status-input"
-                              value={heroSecondaryForm.status || ""}
-                              onChange={(e) =>
-                                setHeroSecondaryForm({
-                                  ...heroSecondaryForm,
-                                  status: e.target.value,
-                                })
-                              }
-                              placeholder="Rental details..."
-                            />
-                            <input
-                              className="hero-inline-input p-input"
-                              value={heroSecondaryForm.image || ""}
-                              onChange={(e) =>
-                                setHeroSecondaryForm({
-                                  ...heroSecondaryForm,
-                                  image: e.target.value,
-                                })
-                              }
-                              placeholder="Paste image URL here..."
-                            />
+                        <>
+                          <div className="hero-name-row">
+                            <h2>{data.heroSecondary.name}</h2>
+                            <div className="hero-action-buttons">
+                              <HoverTooltip text="Edit Camera">
+                                <button
+                                  type="button"
+                                  className="project-hero-btn edit"
+                                  onClick={() => {
+                                    setHeroSecondaryForm(data.heroSecondary);
+                                    setEditingHeroSecondary(true);
+                                    setEditingHero(false);
+                                  }}
+                                >
+                                  <Icon name="edit" modifiers="sm" />
+                                </button>
+                              </HoverTooltip>
+                              <HoverTooltip text="Remove Camera">
+                                <button
+                                  type="button"
+                                  className="project-hero-btn delete"
+                                  onClick={async () => {
+                                    const newData = {
+                                      ...data,
+                                      heroSecondary: null,
+                                    };
+                                    setData(newData);
+                                    if (onSaveStatusChange)
+                                      onSaveStatusChange("saving");
+                                    try {
+                                      await api.put(
+                                        `/api/projects/${project.id}/equipment`,
+                                        {
+                                          equipmentData: {
+                                            hero: data.hero,
+                                            heroSecondary: null,
+                                          },
+                                        },
+                                      );
+                                      notifySave();
+                                    } catch (err) {
+                                      handleError(err);
+                                    }
+                                  }}
+                                >
+                                  <Icon name="delete" modifiers="sm" />
+                                </button>
+                              </HoverTooltip>
+                            </div>
                           </div>
-                        ) : (
-                          <span>{data.heroSecondary.status}</span>
-                        )}
-                      </div>
+
+                          <div className="hero-format-display-row">
+                            <span className="hero-format-text">
+                              Resolution:{" "}
+                              <strong className="hero-format-value">
+                                {data.heroSecondary.resolution || "N/A"}
+                              </strong>
+                            </span>
+                            <span className="hero-format-divider">|</span>
+                            <span className="hero-format-text">
+                              Format:{" "}
+                              <strong className="hero-format-value">
+                                {data.heroSecondary.format || "N/A"}
+                              </strong>
+                            </span>
+                          </div>
+
+                          <div className="hero-status">
+                            <span>{data.heroSecondary.status}</span>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </>

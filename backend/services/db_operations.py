@@ -325,7 +325,7 @@ def sync_verified_levels_migration():
             FROM users u
             LEFT JOIN user_roles ur ON u.id = ur.user_id
             LEFT JOIN roles r ON ur.role_id = r.id
-            GROUP BY u.id
+            GROUP BY u.id, u.role
         """)
         users = cursor.fetchall()
         for u in users:

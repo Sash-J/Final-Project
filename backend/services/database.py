@@ -15,6 +15,7 @@ db_config = {
     "database": os.getenv("DB_NAME", "visiondi_production"),
     "port": int(os.getenv("DB_PORT", 3306)),
     "connection_timeout": 20,
+    "init_command": "SET SESSION sql_mode = REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY', '')",
 }
 
 # Connection Pool

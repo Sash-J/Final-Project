@@ -1,3 +1,4 @@
+import re
 from flask import Blueprint, jsonify, request
 from services.database import get_connection
 from core.session_handler import (
@@ -142,8 +143,17 @@ def create_milestone(project_id):
     status = data.get("status", "pending")
     client_note = data.get("client_note", "")
 
-    if not title or not target_date:
-        return jsonify({"error": "title and target_date are required"}), 400
+    if not title or len(title) < 2 or len(title) > 50:
+        return jsonify({"error": "Milestone title must be between 2 and 50 characters"}), 400
+
+    if not target_date or not re.match(r"^\d{4}-\d{2}-\d{2}$", str(target_date).strip()):
+        return jsonify({"error": "Target date must be in YYYY-MM-DD format"}), 400
+
+    if description and len(description) > 150:
+        return jsonify({"error": "Description cannot exceed 150 characters"}), 400
+
+    if client_note and len(client_note) > 200:
+        return jsonify({"error": "Client note cannot exceed 200 characters"}), 400
 
     is_admin_or_manager = has_role("admin", "manager")
     raw_ivd = data.get("is_visiondivision")
@@ -190,10 +200,23 @@ def edit_milestone(milestone_id):
     title = data.get("title")
     description = data.get("description")
     target_date = data.get("target_date")
-    if title is not None and not str(title).strip():
-        return jsonify({"error": "Title cannot be empty"}), 400
-    if target_date is not None and not str(target_date).strip():
-        return jsonify({"error": "Target date cannot be empty"}), 400
+    if title is not None:
+        title_str = str(title).strip()
+        if len(title_str) < 2 or len(title_str) > 50:
+            return jsonify({"error": "Title must be between 2 and 50 characters"}), 400
+        title = title_str
+
+    if target_date is not None:
+        target_date_str = str(target_date).strip()
+        if not re.match(r"^\d{4}-\d{2}-\d{2}$", target_date_str):
+            return jsonify({"error": "Target date must be in YYYY-MM-DD format"}), 400
+        target_date = target_date_str
+
+    if description is not None and len(str(description).strip()) > 150:
+        return jsonify({"error": "Description cannot exceed 150 characters"}), 400
+
+    if client_note is not None and len(str(client_note).strip()) > 200:
+        return jsonify({"error": "Client note cannot exceed 200 characters"}), 400
 
     raw_ivd = data.get("is_visiondivision")
     is_visiondivision = None

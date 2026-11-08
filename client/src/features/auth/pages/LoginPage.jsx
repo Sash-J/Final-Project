@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 import Icon from "../../../components/common/Icon";
+import FloatingInput from "../../../components/common/FloatingInput";
+import NeoButton from "../../../components/common/NeoButton";
 import "./LoginPage.css";
 
 const LoginPage = () => {
@@ -9,16 +11,19 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const { user, login, logout, loading, startTransition } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setSubmitting(true);
     const res = await login(username, password);
     if (res.success) {
       startTransition(dashboardPath(res.user));
     } else {
-      setError(res.error);
+      setError(res.error || "Login failed");
+      setSubmitting(false);
     }
   };
 
@@ -87,47 +92,50 @@ const LoginPage = () => {
     <div className="login-container">
       <div className="login-card">
         <h2>USER LOGIN</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="neo-form-group">
-            <label className="neo-label">Username</label>
-            <input
-              type="text"
-              className="neo-input"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-            />
-          </div>
-          <div className="neo-form-group password-group">
-            <label className="neo-label">Password</label>
-            <div className="password-input-wrapper">
-              <input
-                type={showPassword ? "text" : "password"}
-                className="neo-input"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+        <form onSubmit={handleSubmit} className="neo-form">
+          <FloatingInput
+            label="Username"
+            required
+            autoFocus
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+
+          <FloatingInput
+            type={showPassword ? "text" : "password"}
+            label="Password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            suffix={
               <button
                 type="button"
-                className="password-toggle-btn"
+                className="floating-suffix-action"
                 onClick={() => setShowPassword(!showPassword)}
                 title={showPassword ? "Hide Password" : "Show Password"}
               >
-                {showPassword ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
-                )}
+                <Icon
+                  name={showPassword ? "visibility_off" : "visibility"}
+                  modifiers="xs"
+                />
               </button>
-            </div>
-          </div>
-          <div className="status-msg-container" style={{ minHeight: '24px', margin: '10px 0' }}>
+            }
+          />
+
+          <div className="login-status-msg-container">
             {error && <p className="error-msg">{error}</p>}
           </div>
-          <button type="submit" className="btn-neo btn-neo-solid" style={{ width: '100%' }}>
+          <NeoButton
+            type="submit"
+            variant="solid"
+            fullWidth
+            loading={submitting}
+            disabled={!username.trim() || !password.trim()}
+            disabledReason={!username.trim() ? "Enter username first" : !password.trim() ? "Enter password first" : ""}
+            className="login-submit-btn"
+          >
             Sign In
-          </button>
+          </NeoButton>
         </form>
         <div className="login-footer">
           <p>

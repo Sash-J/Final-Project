@@ -1,10 +1,23 @@
 import axios from 'axios';
 import { API } from '../config';
+import { sanitizePayload } from '../utils/sanitizer';
 
 // Configure a centralized axios instance
 const api = axios.create({
   baseURL: API,
   withCredentials: true,
+});
+
+// Automatic defense-in-depth sanitization for outgoing request payloads
+api.interceptors.request.use((config) => {
+  if (
+    config.data &&
+    typeof config.data === 'object' &&
+    !(typeof FormData !== 'undefined' && config.data instanceof FormData)
+  ) {
+    config.data = sanitizePayload(config.data);
+  }
+  return config;
 });
 
 // We can set up the 401 interceptor here, or provide a way to inject it.

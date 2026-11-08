@@ -656,8 +656,8 @@ body.light-theme .admin-sidebar-glass {
   margin-bottom: 0 !important;
 }
 
-.glass-dropdown-trigger {
-  margin-bottom: 20px !important;
+.version-controls .glass-dropdown-trigger {
+  margin-bottom: 0 !important;
 }
 
 .db-form .btn-new-version {

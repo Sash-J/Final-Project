@@ -89,3 +89,33 @@
   background: rgba(255, 255, 255, 0.1) !important;
   border-color: rgba(255, 255, 255, 0.25) !important;
 }
+
+/* Light Theme Overrides */
+body.light-theme .confirmation-modal-glass .modal-header h3 {
+  color: #111827;
+}
+
+body.light-theme .confirmation-modal-glass .modal-body p {
+  color: #4b5563;
+}
+
+body.light-theme .confirmation-modal-glass .variant-danger {
+  background: rgba(239, 68, 68, 0.1) !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+  color: #cf222e !important;
+}
+
+body.light-theme .confirmation-modal-glass .variant-danger:hover {
+  background: rgba(239, 68, 68, 0.2) !important;
+  color: #b91c1c !important;
+}
+
+body.light-theme .confirmation-modal-glass .variant-glass {
+  background: rgba(0, 0, 0, 0.04) !important;
+  color: #1f2937 !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+body.light-theme .confirmation-modal-glass .variant-glass:hover {
+  background: rgba(0, 0, 0, 0.08) !important;
+}

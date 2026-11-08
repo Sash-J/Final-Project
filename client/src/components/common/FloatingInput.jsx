@@ -1,5 +1,6 @@
 import React, { useState, useRef, memo, forwardRef } from "react";
 import Icon from "./Icon";
+import { sanitizeRealtime, sanitizeOnBlur } from "../../utils/sanitizer";
 import "./FloatingInput.css";
 
 const FloatingInput = forwardRef(
@@ -24,6 +25,7 @@ const FloatingInput = forwardRef(
       className = "",
       children,
       rows = 3,
+      sanitize = true,
       ...restProps
     },
     ref
@@ -41,7 +43,14 @@ const FloatingInput = forwardRef(
         ? Boolean(value !== "" && value !== null && value !== undefined)
         : Boolean(inputRef.current?.value);
 
-    const isFloating = isFocused || hasValue;
+    const isDateField =
+      type === "date" ||
+      type === "time" ||
+      type === "datetime-local" ||
+      type === "month" ||
+      type === "week";
+
+    const isFloating = isFocused || hasValue || isDateField;
     const isTextarea = as === "textarea";
     const isSelect = as === "select";
     const isCustomControl = Boolean(children && !isSelect);
@@ -51,8 +60,27 @@ const FloatingInput = forwardRef(
       onFocus?.(e);
     };
 
+    const handleChange = (e) => {
+      if (sanitize && e.target && typeof e.target.value === "string") {
+        const raw = e.target.value;
+        const cleaned = sanitizeRealtime(raw, type);
+        if (cleaned !== raw) {
+          e.target.value = cleaned;
+        }
+      }
+      onChange?.(e);
+    };
+
     const handleBlur = (e) => {
       setIsFocused(false);
+      if (sanitize && e.target && typeof e.target.value === "string") {
+        const raw = e.target.value;
+        const cleaned = sanitizeOnBlur(raw, type);
+        if (cleaned !== raw) {
+          e.target.value = cleaned;
+          onChange?.(e);
+        }
+      }
       onBlur?.(e);
     };
 
@@ -61,6 +89,7 @@ const FloatingInput = forwardRef(
       isFloating ? "is-floating" : "",
       isFocused ? "is-focused" : "",
       hasValue ? "has-value" : "",
+      label ? "has-label" : "no-label",
       prefix ? "has-prefix" : "",
       suffix || icon ? "has-suffix" : "",
       isTextarea ? "is-textarea" : "",
@@ -68,6 +97,7 @@ const FloatingInput = forwardRef(
       isCustomControl ? "is-custom-control" : "",
       required ? "is-required" : "",
       disabled ? "is-disabled" : "",
+      restProps.readOnly ? "is-readonly" : "",
       error ? "has-error" : "",
       className,
     ]
@@ -93,7 +123,7 @@ const FloatingInput = forwardRef(
               className="floating-input floating-textarea"
               value={value}
               defaultValue={defaultValue}
-              onChange={onChange}
+              onChange={handleChange}
               onFocus={handleFocus}
               onBlur={handleBlur}
               placeholder={isFocused ? placeholder : ""}
@@ -109,7 +139,7 @@ const FloatingInput = forwardRef(
                 className="floating-input floating-select"
                 value={value}
                 defaultValue={defaultValue}
-                onChange={onChange}
+                onChange={handleChange}
                 onFocus={handleFocus}
                 onBlur={handleBlur}
                 disabled={disabled}
@@ -129,7 +159,7 @@ const FloatingInput = forwardRef(
               className="floating-input"
               value={value}
               defaultValue={defaultValue}
-              onChange={onChange}
+              onChange={handleChange}
               onFocus={handleFocus}
               onBlur={handleBlur}
               placeholder={isFocused ? placeholder : ""}

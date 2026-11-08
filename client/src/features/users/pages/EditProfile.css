@@ -111,7 +111,19 @@
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+  row-gap: var(--neo-form-gap, 30px);
+  column-gap: 20px;
+  margin-top: 24px;
+}
+
+.form-grid > .floating-field,
+.password-fields-grid > .floating-field {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.form-grid > .floating-field.email-group {
+  grid-column: span 2;
 }
 
 .profile-form-group {
@@ -631,4 +643,50 @@ body.light-theme .skeleton-button {
 
 body.light-theme .field-error-msg {
   color: #cf222e;
+}
+
+/* Static classes replacing inline styles */
+.profile-skeleton-header {
+  margin-bottom: 25px;
+}
+
+.skeleton-header-title {
+  height: 24px;
+  width: 160px;
+  margin-bottom: 10px;
+}
+
+.skeleton-header-sub {
+  height: 14px;
+  width: 320px;
+}
+
+.notifications-section.skeleton-notifications {
+  border-top: none;
+  margin-top: 20px;
+}
+
+.skeleton-toggle-item {
+  height: 30px;
+  margin: 12px 0;
+}
+
+.profile-form-actions.skeleton-actions {
+  margin-top: 20px;
+}
+
+.avatar-tooltip-wrapper {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  z-index: 10;
+  display: flex;
+}
+
+.avatar-badge-static {
+  position: static;
+}
+
+.avatar-hidden-file-input {
+  display: none;
 }

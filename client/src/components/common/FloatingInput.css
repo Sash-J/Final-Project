@@ -19,11 +19,12 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  margin-top: 10px;
-  margin-bottom: var(--neo-form-gap, 26px);
+  margin: 0;
 }
 
-.floating-field:first-child {
+/* Modifier when an explicit top margin is not needed */
+.floating-field.no-label,
+.floating-field.no-margin-top {
   margin-top: 0;
 }
 
@@ -95,7 +96,7 @@
 
 /* Offset resting label when prefix is present */
 .floating-field.has-prefix:not(.is-floating) .floating-label {
-  left: 44px;
+  left: 48px;
 }
 
 /* Floating Label - translated top position (Clean, transparent, no black box) */
@@ -126,17 +127,27 @@
 /* Prefix and Suffix */
 .floating-prefix {
   position: absolute;
-  left: 15px;
+  left: 16px;
   color: var(--ff-prefix-color);
   font-size: 0.88rem;
   font-weight: 500;
   pointer-events: none;
   user-select: none;
-  z-index: 1;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
 }
 
-.floating-field.has-prefix .floating-input {
-  padding-left: 44px;
+.floating-field.has-prefix .floating-input,
+.floating-field.has-prefix input {
+  padding-left: 48px !important;
+}
+
+.floating-field.has-prefix.has-suffix .floating-input,
+.floating-field.has-prefix.has-suffix input {
+  padding-left: 48px !important;
+  padding-right: 44px !important;
 }
 
 .floating-suffix {
@@ -145,11 +156,44 @@
   display: flex;
   align-items: center;
   color: var(--ff-prefix-color);
-  z-index: 1;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+.floating-suffix-action {
+  background: transparent;
+  border: none;
+  color: var(--ff-prefix-color);
+  cursor: pointer;
+  padding: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease, transform 0.15s ease;
+  line-height: 1;
+  outline: none;
+}
+
+.floating-suffix-action:hover {
+  color: var(--ff-text-color);
+  transform: scale(1.08);
+}
+
+.floating-suffix-action:active {
+  transform: scale(0.95);
+}
+
+.floating-field.is-readonly .floating-input {
+  cursor: default;
+}
+
+.floating-field.is-readonly .floating-input:focus {
+  border-color: var(--ff-border);
+  box-shadow: none;
 }
 
 .floating-field.has-suffix .floating-input {
-  padding-right: 44px;
+  padding-right: 44px !important;
 }
 
 /* Custom control wrapper (for GlassDatePicker, GlassDropdown, etc.) */
@@ -170,15 +214,43 @@
   box-sizing: border-box;
 }
 
+.floating-custom-control .glass-datepicker-wrapper,
+.floating-custom-control .glass-datepicker-trigger {
+  width: 100% !important;
+}
+
+.floating-custom-control .glass-datepicker-input {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Custom datepicker / control placeholder handling (floating label acts as resting placeholder) */
+.floating-custom-control input::placeholder {
+  color: transparent !important;
+  transition: color 0.2s ease;
+}
+
+.floating-field.is-focused .floating-custom-control input::placeholder {
+  color: rgba(255, 255, 255, 0.35) !important;
+}
+
+body.light-theme .floating-field.is-focused .floating-custom-control input::placeholder {
+  color: #8c959f !important;
+}
+
 /* Textarea styling */
 .floating-input.floating-textarea {
-  min-height: 80px;
+  min-height: 64px;
   resize: vertical;
   line-height: 1.45;
 }
 
+.floating-input.floating-textarea[rows="2"] {
+  min-height: 52px;
+}
+
 .floating-field.is-textarea:not(.is-floating) .floating-label {
-  top: 18px;
+  top: 14px;
   transform: none;
 }
 
@@ -188,7 +260,7 @@
   -webkit-appearance: none;
   -moz-appearance: none;
   cursor: pointer;
-  padding-right: 36px;
+  padding-right: 36px !important;
 }
 
 .floating-input.floating-select option {
@@ -208,9 +280,11 @@
 }
 
 /* Error state */
-.floating-field.has-error .floating-input {
-  border-color: #ef4444;
-  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
+.floating-field.has-error .floating-input,
+.floating-field.has-error .glass-date-input,
+.floating-field.has-error .glass-dropdown-trigger {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15) !important;
 }
 
 .floating-field.has-error .floating-label {

@@ -77,7 +77,10 @@ code {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 28px;
+  gap: 8px;
+  padding: 10px 24px;
+  min-height: var(--neo-control-height, 44px) !important;
+  box-sizing: border-box !important;
   background: rgba(255, 255, 255, 0.07) !important;
   backdrop-filter: blur(12px) saturate(180%) brightness(1.1);
   -webkit-backdrop-filter: blur(12px) saturate(180%) brightness(1.1);
@@ -112,6 +115,62 @@ code {
 
 .btn-neo:active {
   transform: translateY(0) scale(0.98);
+}
+
+/* Rule 5: Accessible Keyboard Focus Ring */
+.btn-neo:focus-visible,
+.btn-neo-solid:focus-visible {
+  outline: 2px solid var(--accent-color, #00c6e6) !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 14px rgba(0, 198, 230, 0.45) !important;
+}
+
+/* Rule 6: Disabled State */
+.btn-neo:disabled,
+.btn-neo-solid:disabled {
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+  pointer-events: auto !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Rule 4: Preserved Width Loading Spinner State */
+.btn-neo.is-loading,
+.btn-neo-solid.is-loading {
+  pointer-events: none !important;
+  cursor: wait !important;
+  position: relative;
+}
+
+.btn-neo.is-loading > *,
+.btn-neo-solid.is-loading > * {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+.btn-neo.is-loading::before,
+.btn-neo-solid.is-loading::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  width: 18px !important;
+  height: 18px !important;
+  margin-left: -9px !important;
+  margin-top: -9px !important;
+  border: 2px solid rgba(255, 255, 255, 0.25) !important;
+  border-top-color: #ffffff !important;
+  border-radius: 50% !important;
+  animation: btnNeoSpinner 0.7s linear infinite !important;
+  z-index: 10 !important;
+  box-sizing: border-box !important;
+}
+
+@keyframes btnNeoSpinner {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .btn-neo-solid {
@@ -208,6 +267,23 @@ body.light-theme .btn-neo-solid:hover {
   box-shadow:
     0 12px 35px rgba(31, 136, 61, 0.35),
     inset 0 1px 3px rgba(255, 255, 255, 0.5) !important;
+}
+
+body.light-theme .btn-neo:focus-visible,
+body.light-theme .btn-neo-solid:focus-visible {
+  outline: 2px solid #0969da !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 12px rgba(9, 105, 218, 0.35) !important;
+}
+
+body.light-theme .btn-neo.is-loading::before {
+  border-color: rgba(0, 0, 0, 0.15) !important;
+  border-top-color: #24292f !important;
+}
+
+body.light-theme .btn-neo-solid.is-loading::before {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  border-top-color: #ffffff !important;
 }
 
 /* ==========================================================================
