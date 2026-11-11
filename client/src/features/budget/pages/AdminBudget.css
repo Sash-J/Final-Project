@@ -26,17 +26,7 @@ body.light-theme .admin-content-animated {
   margin-bottom: 8px;
 }
 
-/* Admin Budget Grid */
-.admin-budget-content {
-  display: flex;
-  gap: 25px;
-  max-width: 1900px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 0;
-  position: relative;
-}
-
+/* Admin Budget Layout */
 .admin-main {
   display: flex;
   flex-direction: column;
@@ -50,68 +40,6 @@ body.light-theme .admin-content-animated {
   gap: 24px;
   max-width: 1400px;
   margin: 0 auto;
-}
-
-.admin-sidebar {
-  display: flex;
-  flex-direction: column;
-  width: 80px;
-  flex-shrink: 0;
-  /* removed position: relative to allow glass to anchor to admin-budget-content */
-}
-
-.admin-sidebar-overlay {
-  position: relative;
-  width: 80px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  z-index: 100;
-  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: visible;
-}
-
-.admin-sidebar-overlay::-webkit-scrollbar {
-  display: none;
-}
-
-.admin-sidebar-overlay {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.admin-sidebar.expanded .admin-sidebar-overlay {
-  width: 300px;
-}
-
-.admin-sidebar-glass {
-  width: 80px;
-  box-sizing: border-box;
-  background: rgba(18, 19, 26, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  padding: 20px 10px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-  /* CRITICAL: prevents container from squishing and cropping when sidebar overflows viewport */
-  overflow: hidden;
-  /* CRITICAL: prevents inner content from spilling out during width expansion */
-  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.admin-sidebar.expanded .admin-sidebar-glass {
-  width: 300px;
-  padding: 24px;
-}
-
-body.light-theme .admin-sidebar-glass {
-  background: #ffffff;
-  border-color: #d0d7de;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
 .sidebar-section {
@@ -1095,7 +1023,7 @@ input:checked+.slider:before {
 }
 
 .variance-neutral {
-  color: #ccc;
+  color: #94a3b8;
   font-weight: 600;
 }
 
@@ -1103,28 +1031,21 @@ input:checked+.slider:before {
   color: #a78bfa !important;
 }
 
-.admin-sidebar-glass.compare-active-tab {
-  overflow: visible !important;
-  /* Mask punches a transparent ring gap but keeps the green dot area visible */
-  -webkit-mask-image:
-    radial-gradient(circle at calc(100% - 11.5px) 11.5px, transparent 13.5px, black 14px),
-    radial-gradient(circle at calc(100% - 11.5px) 11.5px, black 7.5px, transparent 8px);
-  mask-image:
-    radial-gradient(circle at calc(100% - 11.5px) 11.5px, transparent 13.5px, black 14px),
-    radial-gradient(circle at calc(100% - 11.5px) 11.5px, black 7.5px, transparent 8px);
+/* Light Theme Comparison Overrides */
+body.light-theme .variance-positive {
+  color: #059669 !important;
 }
 
-.sidebar-compare-tab {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 15px;
-  height: 15px;
-  background: #10b981;
-  border-radius: 50%;
-  z-index: 50;
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
-  /* Soft glow */
+body.light-theme .variance-negative {
+  color: #dc2626 !important;
+}
+
+body.light-theme .variance-neutral {
+  color: #64748b;
+}
+
+body.light-theme .col-compare-total {
+  color: #6d28d9 !important;
 }
 /* Light Theme Sidebar Overrides */
 body.light-theme .sidebar-widget-title,
@@ -1157,6 +1078,10 @@ body.light-theme .widget-switch-container {
   background: rgba(0, 0, 0, 0.03);
 }
 
+body.light-theme .switch-label {
+  color: #57606a;
+}
+
 body.light-theme .sidebar-widget-input-icon {
   color: rgba(0, 0, 0, 0.4);
 }
@@ -1180,6 +1105,19 @@ body.light-theme .sidebar-widget-input-icon {
   color: #00c6e6;
   flex-shrink: 0;
   margin-top: 2px;
+}
+
+body.light-theme #admin-budget,
+body.light-theme #admin-dashboard {
+  color: #1e293b;
+}
+
+body.light-theme .admin-header h2 {
+  color: #0f172a;
+}
+
+body.light-theme .widget-divider {
+  border-top-color: #e2e8f0;
 }
 
 body.light-theme .client-budget-notice {

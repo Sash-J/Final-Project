@@ -153,11 +153,17 @@ const GlassDropdown = ({
                     ).some((v) => String(v) === String(opt.value))
                   : String(value) === String(opt.value);
 
+                const isDisabled = Boolean(opt.disabled);
+
                 return (
                   <div
                     key={opt.value}
-                    className={`glass-dropdown-item ${isSelected ? "selected" : ""}`}
-                    onClick={() => handleOptionClick(opt.value)}
+                    className={`glass-dropdown-item ${isSelected ? "selected" : ""} ${isDisabled ? "disabled" : ""}`}
+                    onClick={() => {
+                      if (isDisabled) return;
+                      handleOptionClick(opt.value);
+                    }}
+                    aria-disabled={isDisabled}
                   >
                     {isMultiple && (
                       <div

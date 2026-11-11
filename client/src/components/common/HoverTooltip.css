@@ -13,11 +13,12 @@
   --htt-text-color: #ffffff;
   --htt-desc-color: rgba(255, 255, 255, 0.7);
   --htt-icon-color: #ffffff;
+  --htt-shift-x: 0px;
 
   position: fixed;
   z-index: 999999;
   pointer-events: none;
-  transform: translate(-50%, -100%);
+  transform: translate(calc(-50% + var(--htt-shift-x)), -100%);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -33,7 +34,7 @@
 }
 
 .hover-tooltip-modal.position-flipped {
-  transform: translate(-50%, 0);
+  transform: translate(calc(-50% + var(--htt-shift-x)), 0);
 }
 
 .hover-tooltip-modal.hover-tooltip-rich {
@@ -88,7 +89,7 @@
 .hover-tooltip-modal::after {
   content: "";
   position: absolute;
-  left: 50%;
+  left: clamp(12px, calc(50% - var(--htt-shift-x)), calc(100% - 12px));
   transform: translateX(-50%);
   border-width: 5px;
   border-style: solid;

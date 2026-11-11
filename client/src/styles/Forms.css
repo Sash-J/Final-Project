@@ -246,6 +246,19 @@ input[type="datetime-local"]:not(.no-global-input)::-webkit-calendar-picker-indi
   box-sizing: border-box !important;
 }
 
+.btn-neo-cancel.variant-danger {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #f87171;
+}
+
+.btn-neo-cancel.variant-danger:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.22);
+  border-color: rgba(239, 68, 68, 0.55);
+  color: #fca5a5;
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+}
+
 /* Light Theme Overrides */
 body.light-theme .neo-label {
   color: var(--neo-label-color);
@@ -309,6 +322,20 @@ body.light-theme .btn-neo-cancel:focus-visible {
 body.light-theme .btn-neo-cancel.is-loading::before {
   border-color: rgba(0, 0, 0, 0.15) !important;
   border-top-color: #cf222e !important;
+}
+
+body.light-theme .btn-neo-cancel.variant-danger {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(207, 34, 46, 0.28);
+  color: #cf222e;
+  box-shadow: 0 2px 8px rgba(207, 34, 46, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.85);
+}
+
+body.light-theme .btn-neo-cancel.variant-danger:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.16);
+  border-color: rgba(207, 34, 46, 0.45);
+  color: #b91c1c;
+  box-shadow: 0 4px 14px rgba(207, 34, 46, 0.16);
 }
 
 /* Icon Field Wrapper */

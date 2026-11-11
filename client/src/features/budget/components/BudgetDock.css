@@ -1,0 +1,735 @@
+/* ==========================================================================
+   Budget Dock Navigation & Flyout Drawer System
+   Matches macOS detached spring-physics dock design from Payment Confirmation Modal
+   Strict adherence to global typography, neo form controls, and CSS separation
+   ========================================================================== */
+
+/* ── 1. Outer Budget Workspace & Layout ──────────────────────────────────── */
+.admin-budget-workspace {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 24px;
+  max-width: 1700px;
+  width: 100%;
+  margin: 0 auto;
+  position: relative;
+  transition: gap 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.admin-budget-workspace:not(.is-dock-pinned) {
+  gap: 0;
+}
+
+/* ── 2. Budget Dock Container (Detached, Sticky Floating) ────────────────── */
+.budget-dock-container {
+  position: sticky;
+  top: 90px;
+  align-self: flex-start;
+  z-index: 35;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 70px;
+  transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+}
+
+.admin-budget-workspace:not(.is-dock-pinned) .budget-dock-container {
+  width: 0;
+  margin-right: -24px;
+}
+
+/* ── 3. Main Budget Card (Single Elevated Glass Surface) ─────────────────── */
+.budget-main-card {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ── 4. Detached Spring Dock (Matches Payment Confirmation Modal) ────────── */
+.budget-dock.dock,
+.budget-dock.dock--left {
+  position: relative !important;
+  left: auto;
+  right: auto;
+  top: auto;
+  bottom: auto;
+  transform: none;
+  width: 70px;
+  box-sizing: border-box;
+  margin: 0;
+  background: rgba(10, 14, 24, 0.75);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  user-select: none;
+  will-change: translate, opacity;
+  backface-visibility: hidden;
+  transition:
+    translate 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.28s ease,
+    box-shadow 0.3s ease;
+}
+
+.budget-dock.dock--left[data-hidden] {
+  translate: -100px 0;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    translate 0.38s cubic-bezier(0.55, 0, 0.75, 0.15),
+    opacity 0.22s ease 0.08s;
+}
+
+.budget-dock .dock-tile,
+.budget-dock .dock-face {
+  border-radius: calc(var(--dock-base) * var(--dock-round) * 0.5);
+}
+
+.budget-dock .dock-face {
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 4px 10px -4px rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.65);
+  transition:
+    background 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.2s ease;
+}
+
+.budget-dock .dock-face .icon-root,
+.budget-dock .dock-face .icon-root.sm {
+  font-size: 1.15rem !important;
+  line-height: 1;
+}
+
+.budget-dock .dock-item:hover .dock-face {
+  background: rgba(255, 255, 255, 0.09);
+  color: #ffffff;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14),
+    0 6px 14px -3px rgba(0, 0, 0, 0.6);
+}
+
+.budget-dock .dock-item[data-active] .dock-face {
+  background: linear-gradient(135deg, rgba(0, 198, 230, 0.25), rgba(0, 198, 230, 0.08));
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 198, 230, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    0 0 14px rgba(0, 198, 230, 0.28);
+  color: var(--accent-color, #00c6e6);
+}
+
+.budget-dock .dock-dot {
+  background: var(--accent-color, #00c6e6);
+  box-shadow: 0 0 6px rgba(0, 198, 230, 0.6);
+}
+
+.budget-dock .dock-separator {
+  background: rgba(255, 255, 255, 0.09);
+  width: 22px;
+  height: 1px;
+}
+
+.budget-dock .dock-toggle-item.is-pinned .dock-face {
+  color: var(--accent-color, #00c6e6);
+  background: rgba(0, 198, 230, 0.12);
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 198, 230, 0.35),
+    0 0 10px rgba(0, 198, 230, 0.18);
+}
+
+.budget-dock .dock-item[data-disabled],
+.budget-dock .dock-item.disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.budget-dock .dock-item[data-disabled] .dock-face,
+.budget-dock .dock-item.disabled .dock-face {
+  background: rgba(255, 255, 255, 0.02);
+  color: rgba(255, 255, 255, 0.3);
+  box-shadow: none;
+}
+
+.budget-dock .dock-label {
+  background: rgba(18, 22, 33, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  color: #f4f4f5;
+  font-family: var(--font-main);
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-caption);
+  letter-spacing: var(--ls-caption);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 9px;
+  padding: 6px 11px;
+  white-space: nowrap;
+}
+
+/* ── 5. Edge Reveal Indicator (when dock is unpinned/auto-hidden) ──────────── */
+.budget-dock-indicator {
+  position: absolute;
+  left: 0;
+  top: 40px;
+  z-index: 25;
+  background: rgba(10, 14, 24, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: none;
+  border-radius: 0 12px 12px 0;
+  padding: 12px 6px;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease, background 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.budget-dock[data-hidden]~.budget-dock-indicator {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.budget-dock-indicator:hover {
+  background: rgba(20, 26, 42, 0.9);
+  transform: translateX(2px);
+  box-shadow: 0 4px 16px rgba(0, 198, 230, 0.25);
+  border-color: rgba(0, 198, 230, 0.4);
+}
+
+.budget-dock-indicator .indicator-handle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.budget-dock-indicator .indicator-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent-color, #00c6e6);
+  box-shadow: 0 0 6px rgba(0, 198, 230, 0.8);
+}
+
+.budget-dock-indicator .indicator-chevron {
+  color: var(--accent-color, #00c6e6) !important;
+  font-size: 0.85rem !important;
+  transform: rotate(180deg);
+}
+
+/* ── 5.1. Scroll-to-Top Floating Glass Button (Dynamic Gliding Scroll) ────── */
+.budget-scroll-top-widget {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 36;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  will-change: transform;
+  transition:
+    opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    visibility 0.4s ease;
+}
+
+.budget-scroll-top-widget.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.budget-scroll-top-widget.visible .budget-scroll-top-inner,
+.budget-scroll-top-widget.visible .budget-scroll-top-btn {
+  pointer-events: auto;
+}
+
+.budget-scroll-top-inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.budget-scroll-top-tooltip {
+  --htt-bg: rgba(4, 9, 18, 0.85);
+  --htt-border: rgba(255, 255, 255, 0.14);
+  --htt-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px) scale(0.96);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  border: 1px solid var(--htt-border);
+  border-radius: 8px;
+  box-shadow: var(--htt-shadow);
+  white-space: nowrap;
+  background: var(--htt-bg);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  line-height: 1.2;
+  transition:
+    opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    visibility 0.2s ease;
+}
+
+.budget-scroll-top-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: var(--htt-bg) transparent transparent transparent;
+}
+
+.budget-scroll-top-inner:hover .budget-scroll-top-tooltip,
+.budget-scroll-top-btn:focus-visible ~ .budget-scroll-top-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+.budget-scroll-top-btn {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  padding: 0;
+  border-radius: 50%;
+  color: #ffffff;
+  cursor: pointer;
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+  visibility: visible;
+  transition:
+    background 0.35s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease,
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.budget-scroll-top-btn .glass-surface__content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.budget-scroll-top-btn .icon-root {
+  font-size: 1.35rem;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.budget-scroll-top-btn:hover {
+  background: rgba(var(--accent-color-rgb, 0, 198, 230), 0.25);
+  border-color: var(--accent-color, #00c6e6);
+  box-shadow: 0 8px 32px 0 rgba(var(--accent-color-rgb, 0, 198, 230), 0.35);
+  transform: translateY(-2px) scale(1.1);
+}
+
+.budget-scroll-top-btn:hover .icon-root {
+  transform: translateY(-2px);
+}
+
+.budget-scroll-top-btn:active {
+  transform: translateY(0) scale(0.95);
+}
+
+.admin-budget-workspace:not(.is-dock-pinned) .budget-scroll-top-widget {
+  left: 10px;
+  width: 48px;
+}
+
+/* ── 6. Flyout Drawer Panel ───────────────────────────────────────────────── */
+.budget-flyout-drawer {
+  position: absolute;
+  left: calc(100% + 16px);
+  top: var(--drawer-y, 0px);
+  width: 360px;
+  max-width: min(400px, calc(100vw - 120px));
+  max-height: calc(100vh - 120px);
+  margin: 0;
+  padding: 22px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  box-sizing: border-box;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  transition: top 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: top;
+
+  /* Premium Modal Glass Surface Optics */
+  background: rgba(13, 15, 23, 0.82);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  box-shadow:
+    0 40px 100px rgba(0, 0, 0, 0.8),
+    0 20px 40px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+  animation: budgetDrawerSlideIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.budget-flyout-drawer::-webkit-scrollbar {
+  width: 5px;
+}
+
+.budget-flyout-drawer::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+
+@keyframes budgetDrawerSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-12px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+/* ── 7. Drawer Header & Typography ────────────────────────────────────────── */
+.budget-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.budget-drawer-title-group,
+.budget-drawer-title-text {
+  display: flex;
+  min-width: 0;
+}
+
+.budget-drawer-title-group {
+  align-items: center;
+  gap: 12px;
+}
+
+.budget-drawer-title-text {
+  flex-direction: column;
+}
+
+.budget-drawer-title,
+.budget-drawer-subtitle {
+  font-family: var(--font-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.budget-drawer-title {
+  font-size: var(--fs-h3, 1.125rem);
+  font-weight: var(--fw-semibold, 600);
+  line-height: var(--lh-h3, 1.3);
+  letter-spacing: var(--ls-h3, -0.015em);
+  color: #ffffff;
+  margin: 0;
+}
+
+.budget-drawer-subtitle {
+  font-size: var(--fs-caption, 0.75rem);
+  font-weight: var(--fw-regular, 400);
+  line-height: var(--lh-caption, 1.4);
+  letter-spacing: var(--ls-caption, 0.015em);
+  color: rgba(255, 255, 255, 0.55);
+  margin: 2px 0 0 0;
+}
+
+.budget-drawer-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.budget-drawer-close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(12px) saturate(180%) brightness(1.1);
+  -webkit-backdrop-filter: blur(12px) saturate(180%) brightness(1.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.2),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.budget-drawer-close-btn:hover {
+  background: rgba(239, 68, 68, 0.22);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #ff6b6b;
+  box-shadow:
+    0 6px 18px rgba(239, 68, 68, 0.3),
+    inset 0 1px 2px 0 rgba(255, 255, 255, 0.4);
+  transform: rotate(90deg) scale(1.05);
+}
+
+.budget-drawer-close-btn:active {
+  transform: rotate(90deg) scale(0.95);
+}
+
+/* ── 8. Drawer Body & Forms ───────────────────────────────────────────────── */
+.budget-drawer-body {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.budget-flyout-drawer .neo-form {
+  gap: var(--neo-form-gap, 36px);
+  width: 100%;
+}
+
+.budget-flyout-drawer .neo-form>.floating-field:first-child {
+  margin-top: 4px;
+}
+
+.compare-widget-description {
+  margin: 0 0 -8px 0;
+  font-family: var(--font-main);
+  font-size: var(--fs-caption, 0.75rem);
+  line-height: var(--lh-caption, 1.4);
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.budget-drawer-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(0, 198, 230, 0.08);
+  border: 1px solid rgba(0, 198, 230, 0.25);
+  color: rgba(255, 255, 255, 0.85);
+  font-family: var(--font-main);
+  font-size: var(--fs-caption, 0.75rem);
+  line-height: var(--lh-caption, 1.4);
+}
+
+.budget-drawer-notice .icon-root {
+  color: var(--accent-color, #00c6e6);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.budget-drawer-notice-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.budget-drawer-notice-content p {
+  margin: 0;
+  font-family: var(--font-main);
+  font-size: var(--fs-caption, 0.75rem);
+  line-height: var(--lh-caption, 1.4);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.budget-drawer-notice-btn {
+  align-self: flex-start;
+  font-size: var(--fs-caption, 0.75rem);
+  padding: 8px 14px;
+}
+
+/* ── 9. Light Theme Adaptations ───────────────────────────────────────────── */
+body.light-theme .budget-dock.dock--left {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.15);
+}
+
+body.light-theme .budget-dock .dock-face {
+  background: rgba(0, 0, 0, 0.03);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+  color: rgba(0, 0, 0, 0.55);
+}
+
+body.light-theme .budget-dock .dock-item:hover .dock-face {
+  background: rgba(0, 0, 0, 0.06);
+  color: #111111;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+
+body.light-theme .budget-dock .dock-item[data-active] .dock-face {
+  background: linear-gradient(135deg, rgba(9, 105, 218, 0.16), rgba(9, 105, 218, 0.05));
+  box-shadow:
+    inset 0 0 0 1px rgba(9, 105, 218, 0.35),
+    0 2px 10px rgba(9, 105, 218, 0.2);
+  color: #0969da;
+}
+
+body.light-theme .budget-dock .dock-dot {
+  background: #0969da;
+  box-shadow: 0 0 6px rgba(9, 105, 218, 0.6);
+}
+
+body.light-theme .budget-dock .dock-toggle-item.is-pinned .dock-face {
+  color: #0969da;
+  background: rgba(9, 105, 218, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(9, 105, 218, 0.3);
+}
+
+body.light-theme .budget-dock .dock-separator {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .budget-dock .dock-label {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  color: #111827;
+}
+
+body.light-theme .budget-dock-indicator {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(9, 105, 218, 0.35);
+  box-shadow: 0 4px 16px rgba(9, 105, 218, 0.2);
+}
+
+body.light-theme .budget-dock-indicator .indicator-dot {
+  background: #0969da;
+  box-shadow: 0 0 6px rgba(9, 105, 218, 0.7);
+}
+
+body.light-theme .budget-dock-indicator .indicator-chevron {
+  color: #0969da !important;
+}
+
+body.light-theme .budget-flyout-drawer {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 40px 100px rgba(0, 0, 0, 0.1),
+    0 20px 40px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+}
+
+body.light-theme .budget-flyout-drawer::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+body.light-theme .budget-drawer-header {
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .budget-drawer-title {
+  color: #111827;
+}
+
+body.light-theme .budget-drawer-subtitle {
+  color: #6b7280;
+}
+
+body.light-theme .budget-drawer-close-btn {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: #24292f;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    inset 0 1px 1px rgba(255, 255, 255, 0.95);
+}
+
+body.light-theme .budget-drawer-close-btn:hover {
+  background: rgba(255, 235, 233, 0.95);
+  color: #cf222e;
+  border-color: rgba(207, 34, 46, 0.35);
+  box-shadow:
+    0 4px 14px rgba(207, 34, 46, 0.18),
+    inset 0 1px 1px rgba(255, 255, 255, 1);
+  transform: rotate(90deg) scale(1.05);
+}
+
+body.light-theme .budget-drawer-notice {
+  background: rgba(9, 105, 218, 0.08);
+  border-color: rgba(9, 105, 218, 0.2);
+  color: #24292f;
+}
+
+body.light-theme .compare-widget-description {
+  color: #57606a;
+}
+
+/* Light Theme - Scroll-to-Top Floating Glass Button */
+body.light-theme .budget-scroll-top-btn {
+  background: rgba(255, 255, 255, 0.68) !important;
+  backdrop-filter: blur(20px) saturate(180%) brightness(1.1) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(1.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.85) !important;
+  color: #1e293b !important;
+}
+
+body.light-theme .budget-scroll-top-btn:hover {
+  background: rgba(255, 255, 255, 0.88) !important;
+  border-color: rgba(9, 105, 218, 0.35) !important;
+  color: #0969da !important;
+  transform: translateY(-2px) scale(1.08);
+  box-shadow:
+    0 10px 25px -3px rgba(9, 105, 218, 0.18),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05),
+    inset 0 1px 1px rgba(255, 255, 255, 0.95);
+}
+
+body.light-theme .budget-scroll-top-tooltip {
+  --htt-bg: rgba(255, 255, 255, 0.95);
+  --htt-border: rgba(0, 0, 0, 0.12);
+  --htt-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  color: #1e293b;
+}
+
+body.light-theme .budget-scroll-top-tooltip::after {
+  border-color: var(--htt-bg) transparent transparent transparent;
+}

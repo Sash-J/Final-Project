@@ -45,7 +45,7 @@ export const BudgetRow = ({
   const isCompareMode = !!comparisonData;
 
   const valA = parseFloat(totalRaw ? totalRaw(item.id) : v.total) || 0;
-  const valB = parseFloat(comparisonData?.budgetB?.[item.id]?.total) || 0;
+  const valB = parseFloat(comparisonData?.budgetB?.[item.id]?.total ?? comparisonData?.budgetB?.[String(item.id)]?.total) || 0;
 
   const q = parseFloat(v.qty) || 0;
   const m = parseFloat(v.multiplier) || 1;
@@ -61,15 +61,15 @@ export const BudgetRow = ({
   }
   
   const getVarianceClass = (valA, valB) => {
-    const diff = valA - valB;
-    if (diff > 0) return "variance-negative";
-    if (diff < 0) return "variance-positive";
+    const diff = Number((valA - valB).toFixed(2));
+    if (diff > 0.009) return "variance-negative";
+    if (diff < -0.009) return "variance-positive";
     return "variance-neutral";
   };
   
   const formatVariance = (valA, valB) => {
-    const diff = valA - valB;
-    if (diff === 0) return "+$0.00";
+    const diff = Number((valA - valB).toFixed(2));
+    if (Math.abs(diff) < 0.01) return formatCurrency(0);
     const formatted = formatCurrency(Math.abs(diff));
     return diff > 0 ? `+${formatted}` : `-${formatted}`;
   };
@@ -103,20 +103,19 @@ export const BudgetRow = ({
               <span className="item-name-text">{item.item_name}</span>
               {v.is_itemized && (
                 <span
-                  className="breakdown-badge"
+                  className={`breakdown-badge ${isCompareMode ? "is-compare" : ""}`}
                   onClick={(e) => {
                     if (isCompareMode) return;
                     e.stopPropagation();
                     setActiveBreakdownId(item.id);
                     setActiveBreakdownItem(item.item_name);
                   }}
-                  style={{ cursor: isCompareMode ? "default" : "pointer" }}
                 >
                   Itemized
                 </span>
               )}
               
-              {canEdit && !readOnly && (
+              {canEdit && !readOnly && !isCompareMode && (
                 <CrewAssignmentDropdown
                   assignedCrew={budgetItemAssignments[item.id] || []}
                   projectCrew={projectCrew}
@@ -149,7 +148,7 @@ export const BudgetRow = ({
           </td>
           <td className="col-rate-type">
             <div
-              className={`rate-type-column-content ${v.is_itemized || readOnly ? "disabled" : ""}`}
+              className={`rate-type-column-content ${v.is_itemized || readOnly || isCompareMode ? "disabled" : ""}`}
             >
               <input
                 type="number"
@@ -167,7 +166,7 @@ export const BudgetRow = ({
                 }}
                 disabled={readOnly || v.is_itemized || isCompareMode}
               />
-              {readOnly ? (
+              {readOnly || isCompareMode ? (
                 <div
                   className={`rate-type-selected-badge ${v.is_itemized ? "disabled" : ""}`}
                 >
@@ -337,8 +336,8 @@ export const BudgetRow = ({
           <td className={`col-total total-cell ${isFilled ? "has-value" : ""} ${hideGrossAndAdd ? "bef-relative" : ""}`}>
             {hideGrossAndAdd ? (
               <div className="total-cell-content">
-                <span>{totalDisplay(item.id)}</span>
-                {(!readOnly || getVal(item.id, "c1")) && (
+                <span>{isCompareMode && valA === 0 && valB === 0 ? "—" : totalDisplay(item.id)}</span>
+                {!isCompareMode && (!readOnly || getVal(item.id, "c1")) && (
                   <button
                     className={`bef-comment-btn ${getVal(item.id, "c1") ? "has-comment" : ""}`}
                     onClick={(e) => {
@@ -355,7 +354,7 @@ export const BudgetRow = ({
                     )}
                   </button>
                 )}
-                {activeComment?.itemId === item.id &&
+                {!isCompareMode && activeComment?.itemId === item.id &&
                   activeComment?.field === "c1" &&
                   ReactDOM.createPortal(
                     <div
@@ -391,16 +390,16 @@ export const BudgetRow = ({
                   )}
               </div>
             ) : (
-              totalDisplay(item.id)
+              isCompareMode && valA === 0 && valB === 0 ? "—" : totalDisplay(item.id)
             )}
           </td>
           {isCompareMode && (
             <>
               <td className="col-compare-total compare-value-cell">
-                {valB > 0 ? formatCurrency(valB) : "-"}
+                {valA === 0 && valB === 0 ? "—" : formatCurrency(valB)}
               </td>
               <td className={`col-compare-variance compare-value-cell ${getVarianceClass(valA, valB)}`}>
-                {valA > 0 || valB > 0 ? formatVariance(valA, valB) : "-"}
+                {valA === 0 && valB === 0 ? "—" : formatVariance(valA, valB)}
               </td>
             </>
           )}

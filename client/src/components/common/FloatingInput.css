@@ -238,6 +238,29 @@ body.light-theme .floating-field.is-focused .floating-custom-control input::plac
   color: #8c959f !important;
 }
 
+/* GlassDropdown placeholder & open state handling inside floating control */
+.floating-field:not(.is-floating) .floating-custom-control .glass-dropdown-trigger .trigger-text {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.floating-field.is-floating .floating-custom-control .glass-dropdown-trigger .trigger-text {
+  opacity: 1;
+}
+
+.floating-field:has(.glass-dropdown-trigger.active) .floating-label {
+  top: -6px;
+  left: 2px;
+  transform: translateY(-100%);
+  font-size: var(--neo-label-size, 0.78rem);
+  font-weight: var(--neo-label-weight, 500);
+  color: var(--ff-label-focus-color);
+}
+
+.floating-field:has(.glass-dropdown-trigger.active) .floating-custom-control .glass-dropdown-trigger .trigger-text {
+  opacity: 1;
+}
+
 /* Textarea styling */
 .floating-input.floating-textarea {
   min-height: 64px;

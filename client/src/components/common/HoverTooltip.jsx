@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback, memo } from "react";
+import React, { useState, useRef, useEffect, useLayoutEffect, useCallback, memo } from "react";
 import { createPortal } from "react-dom";
 import Icon from "./Icon";
 import "./HoverTooltip.css";
@@ -15,10 +15,17 @@ const HoverTooltip = ({
 }) => {
   const [tooltipData, setTooltipData] = useState(null);
   const wrapperRef = useRef(null);
+  const modalRef = useRef(null);
 
   const displayTitle = title || text;
   const hasContent = Boolean(displayTitle || description);
   const isOpen = Boolean(tooltipData && hasContent);
+
+  useEffect(() => {
+    if (!hasContent) {
+      setTooltipData(null);
+    }
+  }, [hasContent]);
 
   const calculatePosition = useCallback(() => {
     if (!wrapperRef.current) return null;
@@ -30,6 +37,7 @@ const HoverTooltip = ({
       isFlipped,
       top: Math.round(isFlipped ? rect.bottom + 8 : rect.top - 8),
       left: Math.round(rect.left + rect.width / 2),
+      shiftX: 0,
     };
   }, []);
 
@@ -45,6 +53,23 @@ const HoverTooltip = ({
   const handleMouseLeave = () => {
     setTooltipData(null);
   };
+
+  useLayoutEffect(() => {
+    if (!isOpen || !modalRef.current || !tooltipData) return;
+
+    const halfWidth = modalRef.current.offsetWidth / 2;
+    if (halfWidth === 0) return;
+
+    const edgePadding = 12;
+    const minCenter = edgePadding + halfWidth;
+    const maxCenter = Math.max(minCenter, window.innerWidth - edgePadding - halfWidth);
+    const clampedCenter = Math.min(Math.max(tooltipData.left, minCenter), maxCenter);
+    const nextShiftX = Math.round(clampedCenter - tooltipData.left);
+
+    if (nextShiftX !== (tooltipData.shiftX || 0)) {
+      setTooltipData((prev) => (prev ? { ...prev, shiftX: nextShiftX } : prev));
+    }
+  }, [isOpen, tooltipData, displayTitle, description]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -62,7 +87,7 @@ const HoverTooltip = ({
         ) {
           return prev;
         }
-        return pos;
+        return { ...pos, shiftX: prev?.shiftX || 0 };
       });
     };
 
@@ -87,9 +112,14 @@ const HoverTooltip = ({
       {isOpen &&
         createPortal(
           <div
+            ref={modalRef}
             role="tooltip"
             className={`hover-tooltip-modal ${tooltipData.isFlipped ? "position-flipped" : ""} ${description ? "hover-tooltip-rich" : ""}`.trim()}
-            style={{ top: `${tooltipData.top}px`, left: `${tooltipData.left}px` }}
+            style={{
+              top: `${tooltipData.top}px`,
+              left: `${tooltipData.left}px`,
+              "--htt-shift-x": `${tooltipData.shiftX || 0}px`,
+            }}
           >
             {icon && (
               <Icon

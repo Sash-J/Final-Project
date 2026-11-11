@@ -449,3 +449,54 @@ export function validateRate(value) {
   }
   return "";
 }
+
+/**
+ * Validates a department name.
+ * @param {string} value
+ * @returns {string} error message or ""
+ */
+export function validateDepartmentName(value) {
+  const strVal = String(value ?? "").trim();
+  if (!strVal) return "Department name is required.";
+  if (strVal.length < 2 || strVal.length > 60) {
+    return "Department name must be between 2 and 60 characters.";
+  }
+  if (/[<>{}[\]]/.test(strVal)) {
+    return "Special characters < > { } [ ] are prohibited for security.";
+  }
+  return "";
+}
+
+/**
+ * Validates a category name.
+ * @param {string} value
+ * @returns {string} error message or ""
+ */
+export function validateCategoryName(value) {
+  const strVal = String(value ?? "").trim();
+  if (!strVal) return "Category name is required.";
+  if (strVal.length < 2 || strVal.length > 60) {
+    return "Category name must be between 2 and 60 characters.";
+  }
+  if (/[<>{}[\]]/.test(strVal)) {
+    return "Special characters < > { } [ ] are prohibited for security.";
+  }
+  return "";
+}
+
+/**
+ * Validates a budget item description.
+ * @param {string} value
+ * @returns {string} error message or ""
+ */
+export function validateBudgetItemName(value) {
+  const strVal = String(value ?? "").trim();
+  if (!strVal) return "Item description is required.";
+  if (strVal.length < 2 || strVal.length > 80) {
+    return "Item description must be between 2 and 80 characters.";
+  }
+  if (/[<>{}[\]]/.test(strVal)) {
+    return "Special characters < > { } [ ] are prohibited for security.";
+  }
+  return "";
+}

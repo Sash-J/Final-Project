@@ -454,6 +454,7 @@ export default function Dock({
   spring = { mass: 0.1, stiffness: 150, damping: 12 },
   bounce = true,
   autoHide = false,
+  autoFit = true,
   tiles = true,
   showLabels = true,
   showIndicators = true,
@@ -534,6 +535,10 @@ export default function Dock({
   }, []);
 
   useIsomorphicLayoutEffect(() => {
+    if (!autoFit) {
+      setFit(1);
+      return undefined;
+    }
     const root = rootRef.current;
     if (!root) return undefined;
     const host = root.offsetParent ?? document.documentElement;
@@ -547,7 +552,7 @@ export default function Dock({
     const observer = new ResizeObserver(measure);
     observer.observe(host);
     return () => observer.disconnect();
-  }, [length, vertical, rawPeak, rawBase]);
+  }, [length, vertical, rawPeak, rawBase, autoFit]);
 
   useEffect(() => {
     const root = rootRef.current;

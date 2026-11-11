@@ -271,7 +271,10 @@
   width: 170px;
 }
 
+col.col-total,
 .col-total {
+  width: 145px;
+  min-width: 145px;
   text-align: right;
   font-size: 0.85rem;
   font-weight: 400;
@@ -279,6 +282,44 @@
 }
 
 .bef-table thead th.col-total {
+  width: 145px;
+  min-width: 145px;
+  padding-right: 16px !important;
+  text-align: right;
+}
+
+col.col-compare-total,
+.col-compare-total {
+  width: 145px;
+  min-width: 145px;
+  text-align: right;
+  font-size: 0.85rem;
+  font-weight: 400;
+  padding-right: 16px !important;
+  color: #a78bfa !important;
+}
+
+.bef-table thead th.col-compare-total {
+  width: 145px;
+  min-width: 145px;
+  padding-right: 16px !important;
+  text-align: right;
+  color: #c4b5fd !important;
+}
+
+col.col-compare-variance,
+.col-compare-variance {
+  width: 145px;
+  min-width: 145px;
+  text-align: right;
+  font-size: 0.85rem;
+  font-weight: 400;
+  padding-right: 16px !important;
+}
+
+.bef-table thead th.col-compare-variance {
+  width: 145px;
+  min-width: 145px;
   padding-right: 16px !important;
   text-align: right;
 }
@@ -286,6 +327,32 @@
 .dept-subtotal-val {
   font-weight: 700;
   color: var(--accent-color);
+  text-align: right;
+  padding-right: 16px !important;
+}
+
+.dept-subtotal-val.col-compare-total {
+  font-weight: 700;
+  color: #a78bfa !important;
+  text-align: right;
+  padding-right: 16px !important;
+}
+
+.dept-subtotal-val.col-compare-variance {
+  font-weight: 700;
+  text-align: right;
+  padding-right: 16px !important;
+}
+
+.cat-subtotal.col-compare-total {
+  font-weight: 600;
+  color: #a78bfa !important;
+  text-align: right;
+  padding-right: 16px !important;
+}
+
+.cat-subtotal.col-compare-variance {
+  font-weight: 600;
   text-align: right;
   padding-right: 16px !important;
 }
@@ -969,7 +1036,8 @@ body.light-theme .rate-type-selected-badge {
 }
 
 /* Flash row with bright cyan when navigated to */
-.cyan-flash-highlight {
+.cyan-flash-highlight,
+.cyan-flash-highlight > td {
   animation: cyanFlash 2.5s ease-out;
 }
 
@@ -1098,21 +1166,7 @@ body.light-theme .dropdown-title-container {
   align-items: center;
   gap: 8px;
 }
-/* Light Theme Budget Entry Form Overrides */
-body.light-theme .bef-table thead th {
-  background: rgba(0, 0, 0, 0.05);
-  color: #57606a;
-}
 
-body.light-theme .empty-format-text {
-  color: #57606a !important;
-}
-
-body.light-theme .skeleton-phase-header,
-body.light-theme .skeleton-dept-header,
-body.light-theme .skeleton-box {
-  background: rgba(0, 0, 0, 0.05);
-}
 
 /* Budget Format Empty State Styles */
 .empty-format-sheet {
@@ -1185,3 +1239,656 @@ body.light-theme .skeleton-box {
   color: rgba(255, 255, 255, 0.5);
   max-width: 420px;
 }
+
+/* ── Budget Version Comparison Mode Styles ────────────────────────────────── */
+.bef-sheet.is-compare-mode .bef-table {
+  min-width: 1250px;
+}
+
+.cat-list-table.is-collapsed {
+  display: none !important;
+}
+
+.cat-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cat-header-row .cat-crew-assign-wrapper {
+  margin-left: 10px;
+  position: relative;
+}
+
+/* Phase Comparison Totals */
+.phase-compare-totals {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.phase-compare-cell {
+  width: 145px;
+  min-width: 145px;
+  text-align: right;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.phase-compare-cell .phase-variance-value {
+  font-weight: 700;
+}
+
+/* Grand Total Comparison Row */
+.grand-total-compare-row {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.grand-total-col {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.grand-total-col .grand-total-label {
+  color: var(--text-secondary, rgba(255, 255, 255, 0.65));
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.grand-total-col .grand-total-value {
+  font-size: 1.15rem;
+}
+
+/* Comparison Status Banner */
+.budget-compare-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 12px 80px 12px 18px; /* 80px right padding clears the 48px floating search widget */
+  margin-bottom: 20px;
+  background: rgba(167, 139, 250, 0.08);
+  border: 1px solid rgba(167, 139, 250, 0.25);
+  border-radius: 14px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  animation: compareBannerFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+@keyframes compareBannerFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.budget-compare-banner-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.compare-banner-icon-bubble {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(167, 139, 250, 0.18);
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c4b5fd;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(167, 139, 250, 0.2);
+}
+
+.compare-banner-text-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.compare-banner-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.compare-banner-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #c4b5fd;
+}
+
+.compare-loading-pill {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #c4b5fd;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: rgba(167, 139, 250, 0.2);
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  animation: comparePulse 1.5s infinite;
+}
+
+@keyframes comparePulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.compare-version-flow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.compare-version-block {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.compare-version-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.2px;
+}
+
+.compare-arrow-divider {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.75rem;
+  margin: 0 2px;
+}
+
+.compare-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.compare-badge-a {
+  background: rgba(0, 198, 230, 0.15);
+  color: var(--accent-color, #00c6e6);
+  border: 1px solid rgba(0, 198, 230, 0.35);
+  box-shadow: 0 0 12px rgba(0, 198, 230, 0.15);
+}
+
+.compare-badge-b {
+  background: rgba(167, 139, 250, 0.2);
+  color: #c4b5fd;
+  border: 1px solid rgba(167, 139, 250, 0.45);
+  box-shadow: 0 0 12px rgba(167, 139, 250, 0.15);
+}
+
+.budget-compare-exit-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   Light Theme Budget Entry Form Overrides
+   ========================================================================== */
+
+/* ── 1. Containers & Canvas Surfaces ─────────────────────────────────────── */
+body.light-theme .bef-header h2 {
+  color: #0f172a;
+}
+
+body.light-theme .bef-header p {
+  color: #64748b;
+}
+
+body.light-theme .bef-sheet-container {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+}
+
+body.light-theme .bef-sheet {
+  background: transparent;
+  border-color: #e2e8f0;
+}
+
+body.light-theme .bef-table {
+  color: #1e293b;
+}
+
+body.light-theme .bef-table thead th {
+  background: #f8fafc;
+  color: #475569;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+body.light-theme .bef-table thead th.col-num {
+  border-left-color: #e2e8f0;
+}
+
+/* ── 2. Drag & Drop Elements ──────────────────────────────────────────────── */
+body.light-theme .col-drag {
+  color: #cbd5e1;
+}
+
+body.light-theme .bef-row:hover .col-drag,
+body.light-theme .bef-cat-row:hover .col-drag,
+body.light-theme .bef-dept-row:hover .col-drag {
+  color: #64748b;
+}
+
+body.light-theme .drag-handle-icon {
+  color: #94a3b8;
+}
+
+body.light-theme .bef-row:hover .drag-handle-icon,
+body.light-theme .bef-cat-row:hover .drag-handle-icon,
+body.light-theme .bef-dept-row:hover .drag-handle-icon {
+  color: #475569 !important;
+}
+
+body.light-theme .bef-row.dragging {
+  background: rgba(9, 105, 218, 0.15) !important;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .dragging-cat {
+  background: rgba(9, 105, 218, 0.1) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+body.light-theme .dragging-dept {
+  background: rgba(9, 105, 218, 0.1) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+body.light-theme .cyan-flash-highlight,
+body.light-theme .cyan-flash-highlight > td {
+  animation: cyanFlashLight 2.5s ease-out;
+}
+
+@keyframes cyanFlashLight {
+  0% {
+    background-color: rgba(9, 105, 218, 0.25) !important;
+    box-shadow: inset 0 0 10px rgba(9, 105, 218, 0.35);
+  }
+  20% {
+    background-color: rgba(9, 105, 218, 0.12) !important;
+    box-shadow: inset 0 0 6px rgba(9, 105, 218, 0.2);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: none;
+  }
+}
+
+/* ── 3. Phase Hierarchy Sections ─────────────────────────────────────────── */
+body.light-theme .phase-section {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+body.light-theme .phase-section.collapsed {
+  background: #f8fafc;
+}
+
+body.light-theme .phase-header {
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+body.light-theme .phase-header:hover {
+  background: #f1f5f9;
+}
+
+body.light-theme .phase-header h3 {
+  color: #0f172a;
+}
+
+body.light-theme .phase-total-label {
+  color: #64748b;
+}
+
+body.light-theme .phase-total-value {
+  color: #0969da;
+}
+
+/* ── 4. Department & Category Rows ───────────────────────────────────────── */
+body.light-theme .dept-section {
+  border-bottom-color: #e2e8f0;
+}
+
+body.light-theme .bef-dept-row td {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+body.light-theme .bef-dept-row td:not(.col-drag):hover {
+  background-color: #e2e8f0 !important;
+}
+
+body.light-theme .dept-subtotal-val {
+  color: #0969da;
+}
+
+body.light-theme .bef-cat-row td {
+  background: #f8fafc;
+  color: #334155;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+body.light-theme .cat-subtotal {
+  color: #0969da;
+}
+
+/* ── 5. Budget Line Items & Inputs ───────────────────────────────────────── */
+body.light-theme .bef-row {
+  background: #ffffff;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+body.light-theme .bef-row:hover {
+  background: #f8fafc;
+}
+
+body.light-theme .bef-row td {
+  border-right: 1px solid #f1f5f9;
+}
+
+body.light-theme .bef-row .col-item-name {
+  color: #1e293b;
+}
+
+body.light-theme .bef-row input {
+  color: #1e293b;
+}
+
+body.light-theme .bef-row input::placeholder {
+  color: #94a3b8;
+}
+
+body.light-theme .bef-row input:focus {
+  background: #f0f9ff;
+  color: #0f172a;
+}
+
+body.light-theme .col-total {
+  color: #0f172a;
+}
+
+body.light-theme .total-cell {
+  color: #94a3b8;
+}
+
+body.light-theme .total-cell.has-value {
+  color: #0f172a;
+}
+
+body.light-theme .gross-cell {
+  color: #0969da !important;
+  opacity: 1;
+}
+
+/* Rate Type Toggle */
+body.light-theme .rate-type-toggle {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+}
+
+body.light-theme .rt-option {
+  color: #64748b;
+}
+
+body.light-theme .rt-option.active {
+  background: linear-gradient(135deg, #0969da, #0550ae) !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 4px rgba(9, 105, 218, 0.3) !important;
+}
+
+/* Itemize Toggle */
+body.light-theme .item-itemize-toggle {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+body.light-theme .item-itemize-toggle:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+}
+
+body.light-theme .item-itemize-toggle.active {
+  background: rgba(9, 105, 218, 0.15);
+  border-color: #0969da;
+  box-shadow: 0 0 8px rgba(9, 105, 218, 0.25);
+}
+
+body.light-theme .item-itemize-toggle.active::after {
+  border-color: #0969da;
+}
+
+/* ── 6. Footer & Controls ────────────────────────────────────────────────── */
+body.light-theme .bef-footer {
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  border-radius: 0 0 12px 12px;
+}
+
+body.light-theme .bef-grand-total {
+  color: #64748b;
+}
+
+body.light-theme .bef-grand-total strong {
+  color: #0f172a;
+}
+
+body.light-theme .bef-btn-clear {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #475569 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+body.light-theme .bef-btn-clear:hover:not(:disabled) {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: #94a3b8 !important;
+}
+
+body.light-theme .bef-btn-submit {
+  background: linear-gradient(135deg, #0969da, #0550ae) !important;
+  border: 1px solid #0969da !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(9, 105, 218, 0.3) !important;
+}
+
+body.light-theme .bef-btn-submit:hover:not(:disabled) {
+  background: linear-gradient(135deg, #0550ae, #033d8b) !important;
+  box-shadow: 0 6px 20px rgba(9, 105, 218, 0.4) !important;
+}
+
+/* ── 7. Client Mode & Notice Labels ──────────────────────────────────────── */
+body.light-theme .bef-pill {
+  background: rgba(9, 105, 218, 0.1);
+  color: #0969da;
+  border-color: rgba(9, 105, 218, 0.3);
+}
+
+body.light-theme .bef-client-label {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+body.light-theme .bef-client-label span {
+  color: #334155;
+}
+
+body.light-theme .bef-client-label:hover {
+  background: #f1f5f9;
+  border-color: #0969da;
+}
+
+body.light-theme .bef-client-label input[type="checkbox"] {
+  border-color: #94a3b8;
+}
+
+body.light-theme .bef-loading {
+  color: #64748b;
+}
+
+/* ── 8. Empty States & Skeletons ─────────────────────────────────────────── */
+body.light-theme .bef-empty-version-state {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: #cbd5e1;
+}
+
+body.light-theme .bef-empty-version-icon {
+  color: #94a3b8;
+}
+
+body.light-theme .bef-empty-version-state h3 {
+  color: #0f172a;
+}
+
+body.light-theme .bef-empty-version-state p {
+  color: #64748b;
+}
+
+body.light-theme .bef-version-warning {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #b45309;
+}
+
+body.light-theme .skeleton-sheet {
+  border-color: #e2e8f0;
+  background: #ffffff;
+}
+
+body.light-theme .skeleton-row td {
+  border-bottom-color: #f1f5f9;
+}
+
+body.light-theme .skeleton-box {
+  background: #e2e8f0;
+}
+
+body.light-theme .skeleton-box::after {
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0.6) 20%,
+    rgba(255, 255, 255, 0.9) 60%,
+    rgba(255, 255, 255, 0)
+  );
+}
+
+body.light-theme .skeleton-phase-header,
+body.light-theme .skeleton-dept-header {
+  background: #f8fafc;
+}
+
+body.light-theme .empty-format-text {
+  color: #57606a !important;
+}
+
+/* ── 9. Comparison Banner & Variance Overrides ───────────────────────────── */
+body.light-theme .budget-compare-banner {
+  background: rgba(124, 58, 237, 0.05);
+  border-color: rgba(124, 58, 237, 0.22);
+  box-shadow: 0 4px 18px rgba(124, 58, 237, 0.08);
+}
+
+body.light-theme .compare-banner-icon-bubble {
+  background: rgba(124, 58, 237, 0.12);
+  border-color: rgba(124, 58, 237, 0.25);
+  color: #7c3aed;
+  box-shadow: 0 2px 6px rgba(124, 58, 237, 0.15);
+}
+
+body.light-theme .compare-banner-title {
+  color: #7c3aed;
+}
+
+body.light-theme .compare-version-label {
+  color: #475569;
+}
+
+body.light-theme .compare-arrow-divider {
+  color: #94a3b8;
+}
+
+body.light-theme .compare-badge-a {
+  background: rgba(9, 105, 218, 0.08);
+  color: #0969da;
+  border-color: rgba(9, 105, 218, 0.3);
+  box-shadow: none;
+}
+
+body.light-theme .compare-badge-b {
+  background: rgba(124, 58, 237, 0.08);
+  color: #6d28d9;
+  border-color: rgba(124, 58, 237, 0.3);
+  box-shadow: none;
+}
+
+body.light-theme .phase-compare-cell.variance-positive .phase-variance-value,
+body.light-theme .dept-subtotal-val.col-compare-variance.variance-positive,
+body.light-theme .cat-subtotal.col-compare-variance.variance-positive,
+body.light-theme .col-compare-variance.variance-positive,
+body.light-theme .grand-total-col .grand-total-value.variance-positive {
+  color: #16a34a !important;
+}
+
+body.light-theme .phase-compare-cell.variance-negative .phase-variance-value,
+body.light-theme .dept-subtotal-val.col-compare-variance.variance-negative,
+body.light-theme .cat-subtotal.col-compare-variance.variance-negative,
+body.light-theme .col-compare-variance.variance-negative,
+body.light-theme .grand-total-col .grand-total-value.variance-negative {
+  color: #dc2626 !important;
+}
+
+body.light-theme .phase-compare-cell.variance-neutral .phase-variance-value,
+body.light-theme .dept-subtotal-val.col-compare-variance.variance-neutral,
+body.light-theme .cat-subtotal.col-compare-variance.variance-neutral,
+body.light-theme .col-compare-variance.variance-neutral,
+body.light-theme .grand-total-col .grand-total-value.variance-neutral {
+  color: #64748b !important;
+}
+
+body.light-theme .col-compare-total,
+body.light-theme .phase-compare-cell .col-compare-total,
+body.light-theme .dept-subtotal-val.col-compare-total,
+body.light-theme .cat-subtotal.col-compare-total,
+body.light-theme .bef-table thead th.col-compare-total,
+body.light-theme .grand-total-col .col-compare-total.grand-total-value {
+  color: #6d28d9 !important;
+}
+
+body.light-theme .grand-total-col .grand-total-label {
+  color: #57606a;
+}
+

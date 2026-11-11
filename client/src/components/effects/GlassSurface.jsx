@@ -24,6 +24,7 @@ const GlassSurface = ({
   className = "",
   style = {},
   onClick = undefined,
+  ...rest
 }) => {
   const uniqueId = useId().replace(/:/g, "-");
   const filterId = `glass-filter-${uniqueId}`;
@@ -185,6 +186,7 @@ const GlassSurface = ({
       className={`glass-surface ${svgSupported ? "glass-surface--svg" : "glass-surface--fallback"} ${className}`}
       style={containerStyle}
       onClick={onClick}
+      {...rest}
     >
       <svg className="glass-surface__filter" xmlns="http://www.w3.org/2000/svg">
         <defs>
