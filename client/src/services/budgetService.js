@@ -90,9 +90,20 @@ export const budgetService = {
     }
   },
 
+  createBudgetVersion: async (projectId, sourceVersionId = null) => {
+    try {
+      const payload = sourceVersionId ? { source_version_id: sourceVersionId } : {};
+      const response = await api.post(`/api/projects/${projectId}/budget-versions`, payload);
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  },
+
   cloneBudgetVersion: async (projectId, versionId) => {
     try {
-      const response = await api.post(`/api/projects/${projectId}/budget-versions`, { source_version_id: versionId });
+      const payload = versionId ? { source_version_id: versionId } : {};
+      const response = await api.post(`/api/projects/${projectId}/budget-versions`, payload);
       return response.data;
     } catch (error) {
       handleApiError(error);

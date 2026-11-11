@@ -19,8 +19,12 @@
   width: 100%;
 }
 
-.neo-button-wrapper.is-full-width .btn-neo {
-  width: 100%;
+.neo-button-wrapper.is-full-width .btn-neo,
+.btn-neo.btn-full-width,
+.btn-neo-solid.btn-full-width,
+.btn-neo-cancel.btn-full-width,
+button.btn-full-width {
+  width: 100% !important;
 }
 
 .neo-button-icon {
@@ -32,11 +36,11 @@
 }
 
 .neo-button-icon.icon-left {
-  margin-right: 2px;
+  margin-right: 6px;
 }
 
 .neo-button-icon.icon-right {
-  margin-left: 2px;
+  margin-left: 6px;
 }
 
 .neo-button-label {

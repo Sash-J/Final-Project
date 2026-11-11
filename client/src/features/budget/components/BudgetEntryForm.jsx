@@ -1,5 +1,5 @@
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { budgetService } from "../../../services/budgetService";
 import { projectService } from "../../../services/projectService";
@@ -8,6 +8,8 @@ import { useAuth } from "../../auth/context/AuthContext";
 import { formatCurrency } from "../../../utils/currencyUtils";
 import ConfirmationModal from "../../../components/common/ConfirmationModal";
 import BreakdownModal from "../../../components/modals/BreakdownModal";
+import Icon from "../../../components/common/Icon";
+import NeoButton from "../../../components/common/NeoButton";
 import "./BudgetEntryForm.css";
 
 import {
@@ -17,6 +19,7 @@ import {
 
 import BudgetRow from "./BudgetRow";
 import BudgetSearchWidget from "./BudgetSearchWidget";
+import BudgetNavWidget from "./BudgetNavWidget";
 import BudgetSubNav from "./BudgetSubNav";
 import CrewAssignmentDropdown from "./CrewAssignmentDropdown";
 import BudgetColGroup from "./BudgetColGroup";
@@ -47,8 +50,11 @@ const BudgetEntryForm = ({
   selectedDeptId = "",
   onPublish = null,
   actionsContainer = null,
+  onActionsReady = null,
+  hideActionsFooter = false,
   comparisonData = null,
   isCompareLoading = false,
+  onClearCompare = null,
   canEdit: canEditProp = undefined,
   hideUnused = false,
   hideMargin = false,
@@ -127,7 +133,11 @@ const BudgetEntryForm = ({
   } = useBudgetCalculations(values, hierarchy);
 
   // Comparison helpers
-  const getBudgetBItemTotal = (item) => parseFloat(comparisonData?.budgetB?.[item.id]?.total) || 0;
+  const getBudgetBItemTotal = (item) =>
+    parseFloat(
+      comparisonData?.budgetB?.[item.id]?.total ??
+      comparisonData?.budgetB?.[String(item.id)]?.total
+    ) || 0;
   const getBudgetBCatTotal = (cat) =>
     (cat.items || []).reduce((sum, item) => sum + getBudgetBItemTotal(item), 0);
   const getBudgetBDeptTotal = (dept) =>
@@ -138,15 +148,15 @@ const BudgetEntryForm = ({
     (hierarchy || []).reduce((sum, phase) => sum + getBudgetBPhaseTotal(phase), 0);
 
   const getVarianceClass = (valA, valB) => {
-    const diff = valA - valB;
-    if (diff > 0) return "variance-negative"; // Overage in Current Budget compared to Baseline
-    if (diff < 0) return "variance-positive"; // Savings in Current Budget compared to Baseline
+    const diff = Number((valA - valB).toFixed(2));
+    if (diff > 0.009) return "variance-negative"; // Overage in Current Budget compared to Baseline
+    if (diff < -0.009) return "variance-positive"; // Savings in Current Budget compared to Baseline
     return "variance-neutral";
   };
 
   const formatVariance = (valA, valB) => {
-    const diff = valA - valB;
-    if (diff === 0) return "+$0.00";
+    const diff = Number((valA - valB).toFixed(2));
+    if (Math.abs(diff) < 0.01) return formatCurrency(0);
     const formatted = formatCurrency(Math.abs(diff));
     return diff > 0 ? `+${formatted}` : `-${formatted}`;
   };
@@ -156,7 +166,11 @@ const BudgetEntryForm = ({
       return hierarchy;
     }
 
-    const getItemBTotal = (item) => parseFloat(comparisonData?.budgetB?.[item.id]?.total) || 0;
+    const getItemBTotal = (item) =>
+      parseFloat(
+        comparisonData?.budgetB?.[item.id]?.total ??
+        comparisonData?.budgetB?.[String(item.id)]?.total
+      ) || 0;
     const getCatBTotal = (cat) =>
       (cat.items || []).reduce((sum, item) => sum + getItemBTotal(item), 0);
     const getDeptBTotal = (dept) =>
@@ -229,6 +243,65 @@ const BudgetEntryForm = ({
     comparisonData,
   ]);
 
+  const navScrollTimerRef = useRef(null);
+  const navFlashTimerRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (navScrollTimerRef.current) clearTimeout(navScrollTimerRef.current);
+      if (navFlashTimerRef.current) clearTimeout(navFlashTimerRef.current);
+    };
+  }, []);
+
+  // Shared navigator: expands phase/department if collapsed, scrolls row into view, and flashes it
+  const navigateToTarget = useCallback(
+    ({ phaseId = null, deptId = null, elementId }) => {
+      if (phaseId != null) {
+        setExpandedPhases((prev) => {
+          if (prev.has(phaseId)) return prev;
+          const next = new Set(prev);
+          next.add(phaseId);
+          return next;
+        });
+      }
+
+      if (deptId != null) {
+        setCollapsedDepts((prev) => {
+          const numId = Number(deptId);
+          if (!prev.has(deptId) && !prev.has(numId)) return prev;
+          const next = new Set(prev);
+          next.delete(deptId);
+          next.delete(numId);
+          return next;
+        });
+      }
+
+      if (navScrollTimerRef.current) {
+        clearTimeout(navScrollTimerRef.current);
+      }
+
+      navScrollTimerRef.current = setTimeout(() => {
+        navScrollTimerRef.current = null;
+        const element = document.getElementById(elementId);
+        if (!element) return;
+
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
+        element.classList.remove("cyan-flash-highlight");
+        void element.offsetWidth;
+        element.classList.add("cyan-flash-highlight");
+
+        if (navFlashTimerRef.current) {
+          clearTimeout(navFlashTimerRef.current);
+        }
+        navFlashTimerRef.current = setTimeout(() => {
+          element.classList.remove("cyan-flash-highlight");
+          navFlashTimerRef.current = null;
+        }, 2500);
+      }, 120);
+    },
+    [setCollapsedDepts, setExpandedPhases]
+  );
+
   useEffect(() => {
     if (!selectedCatId || !displayHierarchy.length) return;
 
@@ -253,36 +326,13 @@ const BudgetEntryForm = ({
     }
 
     if (foundPhaseId) {
-      setExpandedPhases((prev) => {
-        if (prev.has(foundPhaseId)) return prev;
-        const next = new Set(prev);
-        next.add(foundPhaseId);
-        return next;
+      navigateToTarget({
+        phaseId: foundPhaseId,
+        deptId: foundDeptId,
+        elementId: `cat-section-${selectedCatId}`,
       });
-
-      if (foundDeptId) {
-        setCollapsedDepts((prev) => {
-          if (!prev.has(foundDeptId)) return prev;
-          const next = new Set(prev);
-          next.delete(foundDeptId);
-          return next;
-        });
-      }
-
-      const timer = setTimeout(() => {
-        const element = document.getElementById(`cat-section-${selectedCatId}`);
-        if (element) {
-          element.scrollIntoView({ behavior: "smooth", block: "center" });
-          element.classList.add("highlight-row-glow");
-          const removeTimer = setTimeout(() => {
-            element.classList.remove("highlight-row-glow");
-          }, 3000);
-          return () => clearTimeout(removeTimer);
-        }
-      }, 150);
-      return () => clearTimeout(timer);
     }
-  }, [selectedCatId, displayHierarchy, setCollapsedDepts, setExpandedPhases]);
+  }, [selectedCatId, displayHierarchy, navigateToTarget]);
 
   useEffect(() => {
     if (!selectedDeptId || !displayHierarchy.length) return;
@@ -302,40 +352,29 @@ const BudgetEntryForm = ({
     }
 
     if (foundPhaseId) {
-      setExpandedPhases((prev) => {
-        if (prev.has(foundPhaseId)) return prev;
-        const next = new Set(prev);
-        next.add(foundPhaseId);
-        return next;
+      navigateToTarget({
+        phaseId: foundPhaseId,
+        deptId: selectedDeptId,
+        elementId: `dept-section-${selectedDeptId}`,
       });
-
-      setCollapsedDepts((prev) => {
-        const dId = Number(selectedDeptId);
-        if (!prev.has(dId)) return prev;
-        const next = new Set(prev);
-        next.delete(dId);
-        return next;
-      });
-
-      const timer = setTimeout(() => {
-        const element = document.getElementById(`dept-section-${selectedDeptId}`);
-        if (element) {
-          element.scrollIntoView({ behavior: "smooth", block: "center" });
-          element.classList.add("highlight-row-glow");
-          const removeTimer = setTimeout(() => {
-            element.classList.remove("highlight-row-glow");
-          }, 3000);
-          return () => clearTimeout(removeTimer);
-        }
-      }, 150);
-      return () => clearTimeout(timer);
     }
-  }, [selectedDeptId, displayHierarchy, setCollapsedDepts, setExpandedPhases]);
+  }, [selectedDeptId, displayHierarchy, navigateToTarget]);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [currentMatchIndex, setCurrentMatchIndex] = useState(-1);
+
+  const handleSetSearchOpen = useCallback((open) => {
+    setSearchOpen(open);
+    if (open) setNavOpen(false);
+  }, []);
+
+  const handleSetNavOpen = useCallback((open) => {
+    setNavOpen(open);
+    if (open) setSearchOpen(false);
+  }, []);
 
   const containerRef = useRef(null);
   const widgetRef = useRef(null);
@@ -364,11 +403,11 @@ const BudgetEntryForm = ({
 
       const clampedRectTop = containerDocTop - clampedScroll;
       
-      // Target offset to keep the widget 140px below the viewport top
+      // Target offset to keep the floating widgets 140px below the viewport top
       const targetOffset = 140 - clampedRectTop;
       
-      const widgetHeight = searchOpen ? 240 : 80;
-      const maxScroll = containerRef.current.offsetHeight - widgetHeight;
+      const widgetHeight = navOpen ? 420 : searchOpen ? 240 : 140;
+      const maxScroll = Math.max(0, containerRef.current.offsetHeight - widgetHeight);
       const clampedTranslateY = Math.max(0, Math.min(targetOffset, maxScroll));
 
       // Update position with a smooth CSS transition to create a gliding 'trailing' effect
@@ -400,10 +439,11 @@ const BudgetEntryForm = ({
       const clampedRectTop = containerDocTop - clampedScroll;
 
       const targetOffset = 140 - clampedRectTop;
-      const maxScroll = containerRef.current.offsetHeight - (searchOpen ? 240 : 80);
+      const widgetHeight = navOpen ? 420 : searchOpen ? 240 : 140;
+      const maxScroll = Math.max(0, containerRef.current.offsetHeight - widgetHeight);
       const offset = Math.min(
         Math.max(0, targetOffset),
-        Math.max(0, maxScroll)
+        maxScroll
       );
       setTranslateY(offset);
       if (widgetRef.current) {
@@ -418,7 +458,7 @@ const BudgetEntryForm = ({
         clearTimeout(scrollTimeout);
       }
     };
-  }, [searchOpen]);
+  }, [searchOpen, navOpen]);
 
   // Focus the search input when the widget is expanded
   useEffect(() => {
@@ -473,46 +513,11 @@ const BudgetEntryForm = ({
     if (searchResults.length === 0 || idx < 0 || idx >= searchResults.length) return;
 
     const match = searchResults[idx];
-    
-    // Expand the phase if it is collapsed
-    if (!expandedPhases.has(match.phaseId)) {
-      setExpandedPhases((prev) => {
-        const next = new Set(prev);
-        next.add(match.phaseId);
-        return next;
-      });
-    }
-
-    // Expand the department if it is collapsed
-    if (collapsedDepts.has(match.deptId)) {
-      setCollapsedDepts((prev) => {
-        const next = new Set(prev);
-        next.delete(match.deptId);
-        return next;
-      });
-    }
-
-    // Wait for rendering to complete, locate DOM row, scroll and flash it cyan
-    setTimeout(() => {
-      const element = document.getElementById(`budget-row-${match.itemId}`);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth", block: "center" });
-        
-        // Remove previous highlight class if any
-        element.classList.remove("cyan-flash-highlight");
-        
-        // Trigger reflow to restart CSS animation
-        void element.offsetWidth;
-        
-        // Add highlight class
-        element.classList.add("cyan-flash-highlight");
-        
-        // Clean up class after animation ends
-        setTimeout(() => {
-          element.classList.remove("cyan-flash-highlight");
-        }, 2000);
-      }
-    }, 100);
+    navigateToTarget({
+      phaseId: match.phaseId,
+      deptId: match.deptId,
+      elementId: `budget-row-${match.itemId}`,
+    });
   };
 
   const handleSearchNext = () => {
@@ -766,6 +771,36 @@ const BudgetEntryForm = ({
     setShowClearConfirm(false);
   };
 
+  const actionsRef = useRef({});
+  actionsRef.current = {
+    exportTopSheet: handleExportTopSheet,
+    exportDetailPDF: handleExportDetailPDF,
+    exportDetailExcel: handleExportDetailExcel,
+    clearAll: handleClear,
+    submitAll: handleSubmit,
+  };
+
+  useEffect(() => {
+    if (onActionsReady) {
+      onActionsReady({
+        exportTopSheet: () => actionsRef.current.exportTopSheet?.(),
+        exportDetailPDF: () => actionsRef.current.exportDetailPDF?.(),
+        exportDetailExcel: () => actionsRef.current.exportDetailExcel?.(),
+        clearAll: () => actionsRef.current.clearAll?.(),
+        submitAll: () => actionsRef.current.submitAll?.(),
+        submitting,
+        isReady: Boolean(!loading && externalProjectId && versionId && hierarchy.length > 0),
+      });
+    }
+  }, [
+    onActionsReady,
+    submitting,
+    loading,
+    externalProjectId,
+    versionId,
+    hierarchy.length,
+  ]);
+
   const showVersionWarning = externalProjectId && !versionId;
   const isReadOnly = showVersionWarning || (!!versionId && !canEdit);
   const canDrag = isAdmin && !isReadOnly;
@@ -775,22 +810,33 @@ const BudgetEntryForm = ({
 
   return (
     <div className="bef-root" onClick={() => setActiveComment(null)}>
-      {/* Floating Collapsible Search Widget */}
+      {/* Floating Search & Branched Menu Navigation Stack */}
       {externalProjectId && versionId && displayHierarchy.length > 0 && (
-        <BudgetSearchWidget 
-          widgetRef={widgetRef}
-          searchOpen={searchOpen}
-          setSearchOpen={setSearchOpen}
-          translateY={translateY}
-          searchInputRef={searchInputRef}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          handleSearchKeyDown={handleSearchKeyDown}
-          searchResults={searchResults}
-          currentMatchIndex={currentMatchIndex}
-          handleSearchPrev={handleSearchPrev}
-          handleSearchNext={handleSearchNext}
-        />
+        <div
+          ref={widgetRef}
+          className="bef-floating-widgets"
+          style={{ transform: `translateY(${translateY}px)` }}
+        >
+          <BudgetSearchWidget
+            searchOpen={searchOpen}
+            setSearchOpen={handleSetSearchOpen}
+            searchInputRef={searchInputRef}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            handleSearchKeyDown={handleSearchKeyDown}
+            searchResults={searchResults}
+            currentMatchIndex={currentMatchIndex}
+            handleSearchPrev={handleSearchPrev}
+            handleSearchNext={handleSearchNext}
+          />
+          <BudgetNavWidget
+            hierarchy={displayHierarchy}
+            versionId={versionId}
+            navOpen={navOpen}
+            setNavOpen={handleSetNavOpen}
+            onNavigate={navigateToTarget}
+          />
+        </div>
       )}
 
       <div className="bef-main-content" ref={containerRef}>
@@ -805,12 +851,12 @@ const BudgetEntryForm = ({
         )}
 
         {/* Show active skeleton only when truly loading a version */}
-        {(loading || isCompareLoading) && <SkeletonTable />}
-        {!(loading || isCompareLoading) && (!externalProjectId || !versionId) && (
+        {loading && <SkeletonTable />}
+        {!loading && (!externalProjectId || !versionId) && (
           <BudgetFormatEmpty />
         )}
 
-        {!(loading || isCompareLoading) && externalProjectId && versionId && displayHierarchy.length === 0 && (
+        {!loading && externalProjectId && versionId && displayHierarchy.length === 0 && (
           <div className="bef-empty-version-state">
             <span className="material-symbols-outlined bef-empty-version-icon">inventory_2</span>
             <h3>No Published Budget Structure Found</h3>
@@ -818,12 +864,53 @@ const BudgetEntryForm = ({
           </div>
         )}
 
-        {!(loading || isCompareLoading) && externalProjectId && versionId && displayHierarchy.length > 0 && (
+        {!loading && externalProjectId && versionId && displayHierarchy.length > 0 && (
           <div
             id="admin-budget-pdf-content"
             className="fade-in-section bef-sheet-container"
           >
-            <div className={`bef-sheet ${!canDrag ? "drag-disabled" : ""}`}>
+            {comparisonData && (
+              <div className="budget-compare-banner">
+                <div className="budget-compare-banner-info">
+                  <div className="compare-banner-icon-bubble">
+                    <Icon name="compare_arrows" modifiers="sm" />
+                  </div>
+                  <div className="compare-banner-text-wrap">
+                    <div className="compare-banner-header">
+                      <span className="compare-banner-title">Comparing Versions</span>
+                      {isCompareLoading && <span className="compare-loading-pill">Updating...</span>}
+                    </div>
+                    <div className="compare-version-flow">
+                      <div className="compare-version-block compare-block-baseline">
+                        <span className="compare-version-label">Baseline</span>
+                        <span className="compare-badge compare-badge-a">{comparisonData.versionNameA}</span>
+                      </div>
+                      <span className="compare-arrow-divider" aria-hidden="true">
+                        <Icon name="arrow_forward" modifiers="xs" />
+                      </span>
+                      <div className="compare-version-block compare-block-target">
+                        <span className="compare-version-label">Comparing</span>
+                        <span className="compare-badge compare-badge-b">{comparisonData.versionNameB}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {onClearCompare && (
+                  <NeoButton
+                    type="button"
+                    variant="cancel"
+                    className="budget-compare-exit-btn"
+                    onClick={onClearCompare}
+                    icon="close"
+                    title="Exit Version Comparison"
+                  >
+                    Exit Compare
+                  </NeoButton>
+                )}
+              </div>
+            )}
+
+            <div className={`bef-sheet ${!canDrag ? "drag-disabled" : ""} ${comparisonData ? "is-compare-mode" : ""}`}>
               <DragDropContext onDragEnd={onDragEnd}>
                 <table className="bef-table header-only-table">
                   <BudgetColGroup isCompareMode={!!comparisonData} hideGrossAndAdd={hideGrossAndAdd} canDrag={canDrag} />
@@ -846,28 +933,30 @@ const BudgetEntryForm = ({
                         <div className="phase-header-left">
                           <h3>{phase.phase_name}</h3>
                         </div>
-                          <div className="phase-header-right">
-                            {comparisonData ? (
-                              <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
-                                <div style={{ minWidth: "120px", textAlign: "right" }}>
-                                  <span className="phase-total-value">{formatCurrency(phaseTotal)}</span>
-                                </div>
-                                <div style={{ minWidth: "120px", textAlign: "right" }}>
-                                  <span className="col-compare-total phase-total-value">{formatCurrency(getBudgetBPhaseTotal(phase))}</span>
-                                </div>
-                                <div style={{ minWidth: "120px", textAlign: "right", fontWeight: "bold" }} className={getVarianceClass(phaseTotal, getBudgetBPhaseTotal(phase))}>
-                                  {formatVariance(phaseTotal, getBudgetBPhaseTotal(phase))}
-                                </div>
+                        <div className="phase-header-right">
+                          {comparisonData ? (
+                            <div className="phase-compare-totals">
+                              <div className="phase-compare-cell">
+                                <span className="phase-total-value">{formatCurrency(phaseTotal)}</span>
                               </div>
-                            ) : (
-                              <>
-                                <span className="phase-total-label">Subtotal: </span>
-                                <span className="phase-total-value">
-                                  {formatCurrency(phaseTotal)}
+                              <div className="phase-compare-cell">
+                                <span className="col-compare-total phase-total-value">{formatCurrency(getBudgetBPhaseTotal(phase))}</span>
+                              </div>
+                              <div className={`phase-compare-cell ${getVarianceClass(phaseTotal, getBudgetBPhaseTotal(phase))}`}>
+                                <span className="phase-variance-value">
+                                  {formatVariance(phaseTotal, getBudgetBPhaseTotal(phase))}
                                 </span>
-                              </>
-                            )}
-                          </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              <span className="phase-total-label">Subtotal: </span>
+                              <span className="phase-total-value">
+                                {formatCurrency(phaseTotal)}
+                              </span>
+                            </>
+                          )}
+                        </div>
                       </div>
 
                       {isExpanded && (
@@ -945,20 +1034,32 @@ const BudgetEntryForm = ({
                                             </td>
                                             <td className="col-total dept-subtotal-val">
                                               {(() => {
-                                                const total = getDeptSubtotal(dept);
-                                                return total > 0 ? formatCurrency(total) : "";
+                                                const totalA = getDeptSubtotal(dept);
+                                                if (comparisonData) {
+                                                  const totalB = getBudgetBDeptTotal(dept);
+                                                  if (totalA === 0 && totalB === 0) return "—";
+                                                  return formatCurrency(totalA);
+                                                }
+                                                return totalA > 0 ? formatCurrency(totalA) : "";
                                               })()}
                                             </td>
                                             {comparisonData && (
                                               <>
-                                                <td className="col-compare-total dept-subtotal-val" style={{ fontWeight: "700", textAlign: "right", paddingRight: "24px" }}>
+                                                <td className="col-compare-total dept-subtotal-val">
                                                   {(() => {
-                                                    const total = getBudgetBDeptTotal(dept);
-                                                    return total > 0 ? formatCurrency(total) : "-";
+                                                    const totalA = getDeptSubtotal(dept);
+                                                     const totalB = getBudgetBDeptTotal(dept);
+                                                     if (totalA === 0 && totalB === 0) return "—";
+                                                     return formatCurrency(totalB);
                                                   })()}
                                                 </td>
-                                                <td className={`col-compare-variance dept-subtotal-val ${getVarianceClass(getDeptSubtotal(dept), getBudgetBDeptTotal(dept))}`} style={{ fontWeight: "700", textAlign: "right", paddingRight: "24px" }}>
-                                                  {getDeptSubtotal(dept) > 0 || getBudgetBDeptTotal(dept) > 0 ? formatVariance(getDeptSubtotal(dept), getBudgetBDeptTotal(dept)) : "-"}
+                                                <td className={`col-compare-variance dept-subtotal-val ${getVarianceClass(getDeptSubtotal(dept), getBudgetBDeptTotal(dept))}`}>
+                                                  {(() => {
+                                                     const totalA = getDeptSubtotal(dept);
+                                                     const totalB = getBudgetBDeptTotal(dept);
+                                                     if (totalA === 0 && totalB === 0) return "—";
+                                                     return formatVariance(totalA, totalB);
+                                                   })()}
                                                 </td>
                                               </>
                                             )}
@@ -972,12 +1073,7 @@ const BudgetEntryForm = ({
                                       >
                                         {(provided) => (
                                           <table
-                                            className="bef-table cat-list-table"
-                                            ref={provided.innerRef}
-                                            {...provided.droppableProps}
-                                            style={{
-                                              display: collapsedDepts.has(dept.id) ? "none" : "table"
-                                            }}
+                                            className={`bef-table cat-list-table ${collapsedDepts.has(dept.id) ? "is-collapsed" : ""}`} ref={provided.innerRef} {...provided.droppableProps}
                                           >
                                             <BudgetColGroup isCompareMode={!!comparisonData} hideGrossAndAdd={hideGrossAndAdd} canDrag={canDrag} />
                                             {dept.categories.map((cat, catIdx) => (
@@ -1017,13 +1113,13 @@ const BudgetEntryForm = ({
                                                             colSpan={headerColSpan}
                                                             className="cat-name-cell"
                                                           >
-                                                            <div className="cat-header-row" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                                            <div className="cat-header-row">
                                                               <span className="cat-name">
                                                                 {cat.category_name}
                                                               </span>
                                                               
-                                                              {canEdit && (
-                                                                <div className="crew-assign-wrapper" style={{ marginLeft: "10px", position: "relative" }}>
+                                                              {canEdit && !comparisonData && (
+                                                                <div className="crew-assign-wrapper cat-crew-assign-wrapper">
                                                                   <CrewAssignmentDropdown
                                                                     assignedCrew={categoryAssignments[cat.id] || []}
                                                                     projectCrew={projectCrew}
@@ -1041,27 +1137,32 @@ const BudgetEntryForm = ({
                                                           </td>
                                                           <td className="col-total cat-subtotal">
                                                             {(() => {
-                                                              const subtotal =
-                                                                getCategorySubtotal(
-                                                                  cat,
-                                                                );
-                                                              return subtotal > 0
-                                                                ? formatCurrency(
-                                                                    subtotal,
-                                                                  )
-                                                                : "";
+                                                              const subtotalA = getCategorySubtotal(cat);
+                                                                if (comparisonData) {
+                                                                  const subtotalB = getBudgetBCatTotal(cat);
+                                                                  if (subtotalA === 0 && subtotalB === 0) return "—";
+                                                                  return formatCurrency(subtotalA);
+                                                                }
+                                                                return subtotalA > 0 ? formatCurrency(subtotalA) : "";
                                                             })()}
                                                           </td>
                                                           {comparisonData && (
                                                             <>
-                                                              <td className="col-compare-total cat-subtotal" style={{ fontWeight: "600", color: "#ccc", textAlign: "right" }}>
+                                                              <td className="col-compare-total cat-subtotal">
                                                                 {(() => {
-                                                                  const total = getBudgetBCatTotal(cat);
-                                                                  return total > 0 ? formatCurrency(total) : "-";
+                                                                  const subtotalA = getCategorySubtotal(cat);
+                                                                  const subtotalB = getBudgetBCatTotal(cat);
+                                                                  if (subtotalA === 0 && subtotalB === 0) return "—";
+                                                                  return formatCurrency(subtotalB);
                                                                 })()}
                                                               </td>
-                                                              <td className={`col-compare-variance cat-subtotal ${getVarianceClass(getCategorySubtotal(cat), getBudgetBCatTotal(cat))}`} style={{ fontWeight: "600", textAlign: "right" }}>
-                                                                {getCategorySubtotal(cat) > 0 || getBudgetBCatTotal(cat) > 0 ? formatVariance(getCategorySubtotal(cat), getBudgetBCatTotal(cat)) : "-"}
+                                                              <td className={`col-compare-variance cat-subtotal ${getVarianceClass(getCategorySubtotal(cat), getBudgetBCatTotal(cat))}`}>
+                                                                {(() => {
+                                                                  const subtotalA = getCategorySubtotal(cat);
+                                                                  const subtotalB = getBudgetBCatTotal(cat);
+                                                                  if (subtotalA === 0 && subtotalB === 0) return "—";
+                                                                  return formatVariance(subtotalA, subtotalB);
+                                                                })()}
                                                               </td>
                                                             </>
                                                           )}
@@ -1190,20 +1291,22 @@ const BudgetEntryForm = ({
             <div className="bef-footer">
               <div className="bef-grand-total">
                 {comparisonData ? (
-                    <div style={{ display: "flex", gap: "24px", alignItems: "center" }}>
-                      <div>
-                        <span style={{ color: "#aaa" }}>Grand Total:&nbsp;</span>
-                        <strong>{formatCurrency(grandTotal)}</strong>
-                      </div>
-                      <div>
-                        <strong className="col-compare-total">{formatCurrency(getBudgetBGrandTotal())}</strong>
-                      </div>
-                      <div>
-                        <strong className={getVarianceClass(grandTotal, getBudgetBGrandTotal())}>
-                          {formatVariance(grandTotal, getBudgetBGrandTotal())}
-                        </strong>
-                      </div>
+                  <div className="grand-total-compare-row">
+                    <div className="grand-total-col">
+                      <span className="grand-total-label">Grand Total: </span>
+                      <strong className="grand-total-value">{formatCurrency(grandTotal)}</strong>
                     </div>
+                    <div className="grand-total-col">
+                      <span className="grand-total-label">{comparisonData.versionNameB}: </span>
+                      <strong className="col-compare-total grand-total-value">{formatCurrency(getBudgetBGrandTotal())}</strong>
+                    </div>
+                    <div className="grand-total-col">
+                      <span className="grand-total-label">Variance: </span>
+                      <strong className={`grand-total-value ${getVarianceClass(grandTotal, getBudgetBGrandTotal())}`}>
+                        {formatVariance(grandTotal, getBudgetBGrandTotal())}
+                      </strong>
+                    </div>
+                  </div>
                 ) : (
                   <>
                     Grand Total:&nbsp;
@@ -1215,7 +1318,7 @@ const BudgetEntryForm = ({
           </div>
         )}
 
-        {!loading && externalProjectId && versionId && hierarchy.length > 0 && (() => {
+        {!loading && externalProjectId && versionId && hierarchy.length > 0 && !hideActionsFooter && (() => {
           const content = (
               <div className={actionsContainer ? "" : "bef-footer bef-actions-only-footer"}>
                 <BudgetSubNav 

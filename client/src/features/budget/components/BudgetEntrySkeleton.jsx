@@ -46,6 +46,16 @@ export const SkeletonRow = ({ delay = 1, hideGrossAndAdd = false, canDrag = true
       <td className="col-total">
         <SkeletonBox className="premium-skel-col-md" pulse delay={delay} />
       </td>
+      {isCompareMode && (
+        <>
+          <td className="col-compare-total">
+            <SkeletonBox className="premium-skel-col-md" pulse delay={delay} />
+          </td>
+          <td className="col-compare-variance">
+            <SkeletonBox className="premium-skel-col-md" pulse delay={delay} />
+          </td>
+        </>
+      )}
     </tr>
   );
 };
@@ -69,7 +79,7 @@ export const SkeletonPhase = ({ itemsCount = 3 }) => (
 );
 
 export const SkeletonTable = () => (
-  <div className="premium-skeleton-container" style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+  <div className="premium-skeleton-container">
     <FlipFadeText />
   </div>
 );

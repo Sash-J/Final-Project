@@ -4,10 +4,8 @@ import GlassSurface from "../../../components/effects/GlassSurface";
 import "./BudgetSearchWidget.css";
 
 const BudgetSearchWidget = ({
-  widgetRef,
   searchOpen,
   setSearchOpen,
-  translateY,
   searchInputRef,
   searchQuery,
   setSearchQuery,
@@ -17,24 +15,36 @@ const BudgetSearchWidget = ({
   handleSearchPrev,
   handleSearchNext,
 }) => {
+  const handleTriggerKeyDown = (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      setSearchOpen(true);
+    }
+  };
+
   return (
-    <div
-      ref={widgetRef}
-      className={`bef-search-widget ${searchOpen ? "expanded" : "collapsed"}`}
-      style={{ transform: `translateY(${translateY}px)` }}
-    >
-      <GlassSurface
-        className="bef-search-trigger-btn"
-        onClick={() => setSearchOpen(true)}
-        width={48}
-        height={48}
-        borderRadius={24}
-        blur={10}
-        opacity={0}
-        backgroundOpacity={0}
+    <div className={`bef-search-widget ${searchOpen ? "expanded" : "collapsed"}`}>
+      <HoverTooltip
+        text={searchOpen ? "" : "Find budget items"}
+        wrapperClassName="bef-search-trigger-tooltip"
       >
-        <span className="material-symbols-outlined">search</span>
-      </GlassSurface>
+        <GlassSurface
+          className="bef-floating-trigger-btn bef-search-trigger-btn"
+          onClick={() => setSearchOpen(true)}
+          onKeyDown={handleTriggerKeyDown}
+          role="button"
+          tabIndex={searchOpen ? -1 : 0}
+          aria-label="Search budget items"
+          width={48}
+          height={48}
+          borderRadius={24}
+          blur={10}
+          opacity={0}
+          backgroundOpacity={0}
+        >
+          <span className="material-symbols-outlined">search</span>
+        </GlassSurface>
+      </HoverTooltip>
       <div className="bef-search-container">
         <GlassSurface
           className="bef-search-input-wrapper"

@@ -271,4 +271,107 @@ body.light-theme .rate-type-selected-badge {
   justify-content: flex-end;
   gap: 8px;
 }
+
+/* ── Budget Row Comparison Styles ────────────────────────────────────────── */
+.compare-value-cell {
+  text-align: right;
+  padding-right: 16px !important;
+  font-weight: 500;
+  font-size: 0.85rem;
+  cursor: default;
+}
+
+.item-name-cell-wrapper.is-compare {
+  cursor: default;
+}
+
+.breakdown-badge.is-compare {
+  cursor: default;
+  opacity: 0.85;
+}
+
+/* ── Light Theme Budget Row Overrides ────────────────────────────────────── */
+body.light-theme .readability-input-proxy {
+  color: #1e293b;
+}
+
+body.light-theme .bef-row input:disabled {
+  color: #334155 !important;
+  -webkit-text-fill-color: #334155 !important;
+}
+
+body.light-theme .multiplier-input {
+  background: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #1e293b !important;
+}
+
+body.light-theme .multiplier-input:focus {
+  background: #ffffff !important;
+  border-color: #0969da !important;
+}
+
+body.light-theme .breakdown-badge {
+  background: rgba(9, 105, 218, 0.1);
+  color: #0969da;
+  border-color: rgba(9, 105, 218, 0.25);
+}
+
+body.light-theme .bef-comment-btn:not(.has-comment) .comment-icon {
+  color: #94a3b8;
+}
+
+body.light-theme .bef-comment-btn:hover .comment-icon {
+  color: #475569;
+}
+
+body.light-theme .bef-comment-btn.has-comment .comment-icon {
+  color: #16a34a;
+}
+
+body.light-theme .bef-comment-preview {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #1e293b;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+body.light-theme .bef-comment-preview::after {
+  border-color: #ffffff transparent transparent transparent;
+}
+
+body.light-theme .bef-comment-popover {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.14);
+}
+
+body.light-theme .popover-header {
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+body.light-theme .popover-header span {
+  color: #475569;
+}
+
+body.light-theme .bef-comment-popover textarea {
+  color: #0f172a;
+  background: #ffffff;
+}
+
+body.light-theme .popover-footer {
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+}
+
+body.light-theme .popover-done-btn {
+  background: #0969da;
+  color: #ffffff;
+}
+
+body.light-theme .compare-value-cell {
+  color: #1e293b;
+}
+
 

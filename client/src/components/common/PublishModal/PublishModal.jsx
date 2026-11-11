@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import ModalPortal from "../ModalPortal";
 import Icon from "../Icon";
 import FloatingInput from "../FloatingInput";
+import NeoButton from "../NeoButton";
 import "./PublishModal.css";
 
 /**
@@ -276,44 +277,35 @@ const PublishModal = ({
           {/* Modal Footer Actions */}
           <div className="publish-modal-footer">
             {isPublished && onUnpublish && (
-              <button
+              <NeoButton
                 type="button"
-                className="btn-publish-revoke"
+                variant="danger"
+                icon="undo"
                 onClick={onUnpublish}
                 disabled={isSubmitting}
               >
-                <Icon name="undo" modifiers="xs" />
-                <span>Unpublish / Revoke</span>
-              </button>
+                Unpublish / Revoke
+              </NeoButton>
             )}
 
             <div className="publish-footer-right">
-              <button
+              <NeoButton
                 type="button"
-                className="btn-publish-cancel"
+                variant="cancel"
                 onClick={onClose}
                 disabled={isSubmitting}
               >
                 Cancel
-              </button>
-              <button
+              </NeoButton>
+              <NeoButton
                 type="button"
-                className="btn-publish-submit"
+                variant="solid"
+                icon={isPublished ? "check" : "send"}
+                loading={isSubmitting}
                 onClick={onPublish}
-                disabled={isSubmitting}
               >
-                <Icon
-                  name={isSubmitting ? "sync" : isPublished ? "check" : "send"}
-                  modifiers={isSubmitting ? "sm spin" : "sm"}
-                />
-                <span>
-                  {isSubmitting
-                    ? "Publishing..."
-                    : isPublished
-                      ? "Update Publication"
-                      : "Publish & Release"}
-                </span>
-              </button>
+                {isPublished ? "Update Publication" : "Publish & Release"}
+              </NeoButton>
             </div>
           </div>
         </div>
