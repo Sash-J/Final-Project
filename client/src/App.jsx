@@ -1,3 +1,4 @@
+import React, { Suspense, lazy } from "react";
 import {
   createBrowserRouter,
   Outlet,
@@ -14,20 +15,22 @@ import Footer from "./components/Layout/Footer";
 import Home from "./components/Layout/Home";
 import Navbar from "./components/Layout/Navbar";
 import GlobalToaster from "./components/toast/GlobalToaster";
-import AdminBudget from "./features/budget/pages/AdminBudget";
-import ClientBudgetVault from "./features/budget/pages/ClientBudgetVault";
-import AdminDashboard from "./features/dashboard/pages/AdminDashboard";
-
-import ClientDashboard from "./features/dashboard/pages/ClientDashboard";
-import CrewDashboard from "./features/dashboard/pages/CrewDashboard";
-import FinancialDashboard from "./features/dashboard/pages/FinancialDashboard";
-import LoginPage from "./features/auth/pages/LoginPage";
-import ProjectDetailDashboard from "./features/projects/pages/ProjectDetailDashboard";
-import RegisterPage from "./features/auth/pages/RegisterPage";
-import Schedule from "./features/schedule/pages/Schedule";
-import UserManagement from "./features/users/pages/UserManagement";
 import Starfield from "./components/Starfield/Starfield";
+import DashboardSkeleton from "./components/Skeleton/DashboardSkeleton";
 import { useAuth } from "./features/auth/context/AuthContext";
+
+// Trick #5: Route-level code splitting so landing/auth do not download heavy admin/PDF/chart chunks
+const AdminBudget = lazy(() => import("./features/budget/pages/AdminBudget"));
+const ClientBudgetVault = lazy(() => import("./features/budget/pages/ClientBudgetVault"));
+const AdminDashboard = lazy(() => import("./features/dashboard/pages/AdminDashboard"));
+const ClientDashboard = lazy(() => import("./features/dashboard/pages/ClientDashboard"));
+const CrewDashboard = lazy(() => import("./features/dashboard/pages/CrewDashboard"));
+const FinanceWorkspace = lazy(() => import("./features/finance/FinanceWorkspace"));
+const LoginPage = lazy(() => import("./features/auth/pages/LoginPage"));
+const ProjectDetailDashboard = lazy(() => import("./features/projects/pages/ProjectDetailDashboard"));
+const RegisterPage = lazy(() => import("./features/auth/pages/RegisterPage"));
+const Schedule = lazy(() => import("./features/schedule/pages/Schedule"));
+const UserManagement = lazy(() => import("./features/users/pages/UserManagement"));
 
 //RootLayout handles the persistent UI elements and layout
 //Code helping from OpenAI and Google
@@ -42,7 +45,15 @@ function RootLayout() {
       <div className={`transition-overlay ${isTransiting ? "active" : ""}`} />
       {location.pathname !== "/" && <Navbar />}
       <div className={`main-content ${isTransiting ? "fading-out" : ""}`}>
-        <Outlet />
+        <Suspense
+          fallback={
+            <div className="route-suspense-shell" aria-busy="true">
+              <DashboardSkeleton />
+            </div>
+          }
+        >
+          <Outlet />
+        </Suspense>
       </div>
       {!hideFooter && <Footer />}
     </div>
@@ -147,12 +158,10 @@ const router = createBrowserRouter([
         path: "finance",
         element: (
           <ProtectedRoute permissions={["finance.view"]}>
-            <FinancialDashboard />
+            <FinanceWorkspace />
           </ProtectedRoute>
         ),
       },
-
-
     ],
   },
 ]);

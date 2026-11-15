@@ -6,6 +6,7 @@ from flask_bcrypt import Bcrypt
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from services.sanitizer import sanitize_data
+from services.http_performance import apply_cache_and_compression
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "super_secret_key")
@@ -58,6 +59,11 @@ def add_cors_headers(response):
     except Exception:
         pass
 
+    try:
+        response = apply_cache_and_compression(response)
+    except Exception:
+        pass
+
     origin = request.headers.get("Origin")
     if origin:
         # Authorized origins
@@ -71,7 +77,7 @@ def add_cors_headers(response):
             response.headers["Access-Control-Allow-Origin"] = origin
             response.headers["Access-Control-Allow-Credentials"] = "true"
             response.headers["Access-Control-Allow-Headers"] = (
-                "Content-Type,Authorization"
+                "Content-Type,Authorization,If-None-Match"
             )
             response.headers["Access-Control-Allow-Methods"] = (
                 "GET,PUT,POST,DELETE,OPTIONS"
@@ -97,6 +103,8 @@ from routes.budget_management import budget_bp
 from routes.schedule_management import schedule_bp
 from routes.milestone_management import milestone_bp
 from routes.notifications_management import notifications_bp
+from routes.telemetry import telemetry_bp
+from routes.finance_management import finance_bp
 
 init_auth(bcrypt)
 
@@ -108,6 +116,8 @@ app.register_blueprint(budget_bp)
 app.register_blueprint(schedule_bp)
 app.register_blueprint(milestone_bp)
 app.register_blueprint(notifications_bp)
+app.register_blueprint(telemetry_bp)
+app.register_blueprint(finance_bp)
 
 
 @app.route("/", methods=["GET"])
@@ -126,7 +136,9 @@ if __name__ == "__main__":
             sync_verified_levels_migration,
             run_indexing_migration,
         )
+        from services.finance_migrations import run_finance_migrations
 
+        run_finance_migrations()
         run_indexing_migration()
         run_budget_migration()
         run_project_locations_migration()

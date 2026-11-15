@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { assetUrl } from "../../config";
 
 const projects = [
   {
@@ -7,7 +8,7 @@ const projects = [
     category: "Cinematic Short Film",
     tag: "Latest Release",
     year: "2024",
-    image: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5",
+    image: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=900&q=75",
     youtubeId: "aqz-KE-bpKQ"
   },
   {
@@ -16,7 +17,7 @@ const projects = [
     category: "Commercial Film",
     tag: "Commercial",
     year: "2024",
-    image: "https://images.unsplash.com/photo-1514565131-fce0801e5785",
+    image: "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=900&q=75",
     youtubeId: "Y4pI1sCgN88"
   },
   {
@@ -25,7 +26,7 @@ const projects = [
     category: "Music Video",
     tag: "Music Video",
     year: "2024",
-    image: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7",
+    image: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=900&q=75",
     youtubeId: "d9S5hS_l08A"
   },
   {
@@ -34,7 +35,7 @@ const projects = [
     category: "Documentary Film",
     tag: "Documentary",
     year: "2023",
-    image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b",
+    image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=900&q=75",
     youtubeId: "8z5R4x6C9sM"
   },
   {
@@ -43,7 +44,7 @@ const projects = [
     category: "Corporate Film",
     tag: "Corporate",
     year: "2023",
-    image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa",
+    image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=75",
     youtubeId: "tO01J-M3g0U"
   },
   {
@@ -52,7 +53,7 @@ const projects = [
     category: "Automotive Showreel",
     tag: "Automotive",
     year: "2024",
-    image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb",
+    image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=900&q=75",
     youtubeId: "_t431JjG1aU"
   }
 ];
@@ -86,11 +87,15 @@ const Projects = () => {
   };
 
   return (
-    <section
-      id="projects"
-      className="reframe-projects-section"
-      style={{ backgroundImage: "url(/dunes_background1.png)" }}
-    >
+    <section id="projects" className="reframe-projects-section">
+      <img
+        className="reframe-projects-bg-img"
+        src={assetUrl("/dunes_background1.png")}
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        decoding="async"
+      />
       <div className="section-header">
         <h2 className="section-title">Our Latest Work</h2>
       </div>
@@ -175,10 +180,13 @@ const Projects = () => {
                   </>
                 ) : (
                   <>
-                    <div
+                    <img
                       className="project-bg"
-                      style={{ backgroundImage: `url(${project.image})` }}
-                    ></div>
+                      src={project.image}
+                      alt={project.title}
+                      loading="lazy"
+                      decoding="async"
+                    />
                     <div className="play-button-overlay">
                       <div className="play-button-circle">
                         <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">

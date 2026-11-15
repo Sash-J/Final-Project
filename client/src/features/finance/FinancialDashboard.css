@@ -59,6 +59,22 @@
   pointer-events: none;
 }
 
+.fd-accent-cyan {
+  --accent-rgb: 0, 198, 230;
+}
+
+.fd-accent-violet {
+  --accent-rgb: 139, 92, 246;
+}
+
+.fd-accent-emerald {
+  --accent-rgb: 52, 211, 153;
+}
+
+.fd-accent-rose {
+  --accent-rgb: 251, 113, 133;
+}
+
 .fd-stat-card h3 {
   font-size: 0.85rem;
   font-weight: 700;

@@ -161,6 +161,10 @@ def run_rbac_migration():
             "milestone.delete",
             "finance.view",
             "finance.edit",
+            "finance.approve",
+            "finance.export",
+            "finance.accounts.manage",
+            "finance.personal.view",
             *hierarchy_permissions,
             *map_permissions,
         ]
@@ -180,7 +184,8 @@ def run_rbac_migration():
                 "user.view", "user.approve", "user.reject", "user.edit", "user.verification",
                 "project.view", "project.edit", "project.status",
                 "budget.view", "budget.edit",
-                "finance.view", "finance.edit",
+                "finance.view", "finance.edit", "finance.approve", "finance.export",
+                "finance.accounts.manage", "finance.personal.view",
                 "schedule.view", "schedule.edit",
                 "milestone.view", "milestone.create", "milestone.edit", "milestone.delete",
                 "production.view", "production.edit",
@@ -192,7 +197,7 @@ def run_rbac_migration():
                 "user.view", "user.verification",
                 "project.view", "project.create", "project.edit", "project.status",
                 "budget.view", "budget.edit", "budget.publish",
-                "finance.view", "finance.edit",
+                "finance.view", "finance.edit", "finance.export",
                 "schedule.view", "schedule.edit",
                 "milestone.view", "milestone.create", "milestone.edit", "milestone.delete",
                 "production.view", "production.edit",
@@ -201,7 +206,9 @@ def run_rbac_migration():
                 *map_permissions,
             ],
             "accountant": [
-                "project.view", "budget.view", "budget.edit", "finance.view", "finance.edit",
+                "project.view", "budget.view", "budget.edit",
+                "finance.view", "finance.edit", "finance.approve", "finance.export",
+                "finance.accounts.manage", "finance.personal.view",
                 "schedule.view", "milestone.view", "user.view", "production.view", "equipment.view",
                 "map.view",
             ],
@@ -213,7 +220,7 @@ def run_rbac_migration():
             ],
             "viewer": [
                 "project.view", "budget.view", "schedule.view", "milestone.view",
-                "production.view", "equipment.view", "finance.view", "user.view",
+                "production.view", "equipment.view", "finance.view", "finance.export", "user.view",
                 "map.view",
             ],
             "department head": [
@@ -563,9 +570,12 @@ def update_project_crew_hierarchy(project_id, hierarchy_json_str):
 
 
 def delete_project(project_id):
+    from .finance_migrations import purge_project_payment_sync
+
     conn = get_connection()
     cursor = conn.cursor()
     try:
+        purge_project_payment_sync(cursor, project_id)
         cursor.execute(
             "DELETE FROM client_projects WHERE project_id = %s", (project_id,)
         )
@@ -1441,71 +1451,86 @@ def save_budget_item_breakdowns_batch(
         conn.close()
 
 
-def insert_payment(project_id, amount, payment_date, notes="", bank_ref=None, payment_method="Bank Transfer", description=None, signatory_id=None, signatory_name=None, signatory_role=None):
+def insert_payment(project_id, amount, payment_date, notes="", bank_ref=None, payment_method="Bank Transfer", description=None, signatory_id=None, signatory_name=None, signatory_role=None, actor_user_id=None):
+    from .finance_migrations import sync_payment_to_ledger
+
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO payments (project_id, amount, payment_date, notes, bank_ref, payment_method, description, signatory_id, signatory_name, signatory_role) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-        (project_id, amount, payment_date, notes, bank_ref, payment_method, description, signatory_id, signatory_name, signatory_role),
-    )
-    conn.commit()
-    new_id = cursor.lastrowid
-    cursor.close()
-    conn.close()
-    return new_id
-
-
-def update_payment(payment_id, project_id, amount=None, payment_date=None, notes=None, bank_ref=None, payment_method=None, description=None, signatory_id=None, signatory_name=None, signatory_role=None, published_to_client=None):
-    conn = get_connection()
-    cursor = conn.cursor()
-    fields = []
-    params = []
-    if amount is not None:
-        fields.append("amount = %s")
-        params.append(amount)
-    if payment_date is not None:
-        fields.append("payment_date = %s")
-        params.append(payment_date)
-    if notes is not None:
-        fields.append("notes = %s")
-        params.append(notes)
-    if bank_ref is not None:
-        fields.append("bank_ref = %s")
-        params.append(bank_ref)
-    if payment_method is not None:
-        fields.append("payment_method = %s")
-        params.append(payment_method)
-    if description is not None:
-        fields.append("description = %s")
-        params.append(description)
-    if signatory_id is not None:
-        fields.append("signatory_id = %s")
-        params.append(signatory_id)
-    if signatory_name is not None:
-        fields.append("signatory_name = %s")
-        params.append(signatory_name)
-    if signatory_role is not None:
-        fields.append("signatory_role = %s")
-        params.append(signatory_role)
-    if published_to_client is not None:
-        pub_val = 1 if published_to_client else 0
-        fields.append("published_to_client = %s")
-        params.append(pub_val)
-        fields.append("published_at = CASE WHEN %s = 1 THEN CURRENT_TIMESTAMP ELSE NULL END")
-        params.append(pub_val)
-
-    if not fields:
+    try:
+        cursor.execute(
+            "INSERT INTO payments (project_id, amount, payment_date, notes, bank_ref, payment_method, description, signatory_id, signatory_name, signatory_role) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            (project_id, amount, payment_date, notes, bank_ref, payment_method, description, signatory_id, signatory_name, signatory_role),
+        )
+        new_id = cursor.lastrowid
+        sync_payment_to_ledger(cursor, new_id, actor_user_id=actor_user_id or signatory_id)
+        conn.commit()
+        return new_id
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
         cursor.close()
         conn.close()
-        return True
 
-    params.extend([payment_id, project_id])
-    query = f"UPDATE payments SET {', '.join(fields)} WHERE id = %s AND project_id = %s"
-    cursor.execute(query, tuple(params))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return True
+
+def update_payment(payment_id, project_id, amount=None, payment_date=None, notes=None, bank_ref=None, payment_method=None, description=None, signatory_id=None, signatory_name=None, signatory_role=None, published_to_client=None, actor_user_id=None):
+    from .finance_migrations import sync_payment_to_ledger
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        fields = []
+        params = []
+        if amount is not None:
+            fields.append("amount = %s")
+            params.append(amount)
+        if payment_date is not None:
+            fields.append("payment_date = %s")
+            params.append(payment_date)
+        if notes is not None:
+            fields.append("notes = %s")
+            params.append(notes)
+        if bank_ref is not None:
+            fields.append("bank_ref = %s")
+            params.append(bank_ref)
+        if payment_method is not None:
+            fields.append("payment_method = %s")
+            params.append(payment_method)
+        if description is not None:
+            fields.append("description = %s")
+            params.append(description)
+        if signatory_id is not None:
+            fields.append("signatory_id = %s")
+            params.append(signatory_id)
+        if signatory_name is not None:
+            fields.append("signatory_name = %s")
+            params.append(signatory_name)
+        if signatory_role is not None:
+            fields.append("signatory_role = %s")
+            params.append(signatory_role)
+        if published_to_client is not None:
+            pub_val = 1 if published_to_client else 0
+            fields.append("published_to_client = %s")
+            params.append(pub_val)
+            fields.append("published_at = CASE WHEN %s = 1 THEN CURRENT_TIMESTAMP ELSE NULL END")
+            params.append(pub_val)
+
+        if not fields:
+            return True
+
+        params.extend([payment_id, project_id])
+        query = f"UPDATE payments SET {', '.join(fields)} WHERE id = %s AND project_id = %s"
+        cursor.execute(query, tuple(params))
+        if cursor.rowcount > 0:
+            sync_payment_to_ledger(cursor, payment_id, actor_user_id=actor_user_id or signatory_id)
+        conn.commit()
+        return True
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        cursor.close()
+        conn.close()
 
 
 def get_payments_for_project(project_id):
@@ -1546,13 +1571,14 @@ def get_eligible_signatories():
 
 
 def get_admin_financial_summary():
+    """Return firm-wide financial KPIs with canonical accounting field names and legacy aliases."""
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     # Optimized derived join: aggregates latest versions across all projects in 1 single pass
     query = """
         SELECT 
-            COALESCE(SUM(latest_bv.total), 0) as gross_revenue,
-            COALESCE(SUM(latest_bv.gross_revenue), 0) as gross_profit,
+            COALESCE(SUM(latest_bv.total), 0) as quoted_client_total,
+            COALESCE(SUM(latest_bv.gross_revenue), 0) as budgeted_direct_cost,
             COALESCE((SELECT SUM(amount) FROM payments), 0) as total_received
         FROM projects p
         LEFT JOIN (
@@ -1576,15 +1602,25 @@ def get_admin_financial_summary():
     conn.close()
 
     if result:
-        result["gross_revenue"] = float(result["gross_revenue"] or 0)
-        result["gross_profit"] = float(result["gross_profit"] or 0)
-        result["total_received"] = float(result["total_received"] or 0)
-        result["pending_balance"] = result["gross_revenue"] - result["total_received"]
+        quoted_client_total = float(result["quoted_client_total"] or 0)
+        budgeted_direct_cost = float(result["budgeted_direct_cost"] or 0)
+        projected_gross_margin = quoted_client_total - budgeted_direct_cost
+        total_received = float(result["total_received"] or 0)
+
+        result["quoted_client_total"] = quoted_client_total
+        result["budgeted_direct_cost"] = budgeted_direct_cost
+        result["projected_gross_margin"] = projected_gross_margin
+        result["total_received"] = total_received
+        result["pending_balance"] = quoted_client_total - total_received
+        # Preserve legacy keys while correcting gross_profit to reflect margin, not direct cost
+        result["gross_revenue"] = quoted_client_total
+        result["gross_profit"] = projected_gross_margin
 
     return result
 
 
 def get_all_projects_financials():
+    """Return per-project financial rollups with canonical budget/margin fields and legacy aliases."""
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     # Optimized derived join: eliminates N filesorts and dependent subqueries
@@ -1594,8 +1630,8 @@ def get_all_projects_financials():
             p.project_name, 
             p.code_name,
             p.status,
-            COALESCE(latest_bv.gross_revenue, 0) as latest_gross_total,
-            COALESCE(latest_bv.total, 0) as latest_budget_total,
+            COALESCE(latest_bv.gross_revenue, 0) as budgeted_direct_cost,
+            COALESCE(latest_bv.total, 0) as quoted_client_total,
             COALESCE(pay.total_paid, 0) as total_paid
         FROM projects p
         LEFT JOIN (
@@ -1623,10 +1659,19 @@ def get_all_projects_financials():
     result = cursor.fetchall()
 
     for res in result:
-        res["latest_gross_total"] = float(res["latest_gross_total"] or 0)
-        res["latest_budget_total"] = float(res["latest_budget_total"] or 0)
-        res["total_paid"] = float(res["total_paid"] or 0)
-        res["balance"] = res["latest_budget_total"] - res["total_paid"]
+        direct_cost = float(res["budgeted_direct_cost"] or 0)
+        client_total = float(res["quoted_client_total"] or 0)
+        total_paid = float(res["total_paid"] or 0)
+        projected_margin = client_total - direct_cost
+
+        res["budgeted_direct_cost"] = direct_cost
+        res["quoted_client_total"] = client_total
+        res["projected_gross_margin"] = projected_margin
+        res["total_paid"] = total_paid
+        res["balance"] = client_total - total_paid
+        # Preserve legacy keys for existing dashboard and vault consumers
+        res["latest_gross_total"] = direct_cost
+        res["latest_budget_total"] = client_total
 
     cursor.close()
     conn.close()
@@ -2401,7 +2446,7 @@ def run_indexing_migration():
         cursor.execute("""
             SELECT TABLE_NAME, INDEX_NAME 
             FROM INFORMATION_SCHEMA.STATISTICS 
-            WHERE TABLE_SCHEMA = 'visiondi_production'
+            WHERE TABLE_SCHEMA = COALESCE(DATABASE(), 'visiondi_production')
         """)
         existing = {(r['TABLE_NAME'], r['INDEX_NAME']) for r in cursor.fetchall()}
 
@@ -2421,6 +2466,15 @@ def run_indexing_migration():
             ('user_moderation_logs', 'idx_mod_logs_target', 'CREATE INDEX idx_mod_logs_target ON user_moderation_logs (target_user_id)'),
             ('user_moderation_logs', 'idx_mod_logs_created', 'CREATE INDEX idx_mod_logs_created ON user_moderation_logs (created_at)'),
             ('project_equipment_items', 'idx_eq_items_dept_created', 'CREATE INDEX idx_eq_items_dept_created ON project_equipment_items (department_id, created_at)'),
+            # Phase 1 Finance composite indexes
+            ('finance_transactions', 'idx_ft_entity_scope_date', 'CREATE INDEX idx_ft_entity_scope_date ON finance_transactions (entity_id, scope, doc_type, tx_date DESC)'),
+            ('finance_transactions', 'idx_ft_project_status', 'CREATE INDEX idx_ft_project_status ON finance_transactions (primary_project_id, status, tx_date DESC)'),
+            ('finance_transactions', 'idx_ft_person_date', 'CREATE INDEX idx_ft_person_date ON finance_transactions (primary_user_id, tx_date DESC)'),
+            ('finance_transactions', 'idx_ft_due_status', 'CREATE INDEX idx_ft_due_status ON finance_transactions (due_date, status)'),
+            ('finance_transaction_lines', 'idx_ftl_tx_project_budget', 'CREATE INDEX idx_ftl_tx_project_budget ON finance_transaction_lines (transaction_id, project_id, budget_item_id)'),
+            ('finance_ledger_entries', 'idx_fle_account_date', 'CREATE INDEX idx_fle_account_date ON finance_ledger_entries (account_id, entry_date DESC)'),
+            ('finance_ledger_entries', 'idx_fle_project_date', 'CREATE INDEX idx_fle_project_date ON finance_ledger_entries (project_id, entry_date DESC)'),
+            ('finance_ledger_entries', 'idx_fle_person_date', 'CREATE INDEX idx_fle_person_date ON finance_ledger_entries (person_user_id, entry_date DESC)'),
         ]
 
         created_count = 0

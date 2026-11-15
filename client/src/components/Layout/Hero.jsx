@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { assetUrl } from "../../config";
 
 const Hero = () => {
   const [showScroll, setShowScroll] = useState(true);
@@ -31,11 +32,15 @@ const Hero = () => {
   }, []);
 
   return (
-    <section
-      id="hero"
-      className="reframe-hero"
-      style={{ backgroundImage: 'url("/monolith_hero.png")' }}
-    >
+    <section id="hero" className="reframe-hero">
+      <img
+        className="reframe-hero-bg-img"
+        src={assetUrl("/monolith_hero.png")}
+        alt=""
+        aria-hidden="true"
+        decoding="async"
+        fetchPriority="high"
+      />
       <div className="reframe-hero-overlay"></div>
       <div className="reframe-hero-top">
         <p className="reframe-subtitle">A New Era of Cinematic Expression</p>

@@ -1,0 +1,373 @@
+/* PerformanceAuditView.css - Vision Division Telemetry & Query Auditor */
+
+.fin-audit-view {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
+/* Header */
+.fin-audit-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+  background: rgba(18, 24, 38, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.fin-audit-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fin-audit-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fin-audit-subtitle {
+  font-size: 0.825rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+/* Section Header */
+.fin-audit-section-heading {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+/* Web Vitals Grid */
+.fin-audit-vitals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px;
+}
+
+.fin-audit-vitals-card {
+  padding: 18px 20px;
+  background: rgba(18, 24, 38, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+.fin-audit-vitals-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fin-audit-vitals-metric {
+  font-size: 0.775rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.04em;
+}
+
+.fin-audit-vitals-badge {
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.fin-audit-vitals-badge.good {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.fin-audit-vitals-badge.needs-improvement {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.fin-audit-vitals-badge.poor {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.fin-audit-vitals-val {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #f8fafc;
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+}
+
+.fin-audit-vitals-desc {
+  font-size: 0.725rem;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Database Telemetry Grid */
+.fin-audit-db-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px;
+}
+
+.fin-audit-db-card {
+  padding: 18px 20px;
+  background: rgba(18, 24, 38, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fin-audit-db-label {
+  font-size: 0.775rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.fin-audit-db-val {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #38bdf8;
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+}
+
+.fin-audit-db-sub {
+  font-size: 0.725rem;
+  color: #64748b;
+}
+
+/* Query Log Table Card */
+.fin-audit-table-card {
+  background: rgba(18, 24, 38, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  padding: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fin-audit-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.fin-audit-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.fin-audit-table th {
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 0.725rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  background: rgba(10, 15, 29, 0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.fin-audit-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: #e2e8f0;
+}
+
+.fin-audit-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.fin-audit-query-code {
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  max-width: 600px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.fin-audit-latency-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.fin-audit-latency-pill.fast {
+  background: rgba(16, 185, 129, 0.12);
+  color: #34d399;
+}
+
+.fin-audit-latency-pill.slow {
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Web Performance Checklist Card */
+.fin-audit-tricks-card {
+  background: rgba(18, 24, 38, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fin-audit-tricks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.fin-audit-trick-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: rgba(10, 15, 29, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.fin-audit-trick-icon {
+  color: #34d399;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.fin-audit-trick-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fin-audit-trick-title {
+  font-size: 0.825rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.fin-audit-trick-desc {
+  font-size: 0.725rem;
+  color: #94a3b8;
+  line-height: 1.35;
+}
+
+/* Light Theme */
+body.light-theme .fin-audit-header {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .fin-audit-title {
+  color: #0f172a;
+}
+
+body.light-theme .fin-audit-subtitle {
+  color: #64748b;
+}
+
+body.light-theme .fin-audit-section-heading {
+  color: #0f172a;
+}
+
+body.light-theme .fin-audit-vitals-card {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+body.light-theme .fin-audit-vitals-val {
+  color: #0f172a;
+}
+
+body.light-theme .fin-audit-db-card {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+body.light-theme .fin-audit-db-val {
+  color: #0284c7;
+}
+
+body.light-theme .fin-audit-table-card {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+body.light-theme .fin-audit-table th {
+  background: rgba(241, 245, 249, 0.6);
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+  color: #64748b;
+}
+
+body.light-theme .fin-audit-table td {
+  border-bottom-color: rgba(0, 0, 0, 0.04);
+  color: #1e293b;
+}
+
+body.light-theme .fin-audit-query-code {
+  color: #1e293b;
+}
+
+body.light-theme .fin-audit-tricks-card {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+body.light-theme .fin-audit-trick-item {
+  background: rgba(248, 250, 252, 0.85);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+body.light-theme .fin-audit-trick-title {
+  color: #0f172a;
+}
+
+body.light-theme .fin-audit-trick-desc {
+  color: #64748b;
+}
+

@@ -1,0 +1,537 @@
+/* CashflowTrajectoryChart.css — Composite Bento P&L Trajectory */
+
+.fin-traj-slot {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.fin-traj-bento {
+  height: 360px;
+  min-height: 360px;
+}
+
+.fin-traj-bento .composite-bento-card {
+  --pill-height: 58px;
+  --gap: 10px;
+  --right-width: clamp(134px, 34%, 172px);
+  --corner-radius: 26px;
+  --pill-corner-radius: 999px;
+  --bridge-radius: 44px;
+}
+
+.fin-traj-bento .composite-bottom-content {
+  padding: 12px 16px 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.fin-traj-orb {
+  background: rgba(var(--accent-color-rgb, 0, 198, 230), 0.14) !important;
+  color: var(--accent-color, #00c6e6) !important;
+}
+
+.fin-traj-title {
+  margin: 0;
+  font-size: 0.94rem;
+}
+
+.fin-traj-date-capsule {
+  padding: 3px 10px 3px 5px !important;
+  gap: 6px;
+}
+
+.fin-traj-date-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.fin-traj-date-trigger .glass-datepicker-wrapper {
+  width: auto;
+}
+
+.fin-traj-date-trigger .fin-traj-datepicker-btn.glass-datepicker-icon-only-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  padding: 0;
+  background: rgba(var(--accent-color-rgb, 0, 198, 230), 0.16);
+  border: 1px solid rgba(var(--accent-color-rgb, 0, 198, 230), 0.35);
+  color: var(--accent-color, #00c6e6);
+}
+
+.fin-traj-pin-clear {
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.78);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.fin-traj-pin-clear:hover {
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+}
+
+.fin-traj-body {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.fin-traj-controls-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.fin-traj-series-toggles {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.fin-traj-series-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.56);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.fin-traj-series-pill:hover {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+.fin-traj-series-pill.is-active {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.24);
+  color: #ffffff;
+}
+
+.fin-traj-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.fin-traj-dot.series-income {
+  background: #34d399;
+  box-shadow: 0 0 8px rgba(52, 211, 153, 0.6);
+}
+
+.fin-traj-dot.series-expenses {
+  background: #fb7185;
+  box-shadow: 0 0 8px rgba(251, 113, 133, 0.6);
+}
+
+.fin-traj-dot.series-profit {
+  background: var(--accent-color, #00c6e6);
+  box-shadow: 0 0 8px rgba(var(--accent-color-rgb, 0, 198, 230), 0.7);
+}
+
+.fin-traj-timeframe-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.fin-traj-tf-btn {
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.fin-traj-tf-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.fin-traj-tf-btn.is-active {
+  background: rgba(var(--accent-color-rgb, 0, 198, 230), 0.22);
+  color: var(--accent-color, #00c6e6);
+  box-shadow: inset 0 0 0 1px rgba(var(--accent-color-rgb, 0, 198, 230), 0.45);
+}
+
+.fin-traj-canvas-wrap {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  min-height: 198px;
+}
+
+.fin-traj-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+.fin-traj-grid-line {
+  stroke: rgba(255, 255, 255, 0.07);
+  stroke-width: 1;
+  stroke-dasharray: 4 5;
+}
+
+.fin-traj-zero-line {
+  stroke: rgba(255, 255, 255, 0.18);
+  stroke-width: 1;
+}
+
+.fin-traj-axis-label {
+  fill: rgba(255, 255, 255, 0.48);
+  font-size: 10.5px;
+  font-family: var(--font-mono, monospace);
+  font-variant-numeric: tabular-nums;
+}
+
+.fin-traj-month-label {
+  fill: rgba(255, 255, 255, 0.56);
+  font-size: 10.5px;
+  font-family: var(--font-main, "Funnel Sans", sans-serif);
+}
+
+.fin-traj-line-income {
+  fill: none;
+  stroke: #34d399;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.fin-traj-line-expenses {
+  fill: none;
+  stroke: #fb7185;
+  stroke-width: 2.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.fin-traj-line-profit {
+  fill: none;
+  stroke: var(--accent-color, #00c6e6);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 6px rgba(var(--accent-color-rgb, 0, 198, 230), 0.4));
+}
+
+.fin-traj-crosshair {
+  stroke: rgba(255, 255, 255, 0.32);
+  stroke-width: 1.2;
+  stroke-dasharray: 4 4;
+}
+
+.fin-traj-point-halo {
+  fill: rgba(var(--accent-color-rgb, 0, 198, 230), 0.22);
+  pointer-events: none;
+}
+
+.fin-traj-point-ring {
+  stroke: #0b0e14;
+  stroke-width: 2.2;
+}
+
+.fin-traj-point-income {
+  fill: #34d399;
+}
+
+.fin-traj-point-expenses {
+  fill: #fb7185;
+}
+
+.fin-traj-point-profit {
+  fill: var(--accent-color, #00c6e6);
+}
+
+.fin-traj-hover-hit {
+  fill: transparent;
+  cursor: crosshair;
+}
+
+.fin-traj-tooltip {
+  position: absolute;
+  top: 4px;
+  transform: translateX(-50%);
+  min-width: 196px;
+  padding: 9px 12px;
+  border-radius: 14px;
+  background: rgba(14, 17, 25, 0.92);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.48);
+  pointer-events: none;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.fin-traj-tooltip-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 4px;
+}
+
+.fin-traj-tooltip-month {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.fin-traj-tooltip-pill {
+  font-size: 0.66rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+}
+
+.fin-traj-tooltip-pill.is-positive {
+  background: rgba(52, 211, 153, 0.16);
+  color: #34d399;
+}
+
+.fin-traj-tooltip-pill.is-negative {
+  background: rgba(251, 113, 133, 0.16);
+  color: #fb7185;
+}
+
+.fin-traj-tooltip-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.72rem;
+}
+
+.fin-traj-tooltip-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.66);
+}
+
+.fin-traj-tooltip-val {
+  color: #ffffff;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.fin-traj-empty {
+  height: 100%;
+  min-height: 185px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.84rem;
+  border-radius: 16px;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  padding: 16px;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .fin-traj-bento {
+    height: 392px;
+    min-height: 392px;
+  }
+
+  .fin-traj-bento .composite-bento-card {
+    --right-width: clamp(114px, 38%, 146px);
+  }
+}
+
+/* Light Theme Parity */
+body.light-theme .fin-traj-orb {
+  background: rgba(9, 105, 218, 0.1) !important;
+  color: #0969da !important;
+}
+
+body.light-theme .fin-traj-date-trigger .fin-traj-datepicker-btn.glass-datepicker-icon-only-btn {
+  background: rgba(9, 105, 218, 0.1);
+  border-color: rgba(9, 105, 218, 0.28);
+  color: #0969da;
+}
+
+body.light-theme .fin-traj-pin-clear {
+  background: rgba(15, 23, 42, 0.08);
+  color: #57606a;
+}
+
+body.light-theme .fin-traj-pin-clear:hover {
+  background: rgba(15, 23, 42, 0.16);
+  color: #1f2328;
+}
+
+body.light-theme .fin-traj-series-pill {
+  background: rgba(15, 23, 42, 0.04);
+  border-color: rgba(15, 23, 42, 0.1);
+  color: #57606a;
+}
+
+body.light-theme .fin-traj-series-pill:hover,
+body.light-theme .fin-traj-series-pill.is-active {
+  background: rgba(9, 105, 218, 0.09);
+  border-color: rgba(9, 105, 218, 0.28);
+  color: #1f2328;
+}
+
+body.light-theme .fin-traj-dot.series-income {
+  background: #1a7f37;
+  box-shadow: none;
+}
+
+body.light-theme .fin-traj-dot.series-expenses {
+  background: #cf222e;
+  box-shadow: none;
+}
+
+body.light-theme .fin-traj-dot.series-profit {
+  background: #0969da;
+  box-shadow: none;
+}
+
+body.light-theme .fin-traj-line-income {
+  stroke: #1a7f37;
+}
+
+body.light-theme .fin-traj-line-expenses {
+  stroke: #cf222e;
+}
+
+body.light-theme .fin-traj-line-profit {
+  stroke: #0969da;
+  filter: none;
+}
+
+body.light-theme .fin-traj-point-ring {
+  stroke: #ffffff;
+}
+
+body.light-theme .fin-traj-point-halo {
+  fill: rgba(9, 105, 218, 0.18);
+}
+
+body.light-theme .fin-traj-point-income {
+  fill: #1a7f37;
+}
+
+body.light-theme .fin-traj-point-expenses {
+  fill: #cf222e;
+}
+
+body.light-theme .fin-traj-point-profit {
+  fill: #0969da;
+}
+
+body.light-theme .fin-traj-timeframe-group {
+  background: rgba(15, 23, 42, 0.04);
+  border-color: rgba(15, 23, 42, 0.1);
+}
+
+body.light-theme .fin-traj-tf-btn {
+  color: #57606a;
+}
+
+body.light-theme .fin-traj-tf-btn:hover {
+  color: #1f2328;
+  background: rgba(15, 23, 42, 0.06);
+}
+
+body.light-theme .fin-traj-tf-btn.is-active {
+  background: rgba(9, 105, 218, 0.12);
+  color: #0969da;
+  box-shadow: inset 0 0 0 1px rgba(9, 105, 218, 0.35);
+}
+
+body.light-theme .fin-traj-grid-line {
+  stroke: rgba(15, 23, 42, 0.08);
+}
+
+body.light-theme .fin-traj-zero-line {
+  stroke: rgba(15, 23, 42, 0.2);
+}
+
+body.light-theme .fin-traj-axis-label,
+body.light-theme .fin-traj-month-label {
+  fill: #57606a;
+}
+
+body.light-theme .fin-traj-crosshair {
+  stroke: rgba(15, 23, 42, 0.32);
+}
+
+body.light-theme .fin-traj-tooltip {
+  background: rgba(255, 255, 255, 0.96);
+  border-color: rgba(15, 23, 42, 0.14);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+}
+
+body.light-theme .fin-traj-tooltip-head {
+  border-bottom-color: rgba(15, 23, 42, 0.08);
+}
+
+body.light-theme .fin-traj-tooltip-month,
+body.light-theme .fin-traj-tooltip-val {
+  color: #1f2328;
+}
+
+body.light-theme .fin-traj-tooltip-key {
+  color: #57606a;
+}
+
+body.light-theme .fin-traj-tooltip-pill.is-positive {
+  background: rgba(26, 127, 55, 0.12);
+  color: #1a7f37;
+}
+
+body.light-theme .fin-traj-tooltip-pill.is-negative {
+  background: rgba(207, 34, 46, 0.12);
+  color: #cf222e;
+}
+
+body.light-theme .fin-traj-empty {
+  color: #57606a;
+  border-color: rgba(15, 23, 42, 0.14);
+}
