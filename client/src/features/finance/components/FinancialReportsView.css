@@ -1,0 +1,413 @@
+/* FinancialReportsView.css - Vision Division Reports Studio */
+
+.fin-reports-view {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
+/* Header & Controls */
+.fin-reports-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+  background: rgba(18, 24, 38, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.fin-reports-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fin-reports-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fin-reports-subtitle {
+  font-size: 0.825rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.fin-reports-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Tabs */
+.fin-reports-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  background: rgba(10, 15, 29, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  overflow-x: auto;
+}
+
+.fin-reports-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.fin-reports-tab-btn:hover {
+  color: #f1f5f9;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.fin-reports-tab-btn.active {
+  background: rgba(34, 211, 238, 0.12);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  font-weight: 600;
+}
+
+/* Filters Bar */
+.fin-reports-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 14px;
+  padding: 16px 20px;
+  background: rgba(15, 21, 35, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+}
+
+.fin-reports-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fin-reports-filter-label {
+  font-size: 0.725rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+}
+
+.fin-reports-select {
+  background: rgba(10, 15, 29, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #f1f5f9;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  min-width: 150px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.fin-reports-select:focus {
+  border-color: #38bdf8;
+}
+
+.fin-reports-filter-btn {
+  margin-left: auto;
+}
+
+/* KPI Summary Cards */
+.fin-reports-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px;
+}
+
+.fin-reports-kpi-card {
+  padding: 16px 18px;
+  background: rgba(18, 24, 38, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fin-reports-kpi-label {
+  font-size: 0.775rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.fin-reports-kpi-val {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #f8fafc;
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+}
+
+.fin-reports-kpi-val.positive {
+  color: #10b981;
+}
+
+.fin-reports-kpi-val.negative {
+  color: #ef4444;
+}
+
+.fin-reports-kpi-sub {
+  font-size: 0.725rem;
+  color: #64748b;
+}
+
+/* Trial Balance Status Banner */
+.fin-reports-tb-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+}
+
+.fin-reports-tb-banner.balanced {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #34d399;
+}
+
+.fin-reports-tb-banner.unbalanced {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #f87171;
+}
+
+.fin-reports-tb-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+}
+
+.fin-reports-tb-banner-right {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.825rem;
+}
+
+/* Statements Table Card */
+.fin-reports-table-card {
+  background: rgba(18, 24, 38, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  padding: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fin-reports-section-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #cbd5e1;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.fin-reports-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.fin-reports-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.fin-reports-table th {
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 0.725rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  background: rgba(10, 15, 29, 0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.fin-reports-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: #e2e8f0;
+}
+
+.fin-reports-table tr:last-child td {
+  border-bottom: none;
+}
+
+.fin-reports-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.fin-reports-table .text-right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.fin-reports-table .text-center {
+  text-align: center;
+}
+
+.fin-reports-table .code-cell {
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: #38bdf8;
+}
+
+.fin-reports-table .total-row td {
+  font-weight: 700;
+  background: rgba(30, 41, 59, 0.4);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+}
+
+.fin-reports-table .net-profit-row td {
+  font-weight: 800;
+  font-size: 0.95rem;
+  background: rgba(56, 189, 248, 0.08);
+  border-top: 2px solid rgba(56, 189, 248, 0.3);
+  color: #38bdf8;
+}
+
+.fin-reports-empty {
+  padding: 40px;
+  text-align: center;
+  color: #94a3b8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Light Theme Support */
+body.light-theme .fin-reports-header {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .fin-reports-title {
+  color: #0f172a;
+}
+
+body.light-theme .fin-reports-subtitle {
+  color: #64748b;
+}
+
+body.light-theme .fin-reports-tabs {
+  background: rgba(241, 245, 249, 0.8);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+body.light-theme .fin-reports-tab-btn {
+  color: #64748b;
+}
+
+body.light-theme .fin-reports-tab-btn:hover {
+  color: #0f172a;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+body.light-theme .fin-reports-tab-btn.active {
+  background: #ffffff;
+  color: #0284c7;
+  border-color: rgba(2, 132, 199, 0.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .fin-reports-filter-bar {
+  background: rgba(248, 250, 252, 0.85);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+body.light-theme .fin-reports-select {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.15);
+  color: #0f172a;
+}
+
+body.light-theme .fin-reports-kpi-card {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+body.light-theme .fin-reports-kpi-val {
+  color: #0f172a;
+}
+
+body.light-theme .fin-reports-table-card {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+body.light-theme .fin-reports-section-title {
+  color: #1e293b;
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+}
+
+body.light-theme .fin-reports-table th {
+  background: rgba(241, 245, 249, 0.6);
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+  color: #64748b;
+}
+
+body.light-theme .fin-reports-table td {
+  border-bottom-color: rgba(0, 0, 0, 0.04);
+  color: #1e293b;
+}
+
+body.light-theme .fin-reports-table .code-cell {
+  color: #0284c7;
+}
+
+body.light-theme .fin-reports-table .total-row td {
+  background: rgba(241, 245, 249, 0.8);
+  border-top-color: rgba(0, 0, 0, 0.1);
+  color: #0f172a;
+}
+
+body.light-theme .fin-reports-table .net-profit-row td {
+  background: rgba(2, 132, 199, 0.08);
+  border-top-color: rgba(2, 132, 199, 0.3);
+  color: #0284c7;
+}
+

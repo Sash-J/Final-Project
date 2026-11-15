@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { dashboardService } from "../../../services/dashboardService";
-import PageHeader from "../../../components/common/PageHeader";
+import { dashboardService } from "../../services/dashboardService";
+import PageHeader from "../../components/common/PageHeader";
 import "./FinancialDashboard.css";
 
-import { formatCurrency, getCurrencySymbol } from "../../../utils/currencyUtils";
+import { formatCurrency, getCurrencySymbol } from "../../utils/currencyUtils";
 
 const FinancialDashboard = () => {
   const [summary, setSummary] = useState(null);
@@ -58,28 +58,28 @@ const FinancialDashboard = () => {
 
       <div className="fd-content-wrap">
         <div className="fd-stats-grid">
-          <div className="fd-stat-card" style={{"--accent-rgb": "0, 198, 230"}}>
-            <h3>Gross Revenue</h3>
+          <div className="fd-stat-card fd-accent-cyan">
+            <h3>Quoted Client Total</h3>
             <div className="fd-stat-value">
               <span className="fd-stat-currency">{getCurrencySymbol()}</span>
-              {formatCurrency(summary?.gross_revenue, false)}
+              {formatCurrency(summary?.quoted_client_total ?? summary?.gross_revenue, false)}
             </div>
           </div>
-          <div className="fd-stat-card" style={{"--accent-rgb": "139, 92, 246"}}>
-            <h3>Gross Profit</h3>
+          <div className="fd-stat-card fd-accent-violet">
+            <h3>Projected Margin</h3>
             <div className="fd-stat-value">
               <span className="fd-stat-currency">{getCurrencySymbol()}</span>
-              {formatCurrency(summary?.gross_profit, false)}
+              {formatCurrency(summary?.projected_gross_margin ?? summary?.gross_profit, false)}
             </div>
           </div>
-          <div className="fd-stat-card" style={{"--accent-rgb": "52, 211, 153"}}>
+          <div className="fd-stat-card fd-accent-emerald">
             <h3>Total Received</h3>
             <div className="fd-stat-value">
               <span className="fd-stat-currency">{getCurrencySymbol()}</span>
               {formatCurrency(summary?.total_received, false)}
             </div>
           </div>
-          <div className="fd-stat-card" style={{"--accent-rgb": "251, 113, 133"}}>
+          <div className="fd-stat-card fd-accent-rose">
             <h3>Outstanding Balance</h3>
             <div className="fd-stat-value">
               <span className="fd-stat-currency">{getCurrencySymbol()}</span>
@@ -100,8 +100,8 @@ const FinancialDashboard = () => {
             <thead>
               <tr>
                 <th>Project</th>
-                <th>Gross Revenue</th>
-                <th>Total Budget</th>
+                <th>Direct Cost</th>
+                <th>Quoted Total</th>
                 <th>Total Paid</th>
                 <th>Payment Progress</th>
                 <th>Balance</th>
@@ -109,8 +109,10 @@ const FinancialDashboard = () => {
             </thead>
             <tbody>
               {projects.map(p => {
-                const progress = p.latest_budget_total > 0 
-                  ? (p.total_paid / p.latest_budget_total) * 100 
+                const quotedTotal = p.quoted_client_total ?? p.latest_budget_total ?? 0;
+                const directCost = p.budgeted_direct_cost ?? p.latest_gross_total ?? 0;
+                const progress = quotedTotal > 0 
+                  ? (p.total_paid / quotedTotal) * 100 
                   : 0;
                 
                 return (
@@ -121,8 +123,8 @@ const FinancialDashboard = () => {
                         <span className="fd-project-code">{p.code_name}</span>
                       </div>
                     </td>
-                    <td className="fd-amount-pos">{formatCurrency(p.latest_gross_total)}</td>
-                    <td className="fd-amount-pos">{formatCurrency(p.latest_budget_total)}</td>
+                    <td className="fd-amount-pos">{formatCurrency(directCost)}</td>
+                    <td className="fd-amount-pos">{formatCurrency(quotedTotal)}</td>
                     <td className="fd-amount-paid">{formatCurrency(p.total_paid)}</td>
                     <td>
                       <div className="fd-progress-cell">

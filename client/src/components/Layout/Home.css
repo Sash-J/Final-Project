@@ -42,6 +42,8 @@
 .reframe-projects-section {
   width: 100%;
   height: 100%;
+  position: relative;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -50,6 +52,11 @@
   box-sizing: border-box;
   background-size: cover;
   background-position: center;
+}
+
+.reframe-projects-section > :not(.reframe-projects-bg-img) {
+  position: relative;
+  z-index: 1;
 }
 
 /* Hero Section (Reframe) */
@@ -67,6 +74,18 @@
   text-align: center;
   color: #fff;
   z-index: 1;
+}
+
+.reframe-hero-bg-img,
+.reframe-projects-bg-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .reframe-hero-overlay {
@@ -421,6 +440,9 @@
 .project-bg {
   width: 100%;
   height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
   background-size: cover;
   background-position: center;
   transition: transform 0.5s ease;

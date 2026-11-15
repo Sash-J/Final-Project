@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Funnel+Sans:ital,wght@0,300..800;1,300..800&family=Rethink+Sans:ital,wght@0,400..800;1,300..800&display=swap");
+/* Fonts preloaded in public/index.html to eliminate CSS @import waterfall */
 @import "../components/common/PageContainer.css";
 
 *,
@@ -47,6 +47,13 @@ textarea {
   box-sizing: border-box;
   position: relative;
   z-index: 1;
+}
+
+.route-suspense-shell {
+  min-height: calc(100vh - 140px);
+  width: 100%;
+  padding: 24px 0;
+  box-sizing: border-box;
 }
 
 @keyframes pageFadeIn {

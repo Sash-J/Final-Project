@@ -1,0 +1,615 @@
+/* FinanceWorkspace.css - Split Rail + Bento Studio Shell (Dark & Light Themes) */
+
+.fin-shell-card {
+  padding: 24px;
+}
+
+.fin-workspace-layout {
+  display: grid;
+  grid-template-columns: 236px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  transition: grid-template-columns 0.24s ease;
+}
+
+.fin-workspace-layout.is-rail-collapsed {
+  grid-template-columns: 74px minmax(0, 1fr);
+}
+
+/* ── Left Workspace Rail ──────────────────────────────────────────────────── */
+.fin-rail {
+  position: sticky;
+  top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 12px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  box-sizing: border-box;
+}
+
+.fin-rail-brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 4px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.fin-rail-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.fin-rail-emblem {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: linear-gradient(
+    135deg,
+    rgba(var(--accent-color-rgb, 0, 198, 230), 0.25),
+    rgba(139, 92, 246, 0.2)
+  );
+  border: 1px solid rgba(var(--accent-color-rgb, 0, 198, 230), 0.4);
+  color: var(--accent-color, #00c6e6);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.fin-rail-brand-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.fin-rail-brand-name {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fin-rail-brand-code {
+  font-size: 0.66rem;
+  color: rgba(255, 255, 255, 0.48);
+  font-family: var(--font-mono, monospace);
+  white-space: nowrap;
+}
+
+.fin-rail-collapse-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.72);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.18s ease;
+}
+
+.fin-rail-collapse-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.fin-rail-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.fin-rail-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 6px 6px;
+}
+
+.fin-rail-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.84rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+
+.fin-rail-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+
+.fin-rail-item.is-active {
+  background: linear-gradient(
+    90deg,
+    rgba(var(--accent-color-rgb, 0, 198, 230), 0.22) 0%,
+    rgba(var(--accent-color-rgb, 0, 198, 230), 0.06) 100%
+  );
+  border-color: rgba(var(--accent-color-rgb, 0, 198, 230), 0.36);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+.fin-rail-item.is-active .icon-root {
+  color: var(--accent-color, #00c6e6);
+}
+
+.fin-workspace-layout.is-rail-collapsed .fin-rail-brand-copy,
+.fin-workspace-layout.is-rail-collapsed .fin-rail-item-label,
+.fin-workspace-layout.is-rail-collapsed .fin-rail-footer {
+  display: none;
+}
+
+.fin-workspace-layout.is-rail-collapsed .fin-rail-brand-row {
+  flex-direction: column;
+  padding-bottom: 10px;
+}
+
+.fin-workspace-layout.is-rail-collapsed .fin-rail-item {
+  justify-content: center;
+  padding: 10px;
+}
+
+.fin-rail-footer {
+  margin-top: 4px;
+  padding: 11px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fin-rail-period-label {
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.fin-rail-period-val {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.fin-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 8px rgba(52, 211, 153, 0.65);
+}
+
+/* ── Main Studio Canvas ───────────────────────────────────────────────────── */
+.fin-main-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+.fin-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.fin-sync-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.fin-sync-pill.is-revalidating .icon-root {
+  animation: finSpin 1s linear infinite;
+  color: var(--accent-color, #00c6e6);
+}
+
+@keyframes finSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.fin-refresh-icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.8);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.fin-refresh-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.11);
+  color: #ffffff;
+}
+
+/* ── Control Strip: Scope ViewToggle + Search ─────────────────────────────── */
+.fin-control-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.fin-scope-view-toggle {
+  border-radius: 999px;
+  padding: 4px;
+}
+
+.fin-scope-view-toggle .view-toggle-btn {
+  width: auto;
+  height: 32px;
+  padding: 0 13px;
+  border-radius: 999px;
+  gap: 6px;
+}
+
+.fin-scope-view-toggle .view-toggle-btn-label {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.fin-control-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.fin-date-range-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 12px;
+  height: 40px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  transition: border-color 0.2s ease, background 0.2s ease;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.fin-date-range-pill:focus-within,
+.fin-date-range-pill:hover {
+  border-color: rgba(var(--accent-color-rgb, 0, 198, 230), 0.45);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.fin-date-range-pill.is-filtered {
+  border-color: rgba(var(--accent-color-rgb, 0, 198, 230), 0.55);
+  background: rgba(var(--accent-color-rgb, 0, 198, 230), 0.09);
+}
+
+.fin-date-start,
+.fin-date-end {
+  display: inline-flex;
+  align-items: center;
+}
+
+.fin-date-range-pill .glass-datepicker-wrapper {
+  width: auto;
+}
+
+.fin-date-range-pill .glass-datepicker-icon {
+  left: 2px;
+  font-size: 16px;
+  color: var(--accent-color, #00c6e6);
+}
+
+.fin-date-range-pill .fin-date-picker-input.glass-datepicker-input {
+  width: 96px;
+  height: 32px;
+  padding: 0 4px 0 24px;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-size: 0.76rem;
+  font-variant-numeric: tabular-nums;
+  color: #e2e8f0;
+  border-radius: 999px;
+}
+
+.fin-date-range-pill .fin-date-end .glass-datepicker-icon {
+  display: none;
+}
+
+.fin-date-range-pill .fin-date-end .fin-date-picker-input.glass-datepicker-input {
+  width: 78px;
+  padding-left: 4px;
+}
+
+.fin-date-sep {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.8rem;
+  user-select: none;
+}
+
+.fin-date-clear-btn {
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  padding: 2px;
+  border-radius: 50%;
+}
+
+.fin-date-clear-btn:hover {
+  color: #ffffff;
+}
+
+.fin-search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 220px;
+  flex: 0 1 285px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 999px;
+  padding: 0 14px;
+  height: 40px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.fin-search-box:focus-within {
+  border-color: var(--accent-color, #00c6e6);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.fin-search-icon {
+  color: rgba(255, 255, 255, 0.48);
+  margin-right: 8px;
+}
+
+.fin-search-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  font-size: 0.82rem;
+  outline: none;
+}
+
+.fin-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.fin-search-clear {
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  padding: 2px;
+}
+
+.fin-search-clear:hover {
+  color: #ffffff;
+}
+
+.fin-error-state {
+  padding: 28px;
+  border-radius: 20px;
+  background: rgba(251, 113, 133, 0.1);
+  border: 1px solid rgba(251, 113, 133, 0.35);
+  color: #fecdd3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* ── Responsive Collapse to Horizontal Rail on Tablet/Mobile ─────────────── */
+@media (max-width: 1040px) {
+  .fin-workspace-layout,
+  .fin-workspace-layout.is-rail-collapsed {
+    grid-template-columns: 1fr;
+  }
+
+  .fin-rail {
+    position: static;
+    padding: 12px;
+  }
+
+  .fin-rail-collapse-btn,
+  .fin-rail-footer,
+  .fin-rail-divider {
+    display: none;
+  }
+
+  .fin-rail-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .fin-workspace-layout.is-rail-collapsed .fin-rail-brand-copy,
+  .fin-workspace-layout.is-rail-collapsed .fin-rail-item-label {
+    display: flex;
+  }
+}
+
+@media (max-width: 640px) {
+  .fin-shell-card {
+    padding: 16px 14px;
+  }
+
+  .fin-control-right {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .fin-date-range-pill {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .fin-search-box {
+    width: 100%;
+    flex-basis: 100%;
+  }
+}
+
+/* ── Light Theme Overrides ───────────────────────────────────────────────── */
+body.light-theme .fin-rail {
+  background: rgba(255, 255, 255, 0.78);
+  border-color: rgba(15, 23, 42, 0.1);
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.05);
+}
+
+body.light-theme .fin-rail-brand-row,
+body.light-theme .fin-rail-divider {
+  border-color: rgba(15, 23, 42, 0.09);
+  background: transparent;
+}
+
+body.light-theme .fin-rail-divider {
+  background: rgba(15, 23, 42, 0.09);
+}
+
+body.light-theme .fin-rail-brand-name,
+body.light-theme .fin-rail-period-val {
+  color: #1f2328;
+}
+
+body.light-theme .fin-rail-brand-code,
+body.light-theme .fin-rail-period-label {
+  color: #57606a;
+}
+
+body.light-theme .fin-rail-collapse-btn,
+body.light-theme .fin-refresh-icon-btn,
+body.light-theme .fin-sync-pill {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(15, 23, 42, 0.12);
+  color: #334155;
+}
+
+body.light-theme .fin-rail-collapse-btn:hover,
+body.light-theme .fin-refresh-icon-btn:hover {
+  background: #ffffff;
+  border-color: rgba(9, 105, 218, 0.35);
+  color: #0969da;
+}
+
+body.light-theme .fin-rail-item {
+  color: #475569;
+}
+
+body.light-theme .fin-rail-item:hover {
+  background: rgba(15, 23, 42, 0.05);
+  color: #1f2328;
+}
+
+body.light-theme .fin-rail-item.is-active {
+  background: linear-gradient(
+    90deg,
+    rgba(9, 105, 218, 0.14) 0%,
+    rgba(9, 105, 218, 0.04) 100%
+  );
+  border-color: rgba(9, 105, 218, 0.35);
+  color: #0969da;
+  box-shadow: 0 4px 12px rgba(9, 105, 218, 0.1);
+}
+
+body.light-theme .fin-rail-footer {
+  background: rgba(15, 23, 42, 0.03);
+  border-color: rgba(15, 23, 42, 0.08);
+}
+
+body.light-theme .fin-search-box,
+body.light-theme .fin-date-range-pill {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(15, 23, 42, 0.12);
+}
+
+body.light-theme .fin-date-range-pill.is-filtered {
+  background: rgba(9, 105, 218, 0.08);
+  border-color: rgba(9, 105, 218, 0.42);
+}
+
+body.light-theme .fin-date-range-pill .glass-datepicker-icon {
+  color: #0969da;
+}
+
+body.light-theme .fin-date-range-pill .fin-date-picker-input.glass-datepicker-input {
+  color: #1f2328;
+}
+
+body.light-theme .fin-date-sep,
+body.light-theme .fin-date-clear-btn {
+  color: #64748b;
+}
+
+body.light-theme .fin-date-clear-btn:hover {
+  color: #1f2328;
+}
+
+body.light-theme .fin-search-input {
+  color: #1f2328;
+}
+
+body.light-theme .fin-search-icon,
+body.light-theme .fin-search-clear,
+body.light-theme .fin-search-input::placeholder {
+  color: #64748b;
+}
+
+body.light-theme .fin-error-state {
+  background: rgba(207, 34, 46, 0.08);
+  border-color: rgba(207, 34, 46, 0.28);
+  color: #cf222e;
+}
+
